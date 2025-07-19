@@ -21,6 +21,7 @@ import type {
   ResearchProjectRequest,
   ResearchProjectUpdateRequest,
 } from "../types/ResearchProjectRequest";
+import type { Lecturer } from "../types/Lecturer";
 
 const BASE_URL = "http://localhost:8080";
 
@@ -121,6 +122,11 @@ export const API = {
     updateLeccturer: (data: LecturerRequest) =>
       fetch.post("/api/v1/user/update-lecturer", data),
 
+    getPendingLecturer: () =>
+       fetch.get("/api/v1/user/pending-lecturer-profile"),
+
+    updatePendingLecturer: (data: any) =>
+      fetch.post("/api/v1/user/resubmit-lecturer", data),
     // Institution
     registerInstitution: (data: InstitutionRequest) =>
       fetch.post("/api/v1/user/register-institution", data),
@@ -215,6 +221,8 @@ export const API = {
     getAllPendingUpdates: () => fetch.get("/api/v1/admin/pending-updates"),
     getAllPendingApplications: () =>
       fetch.get("/api/v1/admin/pending-application"),
+
+    getAllLecturers: () => fetch.get("/api/v1/admin/get-all-lecturers"),
     //Lecturer
     approveLecturer: (data: IdRequest) =>
       fetch.post("/api/v1/admin/approve-lecturer", data),
@@ -224,6 +232,9 @@ export const API = {
       fetch.post("/api/v1/admin/approve-lecturer-update", data),
     rejectLecturerUpdate: (data: RejectRequest) =>
       fetch.post("/api/v1/admin/reject-lecturer-update", data),
+
+    updateLecturer: (data: Lecturer) =>
+      fetch.post("/api/v1/admin/update-lecturer", data),
     // Institution
 
     approveInstitution: (data: IdRequest) =>

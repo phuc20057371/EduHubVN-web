@@ -1,5 +1,7 @@
 
+
 const LecturerPage = () => {
+ 
   return (
     <div>Lecturer</div>
   )

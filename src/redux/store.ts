@@ -9,11 +9,14 @@ import partnerPendingCreateReducer from './slice/PartnerPendingCreateSlice';
 import partnerPendingUpdateReducer from './slice/partnerPendingUpdateSlice';
 import degreePendingCreateReducer from './slice/DegreePendingCreateSlice';
 import degreePendingUpdateReducer from './slice/degreePendingUpdateSlice';
+import lecturerReducer from './slice/LecturerSlice';
+import pendingLecturerReducer from './slice/PendingLectuererSlice';
 
 export const store = configureStore({
   reducer: {
     userProfile: userReducer,
     applicationPending: applicationPendingReducer,
+    lecturer: lecturerReducer,
     lecturerPendingUpdate: lecturerPendingUpdateReducer,
     lecturerPendingCreate: lecturerPendingCreateReducer,
     institutionPendingCreate: institutionPendingCreateReducer,
@@ -22,5 +25,7 @@ export const store = configureStore({
     partnerPendingUpdate: partnerPendingUpdateReducer,
     degreePendingCreate: degreePendingCreateReducer,
     degreePendingUpdate: degreePendingUpdateReducer,
+
+    pendingLecturer: pendingLecturerReducer,
   },
 });

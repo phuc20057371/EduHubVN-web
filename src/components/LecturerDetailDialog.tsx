@@ -88,15 +88,21 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({ open, onClo
             try {
                 const degArr = JSON.parse(degStr);
                 const degMap: { [id: number]: { status: 'PENDING' | 'APPROVED' | 'REJECTED', note: string } } = {};
-                degArr.forEach((d: any) => {
-                    let status: 'PENDING' | 'APPROVED' | 'REJECTED' = ['PENDING', 'APPROVED', 'REJECTED'].includes(d.status) ? d.status : 'PENDING';
-                    degMap[d.id] = { status, note: d.note || '' };
+                degrees.forEach((d) => {
+                    // Tìm trạng thái lưu trong localStorage cho degree này
+                    const local = Array.isArray(degArr) ? degArr.find((item: any) => item.id === d.id) : undefined;
+                    let status: 'PENDING' | 'APPROVED' | 'REJECTED' = local && ['PENDING', 'APPROVED', 'REJECTED'].includes(local.status) ? local.status as 'PENDING' | 'APPROVED' | 'REJECTED' : (['PENDING', 'APPROVED', 'REJECTED'].includes(d.status) ? d.status as 'PENDING' | 'APPROVED' | 'REJECTED' : 'PENDING');
+                    let note = local && typeof local.note === 'string' ? local.note : (d.adminNote || '');
+                    degMap[d.id] = { status, note };
                 });
                 setDegreeStates(degMap);
             } catch { }
         } else {
             const degMap: { [id: number]: { status: 'PENDING' | 'APPROVED' | 'REJECTED', note: string } } = {};
-            degrees.forEach(d => { degMap[d.id] = { status: 'PENDING', note: '' }; });
+            degrees.forEach(d => {
+                let status: 'PENDING' | 'APPROVED' | 'REJECTED' = ['PENDING', 'APPROVED', 'REJECTED'].includes(d.status) ? d.status as 'PENDING' | 'APPROVED' | 'REJECTED' : 'PENDING';
+                degMap[d.id] = { status, note: d.adminNote || '' };
+            });
             setDegreeStates(degMap);
         }
 
@@ -107,20 +113,26 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({ open, onClo
             try {
                 const certArr = JSON.parse(certStr);
                 const certMap: { [id: number]: { status: 'PENDING' | 'APPROVED' | 'REJECTED', note: string } } = {};
-                certArr.forEach((c: any) => {
-                    let status: 'PENDING' | 'APPROVED' | 'REJECTED' = ['PENDING', 'APPROVED', 'REJECTED'].includes(c.status) ? c.status : 'PENDING';
-                    certMap[c.id] = { status, note: c.note || '' };
+                certificates.forEach((c) => {
+                    // Tìm trạng thái lưu trong localStorage cho cert này
+                    const local = Array.isArray(certArr) ? certArr.find((item: any) => item.id === c.id) : undefined;
+                    let status: 'PENDING' | 'APPROVED' | 'REJECTED' = local && ['PENDING', 'APPROVED', 'REJECTED'].includes(local.status) ? local.status as 'PENDING' | 'APPROVED' | 'REJECTED' : (['PENDING', 'APPROVED', 'REJECTED'].includes(c.status) ? c.status as 'PENDING' | 'APPROVED' | 'REJECTED' : 'PENDING');
+                    let note = local && typeof local.note === 'string' ? local.note : (c.adminNote || '');
+                    certMap[c.id] = { status, note };
                 });
                 setCertStates(certMap);
             } catch { }
         } else {
             const certMap: { [id: number]: { status: 'PENDING' | 'APPROVED' | 'REJECTED', note: string } } = {};
-            certificates.forEach(c => { certMap[c.id] = { status: 'PENDING', note: '' }; });
+            certificates.forEach(c => {
+                let status: 'PENDING' | 'APPROVED' | 'REJECTED' = ['PENDING', 'APPROVED', 'REJECTED'].includes(c.status) ? c.status as 'PENDING' | 'APPROVED' | 'REJECTED' : 'PENDING';
+                certMap[c.id] = { status, note: c.adminNote || '' };
+            });
             setCertStates(certMap);
         }
     }, [open, lecturer.id, degrees, certificates]);
-    
-     
+
+
 
     // Handle approve/reject
     // Approve/Reject for Degree/Certification
@@ -303,7 +315,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({ open, onClo
                                                 <div>
                                                     <div style={{ fontWeight: 600, marginBottom: 4 }}>🔗 Thông tin chung</div>
                                                     <div><strong>Mã tham chiếu:</strong> {deg.referenceId}</div>
-                                                    
+
                                                     <div><strong>Ghi chú admin:</strong> {degreeStates[deg.id]?.note}</div>
                                                     <div style={{ fontWeight: 600, margin: '8px 0 4px' }}>🎓 Thông tin học vấn</div>
                                                     <div><strong>Chuyên ngành:</strong> {deg.major}</div>
@@ -314,7 +326,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({ open, onClo
                                                     <div style={{ fontWeight: 600, margin: '8px 0 4px' }}>🗂️ Khác</div>
                                                     <div><strong>File:</strong> <a href={deg.url} target="_blank" rel="noopener noreferrer">{deg.url}</a></div>
                                                     <div><strong>Mô tả:</strong> {deg.description}</div>
-                                                    
+                                                    <div><strong>Ghi chú:</strong> {deg.status}</div>
                                                     <Box mt={2} display="flex" alignItems="center" gap={1}>
                                                         {degreeStates[deg.id]?.status === 'PENDING' ? (
                                                             <>
@@ -372,7 +384,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({ open, onClo
                                                     <div><strong>File:</strong> <a href={cert.certificateUrl} target="_blank" rel="noopener noreferrer">{cert.certificateUrl}</a></div>
                                                     <div><strong>Trình độ:</strong> {cert.level}</div>
                                                     <div><strong>Mô tả:</strong> {cert.description}</div>
-                                                   
+
                                                     <Box mt={2} display="flex" alignItems="center" gap={1}>
                                                         {certStates[cert.id]?.status === 'PENDING' ? (
                                                             <>
@@ -481,7 +493,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({ open, onClo
                                 }
                             }
                             toast.success('Lưu trạng thái thành công!');
-                            
+
                             localStorage.removeItem(`Lecturer${lecturer.id}`);
                             localStorage.removeItem(`Degrees${lecturer.id}`);
                             localStorage.removeItem(`Certification${lecturer.id}`);

@@ -21,6 +21,10 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
+import { useDispatch } from 'react-redux';
+import { API } from '../utils/Fetch';
+import { setUserProfile } from '../redux/slice/userSlice';
+import { navigateToRole } from '../utils/navigationRole';
 
 
 const drawerWidth = 240;
@@ -97,6 +101,21 @@ const AdminLayout = () => {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  React.useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await API.user.getUserProfile();
+        dispatch(setUserProfile(response.data.data));
+        if (response.data.data) {
+          navigateToRole(response.data.data, navigate);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData();
+  }, []);
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -206,13 +225,35 @@ const AdminLayout = () => {
           ))}
         </List>
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3, minHeight: '100vh', backgroundColor: '#f8fafc' }}>
+      <Box
+        component="main"
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+          flexGrow: 1,
+          p: 3,
+          backgroundColor: '#f8fafc',
+        }}
+      >
         <DrawerHeader />
-        <div className='w-full h-full p-4 min-h-fit'  >
+        <Box sx={{ flex: 1 }}>
           <Outlet />
-        </div>
-
-        <Box component="footer" sx={{ width: '100%', py: 2, mt: 4, color: 'white', backgroundColor: '#1e40af', textAlign: 'center', fontWeight: 500, fontSize: 14, boxShadow: '0 -2px 8px rgba(30,64,175,0.08)' }}>
+        </Box>
+        <Box
+          component="footer"
+          sx={{
+            width: '100%',
+            py: 2,
+            mt: 4,
+            color: 'white',
+            backgroundColor: '#1e40af',
+            textAlign: 'center',
+            fontWeight: 500,
+            fontSize: 14,
+            boxShadow: '0 -2px 8px rgba(30,64,175,0.08)',
+          }}
+        >
           © {new Date().getFullYear()} EduHubVN Admin. All rights reserved.
         </Box>
       </Box>
