@@ -22,6 +22,8 @@ import type {
   ResearchProjectUpdateRequest,
 } from "../types/ResearchProjectRequest";
 import type { Lecturer } from "../types/Lecturer";
+import type { Institution } from "../types/Institution";
+import type { Partner } from "../types/Parner";
 
 const BASE_URL = "http://localhost:8080";
 
@@ -133,12 +135,17 @@ export const API = {
     updateInstitution: (data: InstitutionRequest) =>
       fetch.post("/api/v1/user/update-institution", data),
 
+    getPendingInstitution: () =>
+      fetch.get("/api/v1/user/pending-institution-profile"),
     // Partner
     registerPartner: (data: PartnerRequest) =>
       fetch.post("/api/v1/user/register-partner", data),
     updatePartner: (data: PartnerRequest) =>
       fetch.post("/api/v1/user/update-partner", data),
 
+
+    getPendingPartner: () =>
+      fetch.get("/api/v1/user/pending-partner-profile"),
     // Degree
     createDegree: (data: any) => fetch.post("/api/v1/user/create-degree", data),
 
@@ -223,6 +230,8 @@ export const API = {
       fetch.get("/api/v1/admin/pending-application"),
 
     getAllLecturers: () => fetch.get("/api/v1/admin/get-all-lecturers"),
+    getAllInstitutions: () => fetch.get("/api/v1/admin/get-all-institutions"),
+    getAllPartners: () => fetch.get("/api/v1/admin/get-all-partners"),
     //Lecturer
     approveLecturer: (data: IdRequest) =>
       fetch.post("/api/v1/admin/approve-lecturer", data),
@@ -246,6 +255,8 @@ export const API = {
     rejectInstitutionUpdate: (data: RejectRequest) =>
       fetch.post("/api/v1/admin/reject-institution-update", data),
 
+    updateInstitution: (data: Institution) =>
+      fetch.post("/api/v1/admin/update-institution", data),
     // Partner
 
     approvePartner: (data: IdRequest) =>
@@ -257,6 +268,8 @@ export const API = {
     rejectPartnerUpdate: (data: RejectRequest) =>
       fetch.post("/api/v1/admin/reject-partner-update", data),
 
+    updatePartner: (data: Partner) =>
+      fetch.post("/api/v1/admin/update-partner", data),
     // Degree
 
     approveDegree: (data: IdRequest) =>

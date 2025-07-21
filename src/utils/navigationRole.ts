@@ -1,6 +1,8 @@
 
 
 export function navigateToRole( user: any, navigate: Function) {
+  console.log("Navigating to role:", user);
+  
   if (user.role === "ADMIN") {
     navigate("/admin");
     return;
@@ -10,7 +12,7 @@ export function navigateToRole( user: any, navigate: Function) {
   } else if (user.role === "PARTNER") {
     navigate("/partner");
     return;
-  } else if (user.role === "INSTITUTION") {
+  } else if (user.role === "SCHOOL") {
     navigate("/institution");
     return;
   } else {
@@ -18,11 +20,11 @@ export function navigateToRole( user: any, navigate: Function) {
       navigate("/pending-lecturer");
       return;
     }
-    if (user.role === "USER" && user.institution !== null) {
+    if (user.role === "USER" && user.educationInstitution !== null) {
       navigate("/pending-institution");
       return;
     }
-    if (user.role === "USER" && user.partner !== null) {
+    if (user.role === "USER" && user.partnerOrganization !== null) {
       navigate("/pending-partner");
       return;
     }

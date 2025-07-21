@@ -14,6 +14,7 @@ import { useState } from 'react';
 import { API } from '../utils/Fetch';
 import { useDispatch, useSelector } from 'react-redux';
 import { setInstitutionPendingCreate } from '../redux/slice/InstitutionPendingCreateSlice';
+import { toast } from 'react-toastify';
 
 interface InstitutionDetailDialogProps {
     open: boolean;
@@ -32,8 +33,23 @@ const InstitutionDetailDialog = ({ open, onClose, institution }: InstitutionDeta
         try {
             await API.admin.approveInstitution({id: institutionId });
             dispatch(setInstitutionPendingCreate(institutionPendingCreate.filter((item: { id: number; }) => item.id !== institutionId)));
+            toast.success("Yêu cầu đã được duyệt thành công!");
         } catch (error) {
             console.error('Error approving institution:', error);
+        }
+    };
+    const handleRejectInstitution = async (data: { id: number; adminNote: string }) => {
+        if (!data.adminNote || data.adminNote.trim() === '') {
+            toast.error("Vui lòng nhập lý do từ chối.");
+            return;
+        }
+        try {
+            await API.admin.rejectInstitution(data);
+            dispatch(setInstitutionPendingCreate(institutionPendingCreate.filter((item: { id: number; }) => item.id !== data.id)));
+            toast.success("Yêu cầu đã được từ chối thành công!");
+            onClose();
+        } catch (error) {
+            console.error('Error rejecting institution:', error);
         }
     };
 
@@ -97,7 +113,7 @@ const InstitutionDetailDialog = ({ open, onClose, institution }: InstitutionDeta
             <Dialog open={confirmRejectOpen} onClose={() => setConfirmRejectOpen(false)}>
                 <DialogTitle>Xác nhận từ chối</DialogTitle>
                 <DialogContent>
-                    <Box mb={2}>Bạn có chắc chắn muốn từ chối cơ sở này?</Box>
+                    <Box mb={2}>Bạn có chắc chắn muốn từ chối cơ sở này? </Box>
                     <TextField
                         label="Lý do từ chối (admin note)"
                         value={adminNote}
@@ -111,10 +127,10 @@ const InstitutionDetailDialog = ({ open, onClose, institution }: InstitutionDeta
                     <Button onClick={() => setConfirmRejectOpen(false)}>Huỷ</Button>
                     <Button color="error" variant="contained" onClick={() => {
                         // eslint-disable-next-line no-console
-                        console.log('Từ chối:', { id: institution.id, adminNote });
+                        handleRejectInstitution({ id: institution.id, adminNote })
                         setConfirmRejectOpen(false);
                         setAdminNote('');
-                        onClose();
+                        
                     }}>Xác nhận</Button>
                 </DialogActions>
             </Dialog>

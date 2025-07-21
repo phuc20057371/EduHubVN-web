@@ -1,4 +1,4 @@
-export type EducationInstitutionType = "SCHOOL" | "TRAINING_CENTER" ;
+export type EducationInstitutionType = "UNIVERSITY" | "TRAINING_CENTER" ;
 
 
 export type InstitutionRequest = {
