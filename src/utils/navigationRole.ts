@@ -9,7 +9,7 @@ export function navigateToRole( user: any, navigate: Function) {
   } else if (user.role === "LECTURER") {
     navigate("/lecturer");
     return;
-  } else if (user.role === "PARTNER") {
+  } else if (user.role === "ORGANIZATION") {
     navigate("/partner");
     return;
   } else if (user.role === "SCHOOL") {
@@ -28,8 +28,8 @@ export function navigateToRole( user: any, navigate: Function) {
       navigate("/pending-partner");
       return;
     }
-    navigate("/guest");
-    return;
+    // navigate("/guest");
+    // return;
 
   }
 }

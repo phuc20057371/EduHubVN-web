@@ -16,6 +16,8 @@ import pendingLecturerReducer from './slice/PendingLectuererSlice';
 import pendingInstitutionReducer from './slice/PendingInstitutionSlice';
 import pendingPartnerReducer from './slice/PendingPartnerSlice';
 
+import lecturerProfileReducer from './slice/LecturerProfileSlice';
+
 export const store = configureStore({
   reducer: {
     userProfile: userReducer,
@@ -35,6 +37,8 @@ export const store = configureStore({
     pendingLecturer: pendingLecturerReducer,
     pendingInstitution: pendingInstitutionReducer,
     pendingPartner: pendingPartnerReducer,
+
+    lecturerProfile: lecturerProfileReducer,
 
   },
 });

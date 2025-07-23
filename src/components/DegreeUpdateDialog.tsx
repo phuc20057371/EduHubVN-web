@@ -33,7 +33,8 @@ const DegreeUpdateDialog = ({ open, onClose, data }: DegreeUpdateDialogProps) =>
     const [startYear, setStartYear] = useState(degree?.startYear || '');
     const [graduationYear, setGraduationYear] = useState(degree?.graduationYear || '');
     const [level, setLevel] = useState(degree?.level || '');
-    const [url, setUrl] = useState(degree?.url || '');
+    // const [url, setUrl] = useState(degree?.url || '');
+    const url = degree?.url || '';
     const [description, setDescription] = useState(degree?.description || '');
 
     const handleConfirm = async () => {

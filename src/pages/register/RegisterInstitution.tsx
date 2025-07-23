@@ -28,7 +28,7 @@ const RegisterInstitution = () => {
     const institutionData: InstitutionRequest = {
       businessRegistrationNumber,
       institutionName,
-      institutionType: institutionType ?? "SCHOOL", // fallback nếu null
+      institutionType: institutionType ?? "UNIVERSITY", // fallback nếu null
       phoneNumber,
       website,
       address,

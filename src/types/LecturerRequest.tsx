@@ -10,4 +10,5 @@ export type LecturerRequest = {
     academicRank: string;
     specialization: string;
     experienceYears: number;
+    jobField: string;
 }

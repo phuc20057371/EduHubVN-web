@@ -17,6 +17,7 @@ const HomeLayout = () => {
                     navigateToRole(response.data.data, navigate);
                 }
             } catch (error) {
+                navigate("/guest");
                 console.error("Error fetching user data:", error);
             }
         };

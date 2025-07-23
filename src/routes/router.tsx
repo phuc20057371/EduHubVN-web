@@ -28,6 +28,8 @@ import RegisterPartner from '../pages/register/RegisterPartner';
 import ProtectedRoute from '../utils/ProtectedRoute';
 import AdminDegree from '../pages/admin/AdminDegree';
 import AdminCourse from '../pages/admin/AdminCourse';
+import LecturerProfilePage from '../pages/lecturer/LecturerProfilePage';
+import LecturerInfoPage from '../pages/other/LecturerInfoPage';
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -67,6 +69,7 @@ export const router = createBrowserRouter(
       <Route element={<ProtectedRoute />}>
         <Route element={<LecturerLayout />}>
           <Route path='/lecturer' element={<LecturerPage />} />
+          <Route path='/lecturer/profile' element={<LecturerProfilePage />} />
         </Route>
       </Route>
 
@@ -89,6 +92,7 @@ export const router = createBrowserRouter(
         <Route path="/register-lecturer" element={<RegisterLecturer />} />
         <Route path="/register-institution" element={<RegisterInstitution />} />
         <Route path="/register-partner" element={<RegisterPartner />} />
+        <Route path="/lecturer-info/:id" element={<LecturerInfoPage />} />
         <Route path="*" element={<h1>404 Not Found</h1>} />
       </Route>
     </>

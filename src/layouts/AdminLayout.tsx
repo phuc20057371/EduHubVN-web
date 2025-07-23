@@ -1,108 +1,63 @@
-import * as React from 'react';
-import { Outlet, useNavigate } from "react-router-dom";
-import { styled, useTheme } from '@mui/material/styles';
-import type { Theme, CSSObject } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import MuiDrawer from '@mui/material/Drawer';
-import MuiAppBar from '@mui/material/AppBar';
-import type { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
-import CssBaseline from '@mui/material/CssBaseline';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
-import { useDispatch } from 'react-redux';
-import { API } from '../utils/Fetch';
-import { setUserProfile } from '../redux/slice/userSlice';
-import { navigateToRole } from '../utils/navigationRole';
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { API } from "../utils/Fetch";
+import { setUserProfile } from "../redux/slice/userSlice";
+import { navigateToRole } from "../utils/navigationRole";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  Container,
+  Avatar,
+  IconButton,
+  Menu,
+  MenuItem,
+  Divider,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListItemButton,
+} from "@mui/material";
+import {
+  AccountCircle,
+  Settings,
+  Logout,
+  AdminPanelSettings,
+  Dashboard,
+  School,
+  Business,
+  Person,
+  WorkspacePremium,
+  MenuBook,
+  Notifications,
+  Menu as MenuIcon,
+} from "@mui/icons-material";
 
-
-const drawerWidth = 240;
-
-const openedMixin = (theme: Theme): CSSObject => ({
-  width: drawerWidth,
-  transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen,
-  }),
-  overflowX: 'hidden',
-});
-
-const closedMixin = (theme: Theme): CSSObject => ({
-  transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  overflowX: 'hidden',
-  width: `calc(${theme.spacing(7)} + 1px)`,
-  [theme.breakpoints.up('sm')]: {
-    width: `calc(${theme.spacing(8)} + 1px)`,
-  },
-});
-
-const DrawerHeader = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar,
-}));
-
-interface AppBarProps extends MuiAppBarProps {
-  open?: boolean;
-}
-
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== 'open',
-})<AppBarProps>(({ theme, open }) => ({
-  zIndex: theme.zIndex.drawer + 1,
-  transition: theme.transitions.create(['width', 'margin'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
-}));
-
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
-    width: drawerWidth,
-    flexShrink: 0,
-    whiteSpace: 'nowrap',
-    boxSizing: 'border-box',
-    ...(open && {
-      ...openedMixin(theme),
-      '& .MuiDrawer-paper': openedMixin(theme),
-    }),
-    ...(!open && {
-      ...closedMixin(theme),
-      '& .MuiDrawer-paper': closedMixin(theme),
-    }),
-  }),
-);
 
 const AdminLayout = () => {
-  const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-  React.useEffect(() => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const userProfile = useSelector((state: any) => state.user);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Function to check if current path matches button path
+  const isActivePath = (path: string) => {
+    if (path === "/admin") {
+      return (
+        location.pathname === "/admin" || location.pathname === "/admin/"
+      );
+    }
+    return location.pathname.startsWith(path);
+  };
+
+  useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await API.user.getUserProfile();
@@ -115,147 +70,347 @@ const AdminLayout = () => {
       }
     };
     fetchUserData();
-  }, []);
+  }, [dispatch, navigate]);
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  const handleDrawerClose = () => {
-    setOpen(false);
+  const handleMenuClose = () => {
+    setAnchorEl(null);
   };
 
-  // Menu items and their routes
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+    handleMenuClose();
+  };
+
+  const handleProfile = () => {
+    navigate("/admin/profile");
+    handleMenuClose();
+  };
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
   const menuItems = [
-    { label: 'Giảng viên', route: '/admin/lecturers' },
-    { label: 'Trung tâm đào tạo', route: '/admin/institutions' },
-    { label: 'Đơn vị tổ chức', route: '/admin/partners' },
-    { label: 'Bằng cấp/ Chứng chỉ', route: '/admin/degree' },
-    { label: 'Khóa đào tạo', route: '/admin/courses' },
-
+    { text: "Dashboard", icon: <Dashboard />, path: "/admin" },
+    { text: "Giảng viên", icon: <Person />, path: "/admin/lecturers" },
+    { text: "Trung tâm đào tạo", icon: <School />, path: "/admin/institutions" },
+    { text: "Đơn vị tổ chức", icon: <Business />, path: "/admin/partners" },
+    { text: "Bằng cấp/Chứng chỉ", icon: <WorkspacePremium />, path: "/admin/degree" },
+    { text: "Khóa đào tạo", icon: <MenuBook />, path: "/admin/courses" },
   ];
 
-  return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-      <CssBaseline />
-      <AppBar position="fixed" open={open} sx={{ backgroundColor: '#1e40af' }}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{
-              marginRight: 5,
-              ...(open && { display: 'none' }),
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 700, letterSpacing: 1 }}>
-            Admin Dashboard
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <Drawer variant="permanent" open={open}>
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton>
-        </DrawerHeader>
-        <Divider />
-        <List>
-          {menuItems.map((item, index) => {
-            const isActive = window.location.pathname.startsWith(item.route);
-            return (
-              <ListItem key={item.label} disablePadding sx={{ display: 'block' }}>
-                <ListItemButton
-                  onClick={() => navigate(item.route)}
-                  sx={{
-                    minHeight: 48,
-                    px: 2.5,
-                    justifyContent: open ? 'initial' : 'center',
-                    backgroundColor: isActive ? '#e0e7ff' : 'inherit',
-                    color: isActive ? '#1e40af' : 'inherit',
-                    fontWeight: isActive ? 700 : 400,
-                    '&:hover': {
-                      backgroundColor: isActive ? '#c7d2fe' : '#f1f5f9',
-                    },
-                  }}
-                >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: 0,
-                      mr: open ? 3 : 'auto',
-                      justifyContent: 'center',
-                      color: isActive ? '#1e40af' : 'inherit',
-                    }}
-                  >
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                  </ListItemIcon>
-                  <ListItemText primary={item.label} sx={{ opacity: open ? 1 : 0, fontWeight: isActive ? 700 : 400 }} />
-                </ListItemButton>
-              </ListItem>
-            );
-          })}
-        </List>
-        <Divider />
-        <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  px: 2.5,
-                  justifyContent: open ? 'initial' : 'center',
+  const drawer = (
+    <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
+      <Typography variant="h6" sx={{ my: 2, color: "primary.main", fontWeight: "bold" }}>
+        EduHub - Admin
+      </Typography>
+      <Divider />
+      <List>
+        {menuItems.map((item) => (
+          <ListItem key={item.text} disablePadding>
+            <ListItemButton
+              sx={{ 
+                textAlign: "center",
+                backgroundColor: isActivePath(item.path) ? "rgba(25, 118, 210, 0.1)" : "transparent",
+                "&:hover": {
+                  backgroundColor: isActivePath(item.path) ? "rgba(25, 118, 210, 0.2)" : "rgba(0, 0, 0, 0.04)",
+                }
+              }}
+              onClick={() => navigate(item.path)}
+            >
+              <ListItemIcon sx={{ 
+                minWidth: "auto", 
+                mr: 1,
+                color: isActivePath(item.path) ? "primary.main" : "inherit"
+              }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText 
+                primary={item.text} 
+                sx={{ 
+                  color: isActivePath(item.path) ? "primary.main" : "inherit",
+                  fontWeight: isActivePath(item.path) ? "bold" : "normal"
                 }}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      {/* Header */}
+      <AppBar position="static" sx={{ bgcolor: "#1976d2" }}>
+        <Container maxWidth="xl">
+          <Toolbar disableGutters>
+            {/* Mobile menu button */}
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ mr: 2, display: { md: "none" } }}
+            >
+              <MenuIcon />
+            </IconButton>
+
+            {/* Logo */}
+            <AdminPanelSettings sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
+            <Typography
+              variant="h6"
+              noWrap
+              component="div"
+              sx={{
+                mr: 2,
+                display: { xs: "flex", md: "flex" },
+                fontFamily: "monospace",
+                fontWeight: 700,
+                letterSpacing: ".3rem",
+                color: "inherit",
+                textDecoration: "none",
+                flexGrow: { xs: 1, md: 0 },
+              }}
+            >
+              EduHub Admin
+            </Typography>
+
+            {/* Navigation */}
+            <Box
+              sx={{ flexGrow: 1, display: { xs: "none", md: "flex" }, gap: 1 }}
+            >
+              <Button
+                onClick={() => navigate("/admin")}
+                sx={{
+                  my: 2,
+                  color: "white",
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 1,
+                  backgroundColor: isActivePath("/admin")
+                    ? "rgba(255, 255, 255, 0.2)"
+                    : "transparent",
+                  borderRadius: 1,
+                  "&:hover": {
+                    backgroundColor: isActivePath("/admin")
+                      ? "rgba(255, 255, 255, 0.3)"
+                      : "rgba(255, 255, 255, 0.1)",
+                  },
+                }}
+                startIcon={<Dashboard />}
               >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
+                Trang chủ
+              </Button>
+              <Button
+                onClick={() => navigate("/admin/lecturers")}
+                sx={{
+                  my: 2,
+                  color: "white",
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 1,
+                  backgroundColor: isActivePath("/admin/lecturers")
+                    ? "rgba(255, 255, 255, 0.2)"
+                    : "transparent",
+                  borderRadius: 1,
+                  "&:hover": {
+                    backgroundColor: isActivePath("/admin/lecturers")
+                      ? "rgba(255, 255, 255, 0.3)"
+                      : "rgba(255, 255, 255, 0.1)",
+                  },
+                }}
+                startIcon={<Person />}
+              >
+                Giảng viên
+              </Button>
+              <Button
+                onClick={() => navigate("/admin/institutions")}
+                sx={{
+                  my: 2,
+                  color: "white",
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 1,
+                  backgroundColor: isActivePath("/admin/institutions")
+                    ? "rgba(255, 255, 255, 0.2)"
+                    : "transparent",
+                  borderRadius: 1,
+                  "&:hover": {
+                    backgroundColor: isActivePath("/admin/institutions")
+                      ? "rgba(255, 255, 255, 0.3)"
+                      : "rgba(255, 255, 255, 0.1)",
+                  },
+                }}
+                startIcon={<School />}
+              >
+                Trung tâm
+              </Button>
+              <Button
+                onClick={() => navigate("/admin/partners")}
+                sx={{
+                  my: 2,
+                  color: "white",
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 1,
+                  backgroundColor: isActivePath("/admin/partners")
+                    ? "rgba(255, 255, 255, 0.2)"
+                    : "transparent",
+                  borderRadius: 1,
+                  "&:hover": {
+                    backgroundColor: isActivePath("/admin/partners")
+                      ? "rgba(255, 255, 255, 0.3)"
+                      : "rgba(255, 255, 255, 0.1)",
+                  },
+                }}
+                startIcon={<Business />}
+              >
+                Đối tác
+              </Button>
+            </Box>
+
+            {/* Notifications */}
+            <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
+              <IconButton color="inherit">
+                <Notifications />
+              </IconButton>
+            </Box>
+
+            {/* User Menu */}
+            <Box sx={{ flexGrow: 0 }}>
+              <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
+                <Avatar
+                  alt={userProfile?.fullName || "Admin"}
+                  src="/static/images/avatar/admin.jpg"
+                  sx={{ bgcolor: "secondary.main" }}
                 >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Drawer>
-      <Box
-        component="main"
+                  {userProfile?.fullName?.charAt(0) || "A"}
+                </Avatar>
+              </IconButton>
+              <Menu
+                sx={{ mt: "45px" }}
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+              >
+                <MenuItem onClick={handleProfile}>
+                  <AccountCircle sx={{ mr: 1 }} />
+                  <Typography textAlign="center">Hồ sơ</Typography>
+                </MenuItem>
+                <MenuItem onClick={handleMenuClose}>
+                  <Settings sx={{ mr: 1 }} />
+                  <Typography textAlign="center">Cài đặt</Typography>
+                </MenuItem>
+                <Divider />
+                <MenuItem onClick={handleLogout}>
+                  <Logout sx={{ mr: 1 }} />
+                  <Typography textAlign="center">Đăng xuất</Typography>
+                </MenuItem>
+              </Menu>
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
+
+      {/* Mobile Navigation Drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{
+          keepMounted: true, // Better open performance on mobile.
+        }}
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-          flexGrow: 1,
-          p: 3,
-          backgroundColor: '#f8fafc',
+          display: { xs: "block", md: "none" },
+          "& .MuiDrawer-paper": { boxSizing: "border-box", width: 240 },
         }}
       >
-        <DrawerHeader />
-        <Box sx={{ flex: 1 }}>
+        {drawer}
+      </Drawer>
+
+      {/* Main Content */}
+      <Box component="main" sx={{ flexGrow: 1, bgcolor: "#f5f5f5", py: 3 }}>
+        <Container maxWidth="xl">
           <Outlet />
-        </Box>
-        <Box
-          component="footer"
-          sx={{
-            width: '100%',
-            py: 2,
-            mt: 4,
-            color: 'white',
-            backgroundColor: '#1e40af',
-            textAlign: 'center',
-            fontWeight: 500,
-            fontSize: 14,
-            boxShadow: '0 -2px 8px rgba(30,64,175,0.08)',
-          }}
-        >
-          © {new Date().getFullYear()} EduHubVN Admin. All rights reserved.
-        </Box>
+        </Container>
+      </Box>
+
+      {/* Footer */}
+      <Box
+        component="footer"
+        sx={{
+          py: 4,
+          px: 2,
+          mt: "auto",
+          backgroundColor: "#1976d2",
+          color: "white",
+        }}
+      >
+        <Container maxWidth="xl">
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              justifyContent: "space-between",
+              alignItems: { xs: "center", md: "center" },
+              gap: { xs: 2, md: 0 },
+            }}
+          >
+            <Box sx={{ textAlign: { xs: "center", md: "left" } }}>
+              <Typography variant="h6" gutterBottom>
+                EduHub - Admin Panel
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                Hệ thống quản trị nền tảng giáo dục
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                © 2025 EduHub Vietnam. Tất cả quyền được bảo lưu.
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                gap: { xs: 1, md: 2 },
+                alignItems: "center",
+              }}
+            >
+              <Button color="inherit" size="small">
+                Hướng dẫn quản trị
+              </Button>
+              <Button color="inherit" size="small">
+                Hỗ trợ kỹ thuật
+              </Button>
+              <Button color="inherit" size="small">
+                Báo cáo
+              </Button>
+              <Button color="inherit" size="small">
+                Bảo mật
+              </Button>
+            </Box>
+          </Box>
+        </Container>
       </Box>
     </Box>
   );

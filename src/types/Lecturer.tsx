@@ -11,6 +11,7 @@ export type Lecturer = {
   academicRank: string;
   specialization: string;
   experienceYears: number;
+  jobField: string;
   adminNote: string;
   status: string;
   createdAt: string;

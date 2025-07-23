@@ -9,7 +9,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Avatar } from "@mui/material";
+import { Avatar, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import DegreeUpdateDialog from "../../components/DegreeUpdateDialog";
 import CertificationUpdateDialog from "../../components/CertificationUpdateDialog";
 import Dialog from '@mui/material/Dialog';
@@ -277,13 +277,20 @@ const LecturerPendingPage = () => {
           <div className="mb-4">
             <div className="mb-1 text-base font-semibold text-gray-700">Thông tin học thuật</div>
             <div className="flex flex-row gap-2">
-              <TextField
-                label="Học vị"
-                value={academicRank}
-                onChange={(e) => setAcademicRank(e.target.value)}
-                fullWidth
-                margin="dense"
-              />
+              <FormControl fullWidth margin="dense">
+                <InputLabel shrink={!!academicRank}>Học vị</InputLabel>
+                <Select
+                  value={academicRank}
+                  onChange={(e) => setAcademicRank(e.target.value)}
+                  label="Học vị"
+                >
+                  <MenuItem value="CN">Cử nhân</MenuItem>
+                  <MenuItem value="THS">Thạc sĩ</MenuItem>
+                  <MenuItem value="TS">Tiến sĩ</MenuItem>
+                  <MenuItem value="PGS">Phó Giáo sư</MenuItem>
+                  <MenuItem value="GS">Giáo sư</MenuItem>
+                </Select>
+              </FormControl>
               <TextField
                 label="Số năm kinh nghiệm"
                 value={experienceYears}

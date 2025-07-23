@@ -29,7 +29,8 @@ const CertificationUpdateDialog = ({ open, onClose, data }: CertificationUpdateD
   const [issuedBy, setIssuedBy] = useState(cert?.issuedBy || '');
   const [issueDate, setIssueDate] = useState(cert?.issueDate || '');
   const [expiryDate, setExpiryDate] = useState(cert?.expiryDate || '');
-  const [certificateUrl, setCertificateUrl] = useState(cert?.certificateUrl || '');
+  // const [certificateUrl, setCertificateUrl] = useState(cert?.certificateUrl || '');
+  const certificateUrl = cert?.certificateUrl || '';
   const [description, setDescription] = useState(cert?.description || '');
 
   const handleConfirm = async () => {

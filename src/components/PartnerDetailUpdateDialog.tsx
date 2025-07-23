@@ -10,7 +10,7 @@ import TextField from '@mui/material/TextField';
 import { useState } from 'react';
 import { API } from '../utils/Fetch';
 import { useDispatch, useSelector } from 'react-redux';
-import { setPartnerPendingUpdate } from '../redux/slice/partnerPendingUpdateSlice';
+import { setPartnerPendingUpdate } from '../redux/slice/PartnerPendingUpdateSlice';
 import { IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 

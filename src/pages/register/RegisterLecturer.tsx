@@ -72,6 +72,7 @@ const RegisterLecturer = () => {
         academicRank,
         specialization,
         experienceYears,
+        avatarUrl: "", // Giả sử không cần upload ảnh đại diện
       };
 
       try {

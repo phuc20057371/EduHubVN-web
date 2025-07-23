@@ -8,6 +8,7 @@ import { API } from "../../utils/Fetch";
 import { setInstitutionPendingCreate } from "../../redux/slice/InstitutionPendingCreateSlice";
 import { setInstitutionPendingUpdate } from "../../redux/slice/InstitutionPendingUpdateSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { createSelector } from "@reduxjs/toolkit";
 import InstitutionDetailDialog from "../../components/InstitutionDetailDialog";
 import InstitutionDetailUpdateDialog from "../../components/InstitutionDetailUpdateDialog";
 import type { Institution } from "../../types/Institution";
@@ -32,6 +33,24 @@ import {
 } from "@mui/material";
 import { setInstitutions } from "../../redux/slice/InstitutionSlice";
 import InstitutionEditDialog from "../../components/InstitutionEditDialog";
+
+// Memoized selectors
+const selectInstitutionPendingCreate = createSelector(
+  (state: any) => state.institutionPendingCreate,
+  (institutionPendingCreate) =>
+    Array.isArray(institutionPendingCreate) ? institutionPendingCreate : [],
+);
+
+const selectInstitutionPendingUpdate = createSelector(
+  (state: any) => state.institutionPendingUpdate,
+  (institutionPendingUpdate) =>
+    Array.isArray(institutionPendingUpdate) ? institutionPendingUpdate : [],
+);
+
+const selectInstitutions = createSelector(
+  (state: any) => state.institution,
+  (institution) => (Array.isArray(institution) ? institution : []),
+);
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -224,10 +243,10 @@ function EnhancedTableToolbar({
 // Helper function để hiển thị tên loại cơ sở giáo dục
 const getInstitutionTypeDisplay = (type: string) => {
   switch (type) {
-    case 'UNIVERSITY':
-      return 'Trường';
-    case 'TRAINING_CENTER':
-      return 'TTDT';
+    case "UNIVERSITY":
+      return "Trường";
+    case "TRAINING_CENTER":
+      return "TTDT";
     default:
       return type;
   }
@@ -241,7 +260,6 @@ const AdminInstitutionPage = () => {
 
   const [openEditDialog, setOpenEditDialog] = useState(false);
 
-
   const [order, setOrder] = useState<Order>("asc");
   const [orderBy, setOrderBy] = useState<keyof Institution>("id");
   const [selected, setSelected] = useState<number | null>(null);
@@ -250,19 +268,9 @@ const AdminInstitutionPage = () => {
     oldData: any;
     newData: any;
   } | null>(null);
-  const institutionPendingCreate = useSelector((state: any) =>
-    Array.isArray(state.institutionPendingCreate)
-      ? state.institutionPendingCreate
-      : [],
-  );
-  const institutionPendingUpdate = useSelector((state: any) =>
-    Array.isArray(state.institutionPendingUpdate)
-      ? state.institutionPendingUpdate
-      : [],
-  );
-  const institutions = useSelector((state: any) =>
-    Array.isArray(state.institution) ? state.institution : [],
-  );
+  const institutionPendingCreate = useSelector(selectInstitutionPendingCreate);
+  const institutionPendingUpdate = useSelector(selectInstitutionPendingUpdate);
+  const institutions = useSelector(selectInstitutions);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -270,15 +278,12 @@ const AdminInstitutionPage = () => {
       try {
         const res = await API.admin.getAllInstitutions();
         dispatch(setInstitutions(res.data.data));
+        console.log("Institutions:", res.data.data);
         const response = await API.admin.getInstitutionPendingCreate();
         dispatch(setInstitutionPendingCreate(response.data.data));
         console.log("Institution pending create requests:", response.data.data);
         const updateResponse = await API.admin.getInstitutionPendingUpdate();
         dispatch(setInstitutionPendingUpdate(updateResponse.data.data));
-        console.log(
-          "Institution pending update requests:",
-          updateResponse.data.data,
-        );
         console.log(
           "Institution pending update requests:",
           updateResponse.data.data,
@@ -302,7 +307,7 @@ const AdminInstitutionPage = () => {
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
       const newSelected = institutions.map((n: { id: any }) => n.id);
-      setSelected(newSelected);
+      setSelected(newSelected.length > 0 ? newSelected[0] : null);
       return;
     }
     setSelected(null);
@@ -407,7 +412,6 @@ const AdminInstitutionPage = () => {
                           <TableCell>{row.address}</TableCell>
                           <TableCell>{row.representativeName}</TableCell>
 
-
                           <TableCell>{row.status}</TableCell>
                         </TableRow>
                       );
@@ -509,7 +513,6 @@ const AdminInstitutionPage = () => {
           ) : (
             <span>Không có yêu cầu tạo mới cơ sở.</span>
           )}
-         
         </TabPanel>
         <TabPanel value="3">
           {institutionPendingUpdate && institutionPendingUpdate.length > 0 ? (
@@ -594,7 +597,6 @@ const AdminInstitutionPage = () => {
                 }
                 return null;
               })}
-             
             </Box>
           ) : (
             <span>Không có yêu cầu cập nhật cơ sở.</span>

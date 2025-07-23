@@ -26,6 +26,8 @@ import type { Institution } from "../types/Institution";
 import type { Partner } from "../types/Parner";
 
 const BASE_URL = "http://localhost:8080";
+// const BASE_URL = "http://10.10.40.55:8080";
+// const BASE_URL = "http://172.16.10.25:8080";
 
 const fetch = axios.create({
   baseURL: BASE_URL,
@@ -125,7 +127,7 @@ export const API = {
       fetch.post("/api/v1/user/update-lecturer", data),
 
     getPendingLecturer: () =>
-       fetch.get("/api/v1/user/pending-lecturer-profile"),
+      fetch.get("/api/v1/user/pending-lecturer-profile"),
 
     updatePendingLecturer: (data: any) =>
       fetch.post("/api/v1/user/resubmit-lecturer", data),
@@ -143,9 +145,7 @@ export const API = {
     updatePartner: (data: PartnerRequest) =>
       fetch.post("/api/v1/user/update-partner", data),
 
-
-    getPendingPartner: () =>
-      fetch.get("/api/v1/user/pending-partner-profile"),
+    getPendingPartner: () => fetch.get("/api/v1/user/pending-partner-profile"),
     // Degree
     createDegree: (data: any) => fetch.post("/api/v1/user/create-degree", data),
 
@@ -155,7 +155,7 @@ export const API = {
   },
   lecturer: {
     // Get
-
+    getLecturerProfile: () => fetch.get("/api/v1/lecturer/lecturer-profile"),
     // Lecturer
     updateProfile: (data: LecturerRequest) =>
       fetch.post("/api/v1/lecturer/update-profile", data),
@@ -244,6 +244,7 @@ export const API = {
 
     updateLecturer: (data: Lecturer) =>
       fetch.post("/api/v1/admin/update-lecturer", data),
+
     // Institution
 
     approveInstitution: (data: IdRequest) =>
@@ -320,5 +321,10 @@ export const API = {
       fetch.post("/api/v1/admin/approve-research-project-update", data),
     rejectResearchProjectUpdate: (data: RejectRequest) =>
       fetch.post("/api/v1/admin/reject-research-project-update", data),
+  },
+  other: {
+    getLecturerProfile: (id: number) => {
+      return fetch.get(`/api/v1/user/lecturer-profile/${id}`);
+    },
   },
 };

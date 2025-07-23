@@ -1,12 +1,12 @@
-
 import { useEffect, useState, useMemo, type SyntheticEvent } from "react";
-import Box from '@mui/material/Box';
-import Tab from '@mui/material/Tab';
-import TabContext from '@mui/lab/TabContext';
-import TabList from '@mui/lab/TabList';
-import TabPanel from '@mui/lab/TabPanel';
+import Box from "@mui/material/Box";
+import Tab from "@mui/material/Tab";
+import TabContext from "@mui/lab/TabContext";
+import TabList from "@mui/lab/TabList";
+import TabPanel from "@mui/lab/TabPanel";
 import { API } from "../../utils/Fetch";
 import { useDispatch, useSelector } from "react-redux";
+import { createSelector } from "@reduxjs/toolkit";
 import { setPartnerPendingCreate } from "../../redux/slice/PartnerPendingCreateSlice";
 import { setPartnerPendingUpdate } from "../../redux/slice/PartnerPendingUpdateSlice";
 import PartnerDetailDialog from "../../components/PartnerDetailDialog";
@@ -33,6 +33,24 @@ import {
   Typography,
 } from "@mui/material";
 import { setPartner } from "../../redux/slice/PartnerSlice";
+
+// Memoized selectors
+const selectPartnerPendingCreate = createSelector(
+  (state: any) => state.partnerPendingCreate,
+  (partnerPendingCreate) =>
+    Array.isArray(partnerPendingCreate) ? partnerPendingCreate : [],
+);
+
+const selectPartnerPendingUpdate = createSelector(
+  (state: any) => state.partnerPendingUpdate,
+  (partnerPendingUpdate) =>
+    Array.isArray(partnerPendingUpdate) ? partnerPendingUpdate : [],
+);
+
+const selectPartners = createSelector(
+  (state: any) => state.partner,
+  (partner) => (Array.isArray(partner) ? partner : []),
+);
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -225,23 +243,24 @@ function EnhancedTableToolbar({
   );
 }
 
-
-
 const AdminPartnerPage = () => {
-  const [value, setValue] = useState('1');
+  const [value, setValue] = useState("1");
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<any>(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [selectedUpdate, setSelectedUpdate] = useState<{oldData: any, newData: any} | null>(null);
-  
+  const [selectedUpdate, setSelectedUpdate] = useState<{
+    oldData: any;
+    newData: any;
+  } | null>(null);
+
   const [order, setOrder] = useState<Order>("asc");
   const [orderBy, setOrderBy] = useState<keyof Partner>("id");
   const [selected, setSelected] = useState<number | null>(null);
-  
-  const partnerPendingCreate = useSelector((state: any) => Array.isArray(state.partnerPendingCreate) ? state.partnerPendingCreate : []);
-  const partnerPendingUpdate = useSelector((state: any) => Array.isArray(state.partnerPendingUpdate) ? state.partnerPendingUpdate : []);
-  const partners = useSelector((state: any) => Array.isArray(state.partner) ? state.partner : []);
+
+  const partnerPendingCreate = useSelector(selectPartnerPendingCreate);
+  const partnerPendingUpdate = useSelector(selectPartnerPendingUpdate);
+  const partners = useSelector(selectPartners);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -255,7 +274,10 @@ const AdminPartnerPage = () => {
         console.log("Partner pending create requests:", response.data.data);
         const updateResponse = await API.admin.getPartnerPendingUpdate();
         dispatch(setPartnerPendingUpdate(updateResponse.data.data));
-        console.log("Partner pending update requests:", updateResponse.data.data);
+        console.log(
+          "Partner pending update requests:",
+          updateResponse.data.data,
+        );
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error("Error initializing AdminPartnerPage:", error);
@@ -276,7 +298,7 @@ const AdminPartnerPage = () => {
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
       const newSelected = partners.map((n: { id: any }) => n.id);
-      setSelected(newSelected);
+      setSelected(newSelected.length > 0 ? newSelected[0] : null);
       return;
     }
     setSelected(null);
@@ -303,9 +325,9 @@ const AdminPartnerPage = () => {
   };
 
   return (
-    <Box sx={{ width: '100%', typography: 'body1' }}>
+    <Box sx={{ width: "100%", typography: "body1" }}>
       <TabContext value={value}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <TabList onChange={handleChange} aria-label="lab API tabs example">
             <Tab label="Danh sách Đối tác" value="1" />
             <Tab label="Yêu cầu tạo mới" value="2" />
@@ -368,7 +390,9 @@ const AdminPartnerPage = () => {
                           >
                             {row.id}
                           </TableCell>
-                          <TableCell>{row.businessRegistrationNumber}</TableCell>
+                          <TableCell>
+                            {row.businessRegistrationNumber}
+                          </TableCell>
                           <TableCell>{row.organizationName}</TableCell>
                           <TableCell>{row.industry}</TableCell>
                           <TableCell>{row.phoneNumber}</TableCell>
@@ -385,7 +409,7 @@ const AdminPartnerPage = () => {
                           height: 53 * emptyRows,
                         }}
                       >
-                        <TableCell colSpan={8} />
+                        <TableCell colSpan={9} />
                       </TableRow>
                     )}
                   </TableBody>
@@ -396,19 +420,63 @@ const AdminPartnerPage = () => {
         </TabPanel>
         <TabPanel value="2">
           {partnerPendingCreate && partnerPendingCreate.length > 0 ? (
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr', lg: '1fr 1fr 1fr 1fr' }, gap: 2 }}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "1fr 1fr",
+                  md: "1fr 1fr 1fr",
+                  lg: "1fr 1fr 1fr 1fr",
+                },
+                gap: 2,
+              }}
+            >
               {partnerPendingCreate.map((item: any, idx: number) => (
-                <Box key={item.id || idx} sx={{ mb: 2, p: 2, border: '1px solid #ccc', borderRadius: 2, height: '100%' }}>
+                <Box
+                  key={item.id || idx}
+                  sx={{
+                    mb: 2,
+                    p: 2,
+                    border: "1px solid #ccc",
+                    borderRadius: 2,
+                    height: "100%",
+                  }}
+                >
                   <strong>{item.organizationName}</strong> <br />
-                  <span>Đại diện: {item.representativeName} ({item.position})</span><br />
-                  <span>Năm thành lập: {item.establishedYear}</span><br />
-                  <span>ĐKKD: {item.businessRegistrationNumber}</span><br />
-                  <span>Địa chỉ: {item.address}</span><br />
-                  <span>Điện thoại: {item.phoneNumber}</span><br />
-                  <span>Website: <a href={item.website} target="_blank" rel="noopener noreferrer">{item.website}</a></span><br />
+                  <span>
+                    Đại diện: {item.representativeName} ({item.position})
+                  </span>
+                  <br />
+                  <span>Năm thành lập: {item.establishedYear}</span>
+                  <br />
+                  <span>ĐKKD: {item.businessRegistrationNumber}</span>
+                  <br />
+                  <span>Địa chỉ: {item.address}</span>
+                  <br />
+                  <span>Điện thoại: {item.phoneNumber}</span>
+                  <br />
+                  <span>
+                    Website:{" "}
+                    <a
+                      href={item.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {item.website}
+                    </a>
+                  </span>
+                  <br />
                   <Box sx={{ mt: 1 }}>
                     <button
-                      style={{ padding: '6px 16px', background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+                      style={{
+                        padding: "6px 16px",
+                        background: "#1976d2",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: 4,
+                        cursor: "pointer",
+                      }}
                       onClick={() => {
                         setSelectedPartner(item);
                         setOpenDialog(true);
@@ -431,25 +499,73 @@ const AdminPartnerPage = () => {
         </TabPanel>
         <TabPanel value="3">
           {partnerPendingUpdate && partnerPendingUpdate.length > 0 ? (
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr', lg: '1fr 1fr 1fr 1fr' }, gap: 2 }}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "1fr 1fr",
+                  md: "1fr 1fr 1fr",
+                  lg: "1fr 1fr 1fr 1fr",
+                },
+                gap: 2,
+              }}
+            >
               {partnerPendingUpdate.map((item: any, idx: number) => {
                 const partner = item.partnerOrganization;
                 const partnerUpdate = item.partnerOrganizationUpdate;
                 if (partner && partnerUpdate) {
                   return (
-                    <Box key={item.id || idx} sx={{ mb: 2, p: 2, border: '1px solid #ccc', borderRadius: 2, height: '100%' }}>
+                    <Box
+                      key={item.id || idx}
+                      sx={{
+                        mb: 2,
+                        p: 2,
+                        border: "1px solid #ccc",
+                        borderRadius: 2,
+                        height: "100%",
+                      }}
+                    >
                       <strong>{partner.organizationName}</strong> <br />
-                      <span>Đại diện: {partner.representativeName} ({partner.position})</span><br />
-                      <span>Năm thành lập: {partner.establishedYear}</span><br />
-                      <span>ĐKKD: {partner.businessRegistrationNumber}</span><br />
-                      <span>Địa chỉ: {partner.address}</span><br />
-                      <span>Điện thoại: {partner.phoneNumber}</span><br />
-                      <span>Website: <a href={partner.website} target="_blank" rel="noopener noreferrer">{partner.website}</a></span><br />
+                      <span>
+                        Đại diện: {partner.representativeName} (
+                        {partner.position})
+                      </span>
+                      <br />
+                      <span>Năm thành lập: {partner.establishedYear}</span>
+                      <br />
+                      <span>ĐKKD: {partner.businessRegistrationNumber}</span>
+                      <br />
+                      <span>Địa chỉ: {partner.address}</span>
+                      <br />
+                      <span>Điện thoại: {partner.phoneNumber}</span>
+                      <br />
+                      <span>
+                        Website:{" "}
+                        <a
+                          href={partner.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {partner.website}
+                        </a>
+                      </span>
+                      <br />
                       <Box sx={{ mt: 1 }}>
                         <button
-                          style={{ padding: '6px 16px', background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+                          style={{
+                            padding: "6px 16px",
+                            background: "#1976d2",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: 4,
+                            cursor: "pointer",
+                          }}
                           onClick={() => {
-                            setSelectedUpdate({ oldData: partner, newData: partnerUpdate });
+                            setSelectedUpdate({
+                              oldData: partner,
+                              newData: partnerUpdate,
+                            });
                             setOpenUpdateDialog(true);
                           }}
                         >
@@ -493,6 +609,6 @@ const AdminPartnerPage = () => {
       />
     </Box>
   );
-}
+};
 
-export default AdminPartnerPage
+export default AdminPartnerPage;
