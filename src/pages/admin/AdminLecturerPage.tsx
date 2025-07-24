@@ -46,6 +46,7 @@ import LecturerDetailUpdateDialog from "../../components/LecturerDetailUpdateDia
 import LecturerUpdateDialog from "../../components/LecturerUpdateDialog";
 import { setLecturers } from "../../redux/slice/LecturerSlice";
 import type { Lecturer } from "../../types/Lecturer";
+import { setLecturerRequests } from "../../redux/slice/LecturerRquestSlice";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -349,14 +350,25 @@ const AdminLecturerPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [academicRankFilter, setAcademicRankFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("APPROVED");
-  
+
   // Filters for Create tab
   const [createSearchTerm, setCreateSearchTerm] = useState("");
   const [createDateSort, setCreateDateSort] = useState("oldest");
-  
+
   // Filters for Update tab
   const [updateSearchTerm, setUpdateSearchTerm] = useState("");
   const [updateDateSort, setUpdateDateSort] = useState("oldest");
+
+  // New states for Degrees/Certificates tab
+  const [degreeSearchTerm, setDegreeSearchTerm] = useState("");
+  const [degreeTypeFilter, setDegreeTypeFilter] = useState("");
+  const [degreeDateSort, setDegreeDateSort] = useState("oldest");
+
+  // New states for Training Courses tab
+  const [courseSearchTerm, setCourseSearchTerm] = useState("");
+  const [courseTypeFilter, setCourseTypeFilter] = useState("");
+  const [courseStatusFilter, setCourseStatusFilter] = useState("");
+  const [courseDateSort, setCourseDateSort] = useState("oldest");
 
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof Lecturer>("id");
@@ -372,6 +384,26 @@ const AdminLecturerPage = () => {
       ? state.lecturerPendingUpdate
       : [],
   );
+  const lecturerRequests = useSelector((state: any) =>
+    Array.isArray(state.lecturerRequests) ? state.lecturerRequests : [],
+  );
+  const lecturerRequestsDGCC = React.useMemo(
+    () =>
+      lecturerRequests.filter(
+        (req: any) => req.type === "BC" || req.type === "CC",
+      ),
+    [lecturerRequests],
+  );
+
+  // const lecturerRequestsCourse = React.useMemo(
+  //   () =>
+  //     lecturerRequests.filter(
+  //       (req: any) =>
+  //         req.type === "AC" || req.type === "OC" || req.type === "RP",
+  //     ),
+  //   [lecturerRequests],
+  // );
+
   const lecturers = useSelector((state: any) => state.lecturer || []);
   const dispatch = useDispatch();
 
@@ -379,17 +411,19 @@ const AdminLecturerPage = () => {
     const fetchData = async () => {
       try {
         const res = await API.admin.getAllLecturers();
-        console.log("All lecturers:", res.data.data);
         dispatch(setLecturers(res.data.data));
         const response = await API.admin.getLecturerPendingCreate();
-        console.log("Lecturer pending create requests:", response.data.data);
         dispatch(setLecturerPendingCreate(response.data.data));
         const updateResponse = await API.admin.getLecturerPendingUpdate();
-        console.log(
-          "Lecturer pending update requests:",
-          updateResponse.data.data,
-        );
         dispatch(setLecturerPendingUpdate(updateResponse.data.data));
+        const responseData = await API.admin.getLecturerRequests();
+        dispatch(setLecturerRequests(responseData.data.data));
+        console.log(
+          "Lecturer requests:",
+          responseData.data.data.filter(
+            (req: any) => req.type === "BC" || req.type === "CC",
+          ),
+        );
       } catch (error) {
         console.error("Error initializing AdminLecturerPage:", error);
       }
@@ -471,7 +505,9 @@ const AdminLecturerPage = () => {
     // Filter by search term
     if (createSearchTerm) {
       filtered = filtered.filter((item: any) =>
-        item.lecturer.fullName?.toLowerCase().includes(createSearchTerm.toLowerCase())
+        item.lecturer.fullName
+          ?.toLowerCase()
+          .includes(createSearchTerm.toLowerCase()),
       );
     }
 
@@ -479,7 +515,7 @@ const AdminLecturerPage = () => {
     filtered = [...filtered].sort((a: any, b: any) => {
       const dateA = new Date(a.lecturer.updatedAt || a.lecturer.createdAt || 0);
       const dateB = new Date(b.lecturer.updatedAt || b.lecturer.createdAt || 0);
-      
+
       if (createDateSort === "oldest") {
         return dateA.getTime() - dateB.getTime();
       } else {
@@ -497,7 +533,9 @@ const AdminLecturerPage = () => {
     // Filter by search term
     if (updateSearchTerm) {
       filtered = filtered.filter((item: any) =>
-        item.lecturer.fullName?.toLowerCase().includes(updateSearchTerm.toLowerCase())
+        item.lecturer.fullName
+          ?.toLowerCase()
+          .includes(updateSearchTerm.toLowerCase()),
       );
     }
 
@@ -505,7 +543,7 @@ const AdminLecturerPage = () => {
     filtered = [...filtered].sort((a: any, b: any) => {
       const dateA = new Date(a.lecturer.updatedAt || a.lecturer.createdAt || 0);
       const dateB = new Date(b.lecturer.updatedAt || b.lecturer.createdAt || 0);
-      
+
       if (updateDateSort === "oldest") {
         return dateA.getTime() - dateB.getTime();
       } else {
@@ -515,6 +553,111 @@ const AdminLecturerPage = () => {
 
     return filtered;
   }, [lecturerUpdateList, updateSearchTerm, updateDateSort]);
+
+  // Filtered and sorted degree/certificate list
+  const filteredDegreeList = React.useMemo(() => {
+    let filtered = lecturerRequestsDGCC;
+    // Filter by search term
+    if (degreeSearchTerm) {
+      filtered = filtered.filter(
+        (item: any) =>
+          item.lecturerInfo?.fullName
+            ?.toLowerCase()
+            .includes(degreeSearchTerm.toLowerCase()) ||
+          item.content?.name
+            ?.toLowerCase()
+            .includes(degreeSearchTerm.toLowerCase()) ||
+          item.content?.title
+            ?.toLowerCase()
+            .includes(degreeSearchTerm.toLowerCase()) ||
+          item.content?.description
+            ?.toLowerCase()
+            .includes(degreeSearchTerm.toLowerCase()),
+      );
+    }
+    // Filter by type
+    if (degreeTypeFilter) {
+      filtered = filtered.filter((item: any) => item.type === degreeTypeFilter);
+    }
+    // Sort by date
+    filtered = [...filtered].sort((a: any, b: any) => {
+      const dateA = new Date(
+        a.date || a.content?.updatedAt || a.content?.createdAt || 0,
+      );
+      const dateB = new Date(
+        b.date || b.content?.updatedAt || b.content?.createdAt || 0,
+      );
+
+      if (degreeDateSort === "oldest") {
+        return dateA.getTime() - dateB.getTime();
+      } else {
+        return dateB.getTime() - dateA.getTime();
+      }
+    });
+    return filtered;
+  }, [lecturerRequestsDGCC
+    , degreeSearchTerm, degreeTypeFilter, degreeDateSort
+  ]);
+
+  // Filtered and sorted course list
+  const filteredCourseList = React.useMemo(() => {
+    let filtered = lecturerRequests;
+
+    // Filter by search term
+    if (courseSearchTerm) {
+      filtered = filtered.filter(
+        (item: any) =>
+          item.lecturerInfo?.fullName
+            ?.toLowerCase()
+            .includes(courseSearchTerm.toLowerCase()) ||
+          item.content?.name
+            ?.toLowerCase()
+            .includes(courseSearchTerm.toLowerCase()) ||
+          item.content?.title
+            ?.toLowerCase()
+            .includes(courseSearchTerm.toLowerCase()) ||
+          item.content?.description
+            ?.toLowerCase()
+            .includes(courseSearchTerm.toLowerCase()),
+      );
+    }
+
+    // Filter by type
+    if (courseTypeFilter) {
+      filtered = filtered.filter((item: any) => item.type === courseTypeFilter);
+    }
+
+    // Filter by status
+    if (courseStatusFilter) {
+      filtered = filtered.filter(
+        (item: any) => item.content?.status === courseStatusFilter,
+      );
+    }
+
+    // Sort by date
+    filtered = [...filtered].sort((a: any, b: any) => {
+      const dateA = new Date(
+        a.date || a.content?.updatedAt || a.content?.createdAt || 0,
+      );
+      const dateB = new Date(
+        b.date || b.content?.updatedAt || b.content?.createdAt || 0,
+      );
+
+      if (courseDateSort === "oldest") {
+        return dateA.getTime() - dateB.getTime();
+      } else {
+        return dateB.getTime() - dateA.getTime();
+      }
+    });
+
+    return filtered;
+  }, [
+    lecturerRequests,
+    courseSearchTerm,
+    courseTypeFilter,
+    courseStatusFilter,
+    courseDateSort,
+  ]);
 
   const emptyRows = 10 - visibleRows.length > 0 ? 10 - visibleRows.length : 0;
 
@@ -638,6 +781,32 @@ const AdminLecturerPage = () => {
                 }
                 value="3"
               />
+              <Tab
+                label={
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <span>Chứng chỉ/Bằng cấp</span>
+                    <Chip
+                      size="small"
+                      label={filteredDegreeList.length}
+                      color="secondary"
+                    />
+                  </Box>
+                }
+                value="4"
+              />
+              <Tab
+                label={
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <span>Khóa đào tạo</span>
+                    <Chip
+                      size="small"
+                      label={filteredCourseList.length}
+                      color="info"
+                    />
+                  </Box>
+                }
+                value="5"
+              />
             </TabList>
           </Box>
         </Paper>
@@ -751,7 +920,9 @@ const AdminLecturerPage = () => {
                             variant="outlined"
                             size="small"
                             color="primary"
-                            onClick={() => window.open(`/lecturer-info/${row.id}`, '_blank')}
+                            onClick={() =>
+                              window.open(`/lecturer-info/${row.id}`, "_blank")
+                            }
                             sx={{ minWidth: 100 }}
                           >
                             Xem chi tiết
@@ -794,12 +965,19 @@ const AdminLecturerPage = () => {
 
           {/* Filter Controls for Create Tab */}
           <Paper sx={{ mb: 3, p: 2, borderRadius: 2 }}>
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
-              
-              
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
               {/* Date Sort Filter */}
               <FormControl size="small" sx={{ minWidth: 180 }}>
-                <InputLabel id="create-date-sort-label">Sắp xếp theo ngày</InputLabel>
+                <InputLabel id="create-date-sort-label">
+                  Sắp xếp theo ngày
+                </InputLabel>
                 <Select
                   labelId="create-date-sort-label"
                   value={createDateSort}
@@ -827,7 +1005,10 @@ const AdminLecturerPage = () => {
                   ),
                   endAdornment: createSearchTerm && (
                     <InputAdornment position="end">
-                      <IconButton size="small" onClick={() => setCreateSearchTerm("")}>
+                      <IconButton
+                        size="small"
+                        onClick={() => setCreateSearchTerm("")}
+                      >
                         <ClearIcon />
                       </IconButton>
                     </InputAdornment>
@@ -1004,12 +1185,19 @@ const AdminLecturerPage = () => {
 
           {/* Filter Controls for Update Tab */}
           <Paper sx={{ mb: 3, p: 2, borderRadius: 2 }}>
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
-              
-              
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
               {/* Date Sort Filter */}
               <FormControl size="small" sx={{ minWidth: 180 }}>
-                <InputLabel id="update-date-sort-label">Sắp xếp theo ngày</InputLabel>
+                <InputLabel id="update-date-sort-label">
+                  Sắp xếp theo ngày
+                </InputLabel>
                 <Select
                   labelId="update-date-sort-label"
                   value={updateDateSort}
@@ -1037,7 +1225,10 @@ const AdminLecturerPage = () => {
                   ),
                   endAdornment: updateSearchTerm && (
                     <InputAdornment position="end">
-                      <IconButton size="small" onClick={() => setUpdateSearchTerm("")}>
+                      <IconButton
+                        size="small"
+                        onClick={() => setUpdateSearchTerm("")}
+                      >
                         <ClearIcon />
                       </IconButton>
                     </InputAdornment>
@@ -1193,6 +1384,604 @@ const AdminLecturerPage = () => {
             lecturer={selectedLecturerUpdate?.lecturer || {}}
             lecturerUpdate={selectedLecturerUpdate?.lecturerUpdate || {}}
           />
+        </TabPanel>
+
+        <TabPanel value="4">
+          <Box sx={{ mb: 3 }}>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: "bold", color: "primary.main", mb: 1 }}
+            >
+              Yêu cầu chứng chỉ và bằng cấp
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Danh sách các yêu cầu tạo mới và cập nhật chứng chỉ, bằng cấp từ
+              giảng viên
+            </Typography>
+          </Box>
+
+          {/* Filter Controls for Degree Tab */}
+          <Paper sx={{ mb: 3, p: 2, borderRadius: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              {/* Type Filter */}
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel id="degree-type-select-label">Loại</InputLabel>
+                <Select
+                  labelId="degree-type-select-label"
+                  value={degreeTypeFilter}
+                  label="Loại"
+                  onChange={(e) => setDegreeTypeFilter(e.target.value)}
+                >
+                  <MenuItem value="">
+                    <em>Tất cả</em>
+                  </MenuItem>
+                  <MenuItem value="BC">Bằng cấp</MenuItem>
+                  <MenuItem value="CC">Chứng chỉ</MenuItem>
+                </Select>
+              </FormControl>
+
+             
+
+              {/* Date Sort Filter */}
+              <FormControl size="small" sx={{ minWidth: 180 }}>
+                <InputLabel id="degree-date-sort-label">
+                  Sắp xếp theo ngày
+                </InputLabel>
+                <Select
+                  labelId="degree-date-sort-label"
+                  value={degreeDateSort}
+                  label="Sắp xếp theo ngày"
+                  onChange={(e) => setDegreeDateSort(e.target.value)}
+                >
+                  <MenuItem value="oldest">Cũ nhất trước</MenuItem>
+                  <MenuItem value="newest">Mới nhất trước</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Search Bar */}
+              <TextField
+                variant="outlined"
+                size="small"
+                placeholder="Tìm kiếm theo tên giảng viên, tên bằng cấp..."
+                value={degreeSearchTerm}
+                onChange={(e) => setDegreeSearchTerm(e.target.value)}
+                sx={{ minWidth: 300 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: degreeSearchTerm && (
+                    <InputAdornment position="end">
+                      <IconButton
+                        size="small"
+                        onClick={() => setDegreeSearchTerm("")}
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <Typography variant="body2" color="text.secondary">
+                Tổng cộng: {filteredDegreeList.length} yêu cầu
+              </Typography>
+            </Box>
+          </Paper>
+
+          {filteredDegreeList && filteredDegreeList.length > 0 ? (
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "1fr 1fr",
+                  md: "1fr 1fr 1fr",
+                  lg: "1fr 1fr 1fr 1fr",
+                },
+                gap: 3,
+              }}
+            >
+              {filteredDegreeList.map((item: any, index: number) => (
+                <Card
+                  key={`${item.type}-${item.content?.id || index}`}
+                  sx={{
+                    height: "100%",
+                    transition: "all 0.3s ease",
+                    border: "2px solid",
+                    borderColor:
+                      item.label === "Create"
+                        ? "success.light"
+                        : "warning.light",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: 4,
+                      borderColor:
+                        item.label === "Create"
+                          ? "success.main"
+                          : "warning.main",
+                    },
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                      <Avatar
+                        src={item.lecturerInfo?.avatarUrl || ""}
+                        sx={{
+                          bgcolor:
+                            item.label === "Create"
+                              ? "success.main"
+                              : "warning.main",
+                          mr: 2,
+                        }}
+                      >
+                        {item.lecturerInfo?.fullName?.charAt(0)}
+                      </Avatar>
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Typography
+                          variant="h6"
+                          sx={{ fontWeight: "bold", mb: 0.5 }}
+                        >
+                          {item.lecturerInfo?.fullName}
+                        </Typography>
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                          <Chip
+                            label={item.type}
+                            size="small"
+                            variant="outlined"
+                          />
+                          <Chip label={item.label} size="small" />
+                        </Box>
+                      </Box>
+                    </Box>
+
+                    <Box sx={{ mb: 2 }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 1 }}
+                      >
+                        <strong>Tên:</strong> {item.content?.name}
+                      </Typography>
+
+                      {item.type === "BC" ? (
+                        <>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ mb: 1 }}
+                          >
+                            <strong>Chuyên ngành:</strong> {item.content?.major}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ mb: 1 }}
+                          >
+                            <strong>Trường:</strong> {item.content?.institution}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ mb: 1 }}
+                          >
+                            <strong>Năm tốt nghiệp:</strong>{" "}
+                            {item.content?.graduationYear}
+                          </Typography>
+                        </>
+                      ) : (
+                        <>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ mb: 1 }}
+                          >
+                            <strong>Tổ chức cấp:</strong>{" "}
+                            {item.content?.issuedBy}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ mb: 1 }}
+                          >
+                            <strong>Ngày cấp:</strong>{" "}
+                            {item.content?.issueDate
+                              ? new Date(
+                                  item.content.issueDate,
+                                ).toLocaleDateString("vi-VN")
+                              : ""}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ mb: 1 }}
+                          >
+                            <strong>Hạn:</strong>{" "}
+                            {item.content?.expiryDate
+                              ? new Date(
+                                  item.content.expiryDate,
+                                ).toLocaleDateString("vi-VN")
+                              : "Vĩnh viễn"}
+                          </Typography>
+                        </>
+                      )}
+
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 1 }}
+                      >
+                        <strong>Trạng thái:</strong>{" "}
+                        <Chip
+                          label={getStatusLabel(item.content?.status)}
+                          size="small"
+                          color={getStatusColor(item.content?.status) as any}
+                          variant="filled"
+                        />
+                      </Typography>
+
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 1 }}
+                      >
+                        <strong>Thời gian:</strong>{" "}
+                        {(() => {
+                          const dateStr =
+                            item.date ||
+                            item.content?.updatedAt ||
+                            item.content?.createdAt;
+                          if (!dateStr) return "Chưa cập nhật";
+
+                          const now = new Date();
+                          const requestTime = new Date(dateStr);
+                          const diffInHours = Math.floor(
+                            (now.getTime() - requestTime.getTime()) /
+                              (1000 * 60 * 60),
+                          );
+
+                          if (diffInHours < 1) {
+                            return "Vừa cập nhật";
+                          } else if (diffInHours < 48) {
+                            return `${diffInHours} giờ trước`;
+                          } else {
+                            const diffInDays = Math.floor(diffInHours / 24);
+                            return `${diffInDays} ngày trước`;
+                          }
+                        })()}
+                      </Typography>
+                    </Box>
+
+                    <Button
+                      variant="contained"
+                      color={item.label === "Create" ? "success" : "warning"}
+                      fullWidth
+                      sx={{ mt: "auto" }}
+                      onClick={() => {
+                        console.log("View details for:", item);
+                      }}
+                    >
+                      Xem chi tiết
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          ) : (
+            <Paper sx={{ p: 4, textAlign: "center" }}>
+              <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                Không có yêu cầu nào
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Hiện tại không có yêu cầu chứng chỉ/bằng cấp nào cần xử lý.
+              </Typography>
+            </Paper>
+          )}
+        </TabPanel>
+
+        <TabPanel value="5">
+          <Box sx={{ mb: 3 }}>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: "bold", color: "primary.main", mb: 1 }}
+            >
+              Yêu cầu khóa đào tạo và hoạt động
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Danh sách các yêu cầu tạo mới và cập nhật khóa học, hoạt động, báo
+              cáo từ giảng viên
+            </Typography>
+          </Box>
+
+          {/* Filter Controls for Course Tab */}
+          <Paper sx={{ mb: 3, p: 2, borderRadius: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              {/* Type Filter */}
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel id="course-type-select-label">Loại</InputLabel>
+                <Select
+                  labelId="course-type-select-label"
+                  value={courseTypeFilter}
+                  label="Loại"
+                  onChange={(e) => setCourseTypeFilter(e.target.value)}
+                >
+                  <MenuItem value="">
+                    <em>Tất cả</em>
+                  </MenuItem>
+                  <MenuItem value="OC">Khóa học</MenuItem>
+                  <MenuItem value="AC">Hoạt động</MenuItem>
+                  <MenuItem value="RP">Báo cáo</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Status Filter */}
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel id="course-status-select-label">
+                  Trạng thái
+                </InputLabel>
+                <Select
+                  labelId="course-status-select-label"
+                  value={courseStatusFilter}
+                  label="Trạng thái"
+                  onChange={(e) => setCourseStatusFilter(e.target.value)}
+                >
+                  <MenuItem value="">
+                    <em>Tất cả</em>
+                  </MenuItem>
+                  <MenuItem value="APPROVED">Đã duyệt</MenuItem>
+                  <MenuItem value="PENDING">Chờ duyệt</MenuItem>
+                  <MenuItem value="REJECTED">Đã từ chối</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Date Sort Filter */}
+              <FormControl size="small" sx={{ minWidth: 180 }}>
+                <InputLabel id="course-date-sort-label">
+                  Sắp xếp theo ngày
+                </InputLabel>
+                <Select
+                  labelId="course-date-sort-label"
+                  value={courseDateSort}
+                  label="Sắp xếp theo ngày"
+                  onChange={(e) => setCourseDateSort(e.target.value)}
+                >
+                  <MenuItem value="oldest">Cũ nhất trước</MenuItem>
+                  <MenuItem value="newest">Mới nhất trước</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Search Bar */}
+              <TextField
+                variant="outlined"
+                size="small"
+                placeholder="Tìm kiếm theo tên giảng viên, tên khóa học..."
+                value={courseSearchTerm}
+                onChange={(e) => setCourseSearchTerm(e.target.value)}
+                sx={{ minWidth: 300 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: courseSearchTerm && (
+                    <InputAdornment position="end">
+                      <IconButton
+                        size="small"
+                        onClick={() => setCourseSearchTerm("")}
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <Typography variant="body2" color="text.secondary">
+                Tổng cộng: {filteredCourseList.length} yêu cầu
+              </Typography>
+            </Box>
+          </Paper>
+
+          {filteredCourseList && filteredCourseList.length > 0 ? (
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "1fr 1fr",
+                  md: "1fr 1fr 1fr",
+                  lg: "1fr 1fr 1fr 1fr",
+                },
+                gap: 3,
+              }}
+            >
+              {filteredCourseList.map((item: any, index: number) => (
+                <Card
+                  key={`${item.type}-${item.content?.id || index}`}
+                  sx={{
+                    height: "100%",
+                    transition: "all 0.3s ease",
+                    border: "2px solid",
+                    borderColor:
+                      item.label === "Create"
+                        ? "success.light"
+                        : "warning.light",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: 4,
+                      borderColor:
+                        item.label === "Create"
+                          ? "success.main"
+                          : "warning.main",
+                    },
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                      <Avatar
+                        src={item.lecturerInfo?.avatarUrl || ""}
+                        sx={{
+                          bgcolor:
+                            item.label === "Create"
+                              ? "success.main"
+                              : "warning.main",
+                          mr: 2,
+                        }}
+                      >
+                        {item.lecturerInfo?.fullName?.charAt(0)}
+                      </Avatar>
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Typography
+                          variant="h6"
+                          sx={{ fontWeight: "bold", mb: 0.5 }}
+                        >
+                          {item.lecturerInfo?.fullName}
+                        </Typography>
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                          <Chip
+                            label={item.type}
+                            size="small"
+                            variant="outlined"
+                          />
+                          <Chip label={item.label} size="small" />
+                        </Box>
+                      </Box>
+                    </Box>
+
+                    <Box sx={{ mb: 2 }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 1 }}
+                      >
+                        <strong>Tên:</strong>{" "}
+                        {item.content?.title || item.content?.name}
+                      </Typography>
+
+                      {item.content?.description && (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            mb: 1,
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <strong>Mô tả:</strong> {item.content.description}
+                        </Typography>
+                      )}
+
+                      {item.content?.category && (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mb: 1 }}
+                        >
+                          <strong>Danh mục:</strong> {item.content.category}
+                        </Typography>
+                      )}
+
+                      {item.content?.duration && (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mb: 1 }}
+                        >
+                          <strong>Thời lượng:</strong> {item.content.duration}
+                        </Typography>
+                      )}
+
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 1 }}
+                      >
+                        <strong>Trạng thái:</strong>{" "}
+                        <Chip
+                          label={getStatusLabel(item.content?.status)}
+                          size="small"
+                          color={getStatusColor(item.content?.status) as any}
+                          variant="filled"
+                        />
+                      </Typography>
+
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 1 }}
+                      >
+                        <strong>Thời gian:</strong>{" "}
+                        {(() => {
+                          const dateStr =
+                            item.date ||
+                            item.content?.updatedAt ||
+                            item.content?.createdAt;
+                          if (!dateStr) return "Chưa cập nhật";
+
+                          const now = new Date();
+                          const requestTime = new Date(dateStr);
+                          const diffInHours = Math.floor(
+                            (now.getTime() - requestTime.getTime()) /
+                              (1000 * 60 * 60),
+                          );
+
+                          if (diffInHours < 1) {
+                            return "Vừa cập nhật";
+                          } else if (diffInHours < 48) {
+                            return `${diffInHours} giờ trước`;
+                          } else {
+                            const diffInDays = Math.floor(diffInHours / 24);
+                            return `${diffInDays} ngày trước`;
+                          }
+                        })()}
+                      </Typography>
+                    </Box>
+
+                    <Button
+                      variant="contained"
+                      color={item.label === "Create" ? "success" : "warning"}
+                      fullWidth
+                      sx={{ mt: "auto" }}
+                      onClick={() => {
+                        console.log("View details for:", item);
+                      }}
+                    >
+                      Xem chi tiết
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          ) : (
+            <Paper sx={{ p: 4, textAlign: "center" }}>
+              <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                Không có yêu cầu nào
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Hiện tại không có yêu cầu khóa đào tạo/hoạt động nào cần xử lý.
+              </Typography>
+            </Paper>
+          )}
         </TabPanel>
       </TabContext>
     </Box>

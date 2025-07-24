@@ -1,8 +1,7 @@
-import { useDispatch } from "react-redux";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 const BlankLayout = () => {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
+    // const dispatch = useDispatch();
+    // const navigate = useNavigate();
     // useEffect(() => {
     //     const fetchUserData = async () => {
     //         try {

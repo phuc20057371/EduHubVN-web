@@ -40,7 +40,8 @@ const Login = () => {
     const top = (window.screen.height - height) / 2;
     // const popup = window.open('http://localhost:8080/oauth2/authorization/github?redirect_uri=http://localhost:3000/', 'Login with Google',
     //   `width=${width},height=${height},top=${top},left=${left}`);
-    const popup = window.open('http://localhost:8080/oauth2/authorization/google', 'Login with Google',
+    const domain = window.location.hostname;
+    const popup = window.open(`http://${domain}:8080/oauth2/authorization/google`, 'Login with Google',
       `width=${width},height=${height},top=${top},left=${left}`);
     // Monitor the popup for changes
     if (popup) {

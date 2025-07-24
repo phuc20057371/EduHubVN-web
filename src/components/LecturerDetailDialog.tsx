@@ -466,7 +466,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
     <Dialog open={open} onClose={handleDialogClose} maxWidth="md" fullWidth>
       <DialogTitle>
         <Box display="flex" alignItems="center" gap={2}>
-          <Avatar sx={{ bgcolor: "primary.main" }}>
+          <Avatar src={lecturer.avatarUrl || ""} sx={{ bgcolor: "primary.main" }}>
             <PersonIcon />
           </Avatar>
           <Box>

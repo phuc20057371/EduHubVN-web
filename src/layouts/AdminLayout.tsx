@@ -27,17 +27,14 @@ import {
   AccountCircle,
   Settings,
   Logout,
-  AdminPanelSettings,
   Dashboard,
   School,
   Business,
   Person,
-  WorkspacePremium,
-  MenuBook,
   Notifications,
   Menu as MenuIcon,
 } from "@mui/icons-material";
-
+import LogoWeb from "../assets/eduhub-03.png";
 
 const AdminLayout = () => {
   const dispatch = useDispatch();
@@ -50,9 +47,7 @@ const AdminLayout = () => {
   // Function to check if current path matches button path
   const isActivePath = (path: string) => {
     if (path === "/admin") {
-      return (
-        location.pathname === "/admin" || location.pathname === "/admin/"
-      );
+      return location.pathname === "/admin" || location.pathname === "/admin/";
     }
     return location.pathname.startsWith(path);
   };
@@ -81,7 +76,8 @@ const AdminLayout = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     navigate("/login");
     handleMenuClose();
   };
@@ -98,43 +94,54 @@ const AdminLayout = () => {
   const menuItems = [
     { text: "Dashboard", icon: <Dashboard />, path: "/admin" },
     { text: "Giảng viên", icon: <Person />, path: "/admin/lecturers" },
-    { text: "Trung tâm đào tạo", icon: <School />, path: "/admin/institutions" },
+    {
+      text: "Trung tâm đào tạo",
+      icon: <School />,
+      path: "/admin/institutions",
+    },
     { text: "Đơn vị tổ chức", icon: <Business />, path: "/admin/partners" },
-    { text: "Bằng cấp/Chứng chỉ", icon: <WorkspacePremium />, path: "/admin/degree" },
-    { text: "Khóa đào tạo", icon: <MenuBook />, path: "/admin/courses" },
   ];
 
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
-      <Typography variant="h6" sx={{ my: 2, color: "primary.main", fontWeight: "bold" }}>
-        EduHub - Admin
+      <Typography
+        variant="h6"
+        sx={{ my: 2, color: "primary.main", fontWeight: "bold" }}
+      >
+        EduHubVN
       </Typography>
       <Divider />
       <List>
         {menuItems.map((item) => (
           <ListItem key={item.text} disablePadding>
             <ListItemButton
-              sx={{ 
+              sx={{
                 textAlign: "center",
-                backgroundColor: isActivePath(item.path) ? "rgba(25, 118, 210, 0.1)" : "transparent",
+                backgroundColor: isActivePath(item.path)
+                  ? "rgba(25, 118, 210, 0.1)"
+                  : "transparent",
                 "&:hover": {
-                  backgroundColor: isActivePath(item.path) ? "rgba(25, 118, 210, 0.2)" : "rgba(0, 0, 0, 0.04)",
-                }
+                  backgroundColor: isActivePath(item.path)
+                    ? "rgba(25, 118, 210, 0.2)"
+                    : "rgba(0, 0, 0, 0.04)",
+                },
               }}
               onClick={() => navigate(item.path)}
             >
-              <ListItemIcon sx={{ 
-                minWidth: "auto", 
-                mr: 1,
-                color: isActivePath(item.path) ? "primary.main" : "inherit"
-              }}>
+              <ListItemIcon
+                sx={{
+                  minWidth: "auto",
+                  mr: 1,
+                  color: isActivePath(item.path) ? "primary.main" : "inherit",
+                }}
+              >
                 {item.icon}
               </ListItemIcon>
-              <ListItemText 
-                primary={item.text} 
-                sx={{ 
+              <ListItemText
+                primary={item.text}
+                sx={{
                   color: isActivePath(item.path) ? "primary.main" : "inherit",
-                  fontWeight: isActivePath(item.path) ? "bold" : "normal"
+                  fontWeight: isActivePath(item.path) ? "bold" : "normal",
                 }}
               />
             </ListItemButton>
@@ -157,29 +164,37 @@ const AdminLayout = () => {
               edge="start"
               onClick={handleDrawerToggle}
               sx={{ mr: 2, display: { md: "none" } }}
+              
             >
               <MenuIcon />
             </IconButton>
 
             {/* Logo */}
-            <AdminPanelSettings sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
-            <Typography
-              variant="h6"
-              noWrap
-              component="div"
-              sx={{
-                mr: 2,
-                display: { xs: "flex", md: "flex" },
-                fontFamily: "monospace",
-                fontWeight: 700,
-                letterSpacing: ".3rem",
-                color: "inherit",
-                textDecoration: "none",
-                flexGrow: { xs: 1, md: 0 },
-              }}
-            >
-              EduHub Admin
-            </Typography>
+            {/* <AdminPanelSettings sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} /> */}
+            <div className="flex items-center bg-white rounded-full p-1">
+              <img
+                src={LogoWeb}
+                style={{ width: "40px", height: "40px" }}
+                alt=""
+              />
+              <Typography
+                variant="h6"
+                noWrap
+                component="div"
+                sx={{
+                  mr: 2,
+                  display: { xs: "flex", md: "flex" },
+                  fontFamily: "monospace",
+                  fontWeight: 700,
+                  letterSpacing: ".3rem",
+                  color: "inherit",
+                  textDecoration: "none",
+                  flexGrow: { xs: 1, md: 0 },
+                }}
+              >
+                EduHubVN
+              </Typography>
+            </div>
 
             {/* Navigation */}
             <Box

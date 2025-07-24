@@ -232,6 +232,9 @@ export const API = {
     getAllLecturers: () => fetch.get("/api/v1/admin/get-all-lecturers"),
     getAllInstitutions: () => fetch.get("/api/v1/admin/get-all-institutions"),
     getAllPartners: () => fetch.get("/api/v1/admin/get-all-partners"),
+
+    getLecturerRequests: () =>
+      fetch.get("/api/v1/admin/get-lecturer-requests"),
     //Lecturer
     approveLecturer: (data: IdRequest) =>
       fetch.post("/api/v1/admin/approve-lecturer", data),

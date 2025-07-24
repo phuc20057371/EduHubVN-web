@@ -98,7 +98,8 @@ const LecturerLayout = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     navigate("/login");
     handleMenuClose();
   };
