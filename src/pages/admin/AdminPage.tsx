@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -24,6 +23,11 @@ import {
   Error as ErrorIcon,
   Info,
 } from "@mui/icons-material";
+import { useDispatch, useSelector } from "react-redux";
+import { API } from "../../utils/Fetch";
+import { setLecturers } from "../../redux/slice/LecturerSlice";
+import { setInstitutions } from "../../redux/slice/InstitutionSlice";
+import { setPartner } from "../../redux/slice/PartnerSlice";
 
 interface StatCard {
   title: string;
@@ -54,42 +58,106 @@ interface QuickAction {
 const AdminPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const lecturers = useSelector((state: any) => state.lecturer || []);
+  const institutions = useSelector((state: any) => state.institution || []);
+  const partners = useSelector((state: any) => state.partner || []);
 
-  // Mock data - in real app, fetch from API
-  const statsData: StatCard[] = [
-    {
-      title: "Tổng Giảng viên",
-      value: 1247,
-      icon: <People sx={{ fontSize: 40 }} />,
-      color: "#2e7d32",
-      change: "+12%",
-      trend: "up"
-    },
-    {
-      title: "Trung tâm Đào tạo",
-      value: 89,
-      icon: <School sx={{ fontSize: 40 }} />,
-      color: "#1976d2",
-      change: "+5%",
-      trend: "up"
-    },
-    {
-      title: "Đối tác",
-      value: 156,
-      icon: <Business sx={{ fontSize: 40 }} />,
-      color: "#ed6c02",
-      change: "+8%",
-      trend: "up"
-    },
-    {
-      title: "Khóa học Hoạt động",
-      value: 342,
-      icon: <MenuBook sx={{ fontSize: 40 }} />,
-      color: "#9c27b0",
-      change: "+15%",
-      trend: "up"
-    }
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await API.admin.getAllLecturers();
+        dispatch(setLecturers(res.data.data));
+        const res2 = await API.admin.getAllInstitutions();
+        dispatch(setInstitutions(res2.data.data));
+        const res3 = await API.admin.getAllPartners();
+        dispatch(setPartner(res3.data.data));
+        // const response = await API.admin.getLecturerPendingCreate();
+        // dispatch(setLecturerPendingCreate(response.data.data));
+        // const updateResponse = await API.admin.getLecturerPendingUpdate();
+        // dispatch(setLecturerPendingUpdate(updateResponse.data.data));
+        // const responseData = await API.admin.getLecturerRequests();
+        // dispatch(setLecturerRequests(responseData.data.data));
+      } catch (error) {
+        console.error("Error initializing AdminLecturerPage:", error);
+      }
+    };
+
+    fetchData();
+    setLoading(false);
+  }, []);
+
+  const statsData: StatCard[] = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+    const calculateChange = (
+      items: any[],
+      statusField: string | null = "status",
+    ): { percentChange: string; trend: "up" | "down" | "stable" } => {
+      if (!Array.isArray(items))
+        return { percentChange: "0%", trend: "stable" };
+
+      const current = items.filter((item) => {
+        const createdAt = new Date(item.createdAt);
+        return (
+          (!statusField || item[statusField] === "APPROVED") &&
+          createdAt.getMonth() === currentMonth &&
+          createdAt.getFullYear() === currentYear
+        );
+      }).length;
+
+      const last = items.filter((item) => {
+        const createdAt = new Date(item.createdAt);
+        return (
+          (!statusField || item[statusField] === "APPROVED") &&
+          createdAt.getMonth() === lastMonth &&
+          createdAt.getFullYear() === lastMonthYear
+        );
+      }).length;
+
+      const diff = current - last;
+      const percent = last === 0 ? 100 : Math.round((diff / last) * 100);
+      const trend: "up" | "down" | "stable" =
+        diff > 0 ? "up" : diff < 0 ? "down" : "stable";
+
+      return { percentChange: `${percent}%`, trend };
+    };
+
+    const lecturerStats = calculateChange(lecturers, "status");
+    const institutionStats = calculateChange(institutions, "status");
+    const partnerStats = calculateChange(partners, "status");
+
+    return [
+      {
+        title: "Tổng Giảng viên",
+        value: lecturers.filter((l: any) => l.status === "APPROVED").length,
+        icon: <People sx={{ fontSize: 40 }} />,
+        color: "#2e7d32",
+        change: lecturerStats.percentChange,
+        trend: lecturerStats.trend,
+      },
+      {
+        title: "Trung tâm Đào tạo",
+        value: institutions.filter((i: any) => i.status === "APPROVED").length,
+        icon: <School sx={{ fontSize: 40 }} />,
+        color: "#1976d2",
+        change: institutionStats.percentChange,
+        trend: institutionStats.trend,
+      },
+      {
+        title: "Đối tác",
+        value: partners.filter((p: any) => p.status === "APPROVED").length,
+        icon: <Business sx={{ fontSize: 40 }} />,
+        color: "#ed6c02",
+        change: partnerStats.percentChange,
+        trend: partnerStats.trend,
+      },
+    ];
+  }, [lecturers, institutions, partners]);
 
   const recentActivities: RecentActivity[] = [
     {
@@ -98,7 +166,7 @@ const AdminPage = () => {
       title: "Nguyễn Văn A đăng ký làm giảng viên",
       description: "Chuyên ngành: Khoa học máy tính",
       timestamp: "2 phút trước",
-      status: "pending"
+      status: "pending",
     },
     {
       id: 2,
@@ -106,7 +174,7 @@ const AdminPage = () => {
       title: "Trường Đại học XYZ yêu cầu hợp tác",
       description: "Ngành: Công nghệ thông tin",
       timestamp: "15 phút trước",
-      status: "approved"
+      status: "approved",
     },
     {
       id: 3,
@@ -114,7 +182,7 @@ const AdminPage = () => {
       title: "Khóa học React.js được tạo mới",
       description: "Giảng viên: Trần Thị B",
       timestamp: "1 giờ trước",
-      status: "approved"
+      status: "approved",
     },
     {
       id: 4,
@@ -122,8 +190,8 @@ const AdminPage = () => {
       title: "Công ty ABC đăng ký đối tác",
       description: "Lĩnh vực: Phần mềm",
       timestamp: "3 giờ trước",
-      status: "pending"
-    }
+      status: "pending",
+    },
   ];
 
   const quickActions: QuickAction[] = [
@@ -132,48 +200,64 @@ const AdminPage = () => {
       description: "Xem, duyệt và quản lý hồ sơ giảng viên",
       icon: <People sx={{ fontSize: 32 }} />,
       color: "#2e7d32",
-      route: "/admin/lecturers"
+      route: "/admin/lecturers",
     },
     {
       title: "Quản lý Trung tâm",
       description: "Quản lý các trung tâm đào tạo",
       icon: <School sx={{ fontSize: 32 }} />,
       color: "#1976d2",
-      route: "/admin/institutions"
+      route: "/admin/institutions",
     },
     {
       title: "Quản lý Đối tác",
       description: "Quản lý các đối tác và doanh nghiệp",
       icon: <Business sx={{ fontSize: 32 }} />,
       color: "#ed6c02",
-      route: "/admin/partners"
+      route: "/admin/partners",
     },
     {
       title: "Quản lý Khóa học",
       description: "Xem và quản lý tất cả khóa học",
       icon: <MenuBook sx={{ fontSize: 32 }} />,
       color: "#9c27b0",
-      route: "/admin/courses"
-    }
+      route: "/admin/courses",
+    },
   ];
-
-  useEffect(() => {
-    // Simulate loading
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  }, []);
 
   const getStatusChip = (status: string) => {
     switch (status) {
       case "pending":
-        return <Chip label="Chờ duyệt" size="small" color="warning" icon={<Warning />} />;
+        return (
+          <Chip
+            label="Chờ duyệt"
+            size="small"
+            color="warning"
+            icon={<Warning />}
+          />
+        );
       case "approved":
-        return <Chip label="Đã duyệt" size="small" color="success" icon={<CheckCircle />} />;
+        return (
+          <Chip
+            label="Đã duyệt"
+            size="small"
+            color="success"
+            icon={<CheckCircle />}
+          />
+        );
       case "rejected":
-        return <Chip label="Từ chối" size="small" color="error" icon={<ErrorIcon />} />;
+        return (
+          <Chip
+            label="Từ chối"
+            size="small"
+            color="error"
+            icon={<ErrorIcon />}
+          />
+        );
       default:
-        return <Chip label="Khác" size="small" color="default" icon={<Info />} />;
+        return (
+          <Chip label="Khác" size="small" color="default" icon={<Info />} />
+        );
     }
   };
 
@@ -214,35 +298,59 @@ const AdminPage = () => {
           </Typography>
         </Box>
         <Typography variant="body1" color="text.secondary">
-          Tổng quan hệ thống EduHub - Cập nhật lúc {new Date().toLocaleString("vi-VN")}
+          Tổng quan hệ thống EduHubVN - Cập nhật lúc{" "}
+          {new Date().toLocaleString("vi-VN")}
         </Typography>
       </Box>
 
       {/* Stats Cards */}
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3, mb: 4 }}>
         {statsData.map((stat, index) => (
-          <Card 
-            key={index} 
-            sx={{ 
-              flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 12px)", lg: "1 1 calc(25% - 18px)" },
-              minWidth: "250px"
+          <Card
+            key={index}
+            sx={{
+              flex: {
+                xs: "1 1 100%",
+                sm: "1 1 calc(50% - 12px)",
+                lg: "1 1 calc(25% - 18px)",
+              },
+              minWidth: "250px",
             }}
           >
             <CardContent>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
                 <Box>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    gutterBottom
+                  >
                     {stat.title}
                   </Typography>
                   <Typography variant="h4" sx={{ fontWeight: "bold", mb: 1 }}>
                     {stat.value.toLocaleString()}
                   </Typography>
                   <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <TrendingUp sx={{ fontSize: 16, color: stat.color, mr: 0.5 }} />
-                    <Typography variant="body2" sx={{ color: stat.color, fontWeight: "bold" }}>
+                    <TrendingUp
+                      sx={{ fontSize: 16, color: stat.color, mr: 0.5 }}
+                    />
+                    <Typography
+                      variant="body2"
+                      sx={{ color: stat.color, fontWeight: "bold" }}
+                    >
                       {stat.change}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ ml: 0.5 }}
+                    >
                       so với tháng trước
                     </Typography>
                   </Box>
@@ -260,21 +368,25 @@ const AdminPage = () => {
         {/* Quick Actions */}
         <Card sx={{ flex: { xs: "1 1 100%", lg: "1 1 calc(50% - 12px)" } }}>
           <CardContent>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
+            <Typography
+              variant="h6"
+              gutterBottom
+              sx={{ fontWeight: "bold", mb: 3 }}
+            >
               Thao tác nhanh
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               {quickActions.map((action, index) => (
-                <Card 
-                  key={index} 
-                  variant="outlined" 
-                  sx={{ 
+                <Card
+                  key={index}
+                  variant="outlined"
+                  sx={{
                     cursor: "pointer",
                     transition: "all 0.3s ease",
                     "&:hover": {
                       boxShadow: 2,
-                      transform: "translateY(-2px)"
-                    }
+                      transform: "translateY(-2px)",
+                    },
                   }}
                   onClick={() => navigate(action.route)}
                 >
@@ -284,15 +396,18 @@ const AdminPage = () => {
                         {action.icon}
                       </Avatar>
                       <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ fontWeight: "bold" }}
+                        >
                           {action.title}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           {action.description}
                         </Typography>
                       </Box>
-                      <Button 
-                        variant="outlined" 
+                      <Button
+                        variant="outlined"
                         size="small"
                         sx={{ color: action.color, borderColor: action.color }}
                       >
@@ -309,24 +424,44 @@ const AdminPage = () => {
         {/* Recent Activities */}
         <Card sx={{ flex: { xs: "1 1 100%", lg: "1 1 calc(50% - 12px)" } }}>
           <CardContent>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
+            <Typography
+              variant="h6"
+              gutterBottom
+              sx={{ fontWeight: "bold", mb: 3 }}
+            >
               Hoạt động gần đây
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               {recentActivities.map((activity) => (
-                <Box key={activity.id} sx={{ p: 2, bgcolor: "background.default", borderRadius: 1 }}>
+                <Box
+                  key={activity.id}
+                  sx={{ p: 2, bgcolor: "background.default", borderRadius: 1 }}
+                >
                   <Box sx={{ display: "flex", alignItems: "start", gap: 2 }}>
                     <Avatar sx={{ width: 40, height: 40 }}>
                       {getActivityIcon(activity.type)}
                     </Avatar>
                     <Box sx={{ flexGrow: 1 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ fontWeight: "bold" }}
+                      >
                         {activity.title}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 1 }}
+                      >
                         {activity.description}
                       </Typography>
-                      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
                         <Typography variant="caption" color="text.secondary">
                           {activity.timestamp}
                         </Typography>
@@ -343,23 +478,35 @@ const AdminPage = () => {
 
       {/* System Alerts */}
       <Box sx={{ mt: 4 }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mb: 2 }}>
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{ fontWeight: "bold", mb: 2 }}
+        >
           Thông báo hệ thống
         </Typography>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <Alert severity="info" action={
-            <Button color="inherit" size="small">
-              Xem chi tiết
-            </Button>
-          }>
-            <strong>Cập nhật hệ thống</strong> - Phiên bản 2.1.0 đã được triển khai thành công
+          <Alert
+            severity="info"
+            action={
+              <Button color="inherit" size="small">
+                Xem chi tiết
+              </Button>
+            }
+          >
+            <strong>Cập nhật hệ thống</strong> - Phiên bản 1.0 đã được triển
+            khai thành công
           </Alert>
-          <Alert severity="warning" action={
-            <Button color="inherit" size="small">
-              Xử lý
-            </Button>
-          }>
-            <strong>Cảnh báo</strong> - Có 15 đơn đăng ký giảng viên đang chờ duyệt
+          <Alert
+            severity="warning"
+            action={
+              <Button color="inherit" size="small">
+                Xử lý
+              </Button>
+            }
+          >
+            <strong>Cảnh báo</strong> - Có 15 đơn đăng ký giảng viên đang chờ
+            duyệt
           </Alert>
         </Box>
       </Box>
@@ -367,4 +514,4 @@ const AdminPage = () => {
   );
 };
 
-export default AdminPage
+export default AdminPage;

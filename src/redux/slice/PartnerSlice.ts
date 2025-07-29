@@ -1,13 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {};
 
 const partnerSlice = createSlice({
   name: "partner",
-  initialState,
+  initialState : [],
   reducers: {
     setPartner: (_state, action) => action.payload,
-    clearPartner: () => ({}),
+    clearPartner: () => ([]),
   },
 });
 

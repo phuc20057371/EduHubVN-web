@@ -7,13 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 function App() {
   useEffect(() => {
     const handleAuthMessage = (event: MessageEvent) => {
-      const allowedOrigins = [
-        "http://localhost:8080",
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://172.16.10.25",
-        "*"
-      ];
+      const allowedOrigins = ["*"];
       if (!allowedOrigins.includes(event.origin)) return;
 
       const authResponse = event.data.authResponse;

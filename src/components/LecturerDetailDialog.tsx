@@ -106,6 +106,8 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
     note?: string;
   } | null>(null);
   // Load from localStorage on open
+  const domain = window.location.hostname;
+  const BASE_URL = `http://${domain}:8080`;
   useEffect(() => {
     if (!open) return;
     // Lecturer
@@ -466,7 +468,10 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
     <Dialog open={open} onClose={handleDialogClose} maxWidth="md" fullWidth>
       <DialogTitle>
         <Box display="flex" alignItems="center" gap={2}>
-          <Avatar src={lecturer.avatarUrl || ""} sx={{ bgcolor: "primary.main" }}>
+          <Avatar
+            src={lecturer.avatarUrl || ""}
+            sx={{ bgcolor: "primary.main" }}
+          >
             <PersonIcon />
           </Avatar>
           <Box>
@@ -845,7 +850,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
               p: 2,
               display: "flex",
               alignItems: "center",
-              gap: 2
+              gap: 2,
             }}
           >
             <Typography
@@ -855,10 +860,11 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                 fontWeight: 500,
                 display: "flex",
                 alignItems: "center",
-                gap: 1
+                gap: 1,
               }}
             >
-              ⚠️ Lưu ý: Bạn phải duyệt hoặc từ chối tất cả bằng cấp và chứng chỉ trước khi có thể lưu hồ sơ này.
+              ⚠️ Lưu ý: Bạn phải duyệt hoặc từ chối tất cả bằng cấp và chứng chỉ
+              trước khi có thể lưu hồ sơ này.
             </Typography>
           </Box>
 
@@ -1065,7 +1071,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                                       textOverflow: "ellipsis",
                                     }}
                                     onClick={() =>
-                                      deg.url && window.open(deg.url, "_blank")
+                                      deg.url && window.open(BASE_URL+"/uploads/" + deg.url)
                                     }
                                   >
                                     {deg.url || "Không có"}
@@ -1095,7 +1101,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                                     {deg.description || "Không có"}
                                   </Typography>
                                 </Box>
-                                
+
                                 <Divider />
                                 <Box
                                   display="flex"
@@ -1135,10 +1141,8 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                                   </Typography>
                                 </Box>
                                 <Divider />
-                                
                               </Box>
                             </Box>
-
 
                             <Box display="flex" alignItems="center" gap={1}>
                               {degreeStates[deg.id]?.status === "PENDING" ? (
@@ -1272,7 +1276,6 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                                 flexDirection="column"
                                 gap={1}
                               >
-                                
                                 <Divider />
                                 <Box
                                   display="flex"
@@ -1330,8 +1333,11 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                                     Ngày cấp:
                                   </Typography>
                                   <Typography variant="body2" fontWeight={500}>
-                    
-                                    {cert.issueDate ? new Date(cert.issueDate).toLocaleDateString('vi-VN') : 'Chưa có'}
+                                    {cert.issueDate
+                                      ? new Date(
+                                          cert.issueDate,
+                                        ).toLocaleDateString("vi-VN")
+                                      : "Chưa có"}
                                   </Typography>
                                 </Box>
                                 <Divider />
@@ -1346,8 +1352,11 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                                     Ngày hết hạn:
                                   </Typography>
                                   <Typography variant="body2" fontWeight={500}>
-                                    
-                                    {cert.expiryDate ? new Date(cert.expiryDate).toLocaleDateString('vi-VN') : 'Chưa có'}
+                                    {cert.expiryDate
+                                      ? new Date(
+                                          cert.expiryDate,
+                                        ).toLocaleDateString("vi-VN")
+                                      : "Chưa có"}
                                   </Typography>
                                 </Box>
                                 <Divider />
@@ -1361,24 +1370,33 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                                   >
                                     URL chứng chỉ:
                                   </Typography>
-                                  <Typography 
-                                    variant="body2" 
+                                  <Typography
+                                    variant="body2"
                                     fontWeight={500}
-                                    sx={{ 
-                                      color: cert.certificateUrl ? "primary.main" : "text.secondary",
-                                      textDecoration: cert.certificateUrl ? "underline" : "none",
-                                      cursor: cert.certificateUrl ? "pointer" : "default",
+                                    sx={{
+                                      color: cert.certificateUrl
+                                        ? "primary.main"
+                                        : "text.secondary",
+                                      textDecoration: cert.certificateUrl
+                                        ? "underline"
+                                        : "none",
+                                      cursor: cert.certificateUrl
+                                        ? "pointer"
+                                        : "default",
                                       maxWidth: "60%",
                                       overflow: "hidden",
-                                      textOverflow: "ellipsis"
+                                      textOverflow: "ellipsis",
                                     }}
-                                    onClick={() => cert.certificateUrl && window.open(cert.certificateUrl, '_blank')}
+                                    onClick={() =>
+                                      cert.certificateUrl &&
+                                      window.open(`${BASE_URL}/uploads/${cert.certificateUrl}`, "_blank")
+                                    }
                                   >
                                     {cert.certificateUrl || "Không có"}
                                   </Typography>
                                 </Box>
                                 <Divider />
-                                
+
                                 <Box
                                   display="flex"
                                   justifyContent="space-between"
@@ -1390,19 +1408,19 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                                   >
                                     Mô tả:
                                   </Typography>
-                                  <Typography 
-                                    variant="body2" 
+                                  <Typography
+                                    variant="body2"
                                     fontWeight={500}
-                                    sx={{ 
-                                      textAlign: "right", 
+                                    sx={{
+                                      textAlign: "right",
                                       maxWidth: "60%",
-                                      wordBreak: "break-word"
+                                      wordBreak: "break-word",
                                     }}
                                   >
                                     {cert.description || "Không có"}
                                   </Typography>
                                 </Box>
-                                
+
                                 <Divider />
                                 <Box
                                   display="flex"
@@ -1415,7 +1433,11 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                                     Thời gian tạo:
                                   </Typography>
                                   <Typography variant="body2" fontWeight={500}>
-                                    {cert.createdAt ? new Date(cert.createdAt).toLocaleDateString('vi-VN') : 'Chưa có'}
+                                    {cert.createdAt
+                                      ? new Date(
+                                          cert.createdAt,
+                                        ).toLocaleDateString("vi-VN")
+                                      : "Chưa có"}
                                   </Typography>
                                 </Box>
                                 <Divider />
@@ -1430,10 +1452,13 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                                     Cập nhật lần cuối:
                                   </Typography>
                                   <Typography variant="body2" fontWeight={500}>
-                                    {cert.updatedAt ? new Date(cert.updatedAt).toLocaleDateString('vi-VN') : 'Chưa có'}
+                                    {cert.updatedAt
+                                      ? new Date(
+                                          cert.updatedAt,
+                                        ).toLocaleDateString("vi-VN")
+                                      : "Chưa có"}
                                   </Typography>
                                 </Box>
-                                
                               </Box>
                             </Box>
 

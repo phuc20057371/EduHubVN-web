@@ -1,25 +1,58 @@
-import { Box, Button, MenuItem, Stack, TextField } from "@mui/material";
-
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import Typography from '@mui/material/Typography';
-import { Fragment, useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  MenuItem,
+  TextField,
+  Paper,
+  Card,
+  CardContent,
+  Chip,
+  Typography,
+  IconButton,
+  Container,
+  Alert,
+  AlertTitle,
+  Stepper,
+  Step,
+  StepLabel,
+  LinearProgress,
+} from "@mui/material";
+import { useEffect, useState } from "react";
 import UploadDegreeModal from "../../components/UploadDegreeModal";
 import type { DegreeRequest } from "../../types/DegreeRequest";
 import UploadCertificationModal from "../../components/UploadCertificationModal";
 import type { CertificationRequest } from "../../types/CertificationRequest";
 import { API } from "../../utils/Fetch";
 import { useNavigate } from "react-router-dom";
+import {
+  Person,
+  School,
+  Delete,
+  Add,
+  CheckCircle,
+  Badge,
+  Work,
+  LocationOn,
+  Phone,
+  CalendarToday,
+} from "@mui/icons-material";
+import { toast } from "react-toastify";
 
 const RegisterLecturer = () => {
-  const steps = ['Thông tin cá nhân', 'Thông tin chứng chỉ và bằng cấp', 'Gửi yêu cầu tạo tài khoản '];
+  const steps = [
+    { label: "Thông tin cá nhân", icon: <Person /> },
+    { label: "Chứng chỉ và bằng cấp", icon: <School /> },
+    { label: "Xác nhận và hoàn tất", icon: <CheckCircle /> },
+  ];
   const navigate = useNavigate();
 
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set<number>());
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const savedData = JSON.parse(localStorage.getItem("registerLecturerForm") || "{}");
+  const savedData = JSON.parse(
+    localStorage.getItem("registerLecturerForm") || "{}",
+  );
 
   const [citizenId, setCitizenId] = useState(savedData.citizenId || "");
   const [phoneNumber, setPhoneNumber] = useState(savedData.phoneNumber || "");
@@ -28,25 +61,33 @@ const RegisterLecturer = () => {
   const [gender, setGender] = useState(savedData.gender || "");
   const [bio, setBio] = useState(savedData.bio || "");
   const [address, setAddress] = useState(savedData.address || "");
-  const [academicRank, setAcademicRank] = useState(savedData.academicRank || "");
-  const [specialization, setSpecialization] = useState(savedData.specialization || "");
-  const [experienceYears, setExperienceYears] = useState(savedData.experienceYears || "");
+  const [academicRank, setAcademicRank] = useState(
+    savedData.academicRank || "",
+  );
+  const [specialization, setSpecialization] = useState(
+    savedData.specialization || "",
+  );
+  const [experienceYears, setExperienceYears] = useState(
+    savedData.experienceYears || "",
+  );
+  const [jobField, setJobField] = useState(savedData.jobField || "");
 
   const [openModal, setOpenModal] = useState(false);
-  const handleOpen = () => setOpenModal(true);
   const [degrees, setDegrees] = useState<DegreeRequest[]>([]);
-  const [certifications, setCertifications] = useState<CertificationRequest[]>([]);
+  const [certifications, setCertifications] = useState<CertificationRequest[]>(
+    [],
+  );
   const [openCertificationModal, setOpenCertificationModal] = useState(false);
 
   const handleDeleteDegree = (indexToDelete: number) => {
-    setDegrees(prev => prev.filter((_, index) => index !== indexToDelete));
+    setDegrees((prev) => prev.filter((_, index) => index !== indexToDelete));
   };
 
   const handleDeleteCertification = (indexToDelete: number) => {
-    setCertifications(prev => prev.filter((_, index) => index !== indexToDelete));
+    setCertifications((prev) =>
+      prev.filter((_, index) => index !== indexToDelete),
+    );
   };
-
-
 
   const isStepOptional = (step: number) => {
     return step === 1;
@@ -58,9 +99,17 @@ const RegisterLecturer = () => {
 
   const handleNext = async () => {
     if (activeStep === 2) {
-      if(gender === "") {
-        alert("Vui lòng chọn giới tính");
+      if (fullName === "") {
+        toast.error("Vui lòng nhập họ và tên");
+        return;
       }
+      if (gender === "") {
+        toast.error("Vui lòng chọn giới tính");
+        return;
+      }
+
+      setIsSubmitting(true);
+
       const lecturerData = {
         citizenId,
         phoneNumber,
@@ -72,27 +121,37 @@ const RegisterLecturer = () => {
         academicRank,
         specialization,
         experienceYears,
-        avatarUrl: "", 
-        jobField: "", 
+        avatarUrl: "",
+        jobField,
       };
 
       try {
-        // 2. Gọi API: Đăng ký giảng viên
         const resLecturer = await API.user.registerLeccturer(lecturerData);
-        const lecturerId = resLecturer.data.data.id; // Lấy ID giảng viên từ phản hồi
-        const degreePayload = degrees.map((deg) => ({ ...deg, lecturerId }));
-        await API.user.createDegree(degreePayload);
-        const certificationPayload = certifications.map((cert) => ({ ...cert, lecturerId }));
-        await API.user.createCertification(certificationPayload);
+        const lecturerId = resLecturer.data.data.id;
 
-        // 5. Thành công → điều hướng
+        if (degrees.length > 0) {
+          const degreePayload = degrees.map((deg) => ({ ...deg, lecturerId }));
+          await API.user.createDegree(degreePayload);
+        }
+
+        if (certifications.length > 0) {
+          const certificationPayload = certifications.map((cert) => ({
+            ...cert,
+            lecturerId,
+          }));
+          await API.user.createCertification(certificationPayload);
+        }
+
+        localStorage.removeItem("registerLecturerForm");
         navigate("/");
-
       } catch (error) {
         console.error("❌ Lỗi gửi dữ liệu:", error);
         alert("Có lỗi xảy ra. Vui lòng kiểm tra lại.");
+      } finally {
+        setIsSubmitting(false);
       }
     }
+
     let newSkipped = skipped;
     if (isStepSkipped(activeStep)) {
       newSkipped = new Set(newSkipped.values());
@@ -109,8 +168,6 @@ const RegisterLecturer = () => {
 
   const handleSkip = () => {
     if (!isStepOptional(activeStep)) {
-      // You probably want to guard against something like this,
-      // it should never occur unless someone's actively trying to break something.
       throw new Error("You can't skip a step that isn't optional.");
     }
 
@@ -122,9 +179,10 @@ const RegisterLecturer = () => {
     });
   };
 
-  const handleReset = () => {
-    setActiveStep(0);
-  };
+  // const handleReset = () => {
+  //   setActiveStep(0);
+  // };
+
   useEffect(() => {
     const formData = {
       citizenId,
@@ -137,323 +195,561 @@ const RegisterLecturer = () => {
       academicRank,
       specialization,
       experienceYears,
+      jobField,
     };
     localStorage.setItem("registerLecturerForm", JSON.stringify(formData));
-  }, [citizenId, phoneNumber, fullName, dateOfBirth, gender, bio, address, academicRank, specialization, experienceYears]);
+  }, [
+    citizenId,
+    phoneNumber,
+    fullName,
+    dateOfBirth,
+    gender,
+    bio,
+    address,
+    academicRank,
+    specialization,
+    experienceYears,
+    jobField,
+  ]);
 
+  const getAcademicRankLabel = (rank: string) => {
+    const ranks: { [key: string]: string } = {
+      CN: "Cử nhân",
+      THS: "Thạc sĩ",
+      TS: "Tiến sĩ",
+      PGS: "Phó giáo sư",
+      GS: "Giáo sư",
+    };
+    return ranks[rank] || rank;
+  };
 
+  const renderPersonalInfoStep = () => (
+    <div className="mx-auto mt-6 w-full max-w-4xl">
+      <Paper elevation={2} className="p-6">
+        <div className="mb-6 flex items-center">
+          <Person className="mr-3 text-3xl text-blue-600" />
+          <Typography variant="h5" className="font-bold text-blue-600">
+            Thông tin cá nhân
+          </Typography>
+        </div>
 
+        <div className="space-y-6">
+          {/* Full Name */}
+          <TextField
+            fullWidth
+            label="Họ và tên"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            required
+            InputProps={{
+              startAdornment: <Badge className="mr-2 text-gray-500" />,
+            }}
+            className="mb-4"
+          />
+
+          {/* ID and Phone */}
+          <div className="flex flex-col gap-4 md:flex-row">
+            <TextField
+              fullWidth
+              label="Số CCCD/CMND"
+              value={citizenId}
+              onChange={(e) => setCitizenId(e.target.value)}
+              required
+              className="flex-1"
+            />
+            <TextField
+              fullWidth
+              label="Số điện thoại"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              required
+              InputProps={{
+                startAdornment: <Phone className="mr-2 text-gray-500" />,
+              }}
+              className="flex-1"
+            />
+          </div>
+
+          {/* Birth Date and Gender */}
+          <div className="flex flex-col gap-4 md:flex-row">
+            <TextField
+              fullWidth
+              label="Ngày sinh"
+              type="date"
+              value={dateOfBirth}
+              onChange={(e) => setDateOfBirth(e.target.value)}
+              required
+              InputLabelProps={{ shrink: true }}
+              InputProps={{
+                startAdornment: (
+                  <CalendarToday className="mr-2 text-gray-500" />
+                ),
+              }}
+              className="flex-1"
+            />
+            <TextField
+              select
+              fullWidth
+              label="Giới tính"
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              required
+              className="flex-1"
+            >
+              <MenuItem value="">Chọn giới tính</MenuItem>
+              <MenuItem value="male">Nam</MenuItem>
+              <MenuItem value="female">Nữ</MenuItem>
+              <MenuItem value="other">Khác</MenuItem>
+            </TextField>
+          </div>
+
+          {/* Academic Rank and Experience */}
+          <div className="flex flex-col gap-4 md:flex-row">
+            <TextField
+              select
+              fullWidth
+              label="Học hàm"
+              value={academicRank}
+              onChange={(e) => setAcademicRank(e.target.value)}
+              required
+              className="flex-1"
+            >
+              <MenuItem value="">Chọn học hàm</MenuItem>
+              <MenuItem value="CN">Cử nhân</MenuItem>
+              <MenuItem value="THS">Thạc sĩ</MenuItem>
+              <MenuItem value="TS">Tiến sĩ</MenuItem>
+              <MenuItem value="PGS">Phó giáo sư</MenuItem>
+              <MenuItem value="GS">Giáo sư</MenuItem>
+            </TextField>
+
+            {/* Specialization */}
+            <TextField
+              label="Chuyên ngành"
+              value={specialization}
+              onChange={(e) => setSpecialization(e.target.value)}
+              required
+            />
+          </div>
+          <div className="flex flex-col gap-4 md:flex-row">
+            <TextField
+              className="flex-1"
+              label="Lĩnh vực công việc"
+              value={jobField}
+              onChange={(e) => setJobField(e.target.value)}
+              required
+              InputProps={{
+                startAdornment: <Work className="mr-2 text-gray-500" />,
+              }}
+            />
+            <TextField
+              label="Số năm kinh nghiệm"
+              type="number"
+              value={experienceYears}
+              onChange={(e) => setExperienceYears(e.target.value)}
+              required
+              InputProps={{
+                startAdornment: <Work className="mr-2 text-gray-500" />,
+              }}
+              className="flex-2"
+            />
+          </div>
+
+          {/* Address */}
+          <TextField
+            fullWidth
+            label="Địa chỉ"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            required
+            InputProps={{
+              startAdornment: <LocationOn className="mr-2 text-gray-500" />,
+            }}
+          />
+
+          {/* Bio */}
+          <TextField
+            fullWidth
+            label="Giới thiệu bản thân"
+            multiline
+            rows={4}
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            placeholder="Chia sẻ về kinh nghiệm, thành tích và mục tiêu nghề nghiệp của bạn..."
+            // InputProps={{
+            //   startAdornment: (
+            //     <Description className="mr-2 mt-3 self-start text-gray-500" />
+            //   ),
+            // }}
+          />
+        </div>
+      </Paper>
+    </div>
+  );
+
+  const renderCredentialsStep = () => (
+    <div className="mx-auto mt-6 w-full max-w-6xl">
+      <div className="flex flex-col gap-6 lg:flex-row">
+        {/* Degrees Section */}
+        <div className="flex-1">
+          <Paper elevation={2} className="h-fit p-6">
+            <div className="mb-4 flex items-center">
+              <School className="mr-3 text-blue-600" />
+              <Typography variant="h6" className="font-bold text-blue-600">
+                Bằng cấp ({degrees.length})
+              </Typography>
+            </div>
+
+            <div className="mb-4 max-h-96 space-y-3 overflow-y-auto pr-2">
+              {degrees.map((degree, index) => (
+                <Card key={index} variant="outlined" className="relative">
+                  <CardContent className="pb-2">
+                    <IconButton
+                      onClick={() => handleDeleteDegree(index)}
+                      className="absolute right-2 top-2 text-red-500 hover:text-red-700"
+                      size="small"
+                    >
+                      <Delete />
+                    </IconButton>
+
+                    <Typography
+                      variant="subtitle1"
+                      className="mb-2 pr-10 font-bold"
+                    >
+                      {degree.name}
+                    </Typography>
+                    <div className="space-y-1 text-sm text-gray-600">
+                      <p>
+                        <strong>Ngành:</strong> {degree.major}
+                      </p>
+                      <p>
+                        <strong>Trường:</strong> {degree.institution}
+                      </p>
+                      <p>
+                        <strong>Năm:</strong> {degree.startYear} -{" "}
+                        {degree.graduationYear}
+                      </p>
+                    </div>
+                    <Chip
+                      label={degree.level}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                      className="mt-2"
+                    />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setOpenModal(true)}
+              fullWidth
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Thêm bằng cấp
+            </Button>
+          </Paper>
+        </div>
+
+        {/* Certifications Section */}
+        <div className="flex-1">
+          <Paper elevation={2} className="h-fit p-6">
+            <div className="mb-4 flex items-center">
+              <Box className="mr-3 text-purple-600" />
+              <Typography variant="h6" className="font-bold text-purple-600">
+                Chứng chỉ ({certifications.length})
+              </Typography>
+            </div>
+
+            <div className="mb-4 max-h-96 space-y-3 overflow-y-auto pr-2">
+              {certifications.map((cert, index) => (
+                <Card key={index} variant="outlined" className="relative">
+                  <CardContent className="pb-2">
+                    <IconButton
+                      onClick={() => handleDeleteCertification(index)}
+                      className="absolute right-2 top-2 text-red-500 hover:text-red-700"
+                      size="small"
+                    >
+                      <Delete />
+                    </IconButton>
+
+                    <Typography
+                      variant="subtitle1"
+                      className="mb-2 pr-10 font-bold"
+                    >
+                      {cert.name}
+                    </Typography>
+                    <div className="space-y-1 text-sm text-gray-600">
+                      <p>
+                        <strong>Cấp bởi:</strong> {cert.issuedBy}
+                      </p>
+                      <p>
+                        <strong>Ngày cấp:</strong>{" "}
+                        {new Date(cert.issueDate).toLocaleDateString("vi-VN")}
+                      </p>
+                      <p>
+                        <strong>Hết hạn:</strong>{" "}
+                        {new Date(cert.expiryDate).toLocaleDateString("vi-VN")}
+                      </p>
+                    </div>
+                    <Chip
+                      label={cert.level}
+                      size="small"
+                      color="secondary"
+                      variant="outlined"
+                      className="mt-2"
+                    />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setOpenCertificationModal(true)}
+              fullWidth
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              Thêm chứng chỉ
+            </Button>
+          </Paper>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderConfirmationStep = () => (
+    <div className="mx-auto mt-6 w-full max-w-4xl">
+      <Paper elevation={2} className="p-6">
+        <div className="mb-6 flex items-center">
+          <CheckCircle className="mr-3 text-3xl text-green-600" />
+          <Typography variant="h5" className="font-bold text-green-600">
+            Xác nhận thông tin
+          </Typography>
+        </div>
+
+        <Alert severity="info" className="mb-6">
+          <AlertTitle>Thông tin quan trọng</AlertTitle>
+          Vui lòng kiểm tra kỹ thông tin trước khi gửi yêu cầu. Sau khi gửi, tài
+          khoản của bạn sẽ chờ được quản trị viên phê duyệt.
+        </Alert>
+
+        <div className="flex flex-col gap-6 lg:flex-row">
+          <div className="flex-1">
+            <Typography variant="h6" className="mb-4 font-bold text-blue-600">
+              Thông tin cá nhân
+            </Typography>
+            <div className="space-y-2 text-sm">
+              <div className="flex">
+                <span className="w-32 font-semibold">Họ tên:</span>{" "}
+                <span>{fullName}</span>
+              </div>
+              <div className="flex">
+                <span className="w-32 font-semibold">CCCD:</span>{" "}
+                <span>{citizenId}</span>
+              </div>
+              <div className="flex">
+                <span className="w-32 font-semibold">Điện thoại:</span>{" "}
+                <span>{phoneNumber}</span>
+              </div>
+              <div className="flex">
+                <span className="w-32 font-semibold">Ngày sinh:</span>{" "}
+                <span>{dateOfBirth}</span>
+              </div>
+              <div className="flex">
+                <span className="w-32 font-semibold">Giới tính:</span>{" "}
+                <span>
+                  {gender === "male"
+                    ? "Nam"
+                    : gender === "female"
+                      ? "Nữ"
+                      : "Khác"}
+                </span>
+              </div>
+              <div className="flex">
+                <span className="w-32 font-semibold">Học hàm:</span>{" "}
+                <span>{getAcademicRankLabel(academicRank)}</span>
+              </div>
+              <div className="flex">
+                <span className="w-32 font-semibold">Chuyên ngành:</span>{" "}
+                <span>{specialization}</span>
+              </div>
+              <div className="flex">
+                <span className="w-32 font-semibold">Kinh nghiệm:</span>{" "}
+                <span>{experienceYears} năm</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1">
+            <Typography variant="h6" className="mb-4 font-bold text-purple-600">
+              Chứng chỉ & Bằng cấp
+            </Typography>
+            <div className="mb-4 space-y-2 text-sm">
+              <div className="flex">
+                <span className="w-32 font-semibold">Bằng cấp:</span>{" "}
+                <span>{degrees.length} bằng</span>
+              </div>
+              <div className="flex">
+                <span className="w-32 font-semibold">Chứng chỉ:</span>{" "}
+                <span>{certifications.length} chứng chỉ</span>
+              </div>
+            </div>
+
+            {bio && (
+              <div className="mt-4">
+                <Typography variant="subtitle2" className="mb-2 font-bold">
+                  Giới thiệu:
+                </Typography>
+                <div className="rounded-lg bg-gray-50 p-4 text-sm italic text-gray-700">
+                  {bio}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </Paper>
+    </div>
+  );
 
   return (
-    <Box sx={{ width: '80%' }}>
-      <Stepper activeStep={activeStep}>
-        {steps.map((label, index) => {
-          const stepProps: { completed?: boolean } = {};
-          const labelProps: {
-            optional?: React.ReactNode;
-          } = {};
-          if (isStepOptional(index)) {
-            labelProps.optional = (
-              <Typography variant="caption">Optional</Typography>
-            );
-          }
-          if (isStepSkipped(index)) {
-            stepProps.completed = false;
-          }
-          return (
-            <Step key={label} {...stepProps}>
-              <StepLabel {...labelProps}>{label}</StepLabel>
-            </Step>
-          );
-        })}
-      </Stepper>
-      {activeStep === steps.length ? (
-        <Fragment>
-          <Typography sx={{ mt: 2, mb: 1 }}>
-            All steps completed - you&apos;re finished
+    <div className="min-h-screen bg-gray-50 py-8">
+      <Container maxWidth="lg">
+        {/* Header */}
+        <Paper elevation={1} className="mb-6 p-6">
+          <Typography
+            variant="h4"
+            className="mb-2 text-center font-bold text-blue-600"
+          >
+            Đăng ký tài khoản Giảng viên
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-            <Box sx={{ flex: '1 1 auto' }} />
-            <Button onClick={handleReset}>Reset</Button>
-          </Box>
-        </Fragment>
-      ) : (
-        <Fragment>
-          {/* <Typography sx={{ mt: 2, mb: 1 }}>Step {activeStep + 1}</Typography> */}
-          {activeStep === 0 && (
-            <Box
-              maxWidth={600}
-              mx="auto"
-              mt={5}
-              p={3}
-              bgcolor="white"
-              borderRadius={2}
-              boxShadow={3}
-            >
-              <h2 style={{ textAlign: "center", marginBottom: 24 }}>Đăng ký Giảng viên</h2>
-              <form>
-                <Stack spacing={2} mb={3}>
-                  <TextField
-                    fullWidth
-                    label="Họ và tên"
-                    value={fullName}
-                    onChange={e => setFullName(e.target.value)}
-                  />
-                </Stack>
+          <Typography
+            variant="body1"
+            className="mb-6 text-center text-gray-600"
+          >
+            Hoàn thành các bước sau để tạo tài khoản giảng viên
+          </Typography>
 
-                <Stack spacing={2}>
-                  <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-
-                    <TextField
-                      fullWidth
-                      label="Số CCCD"
-                      value={citizenId}
-                      onChange={e => setCitizenId(e.target.value)}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Số điện thoại"
-                      value={phoneNumber}
-                      onChange={e => setPhoneNumber(e.target.value)}
-                    />
-                  </Stack>
-                  <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-
-                    <TextField
-                      fullWidth
-                      label="Ngày sinh"
-                      type="date"
-                      value={dateOfBirth}
-                      onChange={e => setDateOfBirth(e.target.value)}
-                      InputLabelProps={{ shrink: true }}
-                    />
-                  </Stack>
-                  <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                    <TextField
-                      select
-                      fullWidth
-                      label="Giới tính"
-                      value={gender}
-                      onChange={e => setGender(e.target.value)}
-                    >
-                      <MenuItem value="">Chọn giới tính</MenuItem>
-                      <MenuItem value="male">Nam</MenuItem>
-                      <MenuItem value="female">Nữ</MenuItem>
-                      <MenuItem value="other">Khác</MenuItem>
-                    </TextField>
-
-                    <TextField
-                      fullWidth
-                      label="Số năm kinh nghiệm"
-                      type="number"
-                      value={experienceYears}
-                      onChange={e => setExperienceYears(e.target.value)}
-                    />
-                  </Stack>
-                  <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                    {/* <TextField
-                      fullWidth
-                      label="Ảnh đại diện (URL)"
-                      value={avatarUrl}
-                      onChange={e => setAvatarUrl(e.target.value)}
-                    /> */}
-                    <TextField
-                      fullWidth
-                      label="Học hàm"
-                      value={academicRank}
-                      onChange={e => setAcademicRank(e.target.value)}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Chuyên ngành"
-                      value={specialization}
-                      onChange={e => setSpecialization(e.target.value)}
-                    />
-                  </Stack>
-                  <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                    <TextField
-                      fullWidth
-                      label="Địa chỉ"
-                      value={address}
-                      onChange={e => setAddress(e.target.value)}
-                    />
-                  </Stack>
-                  <TextField
-                    fullWidth
-                    label="Giới thiệu bản thân"
-                    multiline
-                    minRows={3}
-                    value={bio}
-                    onChange={e => setBio(e.target.value)}
-                  />
-                  {/* <Button fullWidth variant="contained" type="submit">
-                    Đăng ký
-                  </Button> */}
-                </Stack>
-              </form>
-            </Box>
-          )}
-          {activeStep === 1 && (
-            <div className="flex w-full gap-20 mt-5 justify-evenly">
-              {/* BẰNG CẤP */}
-              <div className="flex flex-col items-center w-11/12 mb-10 ml-10">
-                <h2 className="mb-2 text-base font-semibold">🎓 Bằng cấp</h2>
-
-                <div className="pr-2 space-y-3 overflow-y-auto max-h-96"> {/* Đây là vùng cuộn */}
-                  {degrees.map((degree, index) => (
-                    <div key={index} className="relative p-4 bg-white border rounded-md shadow-sm">
-                      <button
-                        onClick={() => handleDeleteDegree(index)}
-                        className="absolute text-red-500 top-2 right-2 hover:text-red-700"
-                      >
-                        🗑
-                      </button>
-                      <p className="text-sm font-semibold">{degree.name}</p>
-                      <p className="text-sm text-gray-700">Ngành: {degree.major}</p>
-                      <p className="text-sm text-gray-700">Trường: {degree.institution}</p>
-                      <p className="text-sm text-gray-700">
-                        Thời gian: {degree.startYear} - {degree.graduationYear}
-                      </p>
-                      <p className="text-sm text-gray-700">Trình độ: {degree.level}</p>
-
-                      {degree.url && (
-                        <div className="mt-2">
-                          <p className="text-sm text-gray-700">File:</p>
-                          <a
-                            href={degree.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block w-32 h-20 mt-1 overflow-hidden border rounded"
-                          >
-                            <img
-                              src={degree.url}
-                              alt="Degree file"
-                              className="object-cover w-full h-full"
-                            />
-                          </a>
-                        </div>
-                      )}
-
-                      {degree.description && (
-                        <p className="mt-2 text-sm text-gray-600">Mô tả: {degree.description}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  onClick={handleOpen}
-                  className="px-4 py-2 mt-3 text-white bg-blue-600 rounded hover:bg-blue-700"
+          <Stepper activeStep={activeStep} alternativeLabel className="mb-4">
+            {steps.map((step, index) => (
+              <Step key={step.label}>
+                <StepLabel
+                  icon={step.icon}
+                  sx={{
+                    "& .MuiStepIcon-root": {
+                      fontSize: "2rem",
+                      color: index <= activeStep ? "#2563eb" : "#d1d5db",
+                    },
+                    "& .MuiStepIcon-text": {
+                      fill: "white",
+                      fontWeight: "bold",
+                    },
+                    "& .MuiStepLabel-label": {
+                      color: index <= activeStep ? "#2563eb" : "#6b7280",
+                      fontWeight: index === activeStep ? "bold" : "normal",
+                    },
+                  }}
                 >
-                  ➕ Thêm bằng cấp
-                </button>
-              </div>
+                  <span className="font-medium">{step.label}</span>
+                </StepLabel>
+              </Step>
+            ))}
+          </Stepper>
 
+          {/* Step Description */}
+          <div className="mt-4 text-center">
+            <Typography variant="body2" className="text-gray-500">
+              {activeStep === 0 && "Điền thông tin cá nhân của bạn để bắt đầu"}
+              {activeStep === 1 && "Tải lên các bằng cấp và chứng chỉ của bạn"}
+              {activeStep === 2 &&
+                "Xem lại và xác nhận thông tin trước khi gửi"}
+            </Typography>
+          </div>
 
-              {/* CHỨNG CHỈ */}
-              <div className="flex flex-col items-center w-11/12 mb-10 ml-10">
-                <h2 className="mb-2 text-base font-semibold">📜 Chứng chỉ</h2>
-                <div className="space-y-3">
-                  {certifications.map((cert, index) => (
-                    <div key={index} className="relative p-4 bg-white border rounded-md shadow-sm">
-                      {/* Nút xoá */}
-                      <button
-                        onClick={() => handleDeleteCertification(index)}
-                        className="absolute text-red-500 top-2 right-2 hover:text-red-700"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                        </svg>
+          {isSubmitting && <LinearProgress className="mt-4" />}
+        </Paper>
 
-                      </button>
+        {/* Step Content */}
+        {activeStep === 0 && renderPersonalInfoStep()}
+        {activeStep === 1 && renderCredentialsStep()}
+        {activeStep === 2 && renderConfirmationStep()}
 
-                      <p className="text-sm font-semibold">{cert.name}</p>
-                      <p className="text-sm text-gray-700">Cấp bởi: {cert.issuedBy}</p>
-                      <p className="text-sm text-gray-700">
-                        Ngày cấp: {new Date(cert.issueDate).toLocaleDateString()}
-                      </p>
-                      <p className="text-sm text-gray-700">
-                        Hết hạn: {new Date(cert.expiryDate).toLocaleDateString()}
-                      </p>
-                      <p className="text-sm text-gray-700">Trình độ: {cert.level}</p>
-
-                      {cert.certificateUrl && (
-                        <div className="mt-2">
-                          <p className="text-sm text-gray-700">File:</p>
-                          <a
-                            href={cert.certificateUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block w-32 h-20 mt-1 overflow-hidden border rounded"
-                          >
-                            <img
-                              src={cert.certificateUrl}
-                              alt="Certificate file"
-                              className="object-cover w-full h-full"
-                            />
-                          </a>
-                        </div>
-                      )}
-
-                      {cert.description && (
-                        <p className="mt-2 text-sm text-gray-600">Mô tả: {cert.description}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setOpenCertificationModal(true)}
-                  className="px-4 py-2 mt-3 text-white bg-blue-600 rounded hover:bg-blue-700"
-                >
-                  ➕ Thêm chứng chỉ
-                </button>
-              </div>
-
-            </div>
-          )
-
-          }
-          <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+        {/* Navigation Buttons with Step Info */}
+        <div className="mt-8 flex justify-between px-4">
+          <div className="flex items-center">
             <Button
-              color="inherit"
               disabled={activeStep === 0}
               onClick={handleBack}
-              sx={{ mr: 1 }}
+              variant="outlined"
+              size="large"
+              className="px-8"
             >
               Trở lại
             </Button>
-            <Box sx={{ flex: '1 1 auto' }} />
+          </div>
+
+          <div className="flex items-center gap-2">
             {isStepOptional(activeStep) && (
-              <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
+              <Button
+                color="inherit"
+                onClick={handleSkip}
+                size="large"
+                className="px-6"
+              >
                 Bỏ qua
               </Button>
             )}
-            <Button onClick={handleNext}>
-              {activeStep === steps.length - 1 ? 'Hoàn tất' : 'Tiếp tục'}
+            <Button
+              onClick={handleNext}
+              variant="contained"
+              size="large"
+              disabled={isSubmitting}
+              className="bg-blue-600 px-8 hover:bg-blue-700"
+            >
+              {activeStep === steps.length - 1
+                ? "Hoàn tất đăng ký"
+                : "Tiếp tục"}
             </Button>
-          </Box>
+          </div>
+        </div>
 
-        </Fragment>
-      )}
+        {/* Completion Status */}
+        {activeStep === steps.length - 1 && (
+          <div className="mt-6 rounded-lg bg-green-50 p-4">
+            <div className="flex items-center justify-center">
+              <CheckCircle className="mr-2 text-green-600" />
+              <Typography
+                variant="body1"
+                className="font-medium text-green-700"
+              >
+                Bạn đã hoàn thành tất cả các bước! Nhấn "Hoàn tất đăng ký" để
+                gửi yêu cầu.
+              </Typography>
+            </div>
+          </div>
+        )}
+      </Container>
+
+      {/* Modals */}
       <UploadDegreeModal
         open={openModal}
         onClose={() => setOpenModal(false)}
         onSubmit={(degree) => {
-          console.log("Degree nhận được:", degree);
-          setDegrees(prev => [...prev, degree]);
+          setDegrees((prev) => [...prev, degree]);
         }}
       />
       <UploadCertificationModal
         open={openCertificationModal}
         onClose={() => setOpenCertificationModal(false)}
         onSubmit={(cert) => {
-          console.log("Certification nhận được:", cert);
-          setCertifications(prev => [...prev, cert]);
+          setCertifications((prev) => [...prev, cert]);
         }}
       />
-    </Box>
+    </div>
+  );
+};
 
-  )
-}
-
-export default RegisterLecturer
+export default RegisterLecturer;

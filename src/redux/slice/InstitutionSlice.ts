@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const institutionSlice = createSlice({
   name: "institution",
-  initialState: {},
+  initialState: [],
   reducers: {
     setInstitutions: (_state, action) => action.payload,
   },

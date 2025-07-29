@@ -114,7 +114,7 @@ const Register = () => {
             const interval = setInterval(() => {
                 if (popup.closed) {
                     clearInterval(interval);
-                    // Handle popup closed logic, e.g., reload page or check login status
+                    
                     console.log("Popup closed");
                 }
             }, 500);

@@ -18,6 +18,7 @@ import pendingPartnerReducer from './slice/PendingPartnerSlice';
 
 import lecturerProfileReducer from './slice/LecturerProfileSlice';
 import lecturerRequestReducer from './slice/LecturerRquestSlice';
+import CourseReducer from './slice/CourseSilce';
 
 export const store = configureStore({
   reducer: {
@@ -34,13 +35,12 @@ export const store = configureStore({
     partnerPendingUpdate: partnerPendingUpdateReducer,
     degreePendingCreate: degreePendingCreateReducer,
     degreePendingUpdate: degreePendingUpdateReducer,
-
     pendingLecturer: pendingLecturerReducer,
     pendingInstitution: pendingInstitutionReducer,
     pendingPartner: pendingPartnerReducer,
-
     lecturerProfile: lecturerProfileReducer,
     lecturerRequests: lecturerRequestReducer,
+    courses: CourseReducer,
 
   },
 });

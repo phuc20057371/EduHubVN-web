@@ -34,6 +34,7 @@ import {
   Notifications,
   Menu as MenuIcon,
 } from "@mui/icons-material";
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import LogoWeb from "../assets/eduhub-03.png";
 
 const AdminLayout = () => {
@@ -100,6 +101,7 @@ const AdminLayout = () => {
       path: "/admin/institutions",
     },
     { text: "Đơn vị tổ chức", icon: <Business />, path: "/admin/partners" },
+    { text: "Khóa học", icon: <Notifications />, path: "/admin/courses" },
   ];
 
   const drawer = (
@@ -171,7 +173,7 @@ const AdminLayout = () => {
 
             {/* Logo */}
             {/* <AdminPanelSettings sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} /> */}
-            <div className="flex items-center bg-white rounded-full p-1">
+            <div className="flex items-center">
               <img
                 src={LogoWeb}
                 style={{ width: "40px", height: "40px" }}
@@ -291,6 +293,29 @@ const AdminLayout = () => {
                 startIcon={<Business />}
               >
                 Đối tác
+              </Button>
+              <Button
+                onClick={() => navigate("/admin/courses")}
+                sx={{
+                  my: 2,
+                  color: "white",
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 1,
+                  backgroundColor: isActivePath("/admin/courses")
+                    ? "rgba(255, 255, 255, 0.2)"
+                    : "transparent",
+                  borderRadius: 1,
+                  "&:hover": {
+                    backgroundColor: isActivePath("/admin/courses")
+                      ? "rgba(255, 255, 255, 0.3)"
+                      : "rgba(255, 255, 255, 0.1)",
+                  },
+                }}
+                startIcon={<AccountBalanceWalletIcon />}
+              >
+                Khóa học
               </Button>
             </Box>
 

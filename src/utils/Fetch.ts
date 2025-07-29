@@ -25,10 +25,11 @@ import type { Lecturer } from "../types/Lecturer";
 import type { Institution } from "../types/Institution";
 import type { Partner } from "../types/Parner";
 
-const BASE_URL = "http://localhost:8080";
-// const BASE_URL = "http://10.10.40.55:8080";
+// const BASE_URL = "http://localhost:8080";
+const domain = window.location.hostname;
+const BASE_URL = `http://${domain}:8080`;
 // const BASE_URL = "http://172.16.10.25:8080";
-
+// const BASE_URL = "http://10.10.40.240:8080";
 const fetch = axios.create({
   baseURL: BASE_URL,
 });
@@ -324,10 +325,15 @@ export const API = {
       fetch.post("/api/v1/admin/approve-research-project-update", data),
     rejectResearchProjectUpdate: (data: RejectRequest) =>
       fetch.post("/api/v1/admin/reject-research-project-update", data),
+
+    // Course
+    getAllCourses: () => fetch.get("/api/v1/admin/get-all-courses"),
   },
+
   other: {
     getLecturerProfile: (id: number) => {
       return fetch.get(`/api/v1/user/lecturer-profile/${id}`);
     },
   },
+
 };
