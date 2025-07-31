@@ -119,10 +119,16 @@ export const API = {
       formData.append("file", file);
       return fetch.post("/api/v1/user/upload", formData);
     },
+    uploadFileToServer: (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      return fetch.post("/api/v1/user/uploads", formData);
+    },
+
     getUserProfile: () => fetch.get("/api/v1/user/user-profile"),
 
     //Leccturer
-    registerLeccturer: (data: LecturerRequest) =>
+    registerLecturer: (data: LecturerRequest) =>
       fetch.post("/api/v1/user/register-lecturer", data),
     updateLeccturer: (data: LecturerRequest) =>
       fetch.post("/api/v1/user/update-lecturer", data),
@@ -149,10 +155,14 @@ export const API = {
     getPendingPartner: () => fetch.get("/api/v1/user/pending-partner-profile"),
     // Degree
     createDegree: (data: any) => fetch.post("/api/v1/user/create-degree", data),
+    deleteDegree: (data: string) =>
+      fetch.post("/api/v1/user/delete-degree", {id: data}),
 
     // Certification
     createCertification: (data: any) =>
       fetch.post("/api/v1/user/create-certification", data),
+    deleteCertification: (data: string) =>
+      fetch.post("/api/v1/user/delete-certification", {id: data}),
   },
   lecturer: {
     // Get
@@ -328,10 +338,17 @@ export const API = {
 
     // Course
     getAllCourses: () => fetch.get("/api/v1/admin/get-all-courses"),
+    getCourseById: (id: number) => fetch.get(`/api/v1/admin/get-course/${id}`),
+    updateCourseMember: (data: any) =>
+      fetch.post("/api/v1/admin/update-course-member", data),
+    getOwnedCourses: () =>
+      fetch.get("/api/v1/admin/get-owned-courses"),
+    createCourse: (data: any) =>
+      fetch.post("/api/v1/admin/create-course", data),
   },
 
   other: {
-    getLecturerProfile: (id: number) => {
+    getLecturerProfile: (id: string) => {
       return fetch.get(`/api/v1/user/lecturer-profile/${id}`);
     },
   },

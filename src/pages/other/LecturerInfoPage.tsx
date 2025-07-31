@@ -12,8 +12,8 @@ const LecturerInfoPage = () => {
   const lecturerProfile = useSelector((state: any) => state.lecturerProfile);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const domain = window.location.hostname;
-  const BASE_URL = `http://${domain}:8080`;
+  // const domain = window.location.hostname;
+  // const BASE_URL = `http://${domain}:8080`;
 
   useEffect(() => {
     const fetchLecturerData = async () => {
@@ -25,10 +25,10 @@ const LecturerInfoPage = () => {
 
       try {
         setLoading(true);
-        const lecturerId = parseInt(id);
-        console.log("Lecturer ID từ URL:", lecturerId);
 
-        const response = await API.other.getLecturerProfile(lecturerId);
+        console.log("Lecturer ID từ URL:", id);
+
+        const response = await API.other.getLecturerProfile(id);
         console.log("Kết quả API:", response.data.data);
 
         dispatch(setLecturerProfile(response.data.data));
@@ -184,7 +184,9 @@ const LecturerInfoPage = () => {
                 </div>
                 <div className="flex">
                   <span className="w-40 font-semibold">Giới thiệu:</span>
-                  <span>{lecturerProfile.lecturer?.bio}</span>
+                  <span className="flex-1 whitespace-pre-line">
+                    {lecturerProfile.lecturer?.bio}
+                  </span>
                 </div>
               </div>
             </section>
@@ -214,7 +216,7 @@ const LecturerInfoPage = () => {
                       {degree.url && (
                         <div className="ml-[68px]">
                           <a
-                            href={`${BASE_URL}/uploads/${degree.url}`}
+                            href={degree.url}
                             className="text-blue-600 underline"
                             target="_blank"
                             rel="noreferrer"
@@ -255,7 +257,7 @@ const LecturerInfoPage = () => {
                       {cert.certificateUrl && (
                         <div className="ml-[68px]">
                           <a
-                            href={`${BASE_URL}/uploads/${cert.certificateUrl}`}
+                            href={cert.certificateUrl}
                             className="text-blue-600 underline"
                             target="_blank"
                             rel="noreferrer"
@@ -390,7 +392,7 @@ const LecturerInfoPage = () => {
                               target="_blank"
                               rel="noreferrer"
                             >
-                              {course.courseUrl}
+                              Bấm vào đây để xem
                             </a>
                           )}
                         </div>
@@ -439,14 +441,13 @@ const LecturerInfoPage = () => {
                           </p>
                           {course.courseUrl && (
                             <p>
-                              <strong>Link:</strong>{" "}
                               <a
                                 href={course.courseUrl}
                                 className="text-blue-600 underline"
                                 target="_blank"
                                 rel="noreferrer"
                               >
-                                {course.courseUrl}
+                                Bấm vào đây để xem
                               </a>
                             </p>
                           )}

@@ -4,12 +4,11 @@ import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import Tab from "@mui/material/Tab";
-
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import SearchIcon from "@mui/icons-material/Search";
+import DateRange from "@mui/icons-material/DateRange";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -23,7 +22,6 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
-import { alpha } from "@mui/material/styles";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -32,7 +30,6 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import TextField from "@mui/material/TextField";
-import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { visuallyHidden } from "@mui/utils";
@@ -80,7 +77,7 @@ interface HeadCell {
 }
 
 const headCells: readonly HeadCell[] = [
-  { id: "id", numeric: true, disablePadding: false, label: "ID" },
+  // { id: "id", numeric: true, disablePadding: false, label: "ID" },
   { id: "fullName", numeric: false, disablePadding: false, label: "Họ tên" },
   {
     id: "academicRank",
@@ -176,172 +173,10 @@ function EnhancedTableHead(props: EnhancedTableProps) {
     </TableHead>
   );
 }
-interface EnhancedTableToolbarProps {
-  numSelected: number;
-  onEdit?: () => void;
-  onSearch: (value: string) => void;
-  searchTerm: string;
-  onAcademicRankFilter: (value: string) => void;
-  academicRankFilter: string;
-  onStatusFilter: (value: string) => void;
-  statusFilter: string;
-}
-
-function EnhancedTableToolbar({
-  numSelected,
-  onEdit,
-  onSearch,
-  searchTerm,
-  onAcademicRankFilter,
-  academicRankFilter,
-  onStatusFilter,
-  statusFilter,
-}: EnhancedTableToolbarProps) {
-  const academicRanks = [
-    { value: "", label: "Tất cả" },
-    { value: "CN", label: "Cử nhân" },
-    { value: "THS", label: "Thạc sĩ" },
-    { value: "TS", label: "Tiến sĩ" },
-    { value: "PGS", label: "Phó giáo sư" },
-    { value: "GS", label: "Giáo sư" },
-  ];
-
-  const statusOptions = [
-    { value: "", label: "Tất cả" },
-    { value: "APPROVED", label: "Đã duyệt" },
-    { value: "PENDING", label: "Chờ duyệt" },
-    { value: "REJECTED", label: "Đã từ chối" },
-  ];
-
-  return (
-    <Toolbar
-      sx={[
-        {
-          pl: { sm: 2 },
-          pr: { xs: 1, sm: 1 },
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          bgcolor: "background.paper",
-          borderRadius: 1,
-          mb: 2,
-          flexWrap: "wrap",
-        },
-        numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(
-              theme.palette.primary.main,
-              theme.palette.action.activatedOpacity,
-            ),
-        },
-      ]}
-    >
-      <Typography
-        sx={{ flex: { xs: "1 1 100%", md: "1 1 auto" } }}
-        variant="h6"
-        id="tableTitle"
-        component="div"
-        color="primary.main"
-        fontWeight="bold"
-      >
-        Danh sách Giảng viên (
-        {searchTerm || academicRankFilter || statusFilter ? "Đã lọc" : "Tất cả"}
-        )
-      </Typography>
-
-      {/* Filter Controls */}
-      <Box
-        sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}
-      >
-        {/* Academic Rank Filter */}
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel id="academic-rank-select-label">Học hàm</InputLabel>
-          <Select
-            labelId="academic-rank-select-label"
-            value={academicRankFilter}
-            label="Học hàm"
-            onChange={(e) => onAcademicRankFilter(e.target.value)}
-          >
-            <MenuItem value="">
-              <em>Tất cả</em>
-            </MenuItem>
-            {academicRanks.slice(1).map((rank) => (
-              <MenuItem key={rank.value} value={rank.value}>
-                {rank.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* Status Filter */}
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel id="status-select-label">Trạng thái</InputLabel>
-          <Select
-            labelId="status-select-label"
-            value={statusFilter}
-            label="Trạng thái"
-            onChange={(e) => onStatusFilter(e.target.value)}
-          >
-            {statusOptions.map((status) => (
-              <MenuItem key={status.value} value={status.value}>
-                {status.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* Search Bar */}
-        <TextField
-          variant="outlined"
-          size="small"
-          placeholder="Tìm kiếm theo tên, chuyên ngành, lĩnh vực..."
-          value={searchTerm}
-          onChange={(e) => onSearch(e.target.value)}
-          sx={{ minWidth: 400 }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" />
-              </InputAdornment>
-            ),
-            endAdornment: searchTerm && (
-              <InputAdornment position="end">
-                <IconButton size="small" onClick={() => onSearch("")}>
-                  <ClearIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Box>
-
-      {numSelected > 0 ? (
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Tooltip title="Chỉnh sửa">
-            <IconButton onClick={onEdit} color="primary">
-              <EditIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Xóa">
-            <IconButton color="error">
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ) : (
-        <Tooltip title="Bộ lọc">
-          <IconButton>
-            <FilterListIcon />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Toolbar>
-  );
-}
 
 const AdminLecturerPage = () => {
-  const domain = window.location.hostname;
-  const BASE_URL = `http://${domain}:8080`;
+  // const domain = window.location.hostname;
+  // const BASE_URL = `http://${domain}:8080`;
 
   const [value, setValue] = useState("1");
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
@@ -354,27 +189,23 @@ const AdminLecturerPage = () => {
   const [academicRankFilter, setAcademicRankFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("APPROVED");
 
-  // Filters for Create tab
   const [createSearchTerm, setCreateSearchTerm] = useState("");
   const [createDateSort, setCreateDateSort] = useState("oldest");
 
-  // Filters for Update tab
   const [updateSearchTerm, setUpdateSearchTerm] = useState("");
   const [updateDateSort, setUpdateDateSort] = useState("oldest");
 
-  // New states for Degrees/Certificates tab
   const [degreeSearchTerm, setDegreeSearchTerm] = useState("");
   const [degreeTypeFilter, setDegreeTypeFilter] = useState("");
   const [degreeDateSort, setDegreeDateSort] = useState("oldest");
 
-  // New states for Training Courses tab
   const [courseSearchTerm, setCourseSearchTerm] = useState("");
   const [courseTypeFilter, setCourseTypeFilter] = useState("");
   const [courseDateSort, setCourseDateSort] = useState("oldest");
 
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof Lecturer>("id");
-  const [selected, setSelected] = React.useState<number | null>(null);
+  const [selected, setSelected] = React.useState<string | null>(null);
 
   const lecturerCreateList = useSelector((state: any) =>
     Array.isArray(state.lecturerPendingCreate)
@@ -420,12 +251,7 @@ const AdminLecturerPage = () => {
         dispatch(setLecturerPendingUpdate(updateResponse.data.data));
         const responseData = await API.admin.getLecturerRequests();
         dispatch(setLecturerRequests(responseData.data.data));
-        console.log(
-          "Lecturer requests:",
-          responseData.data.data.filter(
-            (req: any) => req.type === "BC" || req.type === "CC",
-          ),
-        );
+        console.log(res.data.data);
       } catch (error) {
         console.error("Error initializing AdminLecturerPage:", error);
       }
@@ -469,6 +295,7 @@ const AdminLecturerPage = () => {
     if (searchTerm) {
       filtered = filtered.filter(
         (lecturer: Lecturer) =>
+          lecturer.id?.toString().includes(searchTerm) ||
           lecturer.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           lecturer.specialization
             ?.toLowerCase()
@@ -507,6 +334,7 @@ const AdminLecturerPage = () => {
     // Filter by search term
     if (createSearchTerm) {
       filtered = filtered.filter((item: any) =>
+        item.lecturer.id?.toString().includes(createSearchTerm) ||
         item.lecturer.fullName
           ?.toLowerCase()
           .includes(createSearchTerm.toLowerCase()),
@@ -535,6 +363,7 @@ const AdminLecturerPage = () => {
     // Filter by search term
     if (updateSearchTerm) {
       filtered = filtered.filter((item: any) =>
+        item.lecturer.id?.toString().includes(updateSearchTerm) ||
         item.lecturer.fullName
           ?.toLowerCase()
           .includes(updateSearchTerm.toLowerCase()),
@@ -653,18 +482,6 @@ const AdminLecturerPage = () => {
 
   const emptyRows = 10 - visibleRows.length > 0 ? 10 - visibleRows.length : 0;
 
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-  };
-
-  const handleAcademicRankFilter = (value: string) => {
-    setAcademicRankFilter(value);
-  };
-
-  const handleStatusFilter = (value: string) => {
-    setStatusFilter(value);
-  };
-
   const getStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
       case "PENDING":
@@ -717,11 +534,19 @@ const AdminLecturerPage = () => {
         width: "100%",
         typography: "body1",
         bgcolor: "background.default",
-        minHeight: "fix",
+        minHeight: "100vh",
+        p: 3,
       }}
     >
       <TabContext value={value}>
-        <Paper sx={{ mb: 3, borderRadius: 2, overflow: "hidden" }}>
+        <Paper
+          sx={{
+            mb: 3,
+            borderRadius: 3,
+            overflow: "hidden",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+          }}
+        >
           <Box
             sx={{
               borderBottom: 1,
@@ -732,16 +557,57 @@ const AdminLecturerPage = () => {
             <TabList
               onChange={handleChange}
               aria-label="lecturer management tabs"
-              sx={{ px: 2 }}
+              variant="scrollable"
+              scrollButtons="auto"
+              allowScrollButtonsMobile
+              sx={{
+                px: { xs: 1, sm: 3 },
+                "& .MuiTab-root": {
+                  fontWeight: 600,
+                  textTransform: "none",
+                  fontSize: { xs: "0.85rem", sm: "1rem" },
+                  minWidth: { xs: "auto", sm: "160px" },
+                  padding: { xs: "8px 12px", sm: "12px 16px" },
+                  whiteSpace: "nowrap",
+                },
+                "& .MuiTabs-scrollButtons": {
+                  "&.Mui-disabled": {
+                    opacity: 0.3,
+                  },
+                },
+                "& .MuiTabScrollButton-root": {
+                  width: { xs: 32, sm: 48 },
+                  "&:first-of-type": {
+                    ml: { xs: 0, sm: 1 },
+                  },
+                  "&:last-of-type": {
+                    mr: { xs: 0, sm: 1 },
+                  },
+                },
+              }}
             >
               <Tab
                 label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box sx={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: { xs: 0.5, sm: 1 },
+                    flexWrap: "nowrap"
+                  }}>
                     <span>Giảng viên</span>
                     <Chip
                       size="small"
                       label={filteredLecturers.length}
                       color="primary"
+                      sx={{ 
+                        fontWeight: 600,
+                        minWidth: "auto",
+                        height: { xs: 18, sm: 20 },
+                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                        "& .MuiChip-label": {
+                          px: { xs: 0.5, sm: 1 }
+                        }
+                      }}
                     />
                   </Box>
                 }
@@ -749,12 +615,26 @@ const AdminLecturerPage = () => {
               />
               <Tab
                 label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box sx={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: { xs: 0.5, sm: 1 },
+                    flexWrap: "nowrap"
+                  }}>
                     <span>Tạo mới</span>
                     <Chip
                       size="small"
                       label={filteredCreateList.length}
                       color="success"
+                      sx={{ 
+                        fontWeight: 600,
+                        minWidth: "auto",
+                        height: { xs: 18, sm: 20 },
+                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                        "& .MuiChip-label": {
+                          px: { xs: 0.5, sm: 1 }
+                        }
+                      }}
                     />
                   </Box>
                 }
@@ -762,12 +642,26 @@ const AdminLecturerPage = () => {
               />
               <Tab
                 label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box sx={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: { xs: 0.5, sm: 1 },
+                    flexWrap: "nowrap"
+                  }}>
                     <span>Cập nhật</span>
                     <Chip
                       size="small"
                       label={filteredUpdateList.length}
                       color="warning"
+                      sx={{ 
+                        fontWeight: 600,
+                        minWidth: "auto",
+                        height: { xs: 18, sm: 20 },
+                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                        "& .MuiChip-label": {
+                          px: { xs: 0.5, sm: 1 }
+                        }
+                      }}
                     />
                   </Box>
                 }
@@ -775,12 +669,26 @@ const AdminLecturerPage = () => {
               />
               <Tab
                 label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <span>Chứng chỉ/Bằng cấp</span>
+                  <Box sx={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: { xs: 0.5, sm: 1 },
+                    flexWrap: "nowrap"
+                  }}>
+                    <span style={{ whiteSpace: "nowrap" }}>Chứng chỉ/Bằng cấp</span>
                     <Chip
                       size="small"
                       label={filteredDegreeList.length}
                       color="secondary"
+                      sx={{ 
+                        fontWeight: 600,
+                        minWidth: "auto",
+                        height: { xs: 18, sm: 20 },
+                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                        "& .MuiChip-label": {
+                          px: { xs: 0.5, sm: 1 }
+                        }
+                      }}
                     />
                   </Box>
                 }
@@ -788,12 +696,26 @@ const AdminLecturerPage = () => {
               />
               <Tab
                 label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <span>Khóa đào tạo</span>
+                  <Box sx={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: { xs: 0.5, sm: 1 },
+                    flexWrap: "nowrap"
+                  }}>
+                    <span style={{ whiteSpace: "nowrap" }}>Khóa đào tạo</span>
                     <Chip
                       size="small"
                       label={filteredCourseList.length}
                       color="info"
+                      sx={{ 
+                        fontWeight: 600,
+                        minWidth: "auto",
+                        height: { xs: 18, sm: 20 },
+                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                        "& .MuiChip-label": {
+                          px: { xs: 0.5, sm: 1 }
+                        }
+                      }}
                     />
                   </Box>
                 }
@@ -804,23 +726,261 @@ const AdminLecturerPage = () => {
         </Paper>
 
         <TabPanel value="1" sx={{ p: 0 }}>
-          <Paper sx={{ width: "100%", borderRadius: 2, overflow: "hidden" }}>
-            <EnhancedTableToolbar
-              numSelected={selected ? 1 : 0}
-              onEdit={() => {
-                const lecturer = lecturers.find(
-                  (l: Lecturer) => l.id === selected,
-                );
-                setSelectedLecturerUpdate({ lecturer });
-                setOpenUpdateDialog(true);
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              mb: 3,
+              background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+              borderRadius: 3,
+              border: "1px solid rgba(255,255,255,0.8)",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 3,
+                flexWrap: "wrap",
+                gap: 2,
               }}
-              onSearch={handleSearch}
-              searchTerm={searchTerm}
-              onAcademicRankFilter={handleAcademicRankFilter}
-              academicRankFilter={academicRankFilter}
-              onStatusFilter={handleStatusFilter}
-              statusFilter={statusFilter}
-            />
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Avatar
+                  sx={{
+                    bgcolor: "primary.main",
+                    background:
+                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    width: 56,
+                    height: 56,
+                  }}
+                >
+                  <Typography
+                    variant="h4"
+                    sx={{ color: "white", fontWeight: 700 }}
+                  >
+                    👨‍🏫
+                  </Typography>
+                </Avatar>
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
+                  >
+                    Quản lý Giảng viên
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "#6c757d" }}>
+                    {searchTerm ||
+                    academicRankFilter ||
+                    statusFilter !== "APPROVED"
+                      ? `Đã lọc ${filteredLecturers?.length || 0} giảng viên`
+                      : `Tổng cộng ${filteredLecturers?.length || 0} giảng viên`}
+                  </Typography>
+                </Box>
+              </Box>
+
+              {selected && (
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <Tooltip title="Chỉnh sửa">
+                    <IconButton
+                      sx={{
+                        bgcolor: "primary.main",
+                        color: "white",
+                        width: 48,
+                        height: 48,
+                        "&:hover": {
+                          bgcolor: "primary.dark",
+                          transform: "scale(1.05)",
+                        },
+                      }}
+                      onClick={() => {
+                        const lecturer = lecturers.find(
+                          (l: Lecturer) => l.id === selected,
+                        );
+                        setSelectedLecturerUpdate({ lecturer });
+                        setOpenUpdateDialog(true);
+                      }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Xóa">
+                    <IconButton
+                      sx={{
+                        bgcolor: "error.main",
+                        color: "white",
+                        width: 48,
+                        height: 48,
+                        "&:hover": {
+                          bgcolor: "error.dark",
+                          transform: "scale(1.05)",
+                        },
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              )}
+            </Box>
+
+            {/* Filters */}
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              <Box sx={{ minWidth: 150, flex: "0 0 auto" }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Học hàm</InputLabel>
+                  <Select
+                    value={academicRankFilter}
+                    label="Học hàm"
+                    onChange={(e) => setAcademicRankFilter(e.target.value)}
+                    sx={{
+                      bgcolor: "white",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <MenuItem value="">
+                      <em>Tất cả</em>
+                    </MenuItem>
+                    <MenuItem value="CN">Cử nhân</MenuItem>
+                    <MenuItem value="THS">Thạc sĩ</MenuItem>
+                    <MenuItem value="TS">Tiến sĩ</MenuItem>
+                    <MenuItem value="PGS">Phó giáo sư</MenuItem>
+                    <MenuItem value="GS">Giáo sư</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+
+              <Box sx={{ minWidth: 150, flex: "0 0 auto" }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Trạng thái</InputLabel>
+                  <Select
+                    value={statusFilter}
+                    label="Trạng thái"
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    sx={{
+                      bgcolor: "white",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <MenuItem value="">Tất cả</MenuItem>
+                    <MenuItem value="APPROVED">Đã duyệt</MenuItem>
+                    <MenuItem value="PENDING">Chờ duyệt</MenuItem>
+                    <MenuItem value="REJECTED">Đã từ chối</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+
+              <Box sx={{ flex: "1 1 300px", minWidth: 300 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  placeholder="🔍 Tìm kiếm theo ID, tên, chuyên ngành, lĩnh vực..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  sx={{
+                    bgcolor: "white",
+                    borderRadius: 2,
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ color: "primary.main" }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: searchTerm && (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          onClick={() => setSearchTerm("")}
+                        >
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
+            </Box>
+
+            {/* Active Filters Display */}
+            {(searchTerm ||
+              academicRankFilter ||
+              statusFilter !== "APPROVED") && (
+              <Box
+                sx={{
+                  mt: 2,
+                  display: "flex",
+                  gap: 1,
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="body2" sx={{ color: "#6c757d", mr: 1 }}>
+                  Bộ lọc đang áp dụng:
+                </Typography>
+
+                {searchTerm && (
+                  <Chip
+                    label={`Tìm kiếm: "${searchTerm}"`}
+                    size="small"
+                    onDelete={() => setSearchTerm("")}
+                    color="primary"
+                    variant="outlined"
+                  />
+                )}
+
+                {academicRankFilter && (
+                  <Chip
+                    label={`Học hàm: ${getAcademicRankLabel(academicRankFilter)}`}
+                    size="small"
+                    onDelete={() => setAcademicRankFilter("")}
+                    color="secondary"
+                    variant="outlined"
+                  />
+                )}
+
+                {statusFilter !== "APPROVED" && statusFilter && (
+                  <Chip
+                    label={`Trạng thái: ${getStatusLabel(statusFilter)}`}
+                    size="small"
+                    onDelete={() => setStatusFilter("APPROVED")}
+                    color="success"
+                    variant="outlined"
+                  />
+                )}
+
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setAcademicRankFilter("");
+                    setStatusFilter("APPROVED");
+                  }}
+                  sx={{ ml: 1, textTransform: "none" }}
+                >
+                  Xóa tất cả
+                </Button>
+              </Box>
+            )}
+          </Paper>
+
+          <Paper
+            sx={{
+              width: "100%",
+              borderRadius: 3,
+              overflow: "hidden",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+            }}
+          >
             <TableContainer
               sx={{
                 maxHeight: 10 * 53 + 56,
@@ -841,35 +1001,35 @@ const AdminLecturerPage = () => {
                   rowCount={filteredLecturers.length}
                 />
                 <TableBody>
-                  {visibleRows.map((row, index) => {
+                  {visibleRows.map((row, _index) => {
                     const isItemSelected = selected === row.id;
-                    const labelId = `enhanced-table-checkbox-${index}`;
+                    // const labelId = `enhanced-table-checkbox-${index}`;
 
                     return (
                       <TableRow
                         hover
                         onClick={(event) => handleClick(event, row)}
                         role="checkbox"
-                        aria-checked={isItemSelected}
+                        aria-checked={isItemSelected} 
                         tabIndex={-1}
                         key={row.id}
                         selected={isItemSelected}
                         sx={{ cursor: "pointer" }}
                       >
-                        <TableCell
-                          component="th"
-                          align="right"
-                          id={labelId}
-                          scope="row"
-                          padding="normal"
-                          sx={{
-                            fontWeight: "bold",
-                            color: "primary.main",
-                            width: 80,
-                          }}
-                        >
-                          {row.id}
-                        </TableCell>
+                          {/* <TableCell
+                            component="th"
+                            align="right"
+                            id={labelId}
+                            scope="row"
+                            padding="normal"
+                            sx={{
+                              fontWeight: "bold",
+                              color: "primary.main",
+                              width: 80,
+                            }}
+                          >
+                            {row.id}
+                          </TableCell> */}
                         <TableCell>{row.fullName}</TableCell>
                         <TableCell>
                           <Chip
@@ -942,21 +1102,62 @@ const AdminLecturerPage = () => {
             />
           </Paper>
         </TabPanel>
-        <TabPanel value="2">
-          <Box sx={{ mb: 3 }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", color: "primary.main", mb: 1 }}
-            >
-              Yêu cầu đăng ký giảng viên mới
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Danh sách các yêu cầu đăng ký từ giảng viên chờ phê duyệt
-            </Typography>
-          </Box>
 
-          {/* Filter Controls for Create Tab */}
-          <Paper sx={{ mb: 3, p: 2, borderRadius: 2 }}>
+        <TabPanel value="2" sx={{ p: 0 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              mb: 3,
+              background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+              borderRadius: 3,
+              border: "1px solid rgba(255,255,255,0.8)",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 3,
+                flexWrap: "wrap",
+                gap: 2,
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Avatar
+                  sx={{
+                    bgcolor: "primary.main",
+                    background:
+                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    width: 56,
+                    height: 56,
+                  }}
+                >
+                  <Typography
+                    variant="h4"
+                    sx={{ color: "white", fontWeight: 700 }}
+                  >
+                    ✨
+                  </Typography>
+                </Avatar>
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
+                  >
+                    Yêu cầu đăng ký giảng viên mới
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "#6c757d" }}>
+                    {createSearchTerm
+                      ? `Đã lọc ${filteredCreateList?.length || 0} yêu cầu`
+                      : `Tổng cộng ${filteredCreateList?.length || 0} yêu cầu đăng ký chờ phê duyệt`}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Filters */}
             <Box
               sx={{
                 display: "flex",
@@ -965,190 +1166,329 @@ const AdminLecturerPage = () => {
                 flexWrap: "wrap",
               }}
             >
-              {/* Date Sort Filter */}
-              <FormControl size="small" sx={{ minWidth: 180 }}>
-                <InputLabel id="create-date-sort-label">
-                  Sắp xếp theo ngày
-                </InputLabel>
-                <Select
-                  labelId="create-date-sort-label"
-                  value={createDateSort}
-                  label="Sắp xếp theo ngày"
-                  onChange={(e) => setCreateDateSort(e.target.value)}
-                >
-                  <MenuItem value="oldest">Cũ nhất trước</MenuItem>
-                  <MenuItem value="newest">Mới nhất trước</MenuItem>
-                </Select>
-              </FormControl>
+              <Box sx={{ minWidth: 180, flex: "0 0 auto" }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Sắp xếp theo ngày</InputLabel>
+                  <Select
+                    value={createDateSort}
+                    label="Sắp xếp theo ngày"
+                    onChange={(e) => setCreateDateSort(e.target.value)}
+                    sx={{
+                      bgcolor: "white",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <MenuItem value="oldest">Cũ nhất trước</MenuItem>
+                    <MenuItem value="newest">Mới nhất trước</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
 
-              {/* Name Search */}
-              <TextField
-                variant="outlined"
-                size="small"
-                placeholder="Tìm kiếm theo tên giảng viên..."
-                value={createSearchTerm}
-                onChange={(e) => setCreateSearchTerm(e.target.value)}
-                sx={{ minWidth: 300 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon color="action" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: createSearchTerm && (
-                    <InputAdornment position="end">
-                      <IconButton
-                        size="small"
-                        onClick={() => setCreateSearchTerm("")}
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
-              <Typography variant="body2" color="text.secondary">
-                Tổng cộng: {filteredCreateList.length} yêu cầu
-              </Typography>
+              <Box sx={{ flex: "1 1 300px", minWidth: 300 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  placeholder="🔍 Tìm kiếm theo ID, tên giảng viên..."
+                  value={createSearchTerm}
+                  onChange={(e) => setCreateSearchTerm(e.target.value)}
+                  sx={{
+                    bgcolor: "white",
+                    borderRadius: 2,
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ color: "primary.main" }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: createSearchTerm && (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          onClick={() => setCreateSearchTerm("")}
+                        >
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
             </Box>
+
+            {/* Active Filters Display */}
+            {(createSearchTerm || createDateSort !== "oldest") && (
+              <Box
+                sx={{
+                  mt: 2,
+                  display: "flex",
+                  gap: 1,
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="body2" sx={{ color: "#6c757d", mr: 1 }}>
+                  Bộ lọc đang áp dụng:
+                </Typography>
+
+                {createSearchTerm && (
+                  <Chip
+                    label={`Tìm kiếm: "${createSearchTerm}"`}
+                    size="small"
+                    onDelete={() => setCreateSearchTerm("")}
+                    color="primary"
+                    variant="outlined"
+                  />
+                )}
+
+                {createDateSort !== "oldest" && (
+                  <Chip
+                    label={`Sắp xếp: ${createDateSort === "newest" ? "Mới nhất trước" : "Cũ nhất trước"}`}
+                    size="small"
+                    onDelete={() => setCreateDateSort("oldest")}
+                    color="info"
+                    variant="outlined"
+                    icon={<DateRange />}
+                  />
+                )}
+
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setCreateSearchTerm("");
+                    setCreateDateSort("oldest");
+                  }}
+                  sx={{ ml: 1, textTransform: "none" }}
+                >
+                  Xóa tất cả
+                </Button>
+              </Box>
+            )}
           </Paper>
 
           {filteredCreateList && filteredCreateList.length > 0 ? (
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "1fr 1fr",
-                  md: "1fr 1fr 1fr",
-                  lg: "1fr 1fr 1fr 1fr",
-                },
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
                 gap: 3,
+                "@media (min-width: 1200px)": {
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                },
+                "@media (min-width: 900px) and (max-width: 1199px)": {
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                },
+                "@media (min-width: 600px) and (max-width: 899px)": {
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                },
+                "@media (max-width: 599px)": {
+                  gridTemplateColumns: "1fr",
+                },
               }}
             >
               {filteredCreateList.map((item: any) => (
                 <Card
                   key={item.lecturer.id}
                   sx={{
-                    height: "100%",
                     transition: "all 0.3s ease",
                     border: "2px solid",
                     borderColor: "success.light",
+                    borderRadius: 3,
+                    height: "fit-content",
                     "&:hover": {
                       transform: "translateY(-4px)",
-                      boxShadow: 4,
+                      boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
                       borderColor: "success.main",
                     },
                   }}
                 >
                   <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                      <Avatar
-                        src={`${BASE_URL}/${item.lecturer.avatarUrl}` || ""}
-                        sx={{ bgcolor: "success.main", mr: 2 }}
+                    <Box
+                      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                    >
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
                       >
-                        {item.lecturer.fullName?.charAt(0)}
-                      </Avatar>
-                      <Box sx={{ flexGrow: 1 }}>
-                        <Typography
-                          variant="h6"
-                          sx={{ fontWeight: "bold", mb: 0.5 }}
+                        <Avatar
+                          src={item.lecturer.avatarUrl}
+                          sx={{
+                            bgcolor: "success.main",
+                            width: 50,
+                            height: 50,
+                            fontSize: "1.2rem",
+                            fontWeight: 700,
+                          }}
                         >
-                          {item.lecturer.fullName}
-                        </Typography>
-                        <Box sx={{ display: "flex", gap: 1 }}>
-                          <Chip
-                            label={getAcademicRankLabel(
-                              item.lecturer.academicRank,
-                            )}
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                          />
-                          <Chip
-                            label="Đăng ký mới"
-                            size="small"
-                            color="success"
-                          />
+                          {item.lecturer.fullName?.charAt(0)}
+                        </Avatar>
+
+                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontWeight: 700,
+                              color: "text.primary",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {item.lecturer.fullName}
+                          </Typography>
+                          <Box sx={{ display: "flex", gap: 0.5, mt: 0.5 }}>
+                            <Chip
+                              label={getAcademicRankLabel(
+                                item.lecturer.academicRank,
+                              )}
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                              sx={{ fontSize: "0.7rem", height: 20 }}
+                            />
+                            <Chip
+                              label="Mới"
+                              size="small"
+                              color="success"
+                              sx={{ fontSize: "0.7rem", height: 20 }}
+                            />
+                          </Box>
                         </Box>
                       </Box>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 1.5,
+                        }}
+                      >
+                        <Box>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontWeight: 600, mb: 0.5 }}
+                          >
+                            Chuyên ngành
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 500,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {item.lecturer.specialization}
+                          </Typography>
+                        </Box>
+
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontWeight: 600, mb: 0.5 }}
+                            >
+                              Kinh nghiệm
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 500 }}
+                            >
+                              {item.lecturer.experienceYears} năm
+                            </Typography>
+                          </Box>
+
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontWeight: 600, mb: 0.5 }}
+                            >
+                              Thời gian
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 500, fontSize: "0.75rem" }}
+                            >
+                              {(() => {
+                                if (!item.lecturer.updatedAt)
+                                  return "Chưa cập nhật";
+
+                                const now = new Date();
+                                const updatedTime = new Date(
+                                  item.lecturer.updatedAt,
+                                );
+                                const diffInHours = Math.floor(
+                                  (now.getTime() - updatedTime.getTime()) /
+                                    (1000 * 60 * 60),
+                                );
+
+                                if (diffInHours < 1) {
+                                  return "Vừa cập nhật";
+                                } else if (diffInHours < 48) {
+                                  return `${diffInHours}h trước`;
+                                } else {
+                                  const diffInDays = Math.floor(
+                                    diffInHours / 24,
+                                  );
+                                  return `${diffInDays}d trước`;
+                                }
+                              })()}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        <Button
+                          variant="contained"
+                          color="success"
+                          size="small"
+                          fullWidth
+                          sx={{
+                            mt: 1,
+                            py: 1,
+                            fontWeight: 600,
+                            textTransform: "none",
+                            borderRadius: 2,
+                            fontSize: "0.8rem",
+                          }}
+                          onClick={() => {
+                            setSelectedLecturerCreate(item);
+                            setOpenCreateDialog(true);
+                          }}
+                        >
+                          Xem chi tiết
+                        </Button>
+                      </Box>
                     </Box>
-
-                    <Box sx={{ mb: 2 }}>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 1 }}
-                      >
-                        <strong>Chuyên ngành:</strong>{" "}
-                        {item.lecturer.specialization}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 1 }}
-                      >
-                        <strong>Kinh nghiệm:</strong>{" "}
-                        {item.lecturer.experienceYears} năm
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 1 }}
-                      >
-                        <strong>Lĩnh vực:</strong> {item.lecturer.jobField}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 1 }}
-                      >
-                        <strong>Thời gian:</strong>{" "}
-                        {(() => {
-                          if (!item.lecturer.updatedAt) return "Chưa cập nhật";
-
-                          const now = new Date();
-                          const updatedTime = new Date(item.lecturer.updatedAt);
-                          const diffInHours = Math.floor(
-                            (now.getTime() - updatedTime.getTime()) /
-                              (1000 * 60 * 60),
-                          );
-
-                          if (diffInHours < 1) {
-                            return "Vừa cập nhật";
-                          } else if (diffInHours < 48) {
-                            return `${diffInHours} giờ trước`;
-                          } else {
-                            const diffInDays = Math.floor(diffInHours / 24);
-                            return `${diffInDays} ngày trước`;
-                          }
-                        })()}
-                      </Typography>
-                    </Box>
-
-                    <Button
-                      variant="contained"
-                      color="success"
-                      fullWidth
-                      sx={{ mt: "auto" }}
-                      onClick={() => {
-                        setSelectedLecturerCreate(item);
-                        setOpenCreateDialog(true);
-                      }}
-                    >
-                      Xem chi tiết
-                    </Button>
                   </CardContent>
                 </Card>
               ))}
             </Box>
           ) : (
-            <Paper sx={{ p: 4, textAlign: "center" }}>
-              <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+            <Paper
+              sx={{
+                p: 6,
+                textAlign: "center",
+                borderRadius: 3,
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+              }}
+            >
+              <Typography
+                variant="h5"
+                color="text.secondary"
+                sx={{ mb: 2, fontWeight: 600 }}
+              >
                 Không có yêu cầu nào
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body1" color="text.secondary">
                 Hiện tại không có yêu cầu đăng ký giảng viên mới nào cần xử lý.
               </Typography>
             </Paper>
@@ -1161,22 +1501,62 @@ const AdminLecturerPage = () => {
             certificates={selectedLecturerCreate?.certificates || []}
           />
         </TabPanel>
-        <TabPanel value="3">
-          <Box sx={{ mb: 3 }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", color: "primary.main", mb: 1 }}
-            >
-              Yêu cầu cập nhật thông tin giảng viên
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Danh sách các yêu cầu cập nhật thông tin từ giảng viên chờ phê
-              duyệt
-            </Typography>
-          </Box>
 
-          {/* Filter Controls for Update Tab */}
-          <Paper sx={{ mb: 3, p: 2, borderRadius: 2 }}>
+        <TabPanel value="3" sx={{ p: 0 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              mb: 3,
+              background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+              borderRadius: 3,
+              border: "1px solid rgba(255,255,255,0.8)",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 3,
+                flexWrap: "wrap",
+                gap: 2,
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Avatar
+                  sx={{
+                    bgcolor: "primary.main",
+                    background:
+                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    width: 56,
+                    height: 56,
+                  }}
+                >
+                  <Typography
+                    variant="h4"
+                    sx={{ color: "white", fontWeight: 700 }}
+                  >
+                    🔄
+                  </Typography>
+                </Avatar>
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
+                  >
+                    Yêu cầu cập nhật thông tin giảng viên
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "#6c757d" }}>
+                    {updateSearchTerm
+                      ? `Đã lọc ${filteredUpdateList?.length || 0} yêu cầu`
+                      : `Tổng cộng ${filteredUpdateList?.length || 0} yêu cầu cập nhật chờ phê duyệt`}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Filters */}
             <Box
               sx={{
                 display: "flex",
@@ -1185,186 +1565,329 @@ const AdminLecturerPage = () => {
                 flexWrap: "wrap",
               }}
             >
-              {/* Date Sort Filter */}
-              <FormControl size="small" sx={{ minWidth: 180 }}>
-                <InputLabel id="update-date-sort-label">
-                  Sắp xếp theo ngày
-                </InputLabel>
-                <Select
-                  labelId="update-date-sort-label"
-                  value={updateDateSort}
-                  label="Sắp xếp theo ngày"
-                  onChange={(e) => setUpdateDateSort(e.target.value)}
-                >
-                  <MenuItem value="oldest">Cũ nhất trước</MenuItem>
-                  <MenuItem value="newest">Mới nhất trước</MenuItem>
-                </Select>
-              </FormControl>
+              <Box sx={{ minWidth: 180, flex: "0 0 auto" }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Sắp xếp theo ngày</InputLabel>
+                  <Select
+                    value={updateDateSort}
+                    label="Sắp xếp theo ngày"
+                    onChange={(e) => setUpdateDateSort(e.target.value)}
+                    sx={{
+                      bgcolor: "white",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <MenuItem value="oldest">Cũ nhất trước</MenuItem>
+                    <MenuItem value="newest">Mới nhất trước</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
 
-              {/* Name Search */}
-              <TextField
-                variant="outlined"
-                size="small"
-                placeholder="Tìm kiếm theo tên giảng viên..."
-                value={updateSearchTerm}
-                onChange={(e) => setUpdateSearchTerm(e.target.value)}
-                sx={{ minWidth: 300 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon color="action" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: updateSearchTerm && (
-                    <InputAdornment position="end">
-                      <IconButton
-                        size="small"
-                        onClick={() => setUpdateSearchTerm("")}
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
-              <Typography variant="body2" color="text.secondary">
-                Tổng cộng: {filteredUpdateList.length} yêu cầu
-              </Typography>
+              <Box sx={{ flex: "1 1 300px", minWidth: 300 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  placeholder="🔍 Tìm kiếm theo ID, tên giảng viên..."
+                  value={updateSearchTerm}
+                  onChange={(e) => setUpdateSearchTerm(e.target.value)}
+                  sx={{
+                    bgcolor: "white",
+                    borderRadius: 2,
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ color: "primary.main" }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: updateSearchTerm && (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          onClick={() => setUpdateSearchTerm("")}
+                        >
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
             </Box>
+
+            {/* Active Filters Display */}
+            {(updateSearchTerm || updateDateSort !== "oldest") && (
+              <Box
+                sx={{
+                  mt: 2,
+                  display: "flex",
+                  gap: 1,
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="body2" sx={{ color: "#6c757d", mr: 1 }}>
+                  Bộ lọc đang áp dụng:
+                </Typography>
+
+                {updateSearchTerm && (
+                  <Chip
+                    label={`Tìm kiếm: "${updateSearchTerm}"`}
+                    size="small"
+                    onDelete={() => setUpdateSearchTerm("")}
+                    color="primary"
+                    variant="outlined"
+                  />
+                )}
+
+                {updateDateSort !== "oldest" && (
+                  <Chip
+                    label={`Sắp xếp: ${updateDateSort === "newest" ? "Mới nhất trước" : "Cũ nhất trước"}`}
+                    size="small"
+                    onDelete={() => setUpdateDateSort("oldest")}
+                    color="info"
+                    variant="outlined"
+                    icon={<DateRange />}
+                  />
+                )}
+
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setUpdateSearchTerm("");
+                    setUpdateDateSort("oldest");
+                  }}
+                  sx={{ ml: 1, textTransform: "none" }}
+                >
+                  Xóa tất cả
+                </Button>
+              </Box>
+            )}
           </Paper>
 
           {filteredUpdateList && filteredUpdateList.length > 0 ? (
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "1fr 1fr",
-                  md: "1fr 1fr 1fr",
-                  lg: "1fr 1fr 1fr 1fr",
-                },
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
                 gap: 3,
+                "@media (min-width: 1200px)": {
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                },
+                "@media (min-width: 900px) and (max-width: 1199px)": {
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                },
+                "@media (min-width: 600px) and (max-width: 899px)": {
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                },
+                "@media (max-width: 599px)": {
+                  gridTemplateColumns: "1fr",
+                },
               }}
             >
               {filteredUpdateList.map((item: any) => (
                 <Card
                   key={item.lecturer.id}
                   sx={{
-                    height: "100%",
                     transition: "all 0.3s ease",
                     border: "2px solid",
                     borderColor: "warning.light",
+                    borderRadius: 3,
+                    height: "fit-content",
                     "&:hover": {
                       transform: "translateY(-4px)",
-                      boxShadow: 4,
+                      boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
                       borderColor: "warning.main",
                     },
                   }}
                 >
                   <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                      <Avatar
-                       src={`${BASE_URL}/${item.lecturer.avatarUrl}` || ""}
-                        sx={{ bgcolor: "warning.main", mr: 2 }}
+                    <Box
+                      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                    >
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
                       >
-                        {item.lecturer.fullName?.charAt(0)}
-                      </Avatar>
-                      <Box sx={{ flexGrow: 1 }}>
-                        <Typography
-                          variant="h6"
-                          sx={{ fontWeight: "bold", mb: 0.5 }}
+                        <Avatar
+                          src={item.lecturer.avatarUrl}
+                          sx={{
+                            bgcolor: "warning.main",
+                            width: 50,
+                            height: 50,
+                            fontSize: "1.2rem",
+                            fontWeight: 700,
+                          }}
                         >
-                          {item.lecturer.fullName}
-                        </Typography>
-                        <Box sx={{ display: "flex", gap: 1 }}>
-                          <Chip
-                            label={getAcademicRankLabel(
-                              item.lecturer.academicRank,
-                            )}
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                          />
-                          <Chip label="Cập nhật" size="small" color="warning" />
+                          {item.lecturer.fullName?.charAt(0)}
+                        </Avatar>
+
+                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontWeight: 700,
+                              color: "text.primary",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {item.lecturer.fullName}
+                          </Typography>
+                          <Box sx={{ display: "flex", gap: 0.5, mt: 0.5 }}>
+                            <Chip
+                              label={getAcademicRankLabel(
+                                item.lecturer.academicRank,
+                              )}
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                              sx={{ fontSize: "0.7rem", height: 20 }}
+                            />
+                            <Chip
+                              label="Cập nhật"
+                              size="small"
+                              color="warning"
+                              sx={{ fontSize: "0.7rem", height: 20 }}
+                            />
+                          </Box>
                         </Box>
                       </Box>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 1.5,
+                        }}
+                      >
+                        <Box>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontWeight: 600, mb: 0.5 }}
+                          >
+                            Chuyên ngành
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 500,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {item.lecturer.specialization}
+                          </Typography>
+                        </Box>
+
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontWeight: 600, mb: 0.5 }}
+                            >
+                              Kinh nghiệm
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 500 }}
+                            >
+                              {item.lecturer.experienceYears} năm
+                            </Typography>
+                          </Box>
+
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontWeight: 600, mb: 0.5 }}
+                            >
+                              Thời gian
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 500, fontSize: "0.75rem" }}
+                            >
+                              {(() => {
+                                if (!item.lecturer.updatedAt)
+                                  return "Chưa cập nhật";
+
+                                const now = new Date();
+                                const updatedTime = new Date(
+                                  item.lecturer.updatedAt,
+                                );
+                                const diffInHours = Math.floor(
+                                  (now.getTime() - updatedTime.getTime()) /
+                                    (1000 * 60 * 60),
+                                );
+
+                                if (diffInHours < 1) {
+                                  return "Vừa cập nhật";
+                                } else if (diffInHours < 48) {
+                                  return `${diffInHours}h trước`;
+                                } else {
+                                  const diffInDays = Math.floor(
+                                    diffInHours / 24,
+                                  );
+                                  return `${diffInDays}d trước`;
+                                }
+                              })()}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        <Button
+                          variant="contained"
+                          color="warning"
+                          size="small"
+                          fullWidth
+                          sx={{
+                            mt: 1,
+                            py: 1,
+                            fontWeight: 600,
+                            textTransform: "none",
+                            borderRadius: 2,
+                            fontSize: "0.8rem",
+                          }}
+                          onClick={() => {
+                            setSelectedLecturerUpdate(item);
+                            setOpenUpdateDialog(true);
+                          }}
+                        >
+                          Xem chi tiết
+                        </Button>
+                      </Box>
                     </Box>
-
-                    <Box sx={{ mb: 2 }}>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 1 }}
-                      >
-                        <strong>Chuyên ngành:</strong>{" "}
-                        {item.lecturer.specialization}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 1 }}
-                      >
-                        <strong>Kinh nghiệm:</strong>{" "}
-                        {item.lecturer.experienceYears} năm
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 1 }}
-                      >
-                        <strong>Lĩnh vực:</strong> {item.lecturer.jobField}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 1 }}
-                      >
-                        <strong>Thời gian:</strong>{" "}
-                        {(() => {
-                          if (!item.lecturer.updatedAt) return "Chưa cập nhật";
-
-                          const now = new Date();
-                          const updatedTime = new Date(item.lecturer.updatedAt);
-                          const diffInHours = Math.floor(
-                            (now.getTime() - updatedTime.getTime()) /
-                              (1000 * 60 * 60),
-                          );
-
-                          if (diffInHours < 1) {
-                            return "Vừa cập nhật";
-                          } else if (diffInHours < 48) {
-                            return `${diffInHours} giờ trước`;
-                          } else {
-                            const diffInDays = Math.floor(diffInHours / 24);
-                            return `${diffInDays} ngày trước`;
-                          }
-                        })()}
-                      </Typography>
-                    </Box>
-
-                    <Button
-                      variant="contained"
-                      color="warning"
-                      fullWidth
-                      sx={{ mt: "auto" }}
-                      onClick={() => {
-                        setSelectedLecturerUpdate(item);
-                        setOpenUpdateDialog(true);
-                      }}
-                    >
-                      Xem chi tiết
-                    </Button>
                   </CardContent>
                 </Card>
               ))}
             </Box>
           ) : (
-            <Paper sx={{ p: 4, textAlign: "center" }}>
-              <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+            <Paper
+              sx={{
+                p: 6,
+                textAlign: "center",
+                borderRadius: 3,
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+              }}
+            >
+              <Typography
+                variant="h5"
+                color="text.secondary"
+                sx={{ mb: 2, fontWeight: 600 }}
+              >
                 Không có yêu cầu nào
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body1" color="text.secondary">
                 Hiện tại không có yêu cầu cập nhật thông tin giảng viên nào cần
                 xử lý.
               </Typography>
@@ -1378,22 +1901,61 @@ const AdminLecturerPage = () => {
           />
         </TabPanel>
 
-        <TabPanel value="4">
-          <Box sx={{ mb: 3 }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", color: "primary.main", mb: 1 }}
+        <TabPanel value="4" sx={{ p: 0 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              mb: 3,
+              background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+              borderRadius: 3,
+              border: "1px solid rgba(255,255,255,0.8)",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 3,
+                flexWrap: "wrap",
+                gap: 2,
+              }}
             >
-              Yêu cầu chứng chỉ và bằng cấp
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Danh sách các yêu cầu tạo mới và cập nhật chứng chỉ, bằng cấp từ
-              giảng viên
-            </Typography>
-          </Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Avatar
+                  sx={{
+                    bgcolor: "primary.main",
+                    background:
+                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    width: 56,
+                    height: 56,
+                  }}
+                >
+                  <Typography
+                    variant="h4"
+                    sx={{ color: "white", fontWeight: 700 }}
+                  >
+                    🎓
+                  </Typography>
+                </Avatar>
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
+                  >
+                    Yêu cầu chứng chỉ và bằng cấp
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "#6c757d" }}>
+                    {degreeSearchTerm || degreeTypeFilter
+                      ? `Đã lọc ${filteredDegreeList?.length || 0} yêu cầu`
+                      : `Tổng cộng ${filteredDegreeList?.length || 0} yêu cầu chứng chỉ và bằng cấp`}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
 
-          {/* Filter Controls for Degree Tab */}
-          <Paper sx={{ mb: 3, p: 2, borderRadius: 2 }}>
+            {/* Filters */}
             <Box
               sx={{
                 display: "flex",
@@ -1402,87 +1964,162 @@ const AdminLecturerPage = () => {
                 flexWrap: "wrap",
               }}
             >
-              {/* Type Filter */}
-              <FormControl size="small" sx={{ minWidth: 150 }}>
-                <InputLabel id="degree-type-select-label">Loại</InputLabel>
-                <Select
-                  labelId="degree-type-select-label"
-                  value={degreeTypeFilter}
-                  label="Loại"
-                  onChange={(e) => setDegreeTypeFilter(e.target.value)}
-                >
-                  <MenuItem value="">
-                    <em>Tất cả</em>
-                  </MenuItem>
-                  <MenuItem value="BC">Bằng cấp</MenuItem>
-                  <MenuItem value="CC">Chứng chỉ</MenuItem>
-                </Select>
-              </FormControl>
+              <Box sx={{ minWidth: 150, flex: "0 0 auto" }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Loại</InputLabel>
+                  <Select
+                    value={degreeTypeFilter}
+                    label="Loại"
+                    onChange={(e) => setDegreeTypeFilter(e.target.value)}
+                    sx={{
+                      bgcolor: "white",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <MenuItem value="">
+                      <em>Tất cả</em>
+                    </MenuItem>
+                    <MenuItem value="BC">Bằng cấp</MenuItem>
+                    <MenuItem value="CC">Chứng chỉ</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
 
-              {/* Date Sort Filter */}
-              <FormControl size="small" sx={{ minWidth: 180 }}>
-                <InputLabel id="degree-date-sort-label">
-                  Sắp xếp theo ngày
-                </InputLabel>
-                <Select
-                  labelId="degree-date-sort-label"
-                  value={degreeDateSort}
-                  label="Sắp xếp theo ngày"
-                  onChange={(e) => setDegreeDateSort(e.target.value)}
-                >
-                  <MenuItem value="oldest">Cũ nhất trước</MenuItem>
-                  <MenuItem value="newest">Mới nhất trước</MenuItem>
-                </Select>
-              </FormControl>
+              <Box sx={{ minWidth: 180, flex: "0 0 auto" }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Sắp xếp theo ngày</InputLabel>
+                  <Select
+                    value={degreeDateSort}
+                    label="Sắp xếp theo ngày"
+                    onChange={(e) => setDegreeDateSort(e.target.value)}
+                    sx={{
+                      bgcolor: "white",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <MenuItem value="oldest">Cũ nhất trước</MenuItem>
+                    <MenuItem value="newest">Mới nhất trước</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
 
-              {/* Search Bar */}
-              <TextField
-                variant="outlined"
-                size="small"
-                placeholder="Theo tên giảng viên, tên bằng cấp..."
-                value={degreeSearchTerm}
-                onChange={(e) => setDegreeSearchTerm(e.target.value)}
-                sx={{ minWidth: 350 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon color="action" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: degreeSearchTerm && (
-                    <InputAdornment position="end">
-                      <IconButton
-                        size="small"
-                        onClick={() => setDegreeSearchTerm("")}
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
-              <Typography variant="body2" color="text.secondary">
-                Tổng cộng: {filteredDegreeList.length} yêu cầu
-              </Typography>
+              <Box sx={{ flex: "1 1 300px", minWidth: 300 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  placeholder="🔍 Theo ID, tên giảng viên, tên bằng cấp..."
+                  value={degreeSearchTerm}
+                  onChange={(e) => setDegreeSearchTerm(e.target.value)}
+                  sx={{
+                    bgcolor: "white",
+                    borderRadius: 2,
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ color: "primary.main" }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: degreeSearchTerm && (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          onClick={() => setDegreeSearchTerm("")}
+                        >
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
             </Box>
+
+            {/* Active Filters Display */}
+            {(degreeSearchTerm ||
+              degreeTypeFilter ||
+              degreeDateSort !== "oldest") && (
+              <Box
+                sx={{
+                  mt: 2,
+                  display: "flex",
+                  gap: 1,
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="body2" sx={{ color: "#6c757d", mr: 1 }}>
+                  Bộ lọc đang áp dụng:
+                </Typography>
+
+                {degreeSearchTerm && (
+                  <Chip
+                    label={`Tìm kiếm: "${degreeSearchTerm}"`}
+                    size="small"
+                    onDelete={() => setDegreeSearchTerm("")}
+                    color="primary"
+                    variant="outlined"
+                  />
+                )}
+
+                {degreeTypeFilter && (
+                  <Chip
+                    label={`Loại: ${degreeTypeFilter === "BC" ? "Bằng cấp" : "Chứng chỉ"}`}
+                    size="small"
+                    onDelete={() => setDegreeTypeFilter("")}
+                    color="secondary"
+                    variant="outlined"
+                  />
+                )}
+
+                {degreeDateSort !== "oldest" && (
+                  <Chip
+                    label={`Sắp xếp: ${degreeDateSort === "newest" ? "Mới nhất trước" : "Cũ nhất trước"}`}
+                    size="small"
+                    onDelete={() => setDegreeDateSort("oldest")}
+                    color="info"
+                    variant="outlined"
+                    icon={<DateRange />}
+                  />
+                )}
+
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setDegreeSearchTerm("");
+                    setDegreeTypeFilter("");
+                    setDegreeDateSort("oldest");
+                  }}
+                  sx={{ ml: 1, textTransform: "none" }}
+                >
+                  Xóa tất cả
+                </Button>
+              </Box>
+            )}
           </Paper>
 
           {filteredDegreeList && filteredDegreeList.length > 0 ? (
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "1fr 1fr",
-                  md: "1fr 1fr 1fr",
-                  lg: "1fr 1fr 1fr 1fr",
-                },
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
                 gap: 3,
+                "@media (min-width: 1200px)": {
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                },
+                "@media (min-width: 900px) and (max-width: 1199px)": {
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                },
+                "@media (min-width: 600px) and (max-width: 899px)": {
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                },
+                "@media (max-width: 599px)": {
+                  gridTemplateColumns: "1fr",
+                },
               }}
             >
               {filteredDegreeList.map((item: any, index: number) => {
-                // Get data source based on label
                 const contentData =
                   item.label === "Update"
                     ? item.content?.original
@@ -1492,16 +2129,17 @@ const AdminLecturerPage = () => {
                   <Card
                     key={index}
                     sx={{
-                      height: "100%",
                       transition: "all 0.3s ease",
                       border: "2px solid",
                       borderColor:
                         item.label === "Create"
                           ? "success.light"
                           : "warning.light",
+                      borderRadius: 3,
+                      height: "fit-content",
                       "&:hover": {
                         transform: "translateY(-4px)",
-                        boxShadow: 4,
+                        boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
                         borderColor:
                           item.label === "Create"
                             ? "success.main"
@@ -1511,186 +2149,316 @@ const AdminLecturerPage = () => {
                   >
                     <CardContent sx={{ p: 3 }}>
                       <Box
-                        sx={{ display: "flex", alignItems: "center", mb: 2 }}
-                      >
-                        <Avatar
-                          src={`${BASE_URL}/${item.lecturerInfo?.avatarUrl}` || ""}
-                          sx={{
-                            bgcolor:
-                              item.label === "Create"
-                                ? "success.main"
-                                : "warning.main",
-                            mr: 2,
-                          }}
-                        >
-                          {item.lecturerInfo?.fullName?.charAt(0)}
-                        </Avatar>
-                        <Box sx={{ flexGrow: 1 }}>
-                          <Typography
-                            variant="h6"
-                            sx={{ fontWeight: "bold", mb: 0.5 }}
-                          >
-                            {item.lecturerInfo?.fullName}
-                          </Typography>
-                          <Box sx={{ display: "flex", gap: 1 }}>
-                            <Chip
-                              label={
-                                item.type === "BC" ? "Bằng cấp" : "Chứng chỉ"
-                              }
-                              size="small"
-                              variant="outlined"
-                            />
-                            <Chip label={item.label} size="small" />
-                          </Box>
-                        </Box>
-                      </Box>
-
-                      <Box sx={{ mb: 2 }}>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mb: 1 }}
-                        >
-                          <strong>Tên:</strong> {contentData?.name}
-                        </Typography>
-
-                        {item.type === "BC" ? (
-                          <>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ mb: 1 }}
-                            >
-                              <strong>Chuyên ngành:</strong>{" "}
-                              {contentData?.major}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ mb: 1 }}
-                            >
-                              <strong>Trình độ:</strong> {contentData?.level}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ mb: 1 }}
-                            >
-                              <strong>Năm tốt nghiệp:</strong>{" "}
-                              {contentData?.graduationYear}
-                            </Typography>
-                          </>
-                        ) : (
-                          <>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ mb: 1 }}
-                            >
-                              <strong>Tổ chức cấp:</strong>{" "}
-                              {contentData?.issuedBy}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ mb: 1 }}
-                            >
-                              <strong>Ngày cấp:</strong>{" "}
-                              {contentData?.issueDate
-                                ? new Date(
-                                    contentData.issueDate,
-                                  ).toLocaleDateString("vi-VN")
-                                : ""}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ mb: 1 }}
-                            >
-                              <strong>Thời hạn:</strong>{" "}
-                              {contentData?.expiryDate && contentData?.issueDate
-                                ? `${new Date(contentData.expiryDate).getFullYear() - new Date(contentData.issueDate).getFullYear()} năm`
-                                : "Vô thời hạn"}
-                            </Typography>
-                          </>
-                        )}
-
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mb: 1 }}
-                        >
-                          <strong>Thời gian:</strong>{" "}
-                          {(() => {
-                            const dateStr =
-                              item.date ||
-                              contentData?.updatedAt ||
-                              contentData?.createdAt;
-                            if (!dateStr) return "Chưa cập nhật";
-
-                            const now = new Date();
-                            const requestTime = new Date(dateStr);
-                            const diffInHours = Math.floor(
-                              (now.getTime() - requestTime.getTime()) /
-                                (1000 * 60 * 60),
-                            );
-
-                            if (diffInHours < 1) {
-                              return "Vừa cập nhật";
-                            } else if (diffInHours < 48) {
-                              return `${diffInHours} giờ trước`;
-                            } else {
-                              const diffInDays = Math.floor(diffInHours / 24);
-                              return `${diffInDays} ngày trước`;
-                            }
-                          })()}
-                        </Typography>
-                      </Box>
-
-                      <Button
-                        variant="contained"
-                        color={item.label === "Create" ? "success" : "warning"}
-                        fullWidth
-                        sx={{ mt: "auto" }}
-                        onClick={() => {
-                          console.log("View details for:", item);
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 2,
                         }}
                       >
-                        Xem chi tiết
-                      </Button>
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                        >
+                          <Avatar
+                            src={item.lecturerInfo?.avatarUrl}
+                            sx={{
+                              bgcolor:
+                                item.label === "Create"
+                                  ? "success.main"
+                                  : "warning.main",
+                              width: 50,
+                              height: 50,
+                              fontSize: "1.2rem",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {item.lecturerInfo?.fullName?.charAt(0)}
+                          </Avatar>
+
+                          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                            <Typography
+                              variant="h6"
+                              sx={{
+                                fontWeight: 700,
+                                color: "text.primary",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {item.lecturerInfo?.fullName}
+                            </Typography>
+                            <Box sx={{ display: "flex", gap: 0.5, mt: 0.5 }}>
+                              <Chip
+                                label={
+                                  item.type === "BC" ? "Bằng cấp" : "Chứng chỉ"
+                                }
+                                size="small"
+                                variant="outlined"
+                                sx={{ fontSize: "0.7rem", height: 20 }}
+                              />
+                              <Chip
+                                label={item.label}
+                                size="small"
+                                color={
+                                  item.label === "Create"
+                                    ? "success"
+                                    : "warning"
+                                }
+                                sx={{ fontSize: "0.7rem", height: 20 }}
+                              />
+                            </Box>
+                          </Box>
+                        </Box>
+
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 1.5,
+                          }}
+                        >
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontWeight: 600, mb: 0.5 }}
+                            >
+                              Tên
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: 500,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {contentData?.name}
+                            </Typography>
+                          </Box>
+
+                          {item.type === "BC" ? (
+                            <>
+                              <Box>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  sx={{ fontWeight: 600, mb: 0.5 }}
+                                >
+                                  Chuyên ngành
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    fontWeight: 500,
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  {contentData?.major}
+                                </Typography>
+                              </Box>
+                              <Box>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  sx={{ fontWeight: 600, mb: 0.5 }}
+                                >
+                                  Trình độ
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{ fontWeight: 500 }}
+                                >
+                                  {contentData?.level}
+                                </Typography>
+                              </Box>
+                              <Box>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  sx={{ fontWeight: 600, mb: 0.5 }}
+                                >
+                                  Năm tốt nghiệp
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{ fontWeight: 500 }}
+                                >
+                                  {contentData?.graduationYear}
+                                </Typography>
+                              </Box>
+                            </>
+                          ) : (
+                            <>
+                              <Box>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  sx={{ fontWeight: 600, mb: 0.5 }}
+                                >
+                                  Tổ chức cấp
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    fontWeight: 500,
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  {contentData?.issuedBy}
+                                </Typography>
+                              </Box>
+                              <Box>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  sx={{ fontWeight: 600, mb: 0.5 }}
+                                >
+                                  Ngày cấp
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{ fontWeight: 500 }}
+                                >
+                                  {contentData?.issueDate
+                                    ? new Date(
+                                        contentData.issueDate,
+                                      ).toLocaleDateString("vi-VN")
+                                    : ""}
+                                </Typography>
+                              </Box>
+                              <Box>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  sx={{ fontWeight: 600, mb: 0.5 }}
+                                >
+                                  Thời hạn
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{ fontWeight: 500 }}
+                                >
+                                  {contentData?.expiryDate &&
+                                  contentData?.issueDate
+                                    ? `${new Date(contentData.expiryDate).getFullYear() - new Date(contentData.issueDate).getFullYear()} năm`
+                                    : "Vô thời hạn"}
+                                </Typography>
+                              </Box>
+                            </>
+                          )}
+
+                          <Button
+                            variant="contained"
+                            color={
+                              item.label === "Create" ? "success" : "warning"
+                            }
+                            size="small"
+                            fullWidth
+                            sx={{
+                              mt: 1,
+                              py: 1,
+                              fontWeight: 600,
+                              textTransform: "none",
+                              borderRadius: 2,
+                              fontSize: "0.8rem",
+                            }}
+                            onClick={() => {
+                              console.log("View details for:", item);
+                            }}
+                          >
+                            Xem chi tiết
+                          </Button>
+                        </Box>
+                      </Box>
                     </CardContent>
                   </Card>
-                );
+                               );
               })}
             </Box>
           ) : (
-            <Paper sx={{ p: 4, textAlign: "center" }}>
-              <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+            <Paper
+              sx={{
+                p: 6,
+                textAlign: "center",
+                borderRadius: 3,
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+              }}
+            >
+              <Typography
+                variant="h5"
+                color="text.secondary"
+                sx={{ mb: 2, fontWeight: 600 }}
+              >
                 Không có yêu cầu nào
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body1" color="text.secondary">
                 Hiện tại không có yêu cầu chứng chỉ/bằng cấp nào cần xử lý.
               </Typography>
             </Paper>
           )}
         </TabPanel>
 
-        <TabPanel value="5">
-          <Box sx={{ mb: 3 }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", color: "primary.main", mb: 1 }}
+        <TabPanel value="5" sx={{ p: 0 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              mb: 3,
+              background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+              borderRadius: 3,
+              border: "1px solid rgba(255,255,255,0.8)",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 3,
+                flexWrap: "wrap",
+                gap: 2,
+              }}
             >
-              Yêu cầu khóa đào tạo và hoạt động
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Danh sách các yêu cầu tạo mới và cập nhật khóa học, hoạt động, báo
-              cáo từ giảng viên
-            </Typography>
-          </Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Avatar
+                  sx={{
+                    bgcolor: "primary.main",
+                    background:
+                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    width: 56,
+                    height: 56,
+                  }}
+                >
+                  <Typography
+                    variant="h4"
+                    sx={{ color: "white", fontWeight: 700 }}
+                  >
+                    📚
+                  </Typography>
+                </Avatar>
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
+                  >
+                    Yêu cầu khóa đào tạo và hoạt động
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "#6c757d" }}>
+                    {courseSearchTerm || courseTypeFilter
+                      ? `Đã lọc ${filteredCourseList?.length || 0} yêu cầu`
+                      : `Tổng cộng ${filteredCourseList?.length || 0} yêu cầu khóa học và hoạt động`}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
 
-          {/* Filter Controls for Course Tab */}
-          <Paper sx={{ mb: 3, p: 2, borderRadius: 2 }}>
+            {/* Filters */}
             <Box
               sx={{
                 display: "flex",
@@ -1699,88 +2467,169 @@ const AdminLecturerPage = () => {
                 flexWrap: "wrap",
               }}
             >
-              {/* Type Filter */}
-              <FormControl size="small" sx={{ minWidth: 250 }}>
-                <InputLabel id="course-type-select-label">Loại</InputLabel>
-                <Select
-                  labelId="course-type-select-label"
-                  value={courseTypeFilter}
-                  label="Loại"
-                  onChange={(e) => setCourseTypeFilter(e.target.value)}
-                >
-                  <MenuItem value="">
-                    <em>Tất cả</em>
-                  </MenuItem>
-                  <MenuItem value="OC">Khóa đào tạo cung cấp</MenuItem>
-                  <MenuItem value="AC">Khóa đào tạo được học</MenuItem>
-                  <MenuItem value="RP">Nghiên cứu khoa học</MenuItem>
-                </Select>
-              </FormControl>
+              <Box sx={{ minWidth: 250, flex: "0 0 auto" }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Loại</InputLabel>
+                  <Select
+                    value={courseTypeFilter}
+                    label="Loại"
+                    onChange={(e) => setCourseTypeFilter(e.target.value)}
+                    sx={{
+                      bgcolor: "white",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <MenuItem value="">
+                      <em>Tất cả</em>
+                    </MenuItem>
+                    <MenuItem value="OC">Khóa đào tạo cung cấp</MenuItem>
+                    <MenuItem value="AC">Khóa đào tạo được học</MenuItem>
+                    <MenuItem value="RP">Nghiên cứu khoa học</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
 
-              {/* Date Sort Filter */}
-              <FormControl size="small" sx={{ minWidth: 180 }}>
-                <InputLabel id="course-date-sort-label">
-                  Sắp xếp theo ngày
-                </InputLabel>
-                <Select
-                  labelId="course-date-sort-label"
-                  value={courseDateSort}
-                  label="Sắp xếp theo ngày"
-                  onChange={(e) => setCourseDateSort(e.target.value)}
-                >
-                  <MenuItem value="oldest">Cũ nhất trước</MenuItem>
-                  <MenuItem value="newest">Mới nhất trước</MenuItem>
-                </Select>
-              </FormControl>
+              <Box sx={{ minWidth: 180, flex: "0 0 auto" }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Sắp xếp theo ngày</InputLabel>
+                  <Select
+                    value={courseDateSort}
+                    label="Sắp xếp theo ngày"
+                    onChange={(e) => setCourseDateSort(e.target.value)}
+                    sx={{
+                      bgcolor: "white",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <MenuItem value="oldest">Cũ nhất trước</MenuItem>
+                    <MenuItem value="newest">Mới nhất trước</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
 
-              {/* Search Bar */}
-              <TextField
-                variant="outlined"
-                size="small"
-                placeholder="Theo tên giảng viên, tên khóa học..."
-                value={courseSearchTerm}
-                onChange={(e) => setCourseSearchTerm(e.target.value)}
-                sx={{ minWidth: 350 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon color="action" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: courseSearchTerm && (
-                    <InputAdornment position="end">
-                      <IconButton
-                        size="small"
-                        onClick={() => setCourseSearchTerm("")}
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
-              <Typography variant="body2" color="text.secondary">
-                Tổng cộng: {filteredCourseList.length} yêu cầu
-              </Typography>
+              <Box sx={{ flex: "1 1 300px", minWidth: 300 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  placeholder="🔍 Theo ID, tên giảng viên, tên khóa học..."
+                  value={courseSearchTerm}
+                  onChange={(e) => setCourseSearchTerm(e.target.value)}
+                  sx={{
+                    bgcolor: "white",
+                    borderRadius: 2,
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ color: "primary.main" }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: courseSearchTerm && (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          onClick={() => setCourseSearchTerm("")}
+                        >
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
             </Box>
+
+            {/* Active Filters Display */}
+            {(courseSearchTerm ||
+              courseTypeFilter ||
+              courseDateSort !== "oldest") && (
+              <Box
+                sx={{
+                  mt: 2,
+                  display: "flex",
+                  gap: 1,
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="body2" sx={{ color: "#6c757d", mr: 1 }}>
+                  Bộ lọc đang áp dụng:
+                </Typography>
+
+                {courseSearchTerm && (
+                  <Chip
+                    label={`Tìm kiếm: "${courseSearchTerm}"`}
+                    size="small"
+                    onDelete={() => setCourseSearchTerm("")}
+                    color="primary"
+                    variant="outlined"
+                  />
+                )}
+
+                {courseTypeFilter && (
+                  <Chip
+                    label={`Loại: ${
+                      courseTypeFilter === "OC"
+                        ? "Khóa đào tạo cung cấp"
+                        : courseTypeFilter === "AC"
+                          ? "Khóa đào tạo được học"
+                          : "Nghiên cứu khoa học"
+                    }`}
+                    size="small"
+                    onDelete={() => setCourseTypeFilter("")}
+                    color="secondary"
+                    variant="outlined"
+                  />
+                )}
+
+                {courseDateSort !== "oldest" && (
+                  <Chip
+                    label={`Sắp xếp: ${courseDateSort === "newest" ? "Mới nhất trước" : "Cũ nhất trước"}`}
+                    size="small"
+                    onDelete={() => setCourseDateSort("oldest")}
+                    color="info"
+                    variant="outlined"
+                    icon={<DateRange />}
+                  />
+                )}
+
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setCourseSearchTerm("");
+                    setCourseTypeFilter("");
+                    setCourseDateSort("oldest");
+                  }}
+                  sx={{ ml: 1, textTransform: "none" }}
+                >
+                  Xóa tất cả
+                </Button>
+              </Box>
+            )}
           </Paper>
 
           {filteredCourseList && filteredCourseList.length > 0 ? (
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "1fr 1fr",
-                  md: "1fr 1fr 1fr",
-                  lg: "1fr 1fr 1fr 1fr",
-                },
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
                 gap: 3,
+                "@media (min-width: 1200px)": {
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                },
+                "@media (min-width: 900px) and (max-width: 1199px)": {
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                },
+                "@media (min-width: 600px) and (max-width: 899px)": {
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                },
+                "@media (max-width: 599px)": {
+                  gridTemplateColumns: "1fr",
+                },
               }}
             >
               {filteredCourseList.map((item: any, index: number) => {
-                // Get data source based on label
                 const contentData =
                   item.label === "Update"
                     ? item.content?.original
@@ -1790,16 +2639,17 @@ const AdminLecturerPage = () => {
                   <Card
                     key={`course-${item.type}-${item.content?.id}-${item.label}-${index}`}
                     sx={{
-                      height: "100%",
                       transition: "all 0.3s ease",
                       border: "2px solid",
                       borderColor:
                         item.label === "Create"
                           ? "success.light"
                           : "warning.light",
+                      borderRadius: 3,
+                      height: "fit-content",
                       "&:hover": {
                         transform: "translateY(-4px)",
-                        boxShadow: 4,
+                        boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
                         borderColor:
                           item.label === "Create"
                             ? "success.main"
@@ -1809,186 +2659,244 @@ const AdminLecturerPage = () => {
                   >
                     <CardContent sx={{ p: 3 }}>
                       <Box
-                        sx={{ display: "flex", alignItems: "center", mb: 2 }}
-                      >
-                        <Avatar
-                          src={item.lecturerInfo?.avatarUrl || ""}
-                          sx={{
-                            bgcolor:
-                              item.label === "Create"
-                                ? "success.main"
-                                : "warning.main",
-                            mr: 2,
-                          }}
-                        >
-                          {item.lecturerInfo?.fullName?.charAt(0)}
-                        </Avatar>
-                        <Box sx={{ flexGrow: 1 }}>
-                          <Typography
-                            variant="h6"
-                            sx={{ fontWeight: "bold", mb: 0.5 }}
-                          >
-                            {item.lecturerInfo?.fullName}
-                          </Typography>
-                          <Box sx={{ display: "flex", gap: 1 }}>
-                            <Chip
-                              label={item.type}
-                              size="small"
-                              variant="outlined"
-                            />
-                            <Chip label={item.label} size="small" />
-                          </Box>
-                        </Box>
-                      </Box>
-
-                      <Box sx={{ mb: 2 }}>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mb: 1 }}
-                        >
-                          <strong>Tên:</strong>{" "}
-                          {contentData?.title || contentData?.name}
-                        </Typography>
-
-                        {contentData?.topic && (
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                              mb: 1,
-                              display: "-webkit-box",
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: "vertical",
-                              overflow: "hidden",
-                            }}
-                          >
-                            <strong>Chuyên đề:</strong> {contentData.topic}
-                          </Typography>
-                        )}
-
-                        {contentData?.courseType && (
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ mb: 1 }}
-                          >
-                            <strong>Loại hình:</strong>{" "}
-                            {contentData.courseType === "FORMAL"
-                              ? "Chính quy"
-                              : contentData.courseType === "SPECIALIZED"
-                                ? "Chuyên đề"
-                                : contentData.courseType === "EXTRACURRICULAR"
-                                  ? "Ngoại khóa"
-                                  : "Khác"}
-                          </Typography>
-                        )}
-                        {contentData?.researchArea && (
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ mb: 1 }}
-                          >
-                            <strong>Loại hình:</strong>{" "}
-                            {contentData.researchArea}
-                          </Typography>
-                        )}
-                        {/* RESEARCH,     // Nghiên cứu khoa học
-    TOPIC,        // Đề tài
-    PROJECT       // Dự án */}
-                        {contentData?.projectType && (
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ mb: 1 }}
-                          >
-                            <strong>Loại:</strong>{" "}
-                            {contentData.projectType === "RESEARCH"
-                              ? "Nghiên cứu khoa học"
-                              : contentData.projectType === "TOPIC"
-                                ? "Đề tài"
-                                : contentData.projectType === "PROJECT"
-                                  ? "Dự án"
-                                  : "Khác"}
-                          </Typography>
-                        )}
-                        {contentData?.scale && (
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ mb: 1 }}
-                          >
-                            <strong>Quy mô:</strong>{" "}
-                            {contentData.scale === "INSTITUTIONAL"
-                              ? "Cấp đơn vị"
-                              : contentData.scale === "NATIONAL"
-                                ? "Cấp quốc gia"
-                                : contentData.scale === "INTERNATIONAL"
-                                  ? "Cấp quốc tế"
-                                  : contentData.scale === "UNIVERSITY"
-                                    ? "Cấp trường"
-                                    : contentData.scale === "DEPARTMENTAL"
-                                      ? "Cấp khoa/ tỉnh"
-                                      : contentData.scale === "MINISTERIAL"
-                                        ? "Cấp bộ"
-                                        : "Khác"}
-                          </Typography>
-                        )}
-
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mb: 1 }}
-                        >
-                          <strong>Thời gian:</strong>{" "}
-                          {(() => {
-                            const dateStr =
-                              item.date ||
-                              contentData?.updatedAt ||
-                              contentData?.createdAt;
-                            if (!dateStr) return "Chưa cập nhật";
-
-                            const now = new Date();
-                            const requestTime = new Date(dateStr);
-                            const diffInHours = Math.floor(
-                              (now.getTime() - requestTime.getTime()) /
-                                (1000 * 60 * 60),
-                            );
-
-                            if (diffInHours < 1) {
-                              return "Vừa cập nhật";
-                            } else if (diffInHours < 48) {
-                              return `${diffInHours} giờ trước`;
-                            } else {
-                              const diffInDays = Math.floor(diffInHours / 24);
-                              return `${diffInDays} ngày trước`;
-                            }
-                          })()}
-                        </Typography>
-                      </Box>
-
-                      <Button
-                        variant="contained"
-                        color={item.label === "Create" ? "success" : "warning"}
-                        fullWidth
-                        sx={{ mt: "auto" }}
-                        onClick={() => {
-                          console.log("View details for:", item);
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 2,
                         }}
                       >
-                        Xem chi tiết
-                      </Button>
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                        >
+                          <Avatar
+                            src={item.lecturerInfo?.avatarUrl || ""}
+                            sx={{
+                              bgcolor:
+                                item.label === "Create"
+                                  ? "success.main"
+                                  : "warning.main",
+                              width: 50,
+                              height: 50,
+                              fontSize: "1.2rem",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {item.lecturerInfo?.fullName?.charAt(0)}
+                          </Avatar>
+
+                          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                            <Typography
+                              variant="h6"
+                              sx={{
+                                fontWeight: 700,
+                                color: "text.primary",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {item.lecturerInfo?.fullName}
+                            </Typography>
+                            <Box sx={{ display: "flex", gap: 0.5, mt: 0.5 }}>
+                              <Chip
+                                label={
+                                  item.type === "OC"
+                                    ? "Cung cấp"
+                                    : item.type === "AC"
+                                      ? "Được học"
+                                      : "Nghiên cứu"
+                                }
+                                size="small"
+                                variant="outlined"
+                                sx={{ fontSize: "0.7rem", height: 20 }}
+                              />
+                              <Chip
+                                label={item.label}
+                                size="small"
+                                color={
+                                  item.label === "Create"
+                                    ? "success"
+                                    : "warning"
+                                }
+                                sx={{ fontSize: "0.7rem", height: 20 }}
+                              />
+                            </Box>
+                          </Box>
+                        </Box>
+
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 1.5,
+                          }}
+                        >
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontWeight: 600, mb: 0.5 }}
+                            >
+                              Tên
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: 500,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {contentData?.title || contentData?.name}
+                            </Typography>
+                          </Box>
+
+                          {contentData?.topic && (
+                            <Box>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{ fontWeight: 600, mb: 0.5 }}
+                              >
+                                Chuyên đề
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  fontWeight: 500,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {contentData.topic}
+                              </Typography>
+                            </Box>
+                          )}
+
+                          {contentData?.researchArea && (
+                            <Box>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{ fontWeight: 600, mb: 0.5 }}
+                              >
+                                Lĩnh vực
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  fontWeight: 500,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {contentData.researchArea}
+                              </Typography>
+                            </Box>
+                          )}
+
+                          {contentData?.courseType && (
+                            <Box>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{ fontWeight: 600, mb: 0.5 }}
+                              >
+                                Loại hình
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                sx={{ fontWeight: 500 }}
+                              >
+                                {contentData.courseType === "FORMAL"
+                                  ? "Chính quy"
+                                  : contentData.courseType === "SPECIALIZED"
+                                    ? "Chuyên đề"
+                                    : contentData.courseType === "EXTRACURRICULAR"
+                                      ? "Ngoại khóa"
+                                      : "Khác"}
+                              </Typography>
+                            </Box>
+                          )}
+
+                          {contentData?.scale && (
+                            <Box>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{ fontWeight: 600, mb: 0.5 }}
+                              >
+                                Quy mô
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                sx={{ fontWeight: 500 }}
+                              >
+                                {contentData.scale === "INSTITUTIONAL"
+                                  ? "Cấp đơn vị"
+                                  : contentData.scale === "NATIONAL"
+                                    ? "Cấp quốc gia"
+                                    : contentData.scale === "INTERNATIONAL"
+                                      ? "Cấp quốc tế"
+                                      : contentData.scale === "UNIVERSITY"
+                                        ? "Cấp trường"
+                                        : contentData.scale === "DEPARTMENTAL"
+                                          ? "Cấp khoa/tỉnh"
+                                          : contentData.scale === "MINISTERIAL"
+                                            ? "Cấp bộ"
+                                            : "Khác"}
+                              </Typography>
+                            </Box>
+                          )}
+
+                          <Button
+                            variant="contained"
+                            color={
+                              item.label === "Create" ? "success" : "warning"
+                            }
+                            size="small"
+                            fullWidth
+                            sx={{
+                              mt: 1,
+                              py: 1,
+                              fontWeight: 600,
+                              textTransform: "none",
+                              borderRadius: 2,
+                              fontSize: "0.8rem",
+                            }}
+                            onClick={() => {
+                              console.log("View details for:", item);
+                            }}
+                          >
+                            Xem chi tiết
+                          </Button>
+                        </Box>
+                      </Box>
                     </CardContent>
                   </Card>
                 );
               })}
             </Box>
           ) : (
-            <Paper sx={{ p: 4, textAlign: "center" }}>
-              <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+            <Paper
+              sx={{
+                p: 6,
+                textAlign: "center",
+                borderRadius: 3,
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+              }}
+            >
+              <Typography
+                variant="h5"
+                color="text.secondary"
+                sx={{ mb: 2, fontWeight: 600 }}
+              >
                 Không có yêu cầu nào
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body1" color="text.secondary">
                 Hiện tại không có yêu cầu khóa đào tạo/hoạt động nào cần xử lý.
               </Typography>
             </Paper>

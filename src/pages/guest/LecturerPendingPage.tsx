@@ -1,28 +1,60 @@
-
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPendingLecturer } from "../../redux/slice/PendingLectuererSlice";
 import { API } from "../../utils/Fetch";
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Avatar, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { 
+  Accordion, 
+  AccordionSummary, 
+  AccordionDetails, 
+  Typography, 
+  TextField, 
+  Avatar, 
+  FormControl, 
+  InputLabel, 
+  MenuItem, 
+  Select,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  Paper,
+  Container,
+  Stack,
+  CircularProgress,
+  Button
+} from "@mui/material";
+import { 
+  ExpandMore as ExpandMoreIcon,
+  Person as PersonIcon,
+  School as SchoolIcon,
+  Assignment as AssignmentIcon,
+  Save as SaveIcon,
+  Visibility as VisibilityIcon,
+  Male as MaleIcon,
+  Female as FemaleIcon,
+  Phone as PhoneIcon,
+  LocationOn as LocationIcon,
+  CalendarToday as CalendarIcon,
+  Work as WorkIcon,
+  Add,
+  Delete as DeleteIcon
+} from '@mui/icons-material';
 import DegreeUpdateDialog from "../../components/DegreeUpdateDialog";
 import CertificationUpdateDialog from "../../components/CertificationUpdateDialog";
+import UploadDegreeModal from "../../components/UploadDegreeModal";
+import UploadCertificationModal from "../../components/UploadCertificationModal";
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
 import LinearProgress from '@mui/material/LinearProgress';
 import Box from '@mui/material/Box';
 import { setUserProfile } from "../../redux/slice/userSlice";
 import { useNavigate } from "react-router-dom";
 import { navigateToRole } from "../../utils/navigationRole";
 import { toast } from "react-toastify";
+import type { DegreeRequest } from "../../types/DegreeRequest";
+import type { CertificationRequest } from "../../types/CertificationRequest";
 
 const LecturerPendingPage = () => {
   const dispatch = useDispatch();
@@ -32,6 +64,22 @@ const LecturerPendingPage = () => {
   const [selectedDegree, setSelectedDegree] = useState<any>(null);
   const [openCertificationDialog, setOpenCertificationDialog] = useState(false);
   const [selectedCertification, setSelectedCertification] = useState<any>(null);
+
+  const [openAddDegreeModal, setOpenAddDegreeModal] = useState(false);
+  const [openAddCertificationModal, setOpenAddCertificationModal] = useState(false);
+
+  // Add states for delete confirmation
+  const [deleteConfirmDialog, setDeleteConfirmDialog] = useState<{
+    open: boolean;
+    type: 'degree' | 'certification';
+    item: any;
+    index: number;
+  }>({
+    open: false,
+    type: 'degree',
+    item: null,
+    index: -1
+  });
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -122,8 +170,42 @@ const LecturerPendingPage = () => {
   }, [citizenId, phoneNumber, fullName, dateOfBirth, gender, bio, address, academicRank, specialization, experienceYears, status, pendingLecturer]);
 
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'APPROVED':
+        return 'success';
+      case 'REJECTED':
+        return 'error';
+      case 'PENDING':
+        return 'warning';
+      default:
+        return 'default';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'APPROVED':
+        return 'Đã duyệt';
+      case 'REJECTED':
+        return 'Từ chối';
+      case 'PENDING':
+        return 'Chờ duyệt';
+      default:
+        return status;
+    }
+  };
+
   if (!pendingLecturer || !pendingLecturer.lecturer) {
-    return <div>Không có thông tin giảng viên đang chờ duyệt.</div>;
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Paper sx={{ p: 4, textAlign: 'center' }}>
+          <Typography variant="h6" color="text.secondary">
+            Không có thông tin giảng viên đang chờ duyệt.
+          </Typography>
+        </Paper>
+      </Container>
+    );
   }
 
   const { lecturer, degrees, certifications } = pendingLecturer;
@@ -170,315 +252,792 @@ const LecturerPendingPage = () => {
     }
   };
 
+  const handleAddDegree = async (degree: DegreeRequest) => {
+    try {
+      const response = await API.user.createDegree([degree]);
+      if (response.data.success) {
+        const updatedResponse = await API.user.getPendingLecturer();
+        dispatch(setPendingLecturer(updatedResponse.data.data));
+        toast.success('Đã thêm bằng cấp mới thành công');
+      }
+    } catch (error) {
+      console.error("Error adding degree:", error);
+      toast.error('Lỗi khi thêm bằng cấp');
+    }
+  };
+
+  const handleAddCertification = async (certification: CertificationRequest) => {
+    try {
+      const response = await API.user.createCertification([certification]);
+      if (response.data.success) {
+        const updatedResponse = await API.user.getPendingLecturer();
+        dispatch(setPendingLecturer(updatedResponse.data.data));
+        toast.success('Đã thêm chứng chỉ mới thành công');
+      }
+    } catch (error) {
+      console.error("Error adding certification:", error);
+      toast.error('Lỗi khi thêm chứng chỉ');
+    }
+  };
+
+  // Add delete handlers
+  const handleDeleteDegree = (degree: any, index: number) => {
+    setDeleteConfirmDialog({
+      open: true,
+      type: 'degree',
+      item: degree,
+      index
+    });
+  };
+
+  const handleDeleteCertification = (certification: any, index: number) => {
+    setDeleteConfirmDialog({
+      open: true,
+      type: 'certification',
+      item: certification,
+      index
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    const { type, item } = deleteConfirmDialog;
+    
+    try {
+      if (type === 'degree') {
+        await API.user.deleteDegree(item.id);
+        toast.success('Đã xóa bằng cấp thành công');
+      } else {
+        await API.user.deleteCertification(item.id);
+        toast.success('Đã xóa chứng chỉ thành công');
+      }
+      
+      // Refresh data after deletion
+      const updatedResponse = await API.user.getPendingLecturer();
+      dispatch(setPendingLecturer(updatedResponse.data.data));
+      
+    } catch (error) {
+      console.error(`Error deleting ${type}:`, error);
+      toast.error(`Lỗi khi xóa ${type === 'degree' ? 'bằng cấp' : 'chứng chỉ'}`);
+    } finally {
+      setDeleteConfirmDialog({
+        open: false,
+        type: 'degree',
+        item: null,
+        index: -1
+      });
+    }
+  };
 
   return (
-    <div className="flex flex-col items-center w-3/5 p-6 bg-white rounded-lg shadow-md">
-      <div className="flex flex-row w-full gap-8">
-        {/* Left: Lecturer Info */}
-        <div className="w-full md:w-1/2">
-          {/* Personal Info */}
-          <div className="flex items-center gap-4 mb-6">
-            <Avatar
-              src={lecturer.avatarUrl}
-              alt={lecturer.fullName}
-              sx={{ width: 100, height: 100 }}
-            />
-            <div className="w-full">
-
-              <TextField
-                label="Trạng thái"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                fullWidth
-                margin="dense"
-              />
-              <TextField
-                label="Ghi chú của admin"
-                value={lecturer.adminNote || 'Không có'}
-                InputProps={{ readOnly: true }}
-                fullWidth
-                margin="dense"
-              />
-            </div>
-          </div>
-          <div className="mb-4">
-            <div className="mb-1 text-base font-semibold text-gray-700">Thông tin cá nhân</div>
-            <TextField
-              label="Họ tên"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              fullWidth
-              margin="dense"
-            />
-
-            <div className="flex flex-row gap-4">
-              <TextField
-                label="Mã số"
-                value={citizenId}
-                onChange={(e) => setCitizenId(e.target.value)}
-                fullWidth
-                margin="dense"
-              />
-              <TextField
-                label="Ngày sinh"
-                value={dateOfBirth}
-                onChange={(e) => setDateOfBirth(e.target.value)}
-                type="date"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                margin="dense"
-              />
-              <div className="flex flex-col items-start mt-2 mb-2">
-                <span className="mr-4 text-gray-700">Giới tính:</span>
-                <div className="flex flex-row gap-2">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="Nam"
-                      checked={gender === true}
-                      onChange={() => setGender(true)}
-                      className="mr-1"
-                    />
-                    Nam
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="Nữ"
-                      checked={gender === false}
-                      onChange={() => setGender(false)}
-                      className="mr-1"
-                    />
-                    Nữ
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-row gap-4">
-              <TextField
-                label="Số điện thoại"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                fullWidth
-                margin="dense"
-              />
-              <TextField
-                label="Địa chỉ"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                fullWidth
-                margin="dense"
-              />
-            </div>
-
-          </div>
-          <div className="mb-4">
-            <div className="mb-1 text-base font-semibold text-gray-700">Thông tin học thuật</div>
-            <div className="flex flex-row gap-2">
-              <FormControl fullWidth margin="dense">
-                <InputLabel shrink={!!academicRank}>Học vị</InputLabel>
-                <Select
-                  value={academicRank}
-                  onChange={(e) => setAcademicRank(e.target.value)}
-                  label="Học vị"
-                >
-                  <MenuItem value="CN">Cử nhân</MenuItem>
-                  <MenuItem value="THS">Thạc sĩ</MenuItem>
-                  <MenuItem value="TS">Tiến sĩ</MenuItem>
-                  <MenuItem value="PGS">Phó Giáo sư</MenuItem>
-                  <MenuItem value="GS">Giáo sư</MenuItem>
-                </Select>
-              </FormControl>
-              <TextField
-                label="Số năm kinh nghiệm"
-                value={experienceYears}
-                type="number"
-                onChange={(e) => setExperienceYears(Number(e.target.value))}
-                fullWidth
-                margin="dense"
-              />
-            </div>
-
-            <TextField
-              label="Chuyên ngành"
-              value={specialization}
-              onChange={(e) => setSpecialization(e.target.value)}
-              fullWidth
-              margin="dense"
-            />
-
-            <TextField
-              label="Tiểu sử"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              fullWidth
-              margin="dense"
-              multiline
-              rows={2}
-            />
-          </div>
-          <div className="flex flex-row gap-4">
-
-
-            <TextField
-              label="Ngày tạo"
-              value={lecturer.createdAt ? new Date(lecturer.createdAt).toLocaleString('vi-VN') : 'Chưa cập nhật'}
-              InputProps={{ readOnly: true }}
-              fullWidth
-              margin="dense"
-            />
-            <TextField
-              label="Cập nhật gần nhất"
-              value={lecturer.updatedAt ? new Date(lecturer.updatedAt).toLocaleString('vi-VN') : 'Chưa cập nhật'}
-              InputProps={{ readOnly: true }}
-              fullWidth
-              margin="dense"
-            />
-          </div>
-        </div>
-        {/* Right: Degrees and Certifications as Accordions */}
-        <div className="flex flex-row w-full gap-6 md:w-1/2 ">
-          {/* Degrees */}
-          <div>
-            <h3 className="mb-2 text-lg font-semibold">Bằng cấp</h3>
-            {degrees && degrees.length > 0 ? (
-              degrees.map((deg: any) => {
-
-                return (
-                  <Accordion key={deg.id} sx={{
-                    backgroundColor:
-                      deg.status === 'APPROVED'
-                        ? '#bbf7d0' // Màu xanh nhạt
-                        : deg.status === 'REJECTED'
-                          ? '#fecaca' // Màu đỏ nhạt
-                          : '#fff',   // Trắng
-                  }}>
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon />}
-                      aria-controls={`degree-panel${deg.id}-content`}
-                      id={`degree-panel${deg.id}-header`}
-                    >
-                      <Typography component="span">{deg.name} ({deg.level})</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <div className="space-y-1">
-                        <div><b>Chuyên ngành:</b> {deg.major}</div>
-                        <div><b>Trường:</b> {deg.institution}</div>
-                        <div><b>Thời gian:</b> {deg.startYear} - {deg.graduationYear}</div>
-                        <div><b>Mô tả:</b> {deg.description}</div>
-                        <div><b>Ghi chú admin:</b> {deg.adminNote || 'Không có'}</div>
-                        <div><b>Trạng thái:</b> {deg.status}</div>
-                        <div><b>File:</b> <a href={deg.url} className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">Xem file</a></div>
-                      </div>
-                    </AccordionDetails>
-                    <Box sx={{ mt: 1 }}>
-                      <button
-                        style={{ padding: '6px 16px', background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
-                        onClick={() => {
-                          setSelectedDegree(deg);
-                          setOpenDegreeDialog(true);
-                        }}
-                      >
-                        Xem chi tiết
-                      </button>
-                    </Box>
-                  </Accordion>
-                );
-              })
-            ) : (
-              <div>Không có bằng cấp.</div>
-            )}
-          </div>
-          {/* Certifications */}
-          <div>
-            <h3 className="mb-2 text-lg font-semibold">Chứng chỉ</h3>
-            {certifications && certifications.length > 0 ? (
-              certifications.map((cert: any) => {
-
-                return (
-                  <Accordion key={cert.id} sx={{
-                    backgroundColor:
-                      cert.status === 'APPROVED'
-                        ? '#bbf7d0' // Màu xanh nhạt
-                        : cert.status === 'REJECTED'
-                          ? '#fecaca' // Màu đỏ nhạt
-                          : '#fff',   // Trắng
-                  }}>
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon />}
-                      aria-controls={`cert-panel${cert.id}-content`}
-                      id={`cert-panel${cert.id}-header`}
-                    >
-                      <Typography component="span">{cert.name} ({cert.level})</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <div className="space-y-1">
-                        <div><b>Cấp bởi:</b> {cert.issuedBy}</div>
-                        <div><b>Ngày cấp:</b> {cert.issueDate}</div>
-                        <div><b>Ngày hết hạn:</b> {cert.expiryDate}</div>
-                        <div><b>Mô tả:</b> {cert.description}</div>
-                        <div><b>Ghi chú admin:</b> {cert.adminNote || 'Không có'}</div>
-                        <div><b>Trạng thái:</b> {cert.status}</div>
-                        <div><b>File:</b> <a href={cert.certificateUrl} className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">Xem file</a></div>
-                      </div>
-                    </AccordionDetails>
-                    <Box sx={{ mt: 1 }}>
-                      <button
-                        style={{ padding: '6px 16px', background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
-                        onClick={() => {
-                          setSelectedCertification(cert);
-                          setOpenCertificationDialog(true);
-                        }}
-                      >
-                        Xem chi tiết
-                      </button>
-                    </Box>
-                  </Accordion>
-                );
-              })
-            ) : (
-              <div>Không có chứng chỉ.</div>
-            )}
-
-            <DegreeUpdateDialog
-              open={openDegreeDialog}
-              onClose={() => { setOpenDegreeDialog(false); setSelectedDegree(null); }}
-              data={selectedDegree}
-            />
-            <CertificationUpdateDialog
-              open={openCertificationDialog}
-              onClose={() => { setOpenCertificationDialog(false); setSelectedCertification(null); }}
-              data={selectedCertification}
-            />
-          </div>
-        </div>
-      </div>
-      <button className="px-4 py-2 mt-6 text-white transition-colors duration-200 bg-green-600 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 active:scale-95"
-        onClick={handleSaveChanges}
-        disabled={loading}
-      >
-        {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
-      </button>
-      {loading && (
-        <Box sx={{ width: '100%', mt: 2 }}>
-          <LinearProgress />
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+        {/* Header */}
+        <Box sx={{ 
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          p: 3
+        }}>
+          <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
+            Thông tin giảng viên chờ duyệt
+          </Typography>
+          <Typography variant="body1" sx={{ opacity: 0.9 }}>
+            Cập nhật và quản lý thông tin hồ sơ giảng viên
+          </Typography>
         </Box>
-      )}
-      {/* Dialog xác nhận lưu */}
-      <Dialog open={openConfirmDialog} onClose={() => setOpenConfirmDialog(false)} maxWidth="xs">
-        <DialogTitle>Xác nhận Lưu</DialogTitle>
+
+        <Box sx={{ p: 4 }}>
+          <Box sx={{ display: 'flex', gap: 4, minHeight: '600px' }}>
+            {/* Left Side - Personal Information */}
+            <Box sx={{ flex: '0 0 60%', display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {/* Profile Card */}
+              <Card sx={{ borderRadius: 2, boxShadow: 2 }}>
+                <CardHeader
+                  avatar={
+                    <Avatar
+                      src={lecturer.avatarUrl}
+                      alt={lecturer.fullName}
+                      sx={{ width: 80, height: 80 }}
+                    />
+                  }
+                  title={
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      {fullName || 'Chưa cập nhật'}
+                    </Typography>
+                  }
+                  subheader={
+                    <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                      <Chip 
+                        label={getStatusText(status)} 
+                        color={getStatusColor(status)} 
+                        size="small" 
+                      />
+                    </Stack>
+                  }
+                />
+                <CardContent sx={{ pt: 0 }}>
+                  <TextField
+                    label="Ghi chú của admin"
+                    value={lecturer.adminNote || 'Không có ghi chú'}
+                    InputProps={{ readOnly: true }}
+                    fullWidth
+                    multiline
+                    rows={2}
+                    variant="outlined"
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Personal Information */}
+              <Card sx={{ borderRadius: 2, boxShadow: 2 }}>
+                <CardHeader
+                  avatar={<PersonIcon color="primary" />}
+                  title="Thông tin cá nhân"
+                  titleTypographyProps={{ variant: 'h6', fontWeight: 600 }}
+                />
+                <CardContent>
+                  <Stack spacing={2}>
+                    <TextField
+                      label="Họ và tên"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      fullWidth
+                      variant="outlined"
+                    />
+                    
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <TextField
+                        label="Số CCCD"
+                        value={citizenId}
+                        onChange={(e) => setCitizenId(e.target.value)}
+                        fullWidth
+                        variant="outlined"
+                        InputProps={{
+                          startAdornment: <PersonIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                        }}
+                      />
+                      <TextField
+                        label="Ngày sinh"
+                        value={dateOfBirth}
+                        onChange={(e) => setDateOfBirth(e.target.value)}
+                        type="date"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        variant="outlined"
+                        InputProps={{
+                          startAdornment: <CalendarIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                        }}
+                      />
+                    </Box>
+
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <TextField
+                        label="Số điện thoại"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        fullWidth
+                        variant="outlined"
+                        InputProps={{
+                          startAdornment: <PhoneIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                        }}
+                      />
+                      <TextField
+                        label="Địa chỉ"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        fullWidth
+                        variant="outlined"
+                        InputProps={{
+                          startAdornment: <LocationIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                        }}
+                      />
+                    </Box>
+
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.secondary' }}>
+                        Giới tính
+                      </Typography>
+                      <Stack direction="row" spacing={2}>
+                        <Button
+                          variant={gender === true ? "contained" : "outlined"}
+                          startIcon={<MaleIcon />}
+                          onClick={() => setGender(true)}
+                          size="small"
+                        >
+                          Nam
+                        </Button>
+                        <Button
+                          variant={gender === false ? "contained" : "outlined"}
+                          startIcon={<FemaleIcon />}
+                          onClick={() => setGender(false)}
+                          size="small"
+                        >
+                          Nữ
+                        </Button>
+                      </Stack>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+
+              {/* Academic Information */}
+              <Card sx={{ borderRadius: 2, boxShadow: 2 }}>
+                <CardHeader
+                  avatar={<SchoolIcon color="primary" />}
+                  title="Thông tin học thuật"
+                  titleTypographyProps={{ variant: 'h6', fontWeight: 600 }}
+                />
+                <CardContent>
+                  <Stack spacing={2}>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <FormControl fullWidth variant="outlined">
+                        <InputLabel>Học vị</InputLabel>
+                        <Select
+                          value={academicRank}
+                          onChange={(e) => setAcademicRank(e.target.value)}
+                          label="Học vị"
+                        >
+                          <MenuItem value="CN">Cử nhân</MenuItem>
+                          <MenuItem value="THS">Thạc sĩ</MenuItem>
+                          <MenuItem value="TS">Tiến sĩ</MenuItem>
+                          <MenuItem value="PGS">Phó Giáo sư</MenuItem>
+                          <MenuItem value="GS">Giáo sư</MenuItem>
+                        </Select>
+                      </FormControl>
+                      <TextField
+                        label="Số năm kinh nghiệm"
+                        value={experienceYears}
+                        type="number"
+                        onChange={(e) => setExperienceYears(Number(e.target.value))}
+                        fullWidth
+                        variant="outlined"
+                        InputProps={{
+                          startAdornment: <WorkIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                        }}
+                      />
+                    </Box>
+
+                    <TextField
+                      label="Chuyên ngành"
+                      value={specialization}
+                      onChange={(e) => setSpecialization(e.target.value)}
+                      fullWidth
+                      variant="outlined"
+                    />
+
+                    <TextField
+                      label="Tiểu sử"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      fullWidth
+                      multiline
+                      rows={3}
+                      variant="outlined"
+                    />
+                  </Stack>
+                </CardContent>
+              </Card>
+
+              {/* Timestamps */}
+              <Card sx={{ borderRadius: 2, boxShadow: 2 }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    <TextField
+                      label="Ngày tạo"
+                      value={lecturer.createdAt ? new Date(lecturer.createdAt).toLocaleString('vi-VN') : 'Chưa cập nhật'}
+                      InputProps={{ readOnly: true }}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                    />
+                    <TextField
+                      label="Cập nhật gần nhất"
+                      value={lecturer.updatedAt ? new Date(lecturer.updatedAt).toLocaleString('vi-VN') : 'Chưa cập nhật'}
+                      InputProps={{ readOnly: true }}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Box>
+                </CardContent>
+              </Card>
+            </Box>
+
+            {/* Right Side - Degrees and Certifications */}
+            <Box sx={{ flex: '0 0 40%', display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {/* Degrees */}
+              <Card sx={{ borderRadius: 2, boxShadow: 2, flex: 1 }}>
+                <CardHeader
+                  avatar={<SchoolIcon color="primary" />}
+                  title="Bằng cấp"
+                  titleTypographyProps={{ variant: 'h6', fontWeight: 600 }}
+                  subheader={`${degrees?.length || 0} bằng cấp`}
+                  action={
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<Add />}
+                      onClick={() => setOpenAddDegreeModal(true)}
+                      sx={{
+                        borderRadius: 2,
+                        background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                        boxShadow: '0 3px 8px rgba(33, 203, 243, .3)',
+                        '&:hover': {
+                          background: 'linear-gradient(45deg, #1976D2 30%, #1CB5E0 90%)',
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 4px 12px rgba(33, 203, 243, .4)',
+                        }
+                      }}
+                    >
+                      Thêm mới
+                    </Button>
+                  }
+                />
+                <CardContent sx={{ pt: 0, maxHeight: '400px', overflow: 'auto' }}>
+                  {degrees && degrees.length > 0 ? (
+                    <Stack spacing={2}>
+                      {degrees.map((deg: any, index: number) => (
+                        <Paper key={deg.id} variant="outlined" sx={{ borderRadius: 2 }}>
+                          <Accordion 
+                            sx={{ 
+                              boxShadow: 'none',
+                              '&:before': { display: 'none' }
+                            }}
+                          >
+                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                <Box sx={{ flexGrow: 1 }}>
+                                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                    {deg.name}
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {deg.level} • {deg.institution}
+                                  </Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <Chip 
+                                    label={getStatusText(deg.status)} 
+                                    color={getStatusColor(deg.status)} 
+                                    size="small" 
+                                  />
+                                  <Button
+                                    variant="outlined"
+                                    color="error"
+                                    size="small"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteDegree(deg, index);
+                                    }}
+                                    sx={{ 
+                                      minWidth: 'auto',
+                                      width: 32,
+                                      height: 32,
+                                      p: 0,
+                                      borderRadius: 1
+                                    }}
+                                  >
+                                    <DeleteIcon fontSize="small" />
+                                  </Button>
+                                </Box>
+                              </Box>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                              <Stack spacing={1}>
+                                <Typography variant="body2">
+                                  <strong>Chuyên ngành:</strong> {deg.major}
+                                </Typography>
+                                <Typography variant="body2">
+                                  <strong>Thời gian:</strong> {deg.startYear} - {deg.graduationYear}
+                                </Typography>
+                                <Typography variant="body2">
+                                  <strong>Mô tả:</strong> {deg.description}
+                                </Typography>
+                                <Typography variant="body2">
+                                  <strong>Ghi chú admin:</strong> {deg.adminNote || 'Không có'}
+                                </Typography>
+                                <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                                  <Button
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<VisibilityIcon />}
+                                    href={deg.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    Xem file
+                                  </Button>
+                                  <Button
+                                    variant="contained"
+                                    size="small"
+                                    startIcon={<VisibilityIcon />}
+                                    onClick={() => {
+                                      setSelectedDegree(deg);
+                                      setOpenDegreeDialog(true);
+                                    }}
+                                  >
+                                    Chi tiết
+                                  </Button>
+                                  <Button
+                                    variant="outlined"
+                                    color="error"
+                                    size="small"
+                                    startIcon={<DeleteIcon />}
+                                    onClick={() => handleDeleteDegree(deg, index)}
+                                    sx={{
+                                      '&:hover': {
+                                        backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                                      }
+                                    }}
+                                  >
+                                    Xóa
+                                  </Button>
+                                </Box>
+                              </Stack>
+                            </AccordionDetails>
+                          </Accordion>
+                        </Paper>
+                      ))}
+                    </Stack>
+                  ) : (
+                    <Box sx={{ textAlign: 'center', py: 6 }}>
+                      <SchoolIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+                      <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                        Chưa có bằng cấp nào
+                      </Typography>
+                      <Typography variant="body2" color="text.disabled" sx={{ mb: 3 }}>
+                        Thêm bằng cấp để nâng cao uy tín chuyên môn
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={() => setOpenAddDegreeModal(true)}
+                        sx={{
+                          borderRadius: 2,
+                          background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                        }}
+                      >
+                        Thêm bằng cấp đầu tiên
+                      </Button>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Certifications */}
+              <Card sx={{ borderRadius: 2, boxShadow: 2, flex: 1 }}>
+                <CardHeader
+                  avatar={<AssignmentIcon color="primary" />}
+                  title="Chứng chỉ"
+                  titleTypographyProps={{ variant: 'h6', fontWeight: 600 }}
+                  subheader={`${certifications?.length || 0} chứng chỉ`}
+                  action={
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<Add />}
+                      onClick={() => setOpenAddCertificationModal(true)}
+                      sx={{
+                        borderRadius: 2,
+                        background: 'linear-gradient(45deg, #9C27B0 30%, #E91E63 90%)',
+                        boxShadow: '0 3px 8px rgba(156, 39, 176, .3)',
+                        '&:hover': {
+                          background: 'linear-gradient(45deg, #7B1FA2 30%, #C2185B 90%)',
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 4px 12px rgba(156, 39, 176, .4)',
+                        }
+                      }}
+                    >
+                      Thêm mới
+                    </Button>
+                  }
+                />
+                <CardContent sx={{ pt: 0, maxHeight: '400px', overflow: 'auto' }}>
+                  {certifications && certifications.length > 0 ? (
+                    <Stack spacing={2}>
+                      {certifications.map((cert: any, index: number) => (
+                        <Paper key={cert.id} variant="outlined" sx={{ borderRadius: 2 }}>
+                          <Accordion 
+                            sx={{ 
+                              boxShadow: 'none',
+                              '&:before': { display: 'none' }
+                            }}
+                          >
+                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                <Box sx={{ flexGrow: 1 }}>
+                                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                    {cert.name}
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {cert.level} • {cert.issuedBy}
+                                  </Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <Chip 
+                                    label={getStatusText(cert.status)} 
+                                    color={getStatusColor(cert.status)} 
+                                    size="small" 
+                                  />
+                                  <Button
+                                    variant="outlined"
+                                    color="error"
+                                    size="small"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteCertification(cert, index);
+                                    }}
+                                    sx={{ 
+                                      minWidth: 'auto',
+                                      width: 32,
+                                      height: 32,
+                                      p: 0,
+                                      borderRadius: 1
+                                    }}
+                                  >
+                                    <DeleteIcon fontSize="small" />
+                                  </Button>
+                                </Box>
+                              </Box>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                              <Stack spacing={1}>
+                                <Typography variant="body2">
+                                  <strong>Ngày cấp:</strong> {cert.issueDate}
+                                </Typography>
+                                <Typography variant="body2">
+                                  <strong>Ngày hết hạn:</strong> {cert.expiryDate}
+                                </Typography>
+                                <Typography variant="body2">
+                                  <strong>Mô tả:</strong> {cert.description}
+                                </Typography>
+                                <Typography variant="body2">
+                                  <strong>Ghi chú admin:</strong> {cert.adminNote || 'Không có'}
+                                </Typography>
+                                <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                                  <Button
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<VisibilityIcon />}
+                                    href={cert.certificateUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    Xem file
+                                  </Button>
+                                  <Button
+                                    variant="contained"
+                                    size="small"
+                                    startIcon={<VisibilityIcon />}
+                                    onClick={() => {
+                                      setSelectedCertification(cert);
+                                      setOpenCertificationDialog(true);
+                                    }}
+                                  >
+                                    Chi tiết
+                                  </Button>
+                                  <Button
+                                    variant="outlined"
+                                    color="error"
+                                    size="small"
+                                    startIcon={<DeleteIcon />}
+                                    onClick={() => handleDeleteCertification(cert, index)}
+                                    sx={{
+                                      '&:hover': {
+                                        backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                                      }
+                                    }}
+                                  >
+                                    Xóa
+                                  </Button>
+                                </Box>
+                              </Stack>
+                            </AccordionDetails>
+                          </Accordion>
+                        </Paper>
+                      ))}
+                    </Stack>
+                  ) : (
+                    <Box sx={{ textAlign: 'center', py: 6 }}>
+                      <AssignmentIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+                      <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                        Chưa có chứng chỉ nào
+                      </Typography>
+                      <Typography variant="body2" color="text.disabled" sx={{ mb: 3 }}>
+                        Thêm chứng chỉ để chứng minh năng lực chuyên môn
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={() => setOpenAddCertificationModal(true)}
+                        sx={{
+                          borderRadius: 2,
+                          background: 'linear-gradient(45deg, #9C27B0 30%, #E91E63 90%)',
+                        }}
+                      >
+                        Thêm chứng chỉ đầu tiên
+                      </Button>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            </Box>
+          </Box>
+
+          {/* Save Button */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
+              onClick={handleSaveChanges}
+              disabled={loading}
+              sx={{
+                px: 4,
+                py: 1.5,
+                borderRadius: 2,
+                fontWeight: 600,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
+                }
+              }}
+            >
+              {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+            </Button>
+          </Box>
+
+          {loading && (
+            <Box sx={{ width: '100%', mt: 2 }}>
+              <LinearProgress />
+            </Box>
+          )}
+        </Box>
+      </Paper>
+
+      {/* Dialogs */}
+      <DegreeUpdateDialog
+        open={openDegreeDialog}
+        onClose={() => { setOpenDegreeDialog(false); setSelectedDegree(null); }}
+        data={selectedDegree}
+      />
+      <CertificationUpdateDialog
+        open={openCertificationDialog}
+        onClose={() => { setOpenCertificationDialog(false); setSelectedCertification(null); }}
+        data={selectedCertification}
+      />
+      <UploadDegreeModal
+        open={openAddDegreeModal}
+        onClose={() => setOpenAddDegreeModal(false)}
+        onSubmit={handleAddDegree}
+        editMode={false}
+      />
+      <UploadCertificationModal
+        open={openAddCertificationModal}
+        onClose={() => setOpenAddCertificationModal(false)}
+        onSubmit={handleAddCertification}
+        editMode={false}
+      />
+
+      {/* Confirmation Dialog */}
+      <Dialog open={openConfirmDialog} onClose={() => setOpenConfirmDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ pb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Xác nhận lưu thay đổi
+          </Typography>
+        </DialogTitle>
         <DialogContent>
-          <Typography>Bạn có chắc chắn muốn lưu các thay đổi thông tin giảng viên?</Typography>
+          <Typography>
+            Bạn có chắc chắn muốn lưu các thay đổi thông tin giảng viên? 
+            Thông tin sẽ được cập nhật và gửi lại để admin xem xét.
+          </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenConfirmDialog(false)}>Hủy</Button>
-          <Button onClick={handleConfirmSave} color="primary" variant="contained">Xác nhận</Button>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setOpenConfirmDialog(false)} variant="outlined">
+            Hủy bỏ
+          </Button>
+          <Button onClick={handleConfirmSave} variant="contained" sx={{ ml: 2 }}>
+            Xác nhận lưu
+          </Button>
         </DialogActions>
       </Dialog>
-    </div>
 
+      {/* Delete Confirmation Dialog */}
+      <Dialog 
+        open={deleteConfirmDialog.open} 
+        onClose={() => setDeleteConfirmDialog({ ...deleteConfirmDialog, open: false })} 
+        maxWidth="sm" 
+        fullWidth
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <DeleteIcon color="error" />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              Xác nhận xóa {deleteConfirmDialog.type === 'degree' ? 'bằng cấp' : 'chứng chỉ'}
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              Bạn có chắc chắn muốn xóa {deleteConfirmDialog.type === 'degree' ? 'bằng cấp' : 'chứng chỉ'} này không?
+            </Typography>
+            {deleteConfirmDialog.item && (
+              <Box sx={{ 
+                p: 2, 
+                backgroundColor: 'grey.50', 
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'grey.200'
+              }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                  {deleteConfirmDialog.item.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {deleteConfirmDialog.type === 'degree' 
+                    ? `${deleteConfirmDialog.item.level} • ${deleteConfirmDialog.item.institution}`
+                    : `${deleteConfirmDialog.item.level} • ${deleteConfirmDialog.item.issuedBy}`
+                  }
+                </Typography>
+              </Box>
+            )}
+          </Box>
+          <Box sx={{ 
+            p: 2, 
+            backgroundColor: 'error.lighter', 
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: 'error.light'
+          }}>
+            <Typography variant="body2" color="error.main" sx={{ fontWeight: 500 }}>
+              ⚠️ Lưu ý: Hành động này không thể hoàn tác. {deleteConfirmDialog.type === 'degree' ? 'Bằng cấp' : 'Chứng chỉ'} sẽ bị xóa vĩnh viễn khỏi hệ thống.
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={() => setDeleteConfirmDialog({ ...deleteConfirmDialog, open: false })} 
+            variant="outlined"
+            sx={{ minWidth: 100 }}
+          >
+            Hủy bỏ
+          </Button>
+          <Button 
+            onClick={handleConfirmDelete} 
+            variant="contained" 
+            color="error"
+            startIcon={<DeleteIcon />}
+            sx={{ 
+              ml: 2,
+              minWidth: 100,
+              '&:hover': {
+                backgroundColor: 'error.dark',
+              }
+            }}
+          >
+            Xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 }
 

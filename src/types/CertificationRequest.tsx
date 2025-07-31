@@ -3,7 +3,7 @@ export type CertificationRequest = {
     name: string;
     issuedBy: string;
     issueDate: Date;
-    expiryDate: Date;
+    expiryDate: Date | null;
     certificateUrl: string;
     level: string;
     description: string;

@@ -14,10 +14,8 @@ import PartnerDetailUpdateDialog from "../../components/PartnerDetailUpdateDialo
 import PartnerEditDialog from "../../components/PartnerEditDialog";
 import type { Partner } from "../../types/Parner";
 import { visuallyHidden } from "@mui/utils";
-import { alpha } from "@mui/material/styles";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import {
@@ -30,7 +28,6 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
-  Toolbar,
   Tooltip,
   Typography,
   TextField,
@@ -103,7 +100,6 @@ interface HeadCell {
 }
 
 const headCells: readonly HeadCell[] = [
-  { id: "id", numeric: true, disablePadding: false, label: "ID" },
   {
     id: "businessRegistrationNumber",
     numeric: false,
@@ -170,7 +166,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           position: "sticky",
           top: 0,
           zIndex: 2,
-          backgroundColor: "#1976d2",
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         }}
       >
         {headCells.map((headCell) => (
@@ -180,17 +176,27 @@ function EnhancedTableHead(props: EnhancedTableProps) {
             padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
             sx={{
-              backgroundColor: "#1976d2",
+              background: "transparent",
               color: "#fff",
               position: "sticky",
               top: 0,
               zIndex: 2,
+              fontWeight: 600,
+              fontSize: "0.875rem",
+              letterSpacing: "0.5px",
+              borderBottom: "2px solid rgba(255,255,255,0.2)",
             }}
           >
             <TableSortLabel
               active={orderBy === headCell.id}
               direction={orderBy === headCell.id ? order : "asc"}
               onClick={createSortHandler(headCell.id)}
+              sx={{
+                color: "#fff !important",
+                "& .MuiTableSortLabel-icon": {
+                  color: "#fff !important",
+                },
+              }}
             >
               {headCell.label}
               {orderBy === headCell.id ? (
@@ -217,7 +223,6 @@ interface EnhancedTableToolbarProps {
   statusFilter: string;
 }
 
-
 function EnhancedTableToolbar({
   numSelected,
   onEdit,
@@ -236,110 +241,153 @@ function EnhancedTableToolbar({
   ];
 
   return (
-    <Toolbar
-      sx={[
-        {
-          pl: { sm: 2 },
-          pr: { xs: 1, sm: 1 },
+    <Box
+      sx={{
+        p: 3,
+        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+        borderRadius: 3,
+        border: "1px solid rgba(255,255,255,0.8)",
+        mb: 3,
+      }}
+    >
+      <Box
+        sx={{
           display: "flex",
           alignItems: "center",
-          gap: 2,
-          bgcolor: "background.paper",
-          borderRadius: 1,
-          mb: 2,
+          justifyContent: "space-between",
+          mb: 3,
           flexWrap: "wrap",
-        },
-        numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(
-              theme.palette.primary.main,
-              theme.palette.action.activatedOpacity,
-            ),
-        },
-      ]}
-    >
-      <Typography
-        sx={{ flex: { xs: "1 1 100%", md: "1 1 auto" } }}
-        variant="h6"
-        id="tableTitle"
-        component="div"
-        color="primary.main"
-        fontWeight="bold"
+          gap: 2,
+        }}
       >
-        Danh sách Đối tác (
-        {searchTerm || industryFilter || statusFilter ? "Đã lọc" : "Tất cả"}
-        )
-      </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Avatar
+            sx={{
+              bgcolor: "primary.main",
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              width: 56,
+              height: 56,
+            }}
+          >
+            <Domain sx={{ fontSize: 28 }} />
+          </Avatar>
+          <Box>
+            <Typography
+              variant="h5"
+              sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
+            >
+              Quản lý Đối tác
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#6c757d" }}>
+              {searchTerm || industryFilter || statusFilter !== "APPROVED"
+                ? "Đã lọc"
+                : "Tất cả"}{" "
+              } đối tác
+            </Typography>
+          </Box>
+        </Box>
+
+        {numSelected > 0 && (
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Tooltip title="Chỉnh sửa">
+              <IconButton
+                onClick={onEdit}
+                sx={{
+                  bgcolor: "primary.main",
+                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  color: "white",
+                  width: 48,
+                  height: 48,
+                  "&:hover": {
+                    bgcolor: "primary.dark",
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Xóa">
+              <IconButton
+                sx={{
+                  bgcolor: "error.main",
+                  color: "white",
+                  width: 48,
+                  height: 48,
+                  "&:hover": {
+                    bgcolor: "error.dark",
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        )}
+      </Box>
 
       {/* Filter Controls */}
       <Box
-        sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}
+        sx={{
+          display: "flex",
+          gap: 2,
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
       >
-        
-
-        {/* Status Filter */}
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel id="status-select-label">Trạng thái</InputLabel>
-          <Select
-            labelId="status-select-label"
-            value={statusFilter}
-            label="Trạng thái"
-            onChange={(e) => onStatusFilter(e.target.value)}
-          >
-            {statusOptions.map((status) => (
-              <MenuItem key={status.value} value={status.value}>
-                {status.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* Search Bar */}
-        <TextField
-          variant="outlined"
-          size="small"
-          placeholder="Tìm kiếm theo tên, địa chỉ, đại diện..."
-          value={searchTerm}
-          onChange={(e) => onSearch(e.target.value)}
-          sx={{ minWidth: 400 }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" />
-              </InputAdornment>
-            ),
-            endAdornment: searchTerm && (
-              <InputAdornment position="end">
-                <IconButton size="small" onClick={() => onSearch("")}>
-                  <ClearIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Box>
-
-      {numSelected > 0 ? (
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Tooltip title="Chỉnh sửa">
-            <IconButton onClick={onEdit} color="primary">
-              <EditIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Xóa">
-            <IconButton color="error">
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
+        <Box sx={{ minWidth: 150, flex: "0 0 auto" }}>
+          <FormControl fullWidth size="small">
+            <InputLabel id="status-select-label">Trạng thái</InputLabel>
+            <Select
+              labelId="status-select-label"
+              value={statusFilter}
+              label="Trạng thái"
+              onChange={(e) => onStatusFilter(e.target.value)}
+              sx={{
+                bgcolor: "white",
+                borderRadius: 2,
+              }}
+            >
+              {statusOptions.map((status) => (
+                <MenuItem key={status.value} value={status.value}>
+                  {status.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
-      ) : (
-        <Tooltip title="Bộ lọc">
-          <IconButton>
-            <FilterListIcon />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Toolbar>
+
+        <Box sx={{ flex: "1 1 400px", minWidth: 400 }}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            size="small"
+            placeholder="🔍 Tìm kiếm theo ID, tên, địa chỉ, đại diện..."
+            value={searchTerm}
+            onChange={(e) => onSearch(e.target.value)}
+            sx={{
+              bgcolor: "white",
+              borderRadius: 2,
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: "primary.main" }} />
+                </InputAdornment>
+              ),
+              endAdornment: searchTerm && (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={() => onSearch("")}>
+                    <ClearIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
+      </Box>
+    </Box>
   );
 }
 
@@ -367,7 +415,7 @@ const AdminPartnerPage = () => {
 
   const [order, setOrder] = useState<Order>("asc");
   const [orderBy, setOrderBy] = useState<keyof Partner>("id");
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
 
   // Filter states for main list
   const [searchTerm, setSearchTerm] = useState("");
@@ -623,24 +671,42 @@ const AdminPartnerPage = () => {
     <Box
       sx={{
         width: "100%",
-        typography: "body1",
-        bgcolor: "background.default",
-        minHeight: "100vh",
+        minHeight: "fix-content",
+        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+        p: 3,
       }}
     >
       <TabContext value={value}>
-        <Paper sx={{ mb: 3, borderRadius: 2, overflow: "hidden" }}>
+        <Paper
+          elevation={0}
+          sx={{
+            mb: 3,
+            borderRadius: 3,
+            overflow: "hidden",
+            background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+            border: "1px solid rgba(255,255,255,0.8)",
+          }}
+        >
           <Box
             sx={{
               borderBottom: 1,
               borderColor: "divider",
-              bgcolor: "background.paper",
+              bgcolor: "rgba(255,255,255,0.9)",
+              backdropFilter: "blur(10px)",
             }}
           >
             <TabList
               onChange={handleChange}
               aria-label="partner management tabs"
-              sx={{ px: 2 }}
+              sx={{
+                px: 3,
+                "& .MuiTab-root": {
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: "1rem",
+                  minHeight: 60,
+                },
+              }}
             >
               <Tab
                 label={
@@ -650,7 +716,11 @@ const AdminPartnerPage = () => {
                     <Chip
                       size="small"
                       label={filteredPartners.length}
-                      color="primary"
+                      sx={{
+                        bgcolor: "primary.main",
+                        color: "white",
+                        fontWeight: 600,
+                      }}
                     />
                   </Box>
                 }
@@ -664,7 +734,11 @@ const AdminPartnerPage = () => {
                     <Chip
                       size="small"
                       label={filteredCreateList.length}
-                      color="success"
+                      sx={{
+                        bgcolor: "success.main",
+                        color: "white",
+                        fontWeight: 600,
+                      }}
                     />
                   </Box>
                 }
@@ -678,7 +752,11 @@ const AdminPartnerPage = () => {
                     <Chip
                       size="small"
                       label={filteredUpdateList.length}
-                      color="warning"
+                      sx={{
+                        bgcolor: "warning.main",
+                        color: "white",
+                        fontWeight: 600,
+                      }}
                     />
                   </Box>
                 }
@@ -689,62 +767,85 @@ const AdminPartnerPage = () => {
         </Paper>
 
         <TabPanel value="1" sx={{ p: 0 }}>
-          <Paper sx={{ width: "100%", borderRadius: 2, overflow: "hidden" }}>
-            <EnhancedTableToolbar
-              numSelected={selected ? 1 : 0}
-              onEdit={() => {
-                const partner = partners.find(
-                  (p: Partner) => p.id === selected,
-                );
-                setSelectedPartner({ partner });
-                setOpenEditDialog(true);
+          <EnhancedTableToolbar
+            numSelected={selected ? 1 : 0}
+            onEdit={() => {
+              const partner = partners.find(
+                (p: Partner) => p.id === selected,
+              );
+              setSelectedPartner({ partner });
+              setOpenEditDialog(true);
+            }}
+            onSearch={handleSearch}
+            searchTerm={searchTerm}
+            onIndustryFilter={handleIndustryFilter}
+            industryFilter={industryFilter}
+            onStatusFilter={handleStatusFilter}
+            statusFilter={statusFilter}
+          />
+
+          {/* Active Filters Display */}
+          {(searchTerm || statusFilter !== "APPROVED") && (
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                mb: 3,
+                borderRadius: 2,
+                bgcolor: "rgba(255,255,255,0.9)",
+                backdropFilter: "blur(10px)",
               }}
-              onSearch={handleSearch}
-              searchTerm={searchTerm}
-              onIndustryFilter={handleIndustryFilter}
-              industryFilter={industryFilter}
-              onStatusFilter={handleStatusFilter}
-              statusFilter={statusFilter}
-            />
-
-            {/* Add filter summary and clear button */}
-            {(searchTerm || statusFilter !== "APPROVED") && (
-              <Box sx={{ px: 2, pb: 2 }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Đang lọc:
-                  </Typography>
-                  {searchTerm && (
-                    <Chip
-                      label={`Tìm kiếm: "${searchTerm}"`}
-                      size="small"
-                      onDelete={() => setSearchTerm("")}
-                      variant="outlined"
-                    />
-                  )}
-                 
-                  {statusFilter !== "APPROVED" && (
-                    <Chip
-                      label={`Trạng thái: ${statusOptions.find(s => s.value === statusFilter)?.label}`}
-                      size="small"
-                      onDelete={() => setStatusFilter("APPROVED")}
-                      variant="outlined"
-                    />
-                  )}
-                  <Button
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Typography variant="body2" sx={{ color: "#6c757d", mr: 1 }}>
+                  Bộ lọc đang áp dụng:
+                </Typography>
+                {searchTerm && (
+                  <Chip
+                    label={`Tìm kiếm: "${searchTerm}"`}
                     size="small"
-                    onClick={clearAllFilters}
-                    sx={{ ml: 1 }}
-                  >
-                    Xóa tất cả bộ lọc
-                  </Button>
-                </Box>
+                    onDelete={() => setSearchTerm("")}
+                    color="primary"
+                    variant="outlined"
+                  />
+                )}
+                {statusFilter !== "APPROVED" && (
+                  <Chip
+                    label={`Trạng thái: ${statusOptions.find(s => s.value === statusFilter)?.label}`}
+                    size="small"
+                    onDelete={() => setStatusFilter("APPROVED")}
+                    color="success"
+                    variant="outlined"
+                  />
+                )}
+                <Button
+                  size="small"
+                  onClick={clearAllFilters}
+                  sx={{ ml: 1, textTransform: "none" }}
+                >
+                  Xóa tất cả
+                </Button>
               </Box>
-            )}
+            </Paper>
+          )}
 
+          <Paper
+            sx={{
+              borderRadius: 3,
+              overflow: "hidden",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+            }}
+          >
             <TableContainer
               sx={{
-                maxHeight: 10 * 53 + 56,
+                maxHeight: 600,
                 width: "100%",
                 overflowY: "auto",
                 overflowX: "auto",
@@ -752,20 +853,37 @@ const AdminPartnerPage = () => {
             >
               {/* Show no results message when filtered data is empty */}
               {filteredPartners.length === 0 ? (
-                <Box sx={{ p: 4, textAlign: "center" }}>
-                  <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                <Box
+                  sx={{
+                    p: 4,
+                    textAlign: "center",
+                    minHeight: 400,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    color="text.secondary"
+                    sx={{ mb: 1 }}
+                  >
                     Không tìm thấy kết quả
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm
                   </Typography>
-                  <Button onClick={clearAllFilters} sx={{ mt: 2 }}>
+                  <Button
+                    onClick={clearAllFilters}
+                    sx={{ mt: 2, textTransform: "none" }}
+                    variant="outlined"
+                  >
                     Xóa bộ lọc
                   </Button>
                 </Box>
               ) : (
                 <Table
-                  sx={{ minWidth: 900, width: "100%" }}
+                  sx={{ minWidth: 1400, width: "100%" }}
                   aria-labelledby="tableTitle"
                 >
                   <EnhancedTableHead
@@ -776,9 +894,9 @@ const AdminPartnerPage = () => {
                     rowCount={filteredPartners.length}
                   />
                   <TableBody>
-                    {visibleRows.map((row, index) => {
+                    {visibleRows.map((row, _index) => {
                       const isItemSelected = selected === row.id;
-                      const labelId = `enhanced-table-checkbox-${index}`;
+                      // const labelId = `enhanced-table-checkbox-${index}`;
 
                       return (
                         <TableRow
@@ -789,71 +907,153 @@ const AdminPartnerPage = () => {
                           tabIndex={-1}
                           key={row.id}
                           selected={isItemSelected}
-                          sx={{ cursor: "pointer" }}
+                          sx={{
+                            cursor: "pointer",
+                            "&:nth-of-type(odd)": {
+                              bgcolor: isItemSelected
+                                ? "rgba(25, 118, 210, 0.15)"
+                                : "rgba(0, 0, 0, 0.02)",
+                            },
+                            "&:nth-of-type(even)": {
+                              bgcolor: isItemSelected
+                                ? "rgba(25, 118, 210, 0.15)"
+                                : "white",
+                            },
+                            "&:hover": {
+                              bgcolor: isItemSelected
+                                ? "rgba(25, 118, 210, 0.2)"
+                                : "rgba(25, 118, 210, 0.04)",
+                              transform: "translateY(-1px)",
+                              boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                            },
+                            "&.Mui-selected": {
+                              bgcolor: "rgba(25, 118, 210, 0.15)",
+                              borderLeft: "4px solid #1976d2",
+                              "&:hover": {
+                                bgcolor: "rgba(25, 118, 210, 0.2)",
+                              },
+                            },
+                            transition: "all 0.2s ease-in-out",
+                          }}
                         >
-                          <TableCell
-                            component="th"
-                            align="right"
-                            id={labelId}
-                            scope="row"
-                            padding="normal"
-                            sx={{
-                              fontWeight: "bold",
-                              color: "primary.main",
-                              width: 80,
-                            }}
-                          >
-                            {row.id}
-                          </TableCell>
-                          <TableCell>{row.businessRegistrationNumber}</TableCell>
-                          <TableCell>
-                            <Typography variant="body2" sx={{ fontWeight: "bold", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis" }}>
-                              {row.organizationName}
+                          <TableCell sx={{ py: 2 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {row.businessRegistrationNumber}
                             </Typography>
                           </TableCell>
-                          <TableCell>
-                            {row.industry}
+                          <TableCell sx={{ py: 2, minWidth: 200 }}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 2,
+                              }}
+                            >
+                              <Avatar
+                                src={row.logoUrl}
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  bgcolor: "primary.main",
+                                  background:
+                                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                                }}
+                              >
+                                <Domain />
+                              </Avatar>
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  fontWeight: 700,
+                                  color: "#2c3e50",
+                                  maxWidth: 200,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                {row.organizationName}
+                              </Typography>
+                            </Box>
                           </TableCell>
-                          <TableCell>{row.phoneNumber}</TableCell>
-                          <TableCell>
+                          <TableCell sx={{ py: 2 }}>
+                            <Chip
+                              label={row.industry}
+                              size="small"
+                              sx={{
+                                bgcolor: "#e3f2fd",
+                                color: "#1976d2",
+                                fontWeight: 600,
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell sx={{ py: 2 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                              {row.phoneNumber}
+                            </Typography>
+                          </TableCell>
+                          <TableCell sx={{ py: 2, maxWidth: 200 }}>
                             {row.website && (
                               <a
                                 href={row.website}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                style={{ color: "#1976d2", textDecoration: "none" }}
+                                style={{
+                                  color: "#1976d2",
+                                  textDecoration: "none",
+                                  fontWeight: 500,
+                                }}
                               >
-                                {row.website.length > 30
-                                  ? `${row.website.substring(0, 30)}...`
+                                {row.website.length > 25
+                                  ? `${row.website.substring(0, 25)}...`
                                   : row.website}
                               </a>
                             )}
                           </TableCell>
-                          <TableCell sx={{ maxWidth: 200 }}>
-                            {row.address}
+                          <TableCell
+                            sx={{
+                              py: 2,
+                              maxWidth: 180,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                              {row.address}
+                            </Typography>
                           </TableCell>
-                          <TableCell>{row.representativeName}</TableCell>
-
-                          <TableCell>
+                          <TableCell sx={{ py: 2 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {row.representativeName}
+                            </Typography>
+                          </TableCell>
+                          <TableCell sx={{ py: 2 }}>
                             <Chip
                               label={getStatusLabel(row.status)}
                               size="small"
                               color={getStatusColor(row.status) as any}
                               variant="filled"
+                              sx={{ fontWeight: 600 }}
                             />
                           </TableCell>
-                          <TableCell align="center">
+                          <TableCell align="center" sx={{ py: 2 }}>
                             <Button
-                              variant="outlined"
+                              variant="contained"
                               size="small"
-                              color="primary"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 window.open(`/partner-info/${row.id}`, "_blank");
                               }}
-                              sx={{ minWidth: 100 }}
+                              sx={{
+                                minWidth: 100,
+                                borderRadius: 2,
+                                textTransform: "none",
+                                background:
+                                  "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                                fontWeight: 600,
+                              }}
                             >
-                              Xem chi tiết
+                              Chi tiết
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -876,20 +1076,44 @@ const AdminPartnerPage = () => {
         </TabPanel>
 
         <TabPanel value="2">
-          <Box sx={{ mb: 3 }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", color: "primary.main", mb: 1 }}
-            >
-              Yêu cầu đăng ký đối tác mới
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Danh sách các yêu cầu đăng ký đối tác chờ phê duyệt
-            </Typography>
-          </Box>
+          {/* Enhanced Header for Create Tab */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              mb: 3,
+              background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+              borderRadius: 3,
+              border: "1px solid rgba(255,255,255,0.8)",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
+              <Avatar
+                sx={{
+                  bgcolor: "success.main",
+                  background: "linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)",
+                  width: 56,
+                  height: 56,
+                }}
+              >
+                <Add sx={{ fontSize: 28 }} />
+              </Avatar>
+              <Box>
+                <Typography
+                  variant="h5"
+                  sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
+                >
+                  Yêu cầu đăng ký đối tác mới
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#6c757d" }}>
+                  {(createSearchTerm || createDateSort !== "oldest")
+                    ? `Đã lọc ${filteredCreateList.length} yêu cầu`
+                    : `Tổng cộng ${filteredCreateList.length} yêu cầu chờ phê duyệt`}
+                </Typography>
+              </Box>
+            </Box>
 
-          {/* Enhanced Filter Controls for Create Tab */}
-          <Paper sx={{ mb: 3, p: 2, borderRadius: 2 }}>
+            {/* Enhanced Filter Controls for Create Tab */}
             <Box
               sx={{
                 display: "flex",
@@ -898,71 +1122,80 @@ const AdminPartnerPage = () => {
                 flexWrap: "wrap",
               }}
             >
-              <FormControl size="small" sx={{ minWidth: 180 }}>
-                <InputLabel id="create-date-sort-label">
-                  Sắp xếp theo ngày
-                </InputLabel>
-                <Select
-                  labelId="create-date-sort-label"
-                  value={createDateSort}
-                  label="Sắp xếp theo ngày"
-                  onChange={(e) => setCreateDateSort(e.target.value)}
-                >
-                  <MenuItem value="oldest">Cũ nhất trước</MenuItem>
-                  <MenuItem value="newest">Mới nhất trước</MenuItem>
-                </Select>
-              </FormControl>
+              <Box sx={{ minWidth: 180, flex: "0 0 auto" }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="create-date-sort-label">
+                    Sắp xếp theo ngày
+                  </InputLabel>
+                  <Select
+                    labelId="create-date-sort-label"
+                    value={createDateSort}
+                    label="Sắp xếp theo ngày"
+                    onChange={(e) => setCreateDateSort(e.target.value)}
+                    sx={{
+                      bgcolor: "white",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <MenuItem value="oldest">Cũ nhất trước</MenuItem>
+                    <MenuItem value="newest">Mới nhất trước</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
 
-              <TextField
-                variant="outlined"
-                size="small"
-                placeholder="Tìm kiếm theo tên, địa chỉ, đại diện, ĐKKD..."
-                value={createSearchTerm}
-                onChange={(e) => setCreateSearchTerm(e.target.value)}
-                sx={{ minWidth: 400 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon color="action" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: createSearchTerm && (
-                    <InputAdornment position="end">
-                      <IconButton
-                        size="small"
-                        onClick={() => setCreateSearchTerm("")}
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
-              <Button
-                size="small"
-                onClick={clearCreateFilters}
-                disabled={!createSearchTerm && createDateSort === "oldest"}
-              >
-                Xóa bộ lọc
-              </Button>
-
-              <Typography variant="body2" color="text.secondary">
-                Tổng cộng: {filteredCreateList.length} yêu cầu
-              </Typography>
+              <Box sx={{ flex: "1 1 400px", minWidth: 400 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  placeholder="🔍 Tìm kiếm theo tên, địa chỉ, đại diện, ĐKKD..."
+                  value={createSearchTerm}
+                  onChange={(e) => setCreateSearchTerm(e.target.value)}
+                  sx={{
+                    bgcolor: "white",
+                    borderRadius: 2,
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ color: "primary.main" }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: createSearchTerm && (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          onClick={() => setCreateSearchTerm("")}
+                        >
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
             </Box>
 
             {/* Filter summary for create tab */}
             {(createSearchTerm || createDateSort !== "oldest") && (
-              <Box sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-                <Typography variant="body2" color="text.secondary">
-                  Đang lọc:
+              <Box
+                sx={{
+                  mt: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Typography variant="body2" sx={{ color: "#6c757d", mr: 1 }}>
+                  Bộ lọc đang áp dụng:
                 </Typography>
                 {createSearchTerm && (
                   <Chip
                     label={`Tìm kiếm: "${createSearchTerm}"`}
                     size="small"
                     onDelete={() => setCreateSearchTerm("")}
+                    color="primary"
                     variant="outlined"
                   />
                 )}
@@ -971,6 +1204,7 @@ const AdminPartnerPage = () => {
                     label={`Sắp xếp: ${createDateSort === "newest" ? "Mới nhất trước" : "Cũ nhất trước"}`}
                     size="small"
                     onDelete={() => setCreateDateSort("oldest")}
+                    color="secondary"
                     variant="outlined"
                   />
                 )}
@@ -1000,9 +1234,11 @@ const AdminPartnerPage = () => {
                     transition: "all 0.3s ease",
                     border: "2px solid",
                     borderColor: "success.light",
+                    borderRadius: 3,
+                    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
                     "&:hover": {
-                      transform: "translateY(-4px)",
-                      boxShadow: 4,
+                      transform: "translateY(-8px)",
+                      boxShadow: "0 12px 40px rgba(76, 175, 80, 0.2)",
                       borderColor: "success.main",
                     },
                   }}
@@ -1011,14 +1247,20 @@ const AdminPartnerPage = () => {
                     <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                       <Avatar
                         src={item.logoUrl || ""}
-                        sx={{ bgcolor: "success.main", mr: 2 }}
+                        sx={{
+                          bgcolor: "success.main",
+                          background: "linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)",
+                          mr: 2,
+                          width: 48,
+                          height: 48,
+                        }}
                       >
                         <Domain />
                       </Avatar>
                       <Box sx={{ flexGrow: 1 }}>
                         <Typography
                           variant="h6"
-                          sx={{ fontWeight: "bold", mb: 0.5 }}
+                          sx={{ fontWeight: 700, mb: 0.5, color: "#2c3e50" }}
                         >
                           {item.organizationName}
                         </Typography>
@@ -1026,13 +1268,20 @@ const AdminPartnerPage = () => {
                           <Chip
                             label={item.industry}
                             size="small"
-                            color="primary"
-                            variant="outlined"
+                            sx={{
+                              bgcolor: "#e3f2fd",
+                              color: "#1976d2",
+                              fontWeight: 600,
+                            }}
                           />
                           <Chip
                             label="Đăng ký mới"
                             size="small"
-                            color="success"
+                            sx={{
+                              bgcolor: "success.main",
+                              color: "white",
+                              fontWeight: 600,
+                            }}
                           />
                         </Box>
                       </Box>
@@ -1097,9 +1346,16 @@ const AdminPartnerPage = () => {
 
                     <Button
                       variant="contained"
-                      color="success"
                       fullWidth
-                      sx={{ mt: "auto" }}
+                      sx={{
+                        mt: "auto",
+                        borderRadius: 2,
+                        textTransform: "none",
+                        background:
+                          "linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)",
+                        fontWeight: 600,
+                        py: 1.5,
+                      }}
                       onClick={() => {
                         setSelectedPartner(item);
                         setOpenDialog(true);
@@ -1112,10 +1368,18 @@ const AdminPartnerPage = () => {
               ))}
             </Box>
           ) : (
-            <Paper sx={{ p: 4, textAlign: "center" }}>
+            <Paper
+              sx={{
+                p: 4,
+                textAlign: "center",
+                borderRadius: 3,
+                background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+              }}
+            >
               <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
-                {createSearchTerm || createDateSort !== "oldest" 
-                  ? "Không tìm thấy kết quả" 
+                {createSearchTerm || createDateSort !== "oldest"
+                  ? "Không tìm thấy kết quả"
                   : "Không có yêu cầu nào"}
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -1124,7 +1388,11 @@ const AdminPartnerPage = () => {
                   : "Hiện tại không có yêu cầu đăng ký đối tác mới nào cần xử lý."}
               </Typography>
               {(createSearchTerm || createDateSort !== "oldest") && (
-                <Button onClick={clearCreateFilters} sx={{ mt: 2 }}>
+                <Button
+                  onClick={clearCreateFilters}
+                  sx={{ mt: 2, textTransform: "none" }}
+                  variant="outlined"
+                >
                   Xóa bộ lọc
                 </Button>
               )}
@@ -1133,20 +1401,44 @@ const AdminPartnerPage = () => {
         </TabPanel>
 
         <TabPanel value="3">
-          <Box sx={{ mb: 3 }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", color: "primary.main", mb: 1 }}
-            >
-              Yêu cầu cập nhật thông tin đối tác
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Danh sách các yêu cầu cập nhật thông tin đối tác chờ phê duyệt
-            </Typography>
-          </Box>
+          {/* Enhanced Header for Update Tab */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              mb: 3,
+              background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+              borderRadius: 3,
+              border: "1px solid rgba(255,255,255,0.8)",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
+              <Avatar
+                sx={{
+                  bgcolor: "warning.main",
+                  background: "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)",
+                  width: 56,
+                  height: 56,
+                }}
+              >
+                <Update sx={{ fontSize: 28 }} />
+              </Avatar>
+              <Box>
+                <Typography
+                  variant="h5"
+                  sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
+                >
+                  Yêu cầu cập nhật thông tin đối tác
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#6c757d" }}>
+                  {(updateSearchTerm || updateDateSort !== "oldest")
+                    ? `Đã lọc ${filteredUpdateList.length} yêu cầu`
+                    : `Tổng cộng ${filteredUpdateList.length} yêu cầu chờ phê duyệt`}
+                </Typography>
+              </Box>
+            </Box>
 
-          {/* Enhanced Filter Controls for Update Tab */}
-          <Paper sx={{ mb: 3, p: 2, borderRadius: 2 }}>
+            {/* Similar enhanced filter controls for Update Tab */}
             <Box
               sx={{
                 display: "flex",
@@ -1155,71 +1447,80 @@ const AdminPartnerPage = () => {
                 flexWrap: "wrap",
               }}
             >
-              <FormControl size="small" sx={{ minWidth: 180 }}>
-                <InputLabel id="update-date-sort-label">
-                  Sắp xếp theo ngày
-                </InputLabel>
-                <Select
-                  labelId="update-date-sort-label"
-                  value={updateDateSort}
-                  label="Sắp xếp theo ngày"
-                  onChange={(e) => setUpdateDateSort(e.target.value)}
-                >
-                  <MenuItem value="oldest">Cũ nhất trước</MenuItem>
-                  <MenuItem value="newest">Mới nhất trước</MenuItem>
-                </Select>
-              </FormControl>
+              <Box sx={{ minWidth: 180, flex: "0 0 auto" }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="update-date-sort-label">
+                    Sắp xếp theo ngày
+                  </InputLabel>
+                  <Select
+                    labelId="update-date-sort-label"
+                    value={updateDateSort}
+                    label="Sắp xếp theo ngày"
+                    onChange={(e) => setUpdateDateSort(e.target.value)}
+                    sx={{
+                      bgcolor: "white",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <MenuItem value="oldest">Cũ nhất trước</MenuItem>
+                    <MenuItem value="newest">Mới nhất trước</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
 
-              <TextField
-                variant="outlined"
-                size="small"
-                placeholder="Tìm kiếm theo tên, địa chỉ, đại diện, ĐKKD..."
-                value={updateSearchTerm}
-                onChange={(e) => setUpdateSearchTerm(e.target.value)}
-                sx={{ minWidth: 400 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon color="action" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: updateSearchTerm && (
-                    <InputAdornment position="end">
-                      <IconButton
-                        size="small"
-                        onClick={() => setUpdateSearchTerm("")}
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
-              <Button
-                size="small"
-                onClick={clearUpdateFilters}
-                disabled={!updateSearchTerm && updateDateSort === "oldest"}
-              >
-                Xóa bộ lọc
-              </Button>
-
-              <Typography variant="body2" color="text.secondary">
-                Tổng cộng: {filteredUpdateList.length} yêu cầu
-              </Typography>
+              <Box sx={{ flex: "1 1 400px", minWidth: 400 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  placeholder="🔍 Tìm kiếm theo tên, địa chỉ, đại diện, ĐKKD..."
+                  value={updateSearchTerm}
+                  onChange={(e) => setUpdateSearchTerm(e.target.value)}
+                  sx={{
+                    bgcolor: "white",
+                    borderRadius: 2,
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ color: "primary.main" }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: updateSearchTerm && (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          onClick={() => setUpdateSearchTerm("")}
+                        >
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
             </Box>
 
             {/* Filter summary for update tab */}
             {(updateSearchTerm || updateDateSort !== "oldest") && (
-              <Box sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-                <Typography variant="body2" color="text.secondary">
-                  Đang lọc:
+              <Box
+                sx={{
+                  mt: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Typography variant="body2" sx={{ color: "#6c757d", mr: 1 }}>
+                  Bộ lọc đang áp dụng:
                 </Typography>
                 {updateSearchTerm && (
                   <Chip
                     label={`Tìm kiếm: "${updateSearchTerm}"`}
                     size="small"
                     onDelete={() => setUpdateSearchTerm("")}
+                    color="primary"
                     variant="outlined"
                   />
                 )}
@@ -1228,6 +1529,7 @@ const AdminPartnerPage = () => {
                     label={`Sắp xếp: ${updateDateSort === "newest" ? "Mới nhất trước" : "Cũ nhất trước"}`}
                     size="small"
                     onDelete={() => setUpdateDateSort("oldest")}
+                    color="secondary"
                     variant="outlined"
                   />
                 )}
@@ -1235,7 +1537,7 @@ const AdminPartnerPage = () => {
             )}
           </Paper>
 
-          {/* Show no results message when filtered data is empty */}
+          {/* Update cards with enhanced styling similar to create tab but with warning colors */}
           {filteredUpdateList && filteredUpdateList.length > 0 ? (
             <Box
               sx={{
@@ -1261,9 +1563,11 @@ const AdminPartnerPage = () => {
                         transition: "all 0.3s ease",
                         border: "2px solid",
                         borderColor: "warning.light",
+                        borderRadius: 3,
+                        background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
                         "&:hover": {
-                          transform: "translateY(-4px)",
-                          boxShadow: 4,
+                          transform: "translateY(-8px)",
+                          boxShadow: "0 12px 40px rgba(255, 152, 0, 0.2)",
                           borderColor: "warning.main",
                         },
                       }}
@@ -1271,15 +1575,21 @@ const AdminPartnerPage = () => {
                       <CardContent sx={{ p: 3 }}>
                         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                           <Avatar
-                            src={partner.logoUrl || ""}
-                            sx={{ bgcolor: "warning.main", mr: 2 }}
+                            src={partner.logoUrl}
+                            sx={{
+                              bgcolor: "warning.main",
+                              background: "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)",
+                              mr: 2,
+                              width: 48,
+                              height: 48,
+                            }}
                           >
                             <Domain />
                           </Avatar>
                           <Box sx={{ flexGrow: 1 }}>
                             <Typography
                               variant="h6"
-                              sx={{ fontWeight: "bold", mb: 0.5 }}
+                              sx={{ fontWeight: 700, mb: 0.5, color: "#2c3e50" }}
                             >
                               {partner.organizationName}
                             </Typography>
@@ -1287,10 +1597,21 @@ const AdminPartnerPage = () => {
                               <Chip
                                 label={partner.industry}
                                 size="small"
-                                color="primary"
-                                variant="outlined"
+                                sx={{
+                                  bgcolor: "#e3f2fd",
+                                  color: "#1976d2",
+                                  fontWeight: 600,
+                                }}
                               />
-                              <Chip label="Cập nhật" size="small" color="warning" />
+                              <Chip
+                                label="Cập nhật"
+                                size="small"
+                                sx={{
+                                  bgcolor: "warning.main",
+                                  color: "white",
+                                  fontWeight: 600,
+                                }}
+                              />
                             </Box>
                           </Box>
                         </Box>
@@ -1328,9 +1649,16 @@ const AdminPartnerPage = () => {
 
                         <Button
                           variant="contained"
-                          color="warning"
                           fullWidth
-                          sx={{ mt: "auto" }}
+                          sx={{
+                            mt: "auto",
+                            borderRadius: 2,
+                            textTransform: "none",
+                            background:
+                              "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)",
+                            fontWeight: 600,
+                            py: 1.5,
+                          }}
                           onClick={() => {
                             setSelectedUpdate({
                               oldData: partner,
@@ -1349,7 +1677,15 @@ const AdminPartnerPage = () => {
               })}
             </Box>
           ) : (
-            <Paper sx={{ p: 4, textAlign: "center" }}>
+            <Paper
+              sx={{
+                p: 4,
+                textAlign: "center",
+                borderRadius: 3,
+                background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+              }}
+            >
               <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
                 {updateSearchTerm || updateDateSort !== "oldest"
                   ? "Không tìm thấy kết quả"

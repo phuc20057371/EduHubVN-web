@@ -32,6 +32,7 @@ import { toast } from "react-toastify";
 import { API } from "../utils/Fetch";
 import { useDispatch, useSelector } from "react-redux";
 import { setLecturerPendingCreate } from "../redux/slice/LecturerPendingCreateSlice";
+import { setLecturers } from "../redux/slice/LecturerSlice";
 interface ConfirmDialogProps {
   open: boolean;
   title: string;
@@ -90,10 +91,10 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
   >("PENDING");
   const [lecturerNote, setLecturerNote] = useState<string>("");
   const [degreeStates, setDegreeStates] = useState<{
-    [id: number]: { status: "PENDING" | "APPROVED" | "REJECTED"; note: string };
+    [id: string]: { status: "PENDING" | "APPROVED" | "REJECTED"; note: string };
   }>({});
   const [certStates, setCertStates] = useState<{
-    [id: number]: { status: "PENDING" | "APPROVED" | "REJECTED"; note: string };
+    [id: string]: { status: "PENDING" | "APPROVED" | "REJECTED"; note: string };
   }>({});
   // Confirm dialog state
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -101,13 +102,13 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
     null,
   );
   const [confirmTarget, setConfirmTarget] = useState<{
-    id: number;
+    id: string;
     type: "Degree" | "Certification" | "Lecturer";
     note?: string;
   } | null>(null);
   // Load from localStorage on open
-  const domain = window.location.hostname;
-  const BASE_URL = `http://${domain}:8080`;
+  // const domain = window.location.hostname;
+  // const BASE_URL = `http://${domain}:8080`;
   useEffect(() => {
     if (!open) return;
     // Lecturer
@@ -134,7 +135,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
       try {
         const degArr = JSON.parse(degStr);
         const degMap: {
-          [id: number]: {
+          [id: string]: {
             status: "PENDING" | "APPROVED" | "REJECTED";
             note: string;
           };
@@ -160,7 +161,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
       } catch {}
     } else {
       const degMap: {
-        [id: number]: {
+        [id: string]: {
           status: "PENDING" | "APPROVED" | "REJECTED";
           note: string;
         };
@@ -185,7 +186,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
       try {
         const certArr = JSON.parse(certStr);
         const certMap: {
-          [id: number]: {
+          [id: string]: {
             status: "PENDING" | "APPROVED" | "REJECTED";
             note: string;
           };
@@ -211,7 +212,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
       } catch {}
     } else {
       const certMap: {
-        [id: number]: {
+        [id: string]: {
           status: "PENDING" | "APPROVED" | "REJECTED";
           note: string;
         };
@@ -232,12 +233,12 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
 
   // Handle approve/reject
   // Approve/Reject for Degree/Certification
-  const handleApprove = (id: number, type: "Degree" | "Certification") => {
+  const handleApprove = (id: string, type: "Degree" | "Certification") => {
     setConfirmType("approve");
     setConfirmTarget({ id, type });
     setConfirmOpen(true);
   };
-  const handleReject = (id: number, type: "Degree" | "Certification") => {
+  const handleReject = (id: string, type: "Degree" | "Certification") => {
     setConfirmType("reject");
     setConfirmTarget({
       id,
@@ -270,7 +271,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
               note: "",
             };
             const newState: {
-              [id: number]: {
+              [id: string]: {
                 status: "PENDING" | "APPROVED" | "REJECTED";
                 note: string;
               };
@@ -282,7 +283,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
               `Degrees${lecturer.id}`,
               JSON.stringify(
                 Object.entries(newState).map(([id, v]) => ({
-                  id: Number(id),
+                  id: id, // Keep as string
                   ...v,
                 })),
               ),
@@ -296,7 +297,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
               note: "",
             };
             const newState: {
-              [id: number]: {
+              [id: string]: {
                 status: "PENDING" | "APPROVED" | "REJECTED";
                 note: string;
               };
@@ -308,7 +309,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
               `Certification${lecturer.id}`,
               JSON.stringify(
                 Object.entries(newState).map(([id, v]) => ({
-                  id: Number(id),
+                  id: id, // Keep as string
                   ...v,
                 })),
               ),
@@ -331,7 +332,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
         } else if (confirmTarget.type === "Degree") {
           setDegreeStates((prev) => {
             const newState: {
-              [id: number]: {
+              [id: string]: {
                 status: "PENDING" | "APPROVED" | "REJECTED";
                 note: string;
               };
@@ -346,7 +347,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
               `Degrees${lecturer.id}`,
               JSON.stringify(
                 Object.entries(newState).map(([id, v]) => ({
-                  id: Number(id),
+                  id: id, // Keep as string
                   ...v,
                 })),
               ),
@@ -356,7 +357,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
         } else if (confirmTarget.type === "Certification") {
           setCertStates((prev) => {
             const newState: {
-              [id: number]: {
+              [id: string]: {
                 status: "PENDING" | "APPROVED" | "REJECTED";
                 note: string;
               };
@@ -371,7 +372,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
               `Certification${lecturer.id}`,
               JSON.stringify(
                 Object.entries(newState).map(([id, v]) => ({
-                  id: Number(id),
+                  id: id, // Keep as string
                   ...v,
                 })),
               ),
@@ -392,7 +393,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
   };
   // Refresh status to PENDING
   const handleRefresh = (
-    id: number,
+    id: string,
     type: "Degree" | "Certification" | "Lecturer",
   ) => {
     if (type === "Lecturer") {
@@ -409,7 +410,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
       setDegreeStates((prev) => {
         const prevState = prev[id] || { status: "PENDING", note: "" };
         const newState: {
-          [id: number]: {
+          [id: string]: {
             status: "PENDING" | "APPROVED" | "REJECTED";
             note: string;
           };
@@ -421,7 +422,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
           `Degrees${lecturer.id}`,
           JSON.stringify(
             Object.entries(newState).map(([id, v]) => ({
-              id: Number(id),
+              id: id, // Keep as string
               ...v,
             })),
           ),
@@ -432,7 +433,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
       setCertStates((prev) => {
         const prevState = prev[id] || { status: "PENDING", note: "" };
         const newState: {
-          [id: number]: {
+          [id: string]: {
             status: "PENDING" | "APPROVED" | "REJECTED";
             note: string;
           };
@@ -444,7 +445,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
           `Certification${lecturer.id}`,
           JSON.stringify(
             Object.entries(newState).map(([id, v]) => ({
-              id: Number(id),
+              id: id, // Keep as string
               ...v,
             })),
           ),
@@ -1071,7 +1072,10 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                                       textOverflow: "ellipsis",
                                     }}
                                     onClick={() =>
-                                      deg.url && window.open(BASE_URL+"/uploads/" + deg.url)
+                                      deg.url &&
+                                      window.open(
+                                        deg.url,
+                                      )
                                     }
                                   >
                                     {deg.url || "Không có"}
@@ -1389,7 +1393,10 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                                     }}
                                     onClick={() =>
                                       cert.certificateUrl &&
-                                      window.open(`${BASE_URL}/uploads/${cert.certificateUrl}`, "_blank")
+                                      window.open(
+                                        cert.certificateUrl
+                                        
+                                      )
                                     }
                                   >
                                     {cert.certificateUrl || "Không có"}
@@ -1616,10 +1623,10 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
               // Save Degrees
               for (const [id, v] of Object.entries(degreeStates)) {
                 if (v.status === "APPROVED") {
-                  await API.admin.approveDegree({ id: Number(id) });
+                  await API.admin.approveDegree({ id: id }); // Use string ID
                 } else if (v.status === "REJECTED") {
                   await API.admin.rejectDegree({
-                    id: Number(id),
+                    id: id, // Use string ID
                     adminNote: v.note,
                   });
                 }
@@ -1628,10 +1635,10 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
               // Save Certifications
               for (const [id, v] of Object.entries(certStates)) {
                 if (v.status === "APPROVED") {
-                  await API.admin.approveCertification({ id: Number(id) });
+                  await API.admin.approveCertification({ id: id }); // Use string ID
                 } else if (v.status === "REJECTED") {
                   await API.admin.rejectCertification({
-                    id: Number(id),
+                    id: id, // Use string ID
                     adminNote: v.note,
                   });
                 }
@@ -1641,6 +1648,10 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
               localStorage.removeItem(`Lecturer${lecturer.id}`);
               localStorage.removeItem(`Degrees${lecturer.id}`);
               localStorage.removeItem(`Certification${lecturer.id}`);
+
+              const res = await API.admin.getAllLecturers();
+              dispatch(setLecturers(res.data.data));
+
               handleDialogClose();
             } catch (error) {
               console.error("Error saving lecturer details:", error);

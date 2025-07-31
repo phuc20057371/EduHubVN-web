@@ -1,7 +1,7 @@
 type UserRole = "USER" | "LECTURER" | "SCHOOL" | "ORGANIZATION" | "ADMIN";
 
 export type UserProfile = {
-    id: number;
+    id: string;
     email: string;
     role: UserRole;
     lastLogin: Date

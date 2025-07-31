@@ -1,5 +1,5 @@
 export type Degree = {
-  id: number;
+  id: string;
   referenceId: string;
   name: string;
   major: string;

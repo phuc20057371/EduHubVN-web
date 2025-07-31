@@ -1,75 +1,50 @@
-import { useEffect, useState, type SyntheticEvent } from "react";
-import { API } from "../../utils/Fetch";
+import { useEffect, useState, useCallback, useMemo, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCourse } from "../../redux/slice/CourseSilce";
-import * as React from "react";
-import { alpha } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from "@mui/icons-material/Clear";
-import TextField from "@mui/material/TextField";
-import InputAdornment from "@mui/material/InputAdornment";
-import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
-import Avatar from "@mui/material/Avatar";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
+import { API } from "../../utils/Fetch";
+import {
+  Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableSortLabel,
+  Typography,
+  Chip,
+  Avatar,
+  Button,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  IconButton,
+  Tooltip,
+  Badge,
+} from "@mui/material";
+import {
+  School,
+  Search,
+  Clear,
+  Visibility,
+  People,
+  LocationOn,
+  Language,
+  Edit,
+  Delete,
+  DateRange,
+  Add, // Add this import
+} from "@mui/icons-material";
 import { visuallyHidden } from "@mui/utils";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import ListItemText from "@mui/material/ListItemText";
-import Divider from "@mui/material/Divider";
-import Tab from "@mui/material/Tab";
-import TabContext from "@mui/lab/TabContext";
-import TabList from "@mui/lab/TabList";
-import TabPanel from "@mui/lab/TabPanel";
-import { School, Schedule, CalendarMonth } from "@mui/icons-material";
-
-function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
+import CourseMemberDialog from "../../components/CourseMemberDialog";
+import CreateCourseDialog from "../../components/CreateCourseDialog"; // Uncomment this import
+import { toast } from "react-toastify";
 
 type Order = "asc" | "desc";
-
-function getComparator<Key extends keyof any>(
-  order: Order,
-  orderBy: Key,
-): (
-  a: { [key in Key]: number | string },
-  b: { [key in Key]: number | string },
-) => number {
-  return order === "desc"
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
 
 interface HeadCell {
   disablePadding: boolean;
@@ -79,16 +54,21 @@ interface HeadCell {
 }
 
 const headCells: readonly HeadCell[] = [
-  { id: "id", numeric: true, disablePadding: false, label: "ID" },
-  { id: "title", numeric: false, disablePadding: false, label: "Tên khóa học" },
-  { id: "topic", numeric: false, disablePadding: false, label: "Chủ đề" },
-  { id: "courseType", numeric: false, disablePadding: false, label: "Loại KH" },
-  { id: "scale", numeric: false, disablePadding: false, label: "Quy mô" },
-  { id: "level", numeric: false, disablePadding: false, label: "Trình độ" },
+  {
+    id: "title",
+    numeric: false,
+    disablePadding: false,
+    label: "Thông tin khóa học",
+  },
+  {
+    id: "courseType",
+    numeric: false,
+    disablePadding: false,
+    label: "Loại & Trình độ",
+  },
   { id: "price", numeric: true, disablePadding: false, label: "Giá (VNĐ)" },
-  { id: "startDate", numeric: false, disablePadding: false, label: "Ngày bắt đầu" },
-  { id: "endDate", numeric: false, disablePadding: false, label: "Ngày kết thúc" },
-  // { id: "isPublished", numeric: false, disablePadding: false, label: "Trạng thái" },
+  { id: "schedule", numeric: false, disablePadding: false, label: "Thời gian" },
+  { id: "status", numeric: false, disablePadding: false, label: "Trạng thái" },
   { id: "members", numeric: false, disablePadding: false, label: "Giảng viên" },
   { id: "actions", numeric: false, disablePadding: false, label: "Thao tác" },
 ];
@@ -102,9 +82,10 @@ interface EnhancedTableProps {
 
 function EnhancedTableHead(props: EnhancedTableProps) {
   const { order, orderBy, onRequestSort } = props;
-  const createSortHandler = (property: string) => (event: React.MouseEvent<unknown>) => {
-    onRequestSort(event, property);
-  };
+  const createSortHandler =
+    (property: string) => (event: React.MouseEvent<unknown>) => {
+      onRequestSort(event, property);
+    };
 
   return (
     <TableHead>
@@ -113,7 +94,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           position: "sticky",
           top: 0,
           zIndex: 2,
-          backgroundColor: "#1976d2",
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         }}
       >
         {headCells.map((headCell) => (
@@ -123,17 +104,27 @@ function EnhancedTableHead(props: EnhancedTableProps) {
             padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
             sx={{
-              backgroundColor: "#1976d2",
+              background: "transparent",
               color: "#fff",
               position: "sticky",
               top: 0,
               zIndex: 2,
+              fontWeight: 600,
+              fontSize: "0.875rem",
+              letterSpacing: "0.5px",
+              borderBottom: "2px solid rgba(255,255,255,0.2)",
             }}
           >
             <TableSortLabel
               active={orderBy === headCell.id}
               direction={orderBy === headCell.id ? order : "asc"}
               onClick={createSortHandler(headCell.id)}
+              sx={{
+                color: "#fff !important",
+                "& .MuiTableSortLabel-icon": {
+                  color: "#fff !important",
+                },
+              }}
             >
               {headCell.label}
               {orderBy === headCell.id ? (
@@ -149,208 +140,233 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-interface EnhancedTableToolbarProps {
-  numSelected: number;
-  onEdit?: () => void;
-  onSearch: (value: string) => void;
-  searchTerm: string;
-  onCourseTypeFilter: (value: string) => void;
-  courseTypeFilter: string;
-  onScaleFilter: (value: string) => void;
-  scaleFilter: string;
-  onStatusFilter: (value: string) => void;
-  statusFilter: string;
-}
-
-function EnhancedTableToolbar({
-  numSelected,
-  onEdit,
-  onSearch,
-  searchTerm,
-  onCourseTypeFilter,
-  courseTypeFilter,
-  onScaleFilter,
-  scaleFilter,
-  onStatusFilter,
-  statusFilter,
-}: EnhancedTableToolbarProps) {
-  const courseTypes = [
-    { value: "", label: "Tất cả" },
-    { value: "FORMAL", label: "Chính quy" },
-    { value: "SPECIALIZED", label: "Chuyên đề" },
-    { value: "EXTRACURRICULAR", label: "Ngoại khóa" },
-  ];
-
-  const scales = [
-    { value: "", label: "Tất cả" },
-    { value: "INSTITUTIONAL", label: "Cấp đơn vị" },
-    { value: "UNIVERSITY", label: "Cấp trường" },
-    { value: "DEPARTMENTAL", label: "Cấp khoa/tỉnh" },
-    { value: "MINISTERIAL", label: "Cấp bộ" },
-    { value: "NATIONAL", label: "Cấp quốc gia" },
-    { value: "INTERNATIONAL", label: "Cấp quốc tế" },
-  ];
-
-  const statusOptions = [
-    { value: "", label: "Tất cả" },
-    { value: "true", label: "Đã xuất bản" },
-    { value: "false", label: "Chưa xuất bản" },
-  ];
-
-  return (
-    <Toolbar
-      sx={[
-        {
-          pl: { sm: 2 },
-          pr: { xs: 1, sm: 1 },
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          bgcolor: "background.paper",
-          borderRadius: 1,
-          mb: 2,
-          flexWrap: "wrap",
+// Memoize TableRow component to prevent unnecessary re-renders
+const CourseTableRow = memo(({ 
+  row, 
+  isItemSelected, 
+  onRowClick, 
+  onViewMembers,
+  courseTypeConfig,
+  levelConfig,
+  formatPrice,
+  formatDate 
+}: any) => (
+  <TableRow
+    hover
+    onClick={(event) => onRowClick(event, row.course.id)}
+    role="checkbox"
+    aria-checked={isItemSelected}
+    tabIndex={-1}
+    key={row.course.id}
+    selected={isItemSelected}
+    sx={{
+      cursor: "pointer",
+      "&:nth-of-type(odd)": { 
+        bgcolor: isItemSelected ? "rgba(25, 118, 210, 0.15)" : "rgba(0, 0, 0, 0.02)" 
+      },
+      "&:nth-of-type(even)": { 
+        bgcolor: isItemSelected ? "rgba(25, 118, 210, 0.15)" : "white" 
+      },
+      "&:hover": {
+        bgcolor: isItemSelected 
+          ? "rgba(25, 118, 210, 0.2)" 
+          : "rgba(25, 118, 210, 0.04)",
+        transform: "translateY(-1px)",
+        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+      },
+      "&.Mui-selected": {
+        bgcolor: "rgba(25, 118, 210, 0.15)",
+        borderLeft: "4px solid #1976d2",
+        "&:hover": {
+          bgcolor: "rgba(25, 118, 210, 0.2)",
         },
-        numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(
-              theme.palette.primary.main,
-              theme.palette.action.activatedOpacity,
-            ),
-        },
-      ]}
-    >
-      <Typography
-        sx={{ flex: { xs: "1 1 100%", md: "1 1 auto" } }}
-        variant="h6"
-        id="tableTitle"
-        component="div"
-        color="primary.main"
-        fontWeight="bold"
-      >
-        Danh sách Khóa học (
-        {searchTerm || courseTypeFilter || scaleFilter || statusFilter ? "Đã lọc" : "Tất cả"}
-        )
-      </Typography>
+      },
+      transition: "all 0.2s ease-in-out",
+    }}
+  >
+    {/* Course Info */}
+    <TableCell sx={{ minWidth: 300, py: 2 }}>
+      <Box sx={{ display: "flex", gap: 2 }}>
+        <Avatar
+          src={row.course.thumbnailUrl}
+          sx={{ width: 60, height: 60, borderRadius: 2 }}
+        >
+          <School />
+        </Avatar>
+        <Box sx={{ flex: 1 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: 600, mb: 0.5 }}
+          >
+            {row.course.title}
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{ color: "#6c757d", mb: 1 }}
+          >
+            {row.course.topic}
+          </Typography>
+          <Box
+            sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}
+          >
+            <Chip
+              label={row.course.language}
+              size="small"
+              icon={<Language sx={{ fontSize: 14 }} />}
+              sx={{ fontSize: "0.75rem", height: 24 }}
+            />
+            <Chip
+              label={
+                row.course.isOnline ? "Trực tuyến" : "Tại lớp"
+              }
+              size="small"
+              color={row.course.isOnline ? "success" : "info"}
+              icon={
+                row.course.isOnline ? undefined : (
+                  <LocationOn sx={{ fontSize: 14 }} />
+                )
+              }
+              sx={{ fontSize: "0.75rem", height: 24 }}
+            />
+          </Box>
+        </Box>
+      </Box>
+    </TableCell>
 
-      {/* Filter Controls */}
+    {/* Type & Level */}
+    <TableCell sx={{ py: 2, minWidth: 180 }}>
       <Box
-        sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
+        }}
       >
-        {/* Course Type Filter */}
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel id="course-type-select-label">Loại khóa học</InputLabel>
-          <Select
-            labelId="course-type-select-label"
-            value={courseTypeFilter}
-            label="Loại khóa học"
-            onChange={(e) => onCourseTypeFilter(e.target.value)}
-          >
-            {courseTypes.map((type) => (
-              <MenuItem key={type.value} value={type.value}>
-                {type.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* Scale Filter */}
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel id="scale-select-label">Quy mô</InputLabel>
-          <Select
-            labelId="scale-select-label"
-            value={scaleFilter}
-            label="Quy mô"
-            onChange={(e) => onScaleFilter(e.target.value)}
-          >
-            {scales.map((scale) => (
-              <MenuItem key={scale.value} value={scale.value}>
-                {scale.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* Status Filter */}
-        {/* <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel id="status-select-label">Trạng thái</InputLabel>
-          <Select
-            labelId="status-select-label"
-            value={statusFilter}
-            label="Trạng thái"
-            onChange={(e) => onStatusFilter(e.target.value)}
-          >
-            {statusOptions.map((status) => (
-              <MenuItem key={status.value} value={status.value}>
-                {status.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl> */}
-
-        {/* Search Bar */}
-        <TextField
-          variant="outlined"
+        <Chip
+          label={`${courseTypeConfig.icon} ${courseTypeConfig.label}`}
           size="small"
-          placeholder="Tìm kiếm theo tên, chủ đề, mô tả..."
-          value={searchTerm}
-          onChange={(e) => onSearch(e.target.value)}
-          sx={{ minWidth: 300 }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" />
-              </InputAdornment>
-            ),
-            endAdornment: searchTerm && (
-              <InputAdornment position="end">
-                <IconButton size="small" onClick={() => onSearch("")}>
-                  <ClearIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
+          sx={{
+            bgcolor: courseTypeConfig.bgColor,
+            color: courseTypeConfig.color,
+            fontWeight: 600,
+          }}
+        />
+        <Chip
+          label={`${levelConfig.icon} ${levelConfig.label}`}
+          size="small"
+          sx={{
+            bgcolor: levelConfig.bgColor,
+            color: levelConfig.color,
+            fontWeight: 600,
           }}
         />
       </Box>
+    </TableCell>
 
-      {numSelected > 0 ? (
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Tooltip title="Chỉnh sửa">
-            <IconButton onClick={onEdit} color="primary">
-              <EditIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Xóa">
-            <IconButton color="error">
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ) : (
-        <Tooltip title="Bộ lọc">
-          <IconButton>
-            <FilterListIcon />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Toolbar>
-  );
-}
+    {/* Price */}
+    <TableCell align="right" sx={{ py: 2 }}>
+      <Typography
+        variant="h6"
+        sx={{
+          fontWeight: 700,
+          color: row.course.price ? "#2e7d32" : "#ed6c02",
+        }}
+      >
+        {row.course.price
+          ? formatPrice(row.course.price)
+          : "Miễn phí"}
+      </Typography>
+    </TableCell>
+
+    {/* Schedule */}
+    <TableCell sx={{ py: 2 }}>
+      <Box>
+        <Typography
+          variant="body2"
+          sx={{ fontWeight: 600, mb: 0.5 }}
+        >
+          Từ: {formatDate(row.course.startDate)}
+        </Typography>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          Đến: {formatDate(row.course.endDate)}
+        </Typography>
+      </Box>
+    </TableCell>
+
+    {/* Status */}
+    <TableCell sx={{ py: 2 }}>
+      <Chip
+        label={
+          row.course.isPublished
+            ? "Đã xuất bản"
+            : "Chưa xuất bản"
+        }
+        size="small"
+        color={row.course.isPublished ? "success" : "warning"}
+        variant="filled"
+      />
+    </TableCell>
+
+    {/* Members */}
+    <TableCell sx={{ py: 2 }}>
+      <Badge
+        badgeContent={row.members?.length || 0}
+        color="primary"
+      >
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<People />}
+          sx={{ borderRadius: 2, textTransform: "none" }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onViewMembers(row.members || [], row.course);
+          }}
+        >
+          Giảng viên
+        </Button>
+      </Badge>
+    </TableCell>
+
+    {/* Actions */}
+    <TableCell align="center" sx={{ py: 2 }}>
+      <Button
+        variant="contained"
+        size="small"
+        startIcon={<Visibility />}
+        onClick={(e) => {
+          e.stopPropagation();
+          console.log("View details:", row.course.id);
+        }}
+        sx={{
+          borderRadius: 2,
+          textTransform: "none",
+          background:
+            "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        }}
+      >
+        Chi tiết
+      </Button>
+    </TableCell>
+  </TableRow>
+));
 
 const AdminCourse = () => {
   const dispatch = useDispatch();
   const courses = useSelector((state: any) => state.courses || []);
-  
-  const [value, setValue] = useState("1");
-  const [order, setOrder] = React.useState<Order>("asc");
-  const [orderBy, setOrderBy] = React.useState<string>("id");
-  const [selected, setSelected] = React.useState<number | null>(null);
+
+  const [order, setOrder] = useState<Order>("asc");
+  const [orderBy, setOrderBy] = useState<string>("title");
+  const [selected, setSelected] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [courseTypeFilter, setCourseTypeFilter] = useState("");
-  const [scaleFilter, setScaleFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [startDateFilter, setStartDateFilter] = useState("");
+  const [endDateFilter, setEndDateFilter] = useState("");
   const [membersDialogOpen, setMembersDialogOpen] = useState(false);
   const [selectedCourseMembers, setSelectedCourseMembers] = useState<any[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
+  const [createCourseDialogOpen, setCreateCourseDialogOpen] = useState(false); // Add this state
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -365,223 +381,572 @@ const AdminCourse = () => {
     fetchCourses();
   }, [dispatch]);
 
-  const handleRequestSort = (
+  // Memoize heavy functions
+  const getCourseTypeConfig = useCallback((type: string) => {
+    switch (type) {
+      case "FORMAL":
+        return {
+          label: "Chính quy",
+          color: "#1976d2",
+          bgColor: "#e3f2fd",
+          icon: "",
+        };
+      case "SPECIALIZED":
+        return {
+          label: "Chuyên đề",
+          color: "#388e3c",
+          bgColor: "#e8f5e9",
+          icon: "",
+        };
+      case "EXTRACURRICULAR":
+        return {
+          label: "Ngoại khóa",
+          color: "#f57c00",
+          bgColor: "#fff3e0",
+          icon: "",
+        };
+      default:
+        return {
+          label: type,
+          color: "#757575",
+          bgColor: "#f5f5f5",
+          icon: "",
+        };
+    }
+  }, []);
+
+  const getLevelConfig = useCallback((level: string) => {
+    switch (level?.toLowerCase()) {
+      case "beginner":
+        return {
+          label: "Cơ bản",
+          color: "#4caf50",
+          bgColor: "#e8f5e9",
+          icon: "",
+        };
+      case "intermediate":
+        return {
+          label: "Trung cấp",
+          color: "#ff9800",
+          bgColor: "#fff3e0",
+          icon: "",
+        };
+      case "advanced":
+        return {
+          label: "Nâng cao",
+          color: "#f44336",
+          bgColor: "#ffebee",
+          icon: "",
+        };
+      default:
+        return {
+          label: level || "Chưa xác định",
+          color: "#2196f3",
+          bgColor: "#e3f2fd",
+          icon: "",
+        };
+    }
+  }, []);
+
+  const formatPrice = useCallback((price: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
+  }, []);
+
+  const formatDate = useCallback((dateString: string) => {
+    return new Date(dateString).toLocaleDateString("vi-VN");
+  }, []);
+
+  // Debounce search term to reduce filtering operations
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Memoize filtered and sorted courses with debounced search
+  const { filteredCourses, sortedCourses } = useMemo(() => {
+    // Filter courses
+    const filtered = courses.filter((item: any) => {
+      const matchesSearch =
+        !debouncedSearchTerm ||
+        item.course?.id?.toString().includes(debouncedSearchTerm) ||
+        item.course?.title?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        item.course?.topic?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        item.course?.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+
+      const matchesType =
+        !courseTypeFilter || item.course?.courseType === courseTypeFilter;
+
+      const matchesStatus =
+        !statusFilter || 
+        (statusFilter === "published" && item.course?.isPublished) ||
+        (statusFilter === "unpublished" && !item.course?.isPublished);
+
+      // Date range filtering
+      const courseStartDate = item.course?.startDate ? new Date(item.course.startDate) : null;
+      const courseEndDate = item.course?.endDate ? new Date(item.course.endDate) : null;
+      
+      const matchesStartDate = !startDateFilter || 
+        (courseStartDate && courseStartDate >= new Date(startDateFilter));
+      
+      const matchesEndDate = !endDateFilter || 
+        (courseEndDate && courseEndDate <= new Date(endDateFilter));
+
+      return matchesSearch && matchesType && matchesStatus && matchesStartDate && matchesEndDate;
+    });
+
+    // Sort courses
+    const sorted = [...filtered].sort((a, b) => {
+      const aValue = a.course?.[orderBy];
+      const bValue = b.course?.[orderBy];
+
+      if (order === "desc") {
+        if (bValue < aValue) return -1;
+        if (bValue > aValue) return 1;
+        return 0;
+      } else {
+        if (aValue < bValue) return -1;
+        if (aValue > bValue) return 1;
+        return 0;
+      }
+    });
+
+    return { filteredCourses: filtered, sortedCourses: sorted };
+  }, [courses, debouncedSearchTerm, courseTypeFilter, statusFilter, startDateFilter, endDateFilter, order, orderBy]);
+
+  // Memoize static options
+  const courseTypes = useMemo(() => [
+    { value: "", label: "Tất cả" },
+    { value: "FORMAL", label: "Chính quy" },
+    { value: "SPECIALIZED", label: "Chuyên đề" },
+    { value: "EXTRACURRICULAR", label: "Ngoại khóa" },
+  ], []);
+
+  const statusOptions = useMemo(() => [
+    { value: "", label: "Tất cả trạng thái" },
+    { value: "published", label: "Đã xuất bản" },
+    { value: "unpublished", label: "Chưa xuất bản" },
+  ], []);
+
+  // Memoize event handlers
+  const handleClick = useCallback((_event: React.MouseEvent<unknown>, courseId: string) => {
+    setSelected(selected === courseId ? null : courseId);
+  }, [selected]);
+
+  const handleViewMembers = useCallback((members: any[], course: any) => {
+    setSelectedCourseMembers([...members]);
+    setSelectedCourse(course);
+    setMembersDialogOpen(true);
+  }, []);
+
+  const handleRequestSort = useCallback((
     _event: React.MouseEvent<unknown>,
     property: string,
   ) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
-  };
+  }, [order, orderBy]);
 
-  const handleClick = (_event: React.MouseEvent<unknown>, courseId: number) => {
-    const selectedIndex = selected === courseId ? -1 : courseId;
-    if (selectedIndex === -1) {
-      setSelected(null);
-      return;
-    }
-    setSelected(selectedIndex);
-  };
+  const handleCreateCourse = useCallback(async (courseData: any) => {
+    try {
+      console.log("Creating course:", courseData);
 
-  // Filtering and sorting logic
-  const filteredCourses = React.useMemo(() => {
-    let filtered = courses;
+      const response = await API.admin.createCourse(courseData);
+      console.log("Course created successfully:", response.data);
 
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (item: any) =>
-          item.course?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.course?.topic?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.course?.description?.toLowerCase().includes(searchTerm.toLowerCase()),
-      );
-    }
-
-    // Filter by course type
-    if (courseTypeFilter) {
-      filtered = filtered.filter(
-        (item: any) => item.course?.courseType === courseTypeFilter,
-      );
-    }
-
-    // Filter by scale
-    if (scaleFilter) {
-      filtered = filtered.filter(
-        (item: any) => item.course?.scale === scaleFilter,
-      );
-    }
-
-    // Filter by status
-    if (statusFilter) {
-      filtered = filtered.filter(
-        (item: any) => item.course?.isPublished?.toString() === statusFilter,
-      );
-    }
-
-    return filtered || [];
-  }, [courses, searchTerm, courseTypeFilter, scaleFilter, statusFilter]);
-
-  const visibleRows = React.useMemo(
-    () => {
-      if (!filteredCourses || !Array.isArray(filteredCourses)) {
-        return [];
-      }
+      const coursesResponse = await API.admin.getAllCourses();
+      dispatch(setCourse(coursesResponse.data.data));
       
-      return [...filteredCourses].sort((a, b) => {
-        const aValue = a.course?.[orderBy as keyof typeof a.course];
-        const bValue = b.course?.[orderBy as keyof typeof b.course];
-        
-        if (order === "desc") {
-          if (bValue < aValue) return -1;
-          if (bValue > aValue) return 1;
-          return 0;
-        } else {
-          if (aValue < bValue) return -1;
-          if (aValue > bValue) return 1;
-          return 0;
-        }
-      });
-    },
-    [filteredCourses, order, orderBy],
-  );
+      const newCourseData = response.data.data;
+      
+      setSelectedCourse(newCourseData.course);
+      setSelectedCourseMembers(newCourseData.members || []);
 
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-  };
+      handleViewMembers(newCourseData.members || [], newCourseData.course);
 
-  const handleCourseTypeFilter = (value: string) => {
-    setCourseTypeFilter(value);
-  };
-
-  const handleScaleFilter = (value: string) => {
-    setScaleFilter(value);
-  };
-
-  const handleStatusFilter = (value: string) => {
-    setStatusFilter(value);
-  };
-
-  const getCourseTypeLabel = (type: string) => {
-    switch (type) {
-      case "FORMAL":
-        return "Chính quy";
-      case "SPECIALIZED":
-        return "Chuyên đề";
-      case "EXTRACURRICULAR":
-        return "Ngoại khóa";
-      default:
-        return type;
+      // setMembersDialogOpen(true);
+      
+      toast.success("Khóa học đã được tạo thành công!");
+    } catch (error) {
+      console.error("Error creating course:", error);
+      toast.error("Có lỗi xảy ra khi tạo khóa học!");
     }
+  }, [dispatch]);
+
+  // const clearAllFilters = useCallback(() => {
+  //   setSearchTerm("");
+  //   setCourseTypeFilter("");
+  //   setStatusFilter("");
+  //   setStartDateFilter("");
+  //   setEndDateFilter("");
+  // }, []);
+
+  const clearDateFilters = () => {
+    setStartDateFilter("");
+    setEndDateFilter("");
   };
 
-  const getScaleLabel = (scale: string) => {
-    switch (scale) {
-      case "INSTITUTIONAL":
-        return "Cấp đơn vị";
-      case "UNIVERSITY":
-        return "Cấp trường";
-      case "DEPARTMENTAL":
-        return "Cấp khoa/tỉnh";
-      case "MINISTERIAL":
-        return "Cấp bộ";
-      case "NATIONAL":
-        return "Cấp quốc gia";
-      case "INTERNATIONAL":
-        return "Cấp quốc tế";
-      default:
-        return scale;
-    }
-  };
+  // ...existing useEffect for fetching courses...
 
-  const getAcademicRankLabel = (rank: string) => {
-    switch (rank) {
-      case "CN":
-        return "Cử nhân";
-      case "THS":
-        return "Thạc sĩ";
-      case "TS":
-        return "Tiến sĩ";
-      case "PGS":
-        return "Phó giáo sư";
-      case "GS":
-        return "Giáo sư";
-      default:
-        return rank;
-    }
-  };
+  const hasDateFilters = startDateFilter || endDateFilter;
 
-  const getRoleLabel = (role: string) => {
-    switch (role) {
-      case "AUTHOR":
-        return "Tác giả";
-      case "ASSIGNED":
-        return "Được phân công";
-      case "ASSISTANT":
-        return "Trợ giảng";
-      default:
-        return role;
-    }
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(price);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('vi-VN');
-  };
-
-  const handleViewMembers = (members: any[]) => {
-    setSelectedCourseMembers(members);
-    setMembersDialogOpen(true);
-  };
-
-  const emptyRows = visibleRows && visibleRows.length > 0 ? 
-    (10 - visibleRows.length > 0 ? 10 - visibleRows.length : 0) : 10;
-
-  const handleChange = (_event: SyntheticEvent, newValue: string) => {
-    setValue(newValue);
-  };
-
-  const renderCourseListTab = () => (
-    <Box sx={{ width: "100%", typography: "body1", bgcolor: "background.default" }}>
-      <Paper sx={{ width: "100%", borderRadius: 2, overflow: "hidden" }}>
-        <EnhancedTableToolbar
-          numSelected={selected ? 1 : 0}
-          onEdit={() => {
-            // Handle edit functionality
-            console.log("Edit course:", selected);
-          }}
-          onSearch={handleSearch}
-          searchTerm={searchTerm}
-          onCourseTypeFilter={handleCourseTypeFilter}
-          courseTypeFilter={courseTypeFilter}
-          onScaleFilter={handleScaleFilter}
-          scaleFilter={scaleFilter}
-          onStatusFilter={handleStatusFilter}
-          statusFilter={statusFilter}
-        />
-        <TableContainer
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        minHeight: "fix-content",
+        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+        p: 3,
+      }}
+    >
+      {/* Header */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 3,
+          mb: 3,
+          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+          borderRadius: 3,
+          border: "1px solid rgba(255,255,255,0.8)",
+        }}
+      >
+        <Box
           sx={{
-            maxHeight: 10 * 53 + 56,
-            width: "100%",
-            overflowY: "auto",
-            overflowX: "auto",
-            // Remove any fixed width constraints and let it adjust to content
-            minWidth: "fit-content",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mb: 3,
+            flexWrap: "wrap",
+            gap: 2,
           }}
         >
-          <Table
-            sx={{ 
-              minWidth: "max-content", // Changed from fixed 1200px to content-based
-              width: "auto", // Changed from 100% to auto
-              tableLayout: "auto" // Let table adjust column widths automatically
-            }}
-            aria-labelledby="tableTitle"
-          >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Avatar
+              sx={{
+                bgcolor: "primary.main",
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                width: 56,
+                height: 56,
+              }}
+            >
+              <School sx={{ fontSize: 28 }} />
+            </Avatar>
+            <Box>
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
+              >
+                Quản lý Khóa học
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#6c757d" }}>
+                {(searchTerm || courseTypeFilter || statusFilter || hasDateFilters) 
+                  ? `Đã lọc ${filteredCourses?.length || 0} khóa học` 
+                  : `Tổng cộng ${filteredCourses?.length || 0} khóa học`}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {/* Create Course Button */}
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<Add />}
+              onClick={() => setCreateCourseDialogOpen(true)}
+              sx={{
+                borderRadius: 3,
+                textTransform: "none",
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                px: 3,
+                py: 1.5,
+                fontWeight: 600,
+                fontSize: "1rem",
+                boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 6px 20px rgba(102, 126, 234, 0.6)",
+                },
+                transition: "all 0.3s ease",
+              }}
+            >
+              Thêm khóa học
+            </Button>
+
+            {selected && (
+              <>
+                <Tooltip title="Chỉnh sửa">
+                  <IconButton
+                    sx={{
+                      bgcolor: "primary.main",
+                      color: "white",
+                      width: 48,
+                      height: 48,
+                      "&:hover": {
+                        bgcolor: "primary.dark",
+                        transform: "scale(1.05)",
+                      },
+                    }}
+                  >
+                    <Edit />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Xóa">
+                  <IconButton
+                    sx={{
+                      bgcolor: "error.main",
+                      color: "white",
+                      width: 48,
+                      height: 48,
+                      "&:hover": {
+                        bgcolor: "error.dark",
+                        transform: "scale(1.05)",
+                      },
+                    }}
+                  >
+                    <Delete />
+                  </IconButton>
+                </Tooltip>
+              </>
+            )}
+          </Box>
+        </Box>
+
+        {/* Filters */}
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          <Box sx={{ minWidth: 200, flex: "0 0 auto" }}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Loại khóa học</InputLabel>
+              <Select
+                value={courseTypeFilter}
+                label="Loại khóa học"
+                onChange={(e) => setCourseTypeFilter(e.target.value)}
+                sx={{
+                  bgcolor: "white",
+                  borderRadius: 2,
+                }}
+              >
+                {courseTypes.map((type) => (
+                  <MenuItem key={type.value} value={type.value}>
+                    {type.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          <Box sx={{ minWidth: 180, flex: "0 0 auto" }}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Trạng thái</InputLabel>
+              <Select
+                value={statusFilter}
+                label="Trạng thái"
+                onChange={(e) => setStatusFilter(e.target.value)}
+                sx={{
+                  bgcolor: "white",
+                  borderRadius: 2,
+                }}
+              >
+                {statusOptions.map((status) => (
+                  <MenuItem key={status.value} value={status.value}>
+                    {status.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          {/* Date Range Filters */}
+          <Box sx={{ minWidth: 160, flex: "0 0 auto" }}>
+            <TextField
+              label="Từ ngày"
+              type="date"
+              size="small"
+              value={startDateFilter}
+              onChange={(e) => setStartDateFilter(e.target.value)}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              sx={{
+                bgcolor: "white",
+                borderRadius: 2,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                },
+              }}
+            />
+          </Box>
+
+          <Box sx={{ minWidth: 160, flex: "0 0 auto" }}>
+            <TextField
+              label="Đến ngày"
+              type="date"
+              size="small"
+              value={endDateFilter}
+              onChange={(e) => setEndDateFilter(e.target.value)}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              sx={{
+                bgcolor: "white",
+                borderRadius: 2,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                },
+              }}
+            />
+          </Box>
+
+          {hasDateFilters && (
+            <Tooltip title="Xóa bộ lọc ngày">
+              <IconButton
+                size="small"
+                onClick={clearDateFilters}
+                sx={{
+                  bgcolor: "error.light",
+                  color: "error.main",
+                  "&:hover": {
+                    bgcolor: "error.main",
+                    color: "white",
+                  },
+                }}
+              >
+                <Clear />
+              </IconButton>
+            </Tooltip>
+          )}
+
+          <Box sx={{ flex: "1 1 300px", minWidth: 300 }}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              placeholder="🔍 Tìm kiếm theo ID, tên, chủ đề, mô tả..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              sx={{
+                bgcolor: "white",
+                borderRadius: 2,
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search sx={{ color: "primary.main" }} />
+                  </InputAdornment>
+                ),
+                endAdornment: searchTerm && (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={() => setSearchTerm("")}>
+                      <Clear />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+        </Box>
+
+        {/* Active Filters Display */}
+        {(searchTerm || courseTypeFilter || statusFilter || hasDateFilters) && (
+          <Box sx={{ mt: 2, display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }}>
+            <Typography variant="body2" sx={{ color: "#6c757d", mr: 1 }}>
+              Bộ lọc đang áp dụng:
+            </Typography>
+            
+            {searchTerm && (
+              <Chip
+                label={`Tìm kiếm: "${searchTerm}"`}
+                size="small"
+                onDelete={() => setSearchTerm("")}
+                color="primary"
+                variant="outlined"
+              />
+            )}
+            
+            {courseTypeFilter && (
+              <Chip
+                label={`Loại: ${courseTypes.find(t => t.value === courseTypeFilter)?.label}`}
+                size="small"
+                onDelete={() => setCourseTypeFilter("")}
+                color="secondary"
+                variant="outlined"
+              />
+            )}
+
+            {statusFilter && (
+              <Chip
+                label={`Trạng thái: ${statusOptions.find(s => s.value === statusFilter)?.label}`}
+                size="small"
+                onDelete={() => setStatusFilter("")}
+                color="success"
+                variant="outlined"
+              />
+            )}
+            
+            {startDateFilter && (
+              <Chip
+                label={`Từ: ${new Date(startDateFilter).toLocaleDateString('vi-VN')}`}
+                size="small"
+                onDelete={() => setStartDateFilter("")}
+                color="info"
+                variant="outlined"
+                icon={<DateRange />}
+              />
+            )}
+            
+            {endDateFilter && (
+              <Chip
+                label={`Đến: ${new Date(endDateFilter).toLocaleDateString('vi-VN')}`}
+                size="small"
+                onDelete={() => setEndDateFilter("")}
+                color="info"
+                variant="outlined"
+                icon={<DateRange />}
+              />
+            )}
+            
+            <Button
+              size="small"
+              onClick={() => {
+                setSearchTerm("");
+                setCourseTypeFilter("");
+                setStatusFilter("");
+                setStartDateFilter("");
+                setEndDateFilter("");
+              }}
+              sx={{ ml: 1, textTransform: "none" }}
+            >
+              Xóa tất cả
+            </Button>
+          </Box>
+        )}
+      </Paper>
+
+      {/* Table */}
+      <Paper
+        sx={{
+          borderRadius: 3,
+          overflow: "hidden",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+        }}
+      >
+        <TableContainer sx={{ maxHeight: 600 }}>
+          <Table sx={{ minWidth: 1400 }}>
             <EnhancedTableHead
               order={order}
               orderBy={orderBy}
@@ -589,270 +954,49 @@ const AdminCourse = () => {
               rowCount={filteredCourses?.length || 0}
             />
             <TableBody>
-              {visibleRows && Array.isArray(visibleRows) && visibleRows.map((row, index) => {
-                if (!row || !row.course) {
-                  return null;
-                }
-                
+              {sortedCourses.map((row, _index) => {
+                if (!row || !row.course) return null;
+
                 const isItemSelected = selected === row.course.id;
-                const labelId = `enhanced-table-checkbox-${index}`;
+                const courseTypeConfig = getCourseTypeConfig(row.course.courseType || "");
+                const levelConfig = getLevelConfig(row.course.level || "");
 
                 return (
-                  <TableRow
-                    hover
-                    onClick={(event) => handleClick(event, row.course.id)}
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
+                  <CourseTableRow
                     key={row.course.id}
-                    selected={isItemSelected}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    <TableCell
-                      component="th"
-                      align="right"
-                      id={labelId}
-                      scope="row"
-                      padding="normal"
-                      sx={{
-                        fontWeight: "bold",
-                        color: "primary.main",
-                        width: 80,
-                      }}
-                    >
-                      {row.course.id}
-                    </TableCell>
-                    <TableCell sx={{ maxWidth: 200 }}>
-                      <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                        {row.course.title || "Không có tiêu đề"}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{row.course.topic || "Không có chủ đề"}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={getCourseTypeLabel(row.course.courseType || "")}
-                        size="small"
-                        variant="outlined"
-                        color="primary"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={getScaleLabel(row.course.scale || "")}
-                        size="small"
-                        variant="outlined"
-                        color="secondary"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={row.course.level || "Không có"}
-                        size="small"
-                        color="info"
-                      />
-                    </TableCell>
-                    <TableCell align="right">
-                      {row.course.price ? formatPrice(row.course.price) : "Miễn phí"}
-                    </TableCell>
-                    <TableCell>{row.course.startDate ? formatDate(row.course.startDate) : "Chưa có"}</TableCell>
-                    <TableCell>{row.course.endDate ? formatDate(row.course.endDate) : "Chưa có"}</TableCell>
-                    {/* <TableCell>
-                      <Chip
-                        label={row.course.isPublished ? "Đã xuất bản" : "Chưa xuất bản"}
-                        size="small"
-                        color={row.course.isPublished ? "success" : "warning"}
-                        variant="filled"
-                      />
-                    </TableCell> */}
-                    <TableCell>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewMembers(row.members || []);
-                        }}
-                      >
-                        {row.members && Array.isArray(row.members) ? row.members.length : 0} GV
-                      </Button>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        color="primary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // Handle view details
-                          console.log("View course details:", row.course.id);
-                        }}
-                        sx={{ minWidth: 100 }}
-                      >
-                        Chi tiết
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+                    row={row}
+                    isItemSelected={isItemSelected}
+                    onRowClick={handleClick}
+                    onViewMembers={handleViewMembers}
+                    courseTypeConfig={courseTypeConfig}
+                    levelConfig={levelConfig}
+                    formatPrice={formatPrice}
+                    formatDate={formatDate}
+                  />
                 );
               })}
-              {emptyRows > 0 && (
-                <TableRow
-                  style={{
-                    height: 53 * emptyRows,
-                  }}
-                >
-                  <TableCell colSpan={12} />
-                </TableRow>
-              )}
             </TableBody>
           </Table>
         </TableContainer>
       </Paper>
-    </Box>
-  );
 
-  const renderTeachingScheduleTab = () => (
-    <Box sx={{ width: "100%", typography: "body1", bgcolor: "background.default" }}>
-      <Paper sx={{ width: "100%", borderRadius: 2, overflow: "hidden", p: 4 }}>
-        <Box sx={{ textAlign: "center", py: 8 }}>
-          <CalendarMonth sx={{ fontSize: 80, color: "primary.main", mb: 2 }} />
-          <Typography variant="h4" gutterBottom color="primary.main" fontWeight="bold">
-            Lịch Giảng dạy
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            Tính năng lịch giảng dạy đang được phát triển
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Sẽ sớm có mặt trong phiên bản tiếp theo
-          </Typography>
-        </Box>
-      </Paper>
-    </Box>
-  );
-
-  return (
-    <Box
-      sx={{
-        width: "100%",
-        typography: "body1",
-        bgcolor: "background.default",
-        minHeight: "fit",
-      }}
-    >
-      <TabContext value={value}>
-        <Paper sx={{ mb: 3, borderRadius: 2, overflow: "hidden" }}>
-          <Box
-            sx={{
-              borderBottom: 1,
-              borderColor: "divider",
-              bgcolor: "background.paper",
-            }}
-          >
-            <TabList
-              onChange={handleChange}
-              aria-label="course management tabs"
-              sx={{ px: 2 }}
-            >
-              <Tab
-                label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <School />
-                    <span>Danh sách khóa học</span>
-                    <Chip
-                      size="small"
-                      label={filteredCourses?.length || 0}
-                      color="primary"
-                    />
-                  </Box>
-                }
-                value="1"
-              />
-              <Tab
-                label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Schedule />
-                    <span>Lịch giảng dạy</span>
-                  </Box>
-                }
-                value="2"
-              />
-            </TabList>
-          </Box>
-        </Paper>
-
-        <TabPanel value="1" sx={{ p: 0 }}>
-          {renderCourseListTab()}
-        </TabPanel>
-
-        <TabPanel value="2" sx={{ p: 0 }}>
-          {renderTeachingScheduleTab()}
-        </TabPanel>
-      </TabContext>
-
-      {/* Members Dialog */}
-      <Dialog
+      {/* Course Member Dialog */}
+      <CourseMemberDialog
         open={membersDialogOpen}
-        onClose={() => setMembersDialogOpen(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>Danh sách Giảng viên</DialogTitle>
-        <DialogContent>
-          {selectedCourseMembers && Array.isArray(selectedCourseMembers) && selectedCourseMembers.length > 0 ? (
-            <List>
-              {selectedCourseMembers.map((member, index) => (
-                <React.Fragment key={member?.lecturer?.id || index}>
-                  <ListItem>
-                    <ListItemAvatar>
-                      <Avatar src={member?.lecturer?.avatarUrl} alt={member?.lecturer?.fullName || "Giảng viên"}>
-                        {member?.lecturer?.fullName?.charAt(0) || "?"}
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography variant="subtitle1" fontWeight="bold">
-                            {member?.lecturer?.fullName || "Không có tên"}
-                          </Typography>
-                          <Chip
-                            label={getRoleLabel(member?.courseRole || "")}
-                            size="small"
-                            color={member?.courseRole === 'AUTHOR' ? 'primary' : 'secondary'}
-                          />
-                          <Chip
-                            label={getAcademicRankLabel(member?.lecturer?.academicRank || "")}
-                            size="small"
-                            variant="outlined"
-                          />
-                        </Box>
-                      }
-                      secondary={
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
-                            {member?.lecturer?.specialization || "Chưa cập nhật"} - {member?.lecturer?.experienceYears || 0} năm kinh nghiệm
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Email: {member?.lecturer?.email || "Chưa cập nhật"} | SĐT: {member?.lecturer?.phoneNumber || "Chưa cập nhật"}
-                          </Typography>
-                        </Box>
-                      }
-                    />
-                  </ListItem>
-                  {selectedCourseMembers && index < selectedCourseMembers.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
-            </List>
-          ) : (
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <Typography variant="body1" color="text.secondary">
-                Không có giảng viên nào trong khóa học này
-              </Typography>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setMembersDialogOpen(false)}>Đóng</Button>
-        </DialogActions>
-      </Dialog>
+        onClose={() => {
+          setMembersDialogOpen(false);
+          setSelectedCourse(null);
+        }}
+        members={selectedCourseMembers}
+        course={selectedCourse || undefined}
+      />
+
+      {/* Create Course Dialog */}
+      <CreateCourseDialog
+        open={createCourseDialogOpen}
+        onClose={() => setCreateCourseDialogOpen(false)}
+        onSubmit={handleCreateCourse}
+      />
     </Box>
   );
 };

@@ -1,5 +1,5 @@
 export type Lecturer = {
-  id: number;
+  id: string;
   citizenId: string;
   phoneNumber: string;
   fullName: string;
@@ -16,4 +16,5 @@ export type Lecturer = {
   status: string;
   createdAt: string;
   updatedAt: string;
+  email?: string;
 }

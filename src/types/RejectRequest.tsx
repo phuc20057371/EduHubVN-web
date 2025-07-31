@@ -1,4 +1,4 @@
 export type RejectRequest = {
-    id: number;
+    id: string;
     adminNote: string;
 };

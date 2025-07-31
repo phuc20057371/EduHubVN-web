@@ -1,196 +1,480 @@
-import React, { useState } from 'react';
-import { Modal, Box, Typography, Button, TextField, CircularProgress } from '@mui/material';
-import type { DegreeRequest } from '../types/DegreeRequest';
-import { API } from '../utils/Fetch';
-import { Stack } from '@mui/system';
-
+import {
+  AttachFile,
+  CloudUpload,
+  Description,
+  School,
+} from "@mui/icons-material";
+import {
+    Autocomplete,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Modal,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { Stack } from "@mui/system";
+import React, { useState } from "react";
+import { toast } from "react-toastify";
+import type { DegreeRequest } from "../types/DegreeRequest";
+import { API } from "../utils/Fetch";
 
 const style = {
-    position: 'absolute' as const,
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 600,
-    bgcolor: 'background.paper',
-    borderRadius: 2,
-    boxShadow: 24,
-    p: 4,
+  position: "absolute" as const,
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 700,
+  maxHeight: "90vh",
+  overflow: "auto",
+  bgcolor: "background.paper",
+  borderRadius: 3,
+  boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+  outline: "none",
 };
 
+const degreeLevels = [
+  ,
+  "Kĩ sư",
+  "Cử nhân",
+  "Thạc sĩ",
+  "Tiến sĩ",
+  "Phó Giáo sư",
+  "Giáo sư",
+];
+const majors = [
+  "Công nghệ thông tin",
+  "Kỹ thuật phần mềm",
+  "Quản trị kinh doanh",
+  "Kế toán",
+  "Ngôn ngữ Anh",
+  "Sư phạm Toán",
+  "Sư phạm Văn",
+  "Y đa khoa",
+  "Dược học",
+  "Luật",
+];
+
 interface UploadDegreeModalProps {
-    open: boolean;
-    onClose: () => void;
-    onSubmit: (degree: DegreeRequest) => void; // callback gửi dữ liệu ra ngoài
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (degree: DegreeRequest) => void;
+  editMode?: boolean;
+  editData?: DegreeRequest;
 }
 
-const UploadDegreeModal: React.FC<UploadDegreeModalProps> = ({ open, onClose, onSubmit }) => {
-    // useEffect đẻ clear form khi đóng modal
-    React.useEffect(() => {
-        if (!open) {
-            setForm({
-                referenceId: '',
-                name: '',
-                major: '',
-                institution: '',
-                startYear: 0,
-                graduationYear: 0,
-                level: '',
-                url: '',
-                description: '',
-            });
-            setSelectedFile(null);
-            setIsUploading(false);
-        }
-    }, [open]);
-    const [form, setForm] = useState<DegreeRequest>({
-        referenceId: '',
-        name: '',
-        major: '',
-        institution: '',
+const UploadDegreeModal: React.FC<UploadDegreeModalProps> = ({
+  open,
+  onClose,
+  onSubmit,
+  editMode = false,
+  editData,
+}) => {
+  // useEffect đẻ clear form khi đóng modal
+  React.useEffect(() => {
+    if (!open) {
+      setForm({
+        referenceId: "",
+        name: "",
+        major: "",
+        institution: "",
         startYear: 0,
         graduationYear: 0,
-        level: '',
-        url: '',
-        description: '',
-    });
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [isUploading, setIsUploading] = useState<boolean>(false);
-    const handleChange = (field: keyof DegreeRequest, value: string | number) => {
-        setForm(prev => ({ ...prev, [field]: value }));
-    };
+        level: "",
+        url: "",
+        description: "",
+      });
+      setSelectedFile(null);
+      setIsUploading(false);
+    } else if (editMode && editData) {
+      // Pre-fill form with edit data
+      setForm(editData);
+    }
+  }, [open, editMode, editData]);
+  const [form, setForm] = useState<DegreeRequest>({
+    referenceId: "",
+    name: "",
+    major: "",
+    institution: "",
+    startYear: 0,
+    graduationYear: 0,
+    level: "",
+    url: "",
+    description: "",
+  });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const handleChange = (field: keyof DegreeRequest, value: string | number) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
 
-    const handleSubmit = () => {
-        onSubmit(form);
-        onClose();
-    };
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files && event.target.files.length > 0) {
-            setSelectedFile(event.target.files[0]);
-        }
-    };
-    const handleFileUpload = () => {
-        if (!selectedFile) return;
+  const handleSubmit = () => {
+    if (
+      !form.referenceId ||
+      form.referenceId.trim() === "" ||
+      form.referenceId.length < 5 ||
+      form.referenceId.length > 20
+    ) {
+      toast.error("Mã tham chiếu không hợp lệ.");
+      return;
+    }
+    if (
+      !form.name ||
+      form.name.trim() === "" ||
+      form.name.length < 2 ||
+      form.name.length > 50
+    ) {
+      toast.error("Vui lòng nhập tên bằng cấp hợp lệ");
+      return;
+    }
+    if (
+      !form.institution ||
+      form.institution.trim() === "" ||
+      form.institution.length < 2 ||
+      form.institution.length > 50
+    ) {
+      toast.error("Tên cơ sở đào tạo không hợp lệ");
+      return;
+    }
+    if (
+      form.startYear <= 0 ||
+      form.startYear > new Date().getFullYear() ||
+      form.graduationYear <= 0 ||
+      form.startYear > form.graduationYear ||
+      form.graduationYear - form.startYear > 10
+    ) {
+      toast.error(
+        "Thời gian không hợp lệ.",
+      );
+      return;
+    }
+    if (!form.url) {
+      toast.error("Vui lòng tải lên tài liệu bằng cấp");
+      return;
+    }
+    if (!form.major.trim() || form.major.length < 2 || form.major.length > 50) {
+      toast.error("Vui lòng nhập ngành học hợp lệ (2-50 ký tự)");
+      return;
+    }
 
-        setIsUploading(true);
+    if (!form.level.trim() || form.level.length < 2 || form.level.length > 50) {
+      toast.error("Vui lòng chọn trình độ bằng cấp hợp lệ (2-50 ký tự)");
+      return;
+    }
+    if (form.description.length > 500 ) {
+      toast.error("Mô tả không được quá 500 ký tự");
+      return;
+    }
 
-        API.user.uploadFile(selectedFile)
-            .then((response: any) => {
-                console.log("✅ File uploaded successfully:", response.data);
-                setForm(prev => ({ ...prev, url: response.data.fileUrl }));
-            })
-            .catch((error: any) => {
-                console.error("❌ Error uploading file:", error);
-            })
-            .finally(() => {
-                setIsUploading(false);
-            });
-    };
+    onSubmit(form);
+    onClose();
+  };
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setSelectedFile(event.target.files[0]);
+    }
+  };
+  const handleFileUpload = async () => {
+    if (!selectedFile) return;
+    setIsUploading(true);
+    await API.user
+      .uploadFileToServer(selectedFile)
+      .then((response: any) => {
+        console.log("✅ File uploaded successfully:", response.data);
+        setForm((prev) => ({ ...prev, url: response.data }));
+      })
+      .catch((error: any) => {
+        console.error("❌ Error uploading file:", error);
+        toast.error("Tải lên tài liệu không thành công. (.pdf, .jpg, .png)");
+      })
+      .finally(() => {
+        setIsUploading(false);
+      });
 
-    return (
-        <Modal open={open} onClose={onClose}>
-            <Box sx={style}>
-                <Typography variant="h6" gutterBottom>
-                    Nhập thông tin bằng cấp
+    toast.success("Tải lên tài liệu thành công");
+  };
+
+  return (
+    <Modal open={open} onClose={onClose}>
+      <Box sx={style}>
+        {/* Header */}
+        <Box
+          sx={{
+            p: 3,
+            pb: 2,
+            background: "paper.main",
+
+            borderRadius: "12px 12px 0 0",
+            mb: 3,
+          }}
+        >
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <School />
+            {editMode ? "Chỉnh sửa bằng cấp" : "Thêm bằng cấp mới"}
+          </Typography>
+          <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
+            {editMode ? "Cập nhật thông tin bằng cấp của bạn" : "Nhập thông tin chi tiết về bằng cấp của bạn"}
+          </Typography>
+        </Box>
+
+        <Box sx={{ px: 3, pb: 3 }}>
+          <Stack spacing={3}>
+            {/* Basic Information Section */}
+            <Card variant="outlined" sx={{ borderRadius: 2 }}>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  sx={{ mb: 2, color: "primary.main", fontWeight: 600 }}
+                >
+                  📋 Thông tin cơ bản
+                </Typography>
+                <Stack spacing={2}>
+                  <TextField
+                    fullWidth
+                    label="Mã tham chiếu"
+                    value={form.referenceId}
+                    onChange={(e) =>
+                      handleChange("referenceId", e.target.value)
+                    }
+                    variant="outlined"
+                    size="medium"
+                  />
+
+                  <TextField
+                    fullWidth
+                    label="Tên bằng cấp"
+                    value={form.name}
+                    onChange={(e) => handleChange("name", e.target.value)}
+                    variant="outlined"
+                    size="medium"
+                    required
+                  />
+
+                  <Box display="flex" gap={2}>
+                    <Autocomplete
+                      fullWidth
+                      options={majors}
+                      freeSolo
+                      value={form.major}
+                      onChange={(_e, newValue) =>
+                        handleChange("major", newValue || "")
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Ngành học"
+                          variant="outlined"
+                          size="medium"
+                        />
+                      )}
+                    />
+
+                    <Autocomplete
+                      fullWidth
+                      options={degreeLevels}
+                      value={form.level}
+                      onChange={(_e, newValue) =>
+                        handleChange("level", newValue || "")
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Trình độ"
+                          variant="outlined"
+                          size="medium"
+                        />
+                      )}
+                    />
+                  </Box>
+
+                  <TextField
+                    fullWidth
+                    label="Trường/Cơ sở đào tạo"
+                    value={form.institution}
+                    onChange={(e) =>
+                      handleChange("institution", e.target.value)
+                    }
+                    variant="outlined"
+                    size="medium"
+                  />
+                </Stack>
+              </CardContent>
+            </Card>
+
+            {/* Time Information Section */}
+            <Card variant="outlined" sx={{ borderRadius: 2 }}>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  sx={{ mb: 2, color: "primary.main", fontWeight: 600 }}
+                >
+                  📅 Thời gian
+                </Typography>
+                <Box display="flex" gap={2}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="Năm bắt đầu"
+                    value={form.startYear || ""}
+                    onChange={(e) => handleChange("startYear", +e.target.value)}
+                    variant="outlined"
+                    size="medium"
+                  />
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="Năm tốt nghiệp"
+                    value={form.graduationYear || ""}
+                    onChange={(e) =>
+                      handleChange("graduationYear", +e.target.value)
+                    }
+                    variant="outlined"
+                    size="medium"
+                  />
+                </Box>
+              </CardContent>
+            </Card>
+
+            {/* File Upload Section */}
+            <Card variant="outlined" sx={{ borderRadius: 2 }}>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  sx={{ mb: 2, color: "primary.main", fontWeight: 600 }}
+                >
+                  📎 Tài liệu đính kèm
                 </Typography>
 
-                <Stack spacing={2}>
-                    <TextField
-                        fullWidth
-                        label="Reference ID"
-                        value={form.referenceId}
-                        onChange={(e) => handleChange("referenceId", e.target.value)}
+                {selectedFile && (
+                  <Box sx={{ mb: 2 }}>
+                    <Chip
+                      icon={<AttachFile />}
+                      label={selectedFile.name}
+                      color="primary"
+                      variant="outlined"
+                      sx={{ maxWidth: "100%" }}
                     />
+                  </Box>
+                )}
 
-                    <TextField
-                        fullWidth
-                        label="Tên bằng cấp"
-                        value={form.name}
-                        onChange={(e) => handleChange("name", e.target.value)}
-                    />
+                <Box display="flex" gap={2}>
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    fullWidth
+                    startIcon={<AttachFile />}
+                    sx={{ py: 1.5 }}
+                  >
+                    Chọn file bằng cấp
+                    <input type="file" hidden onChange={handleFileChange} />
+                  </Button>
 
-                    <TextField
-                        fullWidth
-                        label="Ngành học"
-                        value={form.major}
-                        onChange={(e) => handleChange("major", e.target.value)}
-                    />
-
-                    <TextField
-                        fullWidth
-                        label="Trường"
-                        value={form.institution}
-                        onChange={(e) => handleChange("institution", e.target.value)}
-                    />
-
-                    <Box display="flex" gap={2}>
-                        <TextField
-                            fullWidth
-                            type="number"
-                            label="Năm bắt đầu"
-                            value={form.startYear}
-                            onChange={(e) => handleChange("startYear", +e.target.value)}
-                        />
-                        <TextField
-                            fullWidth
-                            type="number"
-                            label="Năm tốt nghiệp"
-                            value={form.graduationYear}
-                            onChange={(e) => handleChange("graduationYear", +e.target.value)}
-                        />
-                    </Box>
-
-                    <TextField
-                        fullWidth
-                        label="Trình độ"
-                        value={form.level}
-                        onChange={(e) => handleChange("level", e.target.value)}
-                    />
-
-                    {selectedFile && (
-                        <Typography variant="body2">
-                            📄 Đã chọn: <strong>{selectedFile.name}</strong>
-                        </Typography>
-                    )}
-
-                    <Box display="flex" gap={2}>
-                        <Button variant="outlined" component="label" fullWidth>
-                            📁 Chọn file
-                            <input type="file" hidden onChange={handleFileChange} />
-                        </Button>
-
-                        <Button
-                            variant="contained"
-                            fullWidth
-                            onClick={handleFileUpload}
-                            disabled={isUploading || !selectedFile}
-                            startIcon={isUploading ? <CircularProgress size={20} /> : null}
-                        >
-                            {isUploading ? "Đang tải lên..." : "Upload"}
-                        </Button>
-                    </Box>
-
-                    <TextField
-                        fullWidth
-                        label="Mô tả"
-                        multiline
-                        rows={3}
-                        value={form.description}
-                        onChange={(e) => handleChange("description", e.target.value)}
-                    />
-                </Stack>
-
-                <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}>
-                    <Button variant="outlined" onClick={onClose}>
-                        Hủy
-                    </Button>
-                    <Button variant="contained" onClick={handleSubmit}>
-                        Lưu
-                    </Button>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={handleFileUpload}
+                    disabled={isUploading || !selectedFile}
+                    startIcon={
+                      isUploading ? (
+                        <CircularProgress size={20} />
+                      ) : (
+                        <CloudUpload />
+                      )
+                    }
+                    sx={{ py: 1.5 }}
+                  >
+                    {isUploading ? "Đang tải lên..." : "Tải lên"}
+                  </Button>
                 </Box>
-            </Box>
-        </Modal>
 
-    );
+                {form.url && (
+                  <Box sx={{ mt: 2 }}>
+                    <Chip
+                      icon={<CloudUpload />}
+                      label="File đã được tải lên thành công"
+                      color="success"
+                      variant="filled"
+                    />
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Description Section */}
+            <Card variant="outlined" sx={{ borderRadius: 2 }}>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  sx={{ mb: 2, color: "primary.main", fontWeight: 600 }}
+                >
+                  <Description sx={{ mr: 1 }} />
+                  Mô tả bổ sung
+                </Typography>
+                <TextField
+                  fullWidth
+                  label="Thông tin bổ sung về bằng cấp"
+                  multiline
+                  rows={4}
+                  value={form.description}
+                  onChange={(e) => handleChange("description", e.target.value)}
+                  variant="outlined"
+                  placeholder="Nhập mô tả chi tiết về bằng cấp, thành tích đạt được..."
+                />
+              </CardContent>
+            </Card>
+          </Stack>
+
+          {/* Action Buttons */}
+          <Box
+            sx={{
+              mt: 4,
+              pt: 3,
+              borderTop: "1px solid",
+              borderColor: "divider",
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 2,
+            }}
+          >
+            <Button
+              variant="outlined"
+              onClick={onClose}
+              size="large"
+              sx={{ minWidth: 120 }}
+            >
+              Hủy bỏ
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              size="large"
+              sx={{
+                minWidth: 120,
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                "&:hover": {
+                  background:
+                    "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                },
+              }}
+            >
+              {editMode ? "Cập nhật bằng cấp" : "Lưu bằng cấp"}
+            </Button>
+          </Box>
+        </Box>
+      </Box>
+    </Modal>
+  );
 };
 
 export default UploadDegreeModal;

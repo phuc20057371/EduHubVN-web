@@ -1,3 +1,3 @@
 export type IdRequest = {
-    id: number;
+    id: string;
 };

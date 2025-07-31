@@ -29,23 +29,23 @@ const InstitutionDetailDialog = ({ open, onClose, institution }: InstitutionDeta
     const [confirmRejectOpen, setConfirmRejectOpen] = useState(false);
     const [adminNote, setAdminNote] = useState('');
 
-    const handleApproveInstitution = async (institutionId: number) => {
+    const handleApproveInstitution = async (institutionId: string) => {
         try {
             await API.admin.approveInstitution({id: institutionId });
-            dispatch(setInstitutionPendingCreate(institutionPendingCreate.filter((item: { id: number; }) => item.id !== institutionId)));
+            dispatch(setInstitutionPendingCreate(institutionPendingCreate.filter((item: { id: string; }) => item.id !== institutionId)));
             toast.success("Yêu cầu đã được duyệt thành công!");
         } catch (error) {
             console.error('Error approving institution:', error);
         }
     };
-    const handleRejectInstitution = async (data: { id: number; adminNote: string }) => {
+    const handleRejectInstitution = async (data: { id: string; adminNote: string }) => {
         if (!data.adminNote || data.adminNote.trim() === '') {
             toast.error("Vui lòng nhập lý do từ chối.");
             return;
         }
         try {
             await API.admin.rejectInstitution(data);
-            dispatch(setInstitutionPendingCreate(institutionPendingCreate.filter((item: { id: number; }) => item.id !== data.id)));
+            dispatch(setInstitutionPendingCreate(institutionPendingCreate.filter((item: { id: string; }) => item.id !== data.id)));
             toast.success("Yêu cầu đã được từ chối thành công!");
             onClose();
         } catch (error) {

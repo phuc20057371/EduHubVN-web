@@ -1,5 +1,5 @@
 export type Certificate = {
-  id: number;
+  id: string;
   referenceId: string;
   name: string;
   issuedBy: string;

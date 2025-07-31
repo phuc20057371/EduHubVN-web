@@ -17,7 +17,7 @@ export type OwnedTrainingCourseRequest = {
 };
 
 export type OwnedTrainingCourseUpdateRequest = {
-    id: number;
+    id: string;
     referenceId: string;
     title: string;
     topic: string;
