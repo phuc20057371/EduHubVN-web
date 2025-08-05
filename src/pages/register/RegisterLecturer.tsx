@@ -44,9 +44,15 @@ import {
   Description,
   AccountCircle,
   Psychology,
+  ArrowBack,
 } from "@mui/icons-material";
 import { toast } from "react-toastify";
-import { getAcademicRankLabel, jobFieldsAutoComplete, majorAutoComplete } from "../../utils/ValidateRegisterLecturer";
+import {
+  getAcademicRankLabel,
+  jobFieldsAutoComplete,
+  majorAutoComplete,
+} from "../../utils/ValidateRegisterLecturer";
+import { validateLecturerInfo } from "../../utils/Validate";
 
 const RegisterLecturer = () => {
   const steps = [
@@ -224,98 +230,49 @@ const RegisterLecturer = () => {
 
   const handleNext = async () => {
     if (activeStep === 0) {
-      if (fullName === "" || fullName.length > 30) {
-        toast.error(
-          "Họ và tên không được để trống hoặc quá dài (tối đa 30 ký tự)",
-        );
-        return;
-      }
-      if (citizenId === "" || citizenId.length != 11) {
-        toast.error("Vui lòng nhập số CCCD/CMND hợp lệ (11 ký tự)");
-        return;
-      }
-      if (gender === "") {
-        toast.error("Vui lòng chọn giới tính");
-        return;
-      }
-      if (phoneNumber === "" || !/^0\d{9,10}$/.test(phoneNumber)) {
-        toast.error(
-          "Vui lòng nhập số điện thoại hợp lệ (bắt đầu bằng 0 và có 10-11 chữ số)",
-        );
-        return;
-      }
-      const now = new Date();
-      const minDate = new Date("1900-01-01");
-      const dob = new Date(dateOfBirth);
+      const formData = {
+        fullName: fullName || "",
+        citizenId: citizenId || "",
+        gender: gender || "",
+        phoneNumber: phoneNumber || "",
+        dateOfBirth: dateOfBirth || "",
+        academicRank: academicRank || "",
+        specialization: specialization || "",
+        experienceYears: experienceYears || "",
+        jobField: jobField || "",
+        address: address || "",
+        bio: bio || "",
+      };
 
-      // Tính tuổi
-      const age = now.getFullYear() - dob.getFullYear();
-      const hasBirthdayPassed =
-        now.getMonth() > dob.getMonth() ||
-        (now.getMonth() === dob.getMonth() && now.getDate() >= dob.getDate());
-      const actualAge = hasBirthdayPassed ? age : age - 1;
+      console.log("Form data before validation:", formData);
 
-      if (
-        !dateOfBirth ||
-        isNaN(dob.getTime()) ||
-        dob >= now ||
-        dob < minDate ||
-        actualAge < 18
-      ) {
-        toast.error("Vui lòng chọn ngày sinh hợp lệ ( >= 18 tuổi).");
-        return;
-      }
-      if (academicRank === "") {
-        toast.error("Vui lòng chọn học hàm");
-        return;
-      }
-      if (specialization === "" || specialization.length > 70) {
-        toast.error("Vui lòng nhập chuyên ngành hợp lệ (tối đa 70 ký tự)");
-        return;
-      }
-      if (
-        experienceYears === "" ||
-        Number(experienceYears) < 0 ||
-        Number(experienceYears) > 80 ||
-        isNaN(Number(experienceYears))
-      ) {
-        toast.error("Vui lòng nhập số năm kinh nghiệm hợp lệ");
-        return;
-      }
-      if (jobField === "" || jobField.length > 50) {
-        toast.error(
-          "Vui lòng nhập lĩnh vực công việc hợp lệ (tối đa 50 ký tự)",
-        );
-        return;
-      }
-      if (address === "" || address.length > 100) {
-        toast.error("Vui lòng nhập địa chỉ");
-        return;
-      }
-      if (bio.length > 200 || bio === "") {
-        toast.error("Giới thiệu bản thân không được quá 200 ký tự");
+      if (!validateLecturerInfo(formData).success) {
+        toast.error(validateLecturerInfo(formData).error);
         return;
       }
     }
+
     if (activeStep === 2) {
       setIsSubmitting(true);
       const lecturerData = {
-        citizenId,
-        phoneNumber,
-        fullName,
-        dateOfBirth,
+        citizenId: citizenId || "",
+        phoneNumber: phoneNumber || "",
+        fullName: fullName || "",
+        dateOfBirth: dateOfBirth || "",
         gender: gender === "male" ? true : false,
-        bio,
-        address,
-        academicRank,
-        specialization,
-        experienceYears,
+        bio: bio || "",
+        address: address || "",
+        academicRank: academicRank || "",
+        specialization: specialization || "",
+        experienceYears: Number(experienceYears) || 0,
         avatarUrl: "",
-        jobField,
+        jobField: jobField || "",
       };
-
       try {
-        await API.user.registerLecturer(lecturerData);
+        console.log("📤 Gửi dữ liệu giảng viên:", lecturerData);
+
+        const response = await API.user.registerLecturer(lecturerData);
+        console.log("✅ Dữ liệu giảng viên đã gửi thành công:", response.data);
         if (degrees.length > 0) {
           await API.user.createDegree(degrees);
         }
@@ -324,10 +281,17 @@ const RegisterLecturer = () => {
         }
 
         localStorage.removeItem("registerLecturerForm");
-        navigate("/pending-lecturer");
-      } catch (error) {
-        console.error("❌ Lỗi gửi dữ liệu:", error);
-        alert("Có lỗi xảy ra. Vui lòng kiểm tra lại.");
+        navigate("/pending-lecturer", { replace: true });
+      } catch (error: any) {
+        if (error.response?.data?.message?.includes("đã tồn tại")) {
+          toast.error("Số CCCD/CMND đã được đăng ký trước đó.");
+          setActiveStep(0);
+          setSkipped(new Set([0])); // Reset to first step
+          return;
+        } else {
+          toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+          return;
+        }
       } finally {
         setIsSubmitting(false);
       }
@@ -360,21 +324,23 @@ const RegisterLecturer = () => {
     });
   };
 
-
+  const handleBackToHome = () => {
+    navigate(-1);
+  };
 
   useEffect(() => {
     const formData = {
-      citizenId,
-      phoneNumber,
-      fullName,
-      dateOfBirth,
-      gender,
-      bio,
-      address,
-      academicRank,
-      specialization,
-      experienceYears,
-      jobField,
+      citizenId: citizenId || "",
+      phoneNumber: phoneNumber || "",
+      fullName: fullName || "",
+      dateOfBirth: dateOfBirth || "",
+      gender: gender || "",
+      bio: bio || "",
+      address: address || "",
+      academicRank: academicRank || "",
+      specialization: specialization || "",
+      experienceYears: experienceYears || "",
+      jobField: jobField || "",
     };
     localStorage.setItem("registerLecturerForm", JSON.stringify(formData));
   }, [
@@ -676,11 +642,11 @@ const RegisterLecturer = () => {
                   <Autocomplete
                     freeSolo
                     options={jobFieldsAutoComplete}
-                    value={jobField}
+                    value={jobField || ""}
                     className="lg:flex-1"
                     onChange={(_e, newValue) => setJobField(newValue || "")}
                     onInputChange={(_e, newInputValue) =>
-                      setJobField(newInputValue)
+                      setJobField(newInputValue || "")
                     }
                     renderInput={(params) => (
                       <TextField
@@ -688,6 +654,7 @@ const RegisterLecturer = () => {
                         label="Lĩnh vực công việc"
                         required
                         variant="outlined"
+                        value={jobField || ""}
                         InputProps={{
                           ...params.InputProps,
                           startAdornment: (
@@ -996,7 +963,7 @@ const RegisterLecturer = () => {
                         width: 56,
                         height: 56,
                         bgcolor: "white",
-                        color: "#9333ea",
+                        color: "#93333ea",
                         mr: 3,
                       }}
                     >
@@ -1015,7 +982,7 @@ const RegisterLecturer = () => {
                     label={certifications.length}
                     sx={{
                       bgcolor: "white",
-                      color: "#9333ea",
+                      color: "#93333ea",
                       fontWeight: "bold",
                       fontSize: "1.1rem",
                       height: 40,
@@ -1060,7 +1027,7 @@ const RegisterLecturer = () => {
                             borderRadius: 3,
                             border: "2px solid #e5e7eb",
                             "&:hover": {
-                              borderColor: "#9333ea",
+                              borderColor: "#93333ea",
                               transform: "translateY(-4px)",
                             },
                           }}
@@ -1136,7 +1103,9 @@ const RegisterLecturer = () => {
                                     Hết hạn:
                                   </span>{" "}
                                   {cert.expiryDate
-                                    ? new Date(cert.expiryDate).toLocaleDateString("vi-VN")
+                                    ? new Date(
+                                        cert.expiryDate,
+                                      ).toLocaleDateString("vi-VN")
                                     : "Vô thời hạn"}
                                 </Typography>
                               </div>
@@ -1435,7 +1404,7 @@ const RegisterLecturer = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8">
       <Container maxWidth="xl">
-        {/* Header */}
+        {/* Compact Header with Back Button */}
         <Paper
           elevation={8}
           className="mb-8 overflow-hidden rounded-3xl"
@@ -1443,24 +1412,36 @@ const RegisterLecturer = () => {
             background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
           }}
         >
-          <div className=" bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 px-8 py-12 text-white">
-            <Typography variant="h3" className="mb-4 text-center font-bold">
-              Đăng ký tài khoản Giảng viên
-            </Typography>
-            {/* <Typography
-              variant="h5"
-              className="mb-8 text-center font-light opacity-90"
-            >
-              Hoàn thành các bước sau để tạo tài khoản giảng viên chuyên nghiệp
-            </Typography> */}
+          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 px-6 py-8 text-white">
+            {/* Back Button and Title Row */}
+            <div className="mb-6 flex items-center justify-between">
+              <IconButton
+                onClick={handleBackToHome}
+                sx={{
+                  backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  color: "white",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.3)",
+                    transform: "translateY(-2px)",
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
+                <ArrowBack />
+              </IconButton>
+              <Typography variant="h4" className="font-bold text-center flex-1">
+                Đăng ký tài khoản Giảng viên
+              </Typography>
+              <div className="w-10"></div> {/* Spacer for balance */}
+            </div>
 
+            {/* Compact Stepper */}
             <Stepper
               activeStep={activeStep}
               alternativeLabel
-              className="mb-8"
               sx={{
                 "& .MuiStepConnector-line": {
-                  borderTopWidth: "4px",
+                  borderTopWidth: "3px",
                   borderColor: "rgba(255,255,255,0.3)",
                 },
                 "& .MuiStepConnector-active .MuiStepConnector-line": {
@@ -1482,12 +1463,12 @@ const RegisterLecturer = () => {
                               ? "#fff"
                               : "rgba(255,255,255,0.3)",
                           color: index <= activeStep ? "#2563eb" : "#fff",
-                          width: 56,
-                          height: 56,
-                          fontSize: "1.5rem",
+                          width: 40,
+                          height: 40,
+                          fontSize: "1.2rem",
                           boxShadow:
                             index <= activeStep
-                              ? "0 8px 25px rgba(0,0,0,0.2)"
+                              ? "0 4px 15px rgba(0,0,0,0.2)"
                               : "none",
                         }}
                       >
@@ -1495,15 +1476,15 @@ const RegisterLecturer = () => {
                       </Avatar>
                     }
                   >
-                    <div className="mt-4">
+                    <div className="mt-2">
                       <Typography
-                        variant="h6"
-                        className={`font-bold ${index === activeStep ? "text-white" : "text-gray-200"}`}
+                        variant="body1"
+                        className={`font-semibold ${index === activeStep ? "text-white" : "text-gray-200"}`}
                       >
                         {step.label}
                       </Typography>
                       <Typography
-                        variant="body1"
+                        variant="body2"
                         className={`${index === activeStep ? "text-gray-100" : "text-gray-300"}`}
                       >
                         {step.description}
@@ -1515,11 +1496,11 @@ const RegisterLecturer = () => {
             </Stepper>
 
             {isSubmitting && (
-              <div className="mt-8">
+              <div className="mt-6">
                 <LinearProgress
                   sx={{
                     borderRadius: 3,
-                    height: 10,
+                    height: 8,
                     backgroundColor: "rgba(255,255,255,0.3)",
                     "& .MuiLinearProgress-bar": {
                       backgroundColor: "#fff",
@@ -1528,8 +1509,8 @@ const RegisterLecturer = () => {
                   }}
                 />
                 <Typography
-                  variant="h6"
-                  className="mt-4 text-center text-gray-100"
+                  variant="body1"
+                  className="mt-3 text-center text-gray-100"
                 >
                   Đang xử lý đăng ký của bạn...
                 </Typography>

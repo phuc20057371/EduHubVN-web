@@ -5,6 +5,12 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  Card,
+  CardContent,
+  Chip,
+  Stack,
+  Divider,
+  TextField,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Box from "@mui/material/Box";
@@ -37,78 +43,194 @@ const getAcademicRankLabel = (rank: string) => {
 
 const fieldGroups = [
   {
-    title: "⭐ Thông tin quan trọng",
-    important: true,
+    title: "Thông tin chuyên môn",
     fields: [
       {
         label: "Học hàm",
         key: "academicRank",
         render: (v: any) => getAcademicRankLabel(v),
-        important: true,
       },
-      { label: "Chuyên ngành", key: "specialization", important: true },
+      { label: "Chuyên ngành", key: "specialization" },
       {
         label: "Kinh nghiệm",
         key: "experienceYears",
         render: (v: any) => v + " năm",
-        important: true,
       },
-      { label: "Lĩnh vực công việc", key: "jobField", important: true },
+      { label: "Lĩnh vực công việc", key: "jobField" },
     ],
   },
   {
-    title: "👤 Thông tin cá nhân",
+    title: "Thông tin cá nhân",
     fields: [
-      { label: "Họ tên", key: "fullName", important: false },
-      { label: "SĐT", key: "phoneNumber", important: false },
+      { label: "Họ tên", key: "fullName" },
+      { label: "SĐT", key: "phoneNumber" },
       {
         label: "Ngày sinh",
         key: "dateOfBirth",
         render: (v: any) => (v ? new Date(v).toLocaleDateString("vi-VN") : "-"),
-        important: false,
       },
       {
         label: "Giới tính",
         key: "gender",
         render: (v: any) => (v ? "Nam" : "Nữ"),
-        important: false,
       },
-      { label: "Tiểu sử", key: "bio", important: false },
+      { label: "Giới thiệu", key: "bio" },
     ],
   },
 ];
 
-const highlightStyle = {
-  background: "#fff3e0",
-  fontWeight: 600,
-  color: "#e65100",
-  border: "2px solid #ff9800",
-  borderRadius: "4px",
-  padding: "4px 8px",
-};
-
-const importantFieldStyle = {
-  background: "#f3e5f5",
-  fontWeight: 600,
-  color: "#7b1fa2",
-  padding: "8px",
-  borderLeft: "4px solid #9c27b0",
-};
-
-const importantGroupStyle = {
-  background: "linear-gradient(135deg, #f3e5f5 0%, #e8f5e8 100%)",
-  border: "2px solid #9c27b0",
-  borderRadius: "12px",
-  padding: "16px",
-  marginBottom: "16px",
-};
-
 import React, { useState } from "react";
-import TextField from "@mui/material/TextField";
 import { toast } from "react-toastify";
 import { API } from "../utils/Fetch";
 import { useDispatch, useSelector } from "react-redux";
 import { setLecturerPendingUpdate } from "../redux/slice/LecturerPendingUpdateSlice";
+
+const FieldCard: React.FC<{
+  field: any;
+  currentValue: any;
+  updateValue: any;
+  isUpdate?: boolean;
+}> = ({ field, currentValue, updateValue, isUpdate = false }) => {
+  const displayValue = field.render
+    ? field.render(isUpdate ? updateValue : currentValue)
+    : isUpdate
+    ? updateValue
+    : currentValue;
+  const hasChanged = isUpdate && currentValue !== updateValue;
+
+  return (
+    <Box sx={{ mb: 2 }}>
+      <TextField
+        label={field.label}
+        value={displayValue ?? "-"}
+        fullWidth
+        variant="outlined"
+        size="small"
+        multiline={field.key === "bio"}
+        rows={field.key === "bio" ? 4 : 1}
+        InputProps={{
+          readOnly: true,
+          endAdornment: hasChanged ? (
+            <Chip
+              label="Đã sửa"
+              size="small"
+              color="warning"
+              variant="outlined"
+              sx={{ 
+                fontSize: "0.7rem", 
+                height: "20px",
+                borderColor: "#ff9800",
+                backgroundColor: "rgba(255, 152, 0, 0.1)"
+              }}
+            />
+          ) : null,
+        }}
+        sx={{
+          "& .MuiOutlinedInput-root": {
+            backgroundColor: hasChanged ? "rgba(255, 152, 0, 0.08)" : "rgba(255, 255, 255, 0.9)",
+            borderRadius: 3,
+            transition: "all 0.3s ease",
+            "&:hover": {
+              backgroundColor: hasChanged ? "rgba(255, 152, 0, 0.12)" : "rgba(255, 255, 255, 0.95)",
+              boxShadow: hasChanged 
+                ? "0 4px 15px rgba(255, 152, 0, 0.2)" 
+                : "0 4px 15px rgba(0,0,0,0.1)",
+            },
+            "&.Mui-focused": {
+              backgroundColor: hasChanged ? "rgba(255, 152, 0, 0.15)" : "white",
+              boxShadow: hasChanged 
+                ? "0 6px 20px rgba(255, 152, 0, 0.25)" 
+                : "0 6px 20px rgba(37, 99, 235, 0.15)",
+            },
+            "& fieldset": {
+              borderColor: hasChanged ? "rgba(255, 152, 0, 0.5)" : "rgba(0, 0, 0, 0.23)",
+              borderWidth: hasChanged ? "2px" : "1px",
+            },
+            "&:hover fieldset": {
+              borderColor: hasChanged ? "rgba(255, 152, 0, 0.7)" : "rgba(0, 0, 0, 0.23)",
+            },
+            "&.Mui-focused fieldset": {
+              borderColor: hasChanged ? "#ff9800" : "primary.main",
+              borderWidth: "2px",
+            },
+          },
+          "& .MuiInputLabel-root": {
+            fontWeight: hasChanged ? 600 : 400,
+            "&.Mui-focused": {
+              color: hasChanged ? "#ff9800" : "primary.main",
+            },
+          },
+          "& .MuiInputBase-input": {
+            fontWeight: hasChanged ? 600 : 400,
+          },
+        }}
+      />
+    </Box>
+  );
+};
+
+const SectionCard: React.FC<{
+  group: any;
+  lecturer: any;
+  lecturerUpdate?: any;
+  isUpdate?: boolean;
+}> = ({ group, lecturer, lecturerUpdate, isUpdate = false }) => {
+  return (
+    <Card 
+      variant="outlined" 
+      sx={{ 
+        mb: 3,
+        borderRadius: 3,
+        border: "1px solid #e5e7eb",
+        overflow: "hidden",
+        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.07)",
+        transition: "all 0.3s ease",
+        "&:hover": {
+          boxShadow: "0 8px 25px rgba(0, 0, 0, 0.1)",
+          transform: "translateY(-2px)",
+        }
+      }}
+    >
+      <CardContent sx={{ p: 0 }}>
+        <Box
+          sx={{
+            p: 3,
+            background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
+            borderBottom: "1px solid #e2e8f0",
+          }}
+        >
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontWeight: 700, 
+              fontSize: "1.1rem", 
+              color: "#334155",
+              letterSpacing: "0.5px"
+            }}
+          >
+            {group.title}
+          </Typography>
+        </Box>
+        <Box sx={{ p: 3 }}>
+          {group.fields.map((field: any) => {
+            const currentValue = (lecturer as any)?.[field.key];
+            const updateValue = (lecturerUpdate as any)?.[field.key];
+
+            return (
+              <FieldCard
+                key={field.key}
+                field={field}
+                currentValue={currentValue}
+                updateValue={updateValue}
+                isUpdate={isUpdate}
+              />
+            );
+          })}
+        </Box>
+      </CardContent>
+    </Card>
+  );
+};
 
 const LecturerDetailUpdateDialog: React.FC<LecturerDetailDialogProps> = ({
   open,
@@ -141,7 +263,6 @@ const LecturerDetailUpdateDialog: React.FC<LecturerDetailDialogProps> = ({
         await API.admin.approveLecturerUpdate({
           id: (lecturerUpdate as any)?.id,
         });
-        // Dispatch action to update state if needed
         dispatch(
           setLecturerPendingUpdate(
             (Array.isArray(lecturerUpdateList)
@@ -190,25 +311,23 @@ const LecturerDetailUpdateDialog: React.FC<LecturerDetailDialogProps> = ({
   if (!open) return null;
   return (
     <>
-      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
         <DialogTitle
           sx={{
             m: 0,
             p: 3,
-            pr: 5,
-            background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)",
+            bgcolor: "primary.main",
             color: "white",
             fontWeight: "bold",
-            fontSize: "1.25rem",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            📊 So sánh thông tin cập nhật giảng viên
+            So sánh thông tin cập nhật
             <Typography
               component="span"
               sx={{ fontSize: "0.9rem", opacity: 0.9 }}
             >
-              ({(lecturer as any)?.fullName || "N/A"})
+              - {(lecturer as any)?.fullName || "N/A"} (ID: {(lecturer as any)?.id || "N/A"})
             </Typography>
           </Box>
           <IconButton
@@ -219,228 +338,76 @@ const LecturerDetailUpdateDialog: React.FC<LecturerDetailDialogProps> = ({
               right: 8,
               top: 8,
               color: "white",
-              "&:hover": {
-                backgroundColor: "rgba(255,255,255,0.1)",
-              },
             }}
           >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent dividers sx={{ maxHeight: "70vh", overflowY: "auto" }}>
-          <Box
-            display="flex"
-            flexDirection={{ xs: "column", md: "row" }}
-            gap={3}
-          >
-            {/* Thông tin hiện tại */}
-            <Box flex={1} minWidth={0}>
+        <DialogContent sx={{ p: 3 }}>
+          <Stack direction={{ xs: "column", lg: "row" }} spacing={4}>
+            <Box flex={1}>
               <Typography
                 variant="h6"
-                gutterBottom
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  color: "primary.main",
-                  fontWeight: "bold",
-                }}
+                sx={{ mb: 3, color: "primary.main", fontWeight: 600 }}
               >
-                👤 Thông tin hiện tại
+                Thông tin hiện tại
               </Typography>
               {fieldGroups.map((group) => (
-                <Box
-                  key={group.title}
-                  mb={2}
-                  sx={group.important ? importantGroupStyle : {}}
-                >
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight={700}
-                    sx={{
-                      mb: 1,
-                      color: group.important ? "#7b1fa2" : "text.primary",
-                      fontSize: group.important ? "1.1rem" : "1rem",
-                    }}
-                  >
-                    {group.title}
-                    {group.important && (
-                      <Typography
-                        component="span"
-                        sx={{
-                          fontSize: "0.8rem",
-                          ml: 1,
-                          color: "text.secondary",
-                        }}
-                      >
-                        (Thông tin quan trọng)
-                      </Typography>
-                    )}
-                  </Typography>
-                  <Box
-                    component="table"
-                    width="100%"
-                    sx={{ borderCollapse: "collapse" }}
-                  >
-                    <tbody>
-                      {group.fields.map((row) => {
-                        const val = row.render
-                          ? row.render((lecturer as any)?.[row.key])
-                          : (lecturer as any)?.[row.key];
-                        return (
-                          <tr key={row.key}>
-                            <td
-                              style={{
-                                borderBottom: "1px solid #eee",
-                                fontWeight: row.important ? 700 : 500,
-                                width: "40%",
-                                padding: "8px 4px",
-                                color: row.important ? "#7b1fa2" : "inherit",
-                              }}
-                            >
-                              {row.label}
-                              {row.important && (
-                                <span style={{ color: "#f57c00" }}>*</span>
-                              )}
-                            </td>
-                            <td
-                              style={{
-                                borderBottom: "1px solid #eee",
-                                padding: "8px 4px",
-                                ...(row.important ? importantFieldStyle : {}),
-                              }}
-                            >
-                              {val ?? "-"}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </Box>
-                </Box>
+                <SectionCard
+                  key={`current-${group.title}`}
+                  group={group}
+                  lecturer={lecturer}
+                  lecturerUpdate={lecturerUpdate}
+                  isUpdate={false}
+                />
               ))}
             </Box>
-            {/* Thông tin cập nhật */}
-            <Box flex={1} minWidth={0}>
+
+            <Divider
+              orientation="vertical"
+              flexItem
+              sx={{ display: { xs: "none", lg: "block" } }}
+            />
+            <Divider sx={{ display: { xs: "block", lg: "none" } }} />
+
+            <Box flex={1}>
               <Typography
                 variant="h6"
-                gutterBottom
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  color: "warning.main",
-                  fontWeight: "bold",
-                }}
+                sx={{ mb: 3, color: "warning.main", fontWeight: 600 }}
               >
-                📝 Thông tin cập nhật
+                Thông tin cập nhật
               </Typography>
               {fieldGroups.map((group) => (
-                <Box
-                  key={group.title}
-                  mb={2}
-                  sx={group.important ? importantGroupStyle : {}}
-                >
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight={700}
-                    sx={{
-                      mb: 1,
-                      color: group.important ? "#7b1fa2" : "text.primary",
-                      fontSize: group.important ? "1.1rem" : "1rem",
-                    }}
-                  >
-                    {group.title}
-                    {group.important && (
-                      <Typography
-                        component="span"
-                        sx={{
-                          fontSize: "0.8rem",
-                          ml: 1,
-                          color: "text.secondary",
-                        }}
-                      >
-                        (Thông tin quan trọng)
-                      </Typography>
-                    )}
-                  </Typography>
-                  <Box
-                    component="table"
-                    width="100%"
-                    sx={{ borderCollapse: "collapse" }}
-                  >
-                    <tbody>
-                      {group.fields.map((row) => {
-                        const val = row.render
-                          ? row.render((lecturerUpdate as any)?.[row.key])
-                          : (lecturerUpdate as any)?.[row.key];
-                        // Highlight nếu khác với bản gốc
-                        const oldVal = row.render
-                          ? row.render((lecturer as any)?.[row.key])
-                          : (lecturer as any)?.[row.key];
-                        const changed = val !== oldVal;
-                        return (
-                          <tr key={row.key}>
-                            <td
-                              style={{
-                                borderBottom: "1px solid #eee",
-                                fontWeight: row.important ? 700 : 500,
-                                width: "40%",
-                                padding: "8px 4px",
-                                color: row.important ? "#7b1fa2" : "inherit",
-                              }}
-                            >
-                              {row.label}
-                              {row.important && (
-                                <span style={{ color: "#f57c00" }}>*</span>
-                              )}
-                            </td>
-                            <td
-                              style={{
-                                borderBottom: "1px solid #eee",
-                                ...(changed
-                                  ? highlightStyle
-                                  : row.important
-                                    ? importantFieldStyle
-                                    : {}),
-                              }}
-                            >
-                              {val ?? "-"}
-                              {changed && (
-                                <Typography
-                                  component="span"
-                                  sx={{
-                                    fontSize: "0.75rem",
-                                    ml: 1,
-                                    color: "success.main",
-                                    fontWeight: "bold",
-                                  }}
-                                >
-                                  (Đã thay đổi)
-                                </Typography>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </Box>
-                </Box>
+                <SectionCard
+                  key={`update-${group.title}`}
+                  group={group}
+                  lecturer={lecturer}
+                  lecturerUpdate={lecturerUpdate}
+                  isUpdate={true}
+                />
               ))}
             </Box>
-          </Box>
+          </Stack>
         </DialogContent>
         <DialogActions sx={{ p: 3, gap: 2, bgcolor: "grey.50" }}>
-          <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
-            💡 Xem xét kỹ các thông tin quan trọng được đánh dấu * trước khi
-            quyết định
-          </Typography>
+          <Box flex={1}>
+            <Typography variant="body2" color="text.secondary">
+              Các trường đã thay đổi được tô màu cam
+            </Typography>
+          </Box>
           <Button
             onClick={handleReject}
             color="error"
             variant="outlined"
-            startIcon={<span>❌</span>}
-            sx={{ minWidth: 120 }}
+            sx={{ 
+              minWidth: 100,
+              borderRadius: 3,
+              fontWeight: 600,
+              "&:hover": {
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(239, 68, 68, 0.3)",
+              }
+            }}
           >
             Từ chối
           </Button>
@@ -448,8 +415,17 @@ const LecturerDetailUpdateDialog: React.FC<LecturerDetailDialogProps> = ({
             onClick={handleApprove}
             color="success"
             variant="contained"
-            startIcon={<span>✅</span>}
-            sx={{ minWidth: 120 }}
+            sx={{ 
+              minWidth: 100,
+              borderRadius: 3,
+              fontWeight: 600,
+              background: "linear-gradient(45deg, #16a34a 30%, #22c55e 90%)",
+              "&:hover": {
+                background: "linear-gradient(45deg, #15803d 30%, #16a34a 90%)",
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(34, 197, 94, 0.4)",
+              }
+            }}
           >
             Duyệt
           </Button>
@@ -509,3 +485,4 @@ const LecturerDetailUpdateDialog: React.FC<LecturerDetailDialogProps> = ({
 };
 
 export default LecturerDetailUpdateDialog;
+

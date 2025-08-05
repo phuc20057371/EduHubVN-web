@@ -10,7 +10,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
   FormControl,
   FormControlLabel,
   InputLabel,
@@ -32,6 +31,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { setLecturers } from "../redux/slice/LecturerSlice";
 import { API } from "../utils/Fetch";
+import { validateLecturerInfo } from "../utils/Validate";
 
 interface LecturerUpdateDialogProps {
   open: boolean;
@@ -97,78 +97,25 @@ const LecturerUpdateDialog = ({
 
   const handleConfirm = async () => {
     setConfirmOpen(false);
-    
-    // Validation - Ràng buộc dữ liệu
-    const errors = [];
-    
-    // Kiểm tra họ tên
-    if (!fullName || fullName.trim().length < 2) {
-      errors.push("Họ tên phải có ít nhất 2 ký tự");
-    }
-    
-    // Kiểm tra CCCD
-    if (!citizenId || citizenId.trim().length !== 11) {
-      errors.push("CCCD phải có đúng 11 số");
-    } else if (!/^\d{11}$/.test(citizenId.trim())) {
-      errors.push("CCCD chỉ được chứa số");
-    }
-    
-    // Kiểm tra số điện thoại
-    if (!phoneNumber || phoneNumber.trim().length < 10) {
-      errors.push("Số điện thoại phải có ít nhất 10 số");
-    } else if (!/^[0-9+\-\s()]+$/.test(phoneNumber.trim())) {
-      errors.push("Số điện thoại không hợp lệ");
-    }
-    
-    // Kiểm tra ngày sinh
-    if (!dateOfBirth) {
-      errors.push("Vui lòng chọn ngày sinh");
-    } else {
-      const birthDate = new Date(dateOfBirth);
-      const today = new Date();
-      const age = today.getFullYear() - birthDate.getFullYear();
-      if (age < 18 || age > 100) {
-        errors.push("Tuổi phải từ 18 đến 100");
-      }
-    }
-    
-    // Kiểm tra giới tính
-    if (!gender) {
-      errors.push("Vui lòng chọn giới tính");
-    }
-    
-    // Kiểm tra học vị
-    if (!academicRank) {
-      errors.push("Vui lòng chọn học vị");
-    }
-    
-    // Kiểm tra chuyên ngành
-    if (!specialization || specialization.trim().length < 2) {
-      errors.push("Chuyên ngành phải có ít nhất 2 ký tự");
-    }
-    
-    // Kiểm tra lĩnh vực
-    if (!jobField || jobField.trim().length < 2) {
-      errors.push("Lĩnh vực phải có ít nhất 2 ký tự");
-    }
-    
-    // Kiểm tra số năm kinh nghiệm
-    const expYears = Number(experienceYears);
-    if (isNaN(expYears) || expYears < 0) {
-      errors.push("Số năm kinh nghiệm phải >= 0");
-    }
-    
-    // Kiểm tra địa chỉ
-    if (!address || address.trim().length === 0) {
-      errors.push("Địa chỉ không được để trống");
-    }
-    
-    // Nếu có lỗi validation, hiển thị và dừng
-    if (errors.length > 0) {
-      toast.error(`Vui lòng kiểm tra lại:\n${errors.join('\n')}`);
+
+    const formData = {
+      fullName,
+      citizenId,
+      phoneNumber,
+      dateOfBirth,
+      gender,
+      academicRank,
+      specialization,
+      jobField,
+      experienceYears,
+      address,
+      bio,
+    };
+    const error = validateLecturerInfo(formData);
+    if (error.success === false) {
+      toast.error(error.error);
       return;
     }
-    
     try {
       const updatedLecturer = {
         ...lecturer,
@@ -187,12 +134,22 @@ const LecturerUpdateDialog = ({
         status,
         adminNote,
       };
-      
+
       const res = await API.admin.updateLecturer(updatedLecturer);
+      if (res.data.success === false) {
+        toast.error(res.data.error);
+        return;
+      }
+      let updatedLecturerData = res.data.data;
+      updatedLecturerData = {
+        ...updatedLecturerData,
+        email: email.trim(),
+      };
+
       dispatch(
         setLecturers(
           lecturers.map((l: Lecturer) =>
-            l.id === lecturer.id ? res.data.data : l,
+            l.id === lecturer.id ? updatedLecturerData : l,
           ),
         ),
       );
@@ -237,7 +194,8 @@ const LecturerUpdateDialog = ({
               <Card
                 elevation={4}
                 sx={{
-                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                   borderRadius: 3,
                   overflow: "hidden",
                 }}
@@ -253,7 +211,8 @@ const LecturerUpdateDialog = ({
                         height: 80,
                         border: "3px solid rgba(255,255,255,0.9)",
                         boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
-                        background: "linear-gradient(45deg, #f093fb 0%, #f5576c 100%)",
+                        background:
+                          "linear-gradient(45deg, #f093fb 0%, #f5576c 100%)",
                       }}
                     >
                       <PersonIcon sx={{ fontSize: 40, color: "white" }} />
@@ -261,10 +220,10 @@ const LecturerUpdateDialog = ({
 
                     {/* Main Info Section */}
                     <Box flex={1}>
-                      <Typography 
-                        variant="h5" 
-                        sx={{ 
-                          fontWeight: 700, 
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontWeight: 700,
                           color: "white",
                           textShadow: "0 1px 3px rgba(0,0,0,0.3)",
                           mb: 1,
@@ -272,12 +231,13 @@ const LecturerUpdateDialog = ({
                       >
                         {lecturer.fullName}
                       </Typography>
-                      
+
                       <Box display="flex" alignItems="center" gap={2} mb={1}>
                         <Chip
                           label={getAcademicRankLabel(lecturer.academicRank)}
                           sx={{
-                            background: "linear-gradient(45deg, #FFD700, #FFA500)",
+                            background:
+                              "linear-gradient(45deg, #FFD700, #FFA500)",
                             color: "#1a1a1a",
                             fontWeight: "bold",
                             fontSize: "0.85rem",
@@ -287,12 +247,12 @@ const LecturerUpdateDialog = ({
                         />
                       </Box>
 
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
-                          color: "rgba(255,255,255,0.9)", 
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "rgba(255,255,255,0.9)",
                           fontWeight: 500,
-                          textShadow: "0 1px 2px rgba(0,0,0,0.2)"
+                          textShadow: "0 1px 2px rgba(0,0,0,0.2)",
                         }}
                       >
                         📧 {email || "Chưa có email"}
@@ -300,11 +260,15 @@ const LecturerUpdateDialog = ({
                     </Box>
 
                     {/* Status Section */}
-                    <Box display="flex" flexDirection="column" alignItems="center">
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      alignItems="center"
+                    >
                       <Typography
                         variant="body2"
-                        sx={{ 
-                          color: "rgba(255,255,255,0.8)", 
+                        sx={{
+                          color: "rgba(255,255,255,0.8)",
                           fontWeight: 500,
                           mb: 1,
                         }}
@@ -312,11 +276,19 @@ const LecturerUpdateDialog = ({
                         Trạng thái
                       </Typography>
                       <Chip
-                        label={lecturer.status === "APPROVED" ? "Đã duyệt" : 
-                               lecturer.status === "REJECTED" ? "Đã từ chối" : "Chờ duyệt"}
+                        label={
+                          lecturer.status === "APPROVED"
+                            ? "Đã duyệt"
+                            : lecturer.status === "REJECTED"
+                              ? "Đã từ chối"
+                              : "Chờ duyệt"
+                        }
                         color={
-                          lecturer.status === "APPROVED" ? "success" :
-                          lecturer.status === "REJECTED" ? "error" : "warning"
+                          lecturer.status === "APPROVED"
+                            ? "success"
+                            : lecturer.status === "REJECTED"
+                              ? "error"
+                              : "warning"
                         }
                         variant="filled"
                         size="medium"
@@ -490,12 +462,12 @@ const LecturerUpdateDialog = ({
                             variant="outlined"
                           />
                           <TextField
-                            label="Kinh nghiệm (năm)"
+                            label="Năm KN"
                             value={experienceYears}
                             onChange={(
                               e: React.ChangeEvent<HTMLInputElement>,
                             ) => setExperienceYears(e.target.value)}
-                            sx={{ maxWidth: 150, flex: "0 0 auto" }}
+                            sx={{ maxWidth: 120, flex: "0 0 auto" }}
                             type="number"
                             variant="outlined"
                           />
@@ -509,83 +481,39 @@ const LecturerUpdateDialog = ({
                           }
                           fullWidth
                           multiline
-                          rows={3}
+                          rows={5}
                           variant="outlined"
                         />
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          gutterBottom
+                        >
+                          Được tạo lúc :{" "}
+                          {lecturer.createdAt
+                            ? new Date(lecturer.createdAt).toLocaleString(
+                                "vi-VN",
+                              )
+                            : "Chưa cập nhật"}
+                        </Typography>
+
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          gutterBottom
+                        >
+                          Cập nhật lúc{" "}
+                          {lecturer.updatedAt
+                            ? new Date(lecturer.updatedAt).toLocaleString(
+                                "vi-VN",
+                              )
+                            : "Chưa cập nhật"}
+                        </Typography>
                       </Box>
                     </CardContent>
                   </Card>
                 </Box>
               </Box>
-
-              {/* Second Row */}
-              <Box
-                display="flex"
-                flexDirection={{ xs: "column", lg: "row" }}
-                gap={3}
-              ></Box>
-
-              {/* System Information Card */}
-              <Card elevation={1} sx={{ bgcolor: "grey.50" }}>
-                <CardHeader
-                  title="Thông tin hệ thống"
-                  titleTypographyProps={{ variant: "h6" }}
-                />
-                <CardContent>
-                  <Box
-                    display="flex"
-                    flexDirection={{ xs: "column", md: "row" }}
-                    gap={3}
-                  >
-                    <Box flex={1}>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        gutterBottom
-                      >
-                        ID
-                      </Typography>
-                      <Typography variant="body1" fontWeight={500}>
-                        #{lecturer.id}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: { xs: "none", md: "block" } }}>
-                      <Divider orientation="vertical" flexItem />
-                    </Box>
-                    <Box flex={1}>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        gutterBottom
-                      >
-                        Được tạo lúc
-                      </Typography>
-                      <Typography variant="body1" fontWeight={500}>
-                        {lecturer.createdAt
-                          ? new Date(lecturer.createdAt).toLocaleString("vi-VN")
-                          : "Chưa cập nhật"}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: { xs: "none", md: "block" } }}>
-                      <Divider orientation="vertical" flexItem />
-                    </Box>
-                    <Box flex={1}>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        gutterBottom
-                      >
-                        Cập nhật lúc
-                      </Typography>
-                      <Typography variant="body1" fontWeight={500}>
-                        {lecturer.updatedAt
-                          ? new Date(lecturer.updatedAt).toLocaleString("vi-VN")
-                          : "Chưa cập nhật"}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
             </Box>
           ) : (
             <Box

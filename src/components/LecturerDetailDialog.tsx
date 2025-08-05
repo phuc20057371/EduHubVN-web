@@ -482,6 +482,11 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
             <Typography variant="body2" color="text.secondary">
               Chi tiết hồ sơ giảng viên
             </Typography>
+            <Box display="flex" justifyContent="space-between">
+              <Typography variant="body2" color="text.secondary">
+                ID: {lecturer.id}
+              </Typography>
+            </Box>
           </Box>
         </Box>
       </DialogTitle>
@@ -801,18 +806,6 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                 <Box display="flex" flexDirection="column" gap={1.5}>
                   <Box display="flex" justifyContent="space-between">
                     <Typography variant="body2" color="text.secondary">
-                      ID:
-                    </Typography>
-                    <Chip
-                      label={lecturer.id}
-                      size="small"
-                      color="secondary"
-                      variant="outlined"
-                    />
-                  </Box>
-                  <Divider />
-                  <Box display="flex" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">
                       Thời gian tạo:
                     </Typography>
                     <Typography variant="body2" fontWeight={500}>
@@ -1072,13 +1065,10 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                                       textOverflow: "ellipsis",
                                     }}
                                     onClick={() =>
-                                      deg.url &&
-                                      window.open(
-                                        deg.url,
-                                      )
+                                      deg.url && window.open(deg.url)
                                     }
                                   >
-                                    {deg.url || "Không có"}
+                                    Bấm vào đây
                                   </Typography>
                                 </Box>
                                 <Divider />
@@ -1372,7 +1362,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                                     variant="body2"
                                     color="text.secondary"
                                   >
-                                    URL chứng chỉ:
+                                    URL:
                                   </Typography>
                                   <Typography
                                     variant="body2"
@@ -1393,13 +1383,12 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
                                     }}
                                     onClick={() =>
                                       cert.certificateUrl &&
-                                      window.open(
-                                        cert.certificateUrl
-                                        
-                                      )
+                                      window.open(cert.certificateUrl)
                                     }
                                   >
-                                    {cert.certificateUrl || "Không có"}
+                                    {cert.certificateUrl
+                                      ? "Bấm vào đây"
+                                      : "Không có"}
                                   </Typography>
                                 </Box>
                                 <Divider />

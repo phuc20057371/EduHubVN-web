@@ -30,6 +30,8 @@ import {
   Alert,
   ListItemButton,
   IconButton,
+  Checkbox,
+  Tooltip,
 } from "@mui/material";
 import {
   Search,
@@ -45,6 +47,8 @@ import { API } from "../utils/Fetch";
 import type { OwnedCourse } from "../types/OwnedCourseInfo";
 import { getCourseType } from "../utils/CourseChangeText";
 import { toast } from "react-toastify";
+import { validateCourseForm } from "../utils/Validate";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 interface CreateCourseDialogProps {
   open: boolean;
@@ -115,6 +119,9 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
             .includes(searchTerm.toLowerCase()) ||
           item.lecturer.fullName
             .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          item.ownedCourse.id
+            .toLowerCase()
             .includes(searchTerm.toLowerCase()),
       );
     }
@@ -166,6 +173,8 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
       setLoading(true);
       const response = await API.admin.getOwnedCourses();
       setOwnedCourses(response.data.data || []);
+      console.log("✅ Owned courses fetched successfully:", response.data.data);
+
       setFilteredCourses(response.data.data || []);
     } catch (error) {
       console.error("Error fetching owned courses:", error);
@@ -196,7 +205,7 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
       isPublished: false, // Default to unpublished for new courses
     });
   }, []);
-  const [_selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = (field: string, value: any) => {
@@ -207,6 +216,11 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
   };
 
   const handleSubmit = () => {
+    if (validateCourseForm(formData).success === false) {
+      toast.error(validateCourseForm(formData).error);
+      return;
+    }
+
     const courseData = {
       ...formData,
       ownedCourseId: selectedOwnedCourse?.ownedCourse.id,
@@ -215,6 +229,7 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
     console.log("Submitting course data:", courseData);
 
     onSubmit(courseData);
+    fetchOwnedCourses();
     handleClose();
   };
 
@@ -224,24 +239,45 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
     }
   };
 
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  // const handleFileUpload = async (
+  //   event: React.ChangeEvent<HTMLInputElement>,
+  // ) => {
+  //   const file = event.target.files?.[0];
+  //   if (!file) return;
 
+  //   try {
+  //     const response = await API.user.uploadFileToServer(file);
+  //     console.log("✅ File uploaded successfully:", response.data);
+  //     setFormData((prev) => ({ ...prev, thumbnailUrl: response.data }));
+  //     toast.success("Tải lên tài liệu thành công");
+  //   } catch (error) {
+  //     console.error("❌ Error uploading file:", error);
+  //     toast.error("Tải lên tài liệu không thành công. (.pdf, .jpg, .png)");
+  //   } finally {
+  //     setSelectedFile(null);
+  //   }
+  // };
+  const handleFileUpload = async (file: File) => {
     try {
       const response = await API.user.uploadFileToServer(file);
-      console.log("✅ File uploaded successfully:", response.data);
-      setFormData((prev) => ({ ...prev, thumbnailUrl: response.data }));
+      const uploadedUrl = response.data; // hoặc thêm tiền tố nếu cần
+      setFormData((prev) => ({ ...prev, thumbnailUrl: uploadedUrl }));
       toast.success("Tải lên tài liệu thành công");
     } catch (error) {
       console.error("❌ Error uploading file:", error);
       toast.error("Tải lên tài liệu không thành công. (.pdf, .jpg, .png)");
     } finally {
       setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
+  useEffect(() => {
+    if (selectedFile) {
+      handleFileUpload(selectedFile);
+    }
+  }, [selectedFile]);
 
   const handleClose = () => {
     setFormData({
@@ -830,6 +866,22 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
                       {selectedOwnedCourse.ownedCourse.title}
                     </strong>
                   </Typography>
+                  <Typography variant="body2" className="font-medium">
+                    ID:{" "}
+                    <strong className="text-blue-700">
+                      {selectedOwnedCourse.ownedCourse.id}
+                    </strong>
+                    <Tooltip title="Sao chép ID">
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedOwnedCourse.ownedCourse.id);
+                        }}
+                      >
+                        <ContentCopyIcon sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Typography>
                   <Typography
                     variant="caption"
                     className="mt-1 block text-blue-600"
@@ -907,6 +959,7 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
                 >
                   <Avatar
                     src={formData.thumbnailUrl}
+                    key={formData.thumbnailUrl}
                     sx={{
                       width: "100%",
                       height: "100%",
@@ -920,11 +973,7 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
                     hidden
                     ref={fileInputRef}
                     accept=".png, .jpg, .jpeg"
-                    onChange={(e) => {
-                      handleFileChange(e); // cập nhật selectedFile
-                      // Đợi selectedFile cập nhật xong mới upload
-                      setTimeout(() => handleFileUpload(e), 0); // dùng setTimeout để đảm bảo state cập nhật xong
-                    }}
+                    onChange={(e) => handleFileChange(e)}
                   />
                 </button>
                 <TextField
@@ -999,19 +1048,19 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
               <div className="flex flex-col gap-4 md:flex-row md:items-center">
                 <FormControlLabel
                   control={
-                    <Switch
+                    <Checkbox
                       checked={formData.isOnline}
                       onChange={(e) =>
                         handleInputChange("isOnline", e.target.checked)
                       }
                     />
                   }
-                  label="Khóa học trực tuyến"
+                  label={formData.isOnline ? "Online" : "Offline"}
                   className="md:w-1/2"
                 />
                 <TextField
                   fullWidth
-                  label="Địa chỉ"
+                  label="Địa chỉ/ Link phòng học"
                   value={formData.address}
                   onChange={(e) => handleInputChange("address", e.target.value)}
                   InputProps={{
@@ -1098,7 +1147,13 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
           variant="contained"
           size="large"
           startIcon={<Add />}
-          disabled={!formData.title || !formData.topic || !formData.courseType}
+          disabled={
+            !formData.title ||
+            !formData.topic ||
+            !formData.courseType ||
+            !formData.description ||
+            !formData.address
+          }
           className="bg-gradient-to-r from-indigo-500 to-purple-600 px-8"
         >
           Tạo khóa học

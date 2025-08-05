@@ -342,7 +342,7 @@ export const API = {
     updateCourseMember: (data: any) =>
       fetch.post("/api/v1/admin/update-course-member", data),
     getOwnedCourses: () =>
-      fetch.get("/api/v1/admin/get-owned-courses"),
+      fetch.get("/api/v1/admin/get-new-owned-courses"),
     createCourse: (data: any) =>
       fetch.post("/api/v1/admin/create-course", data),
   },
@@ -351,6 +351,9 @@ export const API = {
     getLecturerProfile: (id: string) => {
       return fetch.get(`/api/v1/user/lecturer-profile/${id}`);
     },
+    checkCitizenId: (citizenId: string) => {
+      return fetch.get("/api/v1/user/check-citizen-id/" + citizenId);
+    }
   },
 
 };

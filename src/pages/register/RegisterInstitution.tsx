@@ -1,26 +1,101 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { EducationInstitutionType } from "../../types/InstitutionRequest";
-import { Button, TextField } from "@mui/material";
+import {
+  Button,
+  TextField,
+  IconButton,
+  Typography,
+  Paper,
+  Divider,
+} from "@mui/material";
+import { ArrowBack } from "@mui/icons-material";
 import type { InstitutionRequest } from "../../types/InstitutionRequest";
 import { API } from "../../utils/Fetch";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUserProfile } from "../../redux/slice/userSlice";
+import {
+  School,
+  Business,
+  ContactMail,
+  Person,
+  Description,
+} from "@mui/icons-material";
+import { validateInstitutionInfo } from "../../utils/Validate";
+import { toast } from "react-toastify";
 
 const RegisterInstitution = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [businessRegistrationNumber, setBusinessRegistrationNumber] = useState<string>('');
-  const [institutionName, setInstitutionName] = useState<string>('');
-  const [institutionType, setInstitutionType] = useState<EducationInstitutionType | null>(null);
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [website, setWebsite] = useState<string>('');
-  const [address, setAddress] = useState<string>('');
-  const [representativeName, setRepresentativeName] = useState<string>('');
-  const [position, setPosition] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
+  const [businessRegistrationNumber, setBusinessRegistrationNumber] =
+    useState<string>("");
+  const [institutionName, setInstitutionName] = useState<string>("");
+  const [institutionType, setInstitutionType] =
+    useState<EducationInstitutionType | null>(null);
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const [website, setWebsite] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
+  const [representativeName, setRepresentativeName] = useState<string>("");
+  const [position, setPosition] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
   const [establishedYear, setEstablishedYear] = useState<number | null>(null);
+
+  // Load data from localStorage on component mount
+  useEffect(() => {
+    const savedData = localStorage.getItem("institutionRegisterForm");
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        setBusinessRegistrationNumber(
+          parsedData.businessRegistrationNumber || "",
+        );
+        setInstitutionName(parsedData.institutionName || "");
+        setInstitutionType(parsedData.institutionType || null);
+        setPhoneNumber(parsedData.phoneNumber || "");
+        setWebsite(parsedData.website || "");
+        setAddress(parsedData.address || "");
+        setRepresentativeName(parsedData.representativeName || "");
+        setPosition(parsedData.position || "");
+        setDescription(parsedData.description || "");
+        setEstablishedYear(parsedData.establishedYear || null);
+      } catch (error) {
+        console.warn("Error loading saved form data:", error);
+      }
+    }
+  }, []);
+
+  // Save data to localStorage whenever form data changes
+  useEffect(() => {
+    const formData = {
+      businessRegistrationNumber,
+      institutionName,
+      institutionType,
+      phoneNumber,
+      website,
+      address,
+      representativeName,
+      position,
+      description,
+      establishedYear,
+    };
+    localStorage.setItem("institutionRegisterForm", JSON.stringify(formData));
+  }, [
+    businessRegistrationNumber,
+    institutionName,
+    institutionType,
+    phoneNumber,
+    website,
+    address,
+    representativeName,
+    position,
+    description,
+    establishedYear,
+  ]);
+
+  const handleBack = () => {
+    navigate(-1);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,117 +112,467 @@ const RegisterInstitution = () => {
       description,
       establishedYear: establishedYear ?? new Date().getFullYear(), // fallback nếu null
     };
+    console.log(validateInstitutionInfo(institutionData));
+
+    if (validateInstitutionInfo(institutionData).success === false) {
+      toast.error(validateInstitutionInfo(institutionData).error);
+      return;
+    }
 
     try {
       const response = await API.user.registerInstitution(institutionData);
       console.log("✅ Đăng ký thành công:", response.data.data);
+
+      // Clear localStorage on successful registration
+      localStorage.removeItem("institutionRegisterForm");
+
       const profileResponse = await API.user.getUserProfile();
       const user = profileResponse?.data?.data;
-      // nếu dùng react-router
+      toast.success("Đăng ký thành công! Vui lòng chờ duyệt.");
       if (user && user.role) {
         dispatch(setUserProfile(user));
-        navigate("/pending-institution"); 
+        navigate("/pending-institution", { replace: true });
       } else {
         console.warn("User profile không hợp lệ:", user);
       }
     } catch (error: any) {
-      alert("Có lỗi xảy ra. Vui lòng kiểm tra lại thông tin.");
+      if (error.response?.data?.message?.includes("đã tồn tại")) {
+        toast.error("Số đăng ký kinh doanh đã tồn tại trong hệ thống.");
+      } else {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+      }
     }
   };
 
-
   return (
-    (
-      <div className="max-w-3xl p-6 mx-auto mt-6 bg-white rounded-md shadow-md">
-        <h2 className="mb-6 text-xl font-bold text-center">Đăng ký Cơ sở Giáo dục</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <TextField
-            fullWidth
-            placeholder="Mã số đăng ký kinh doanh"
-            value={businessRegistrationNumber}
-            onChange={(e) => setBusinessRegistrationNumber(e.target.value)}
-          />
-          <TextField
-            fullWidth
-            placeholder="Tên cơ sở"
-            value={institutionName}
-            onChange={(e) => setInstitutionName(e.target.value)}
-          />
-          <TextField
-            fullWidth
-            select
-            placeholder="Loại cơ sở"
-            value={institutionType ?? ''}
-            onChange={(e) => setInstitutionType(e.target.value as EducationInstitutionType)}
-            SelectProps={{ native: true }}
-          >
-            <option value="">-- Chọn loại --</option>
-            <option value="SCHOOL">Trường</option>
-            <option value="TRAINING_CENTER">Trung tâm</option>
-          </TextField>
-
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <TextField
-              fullWidth
-              placeholder="Số điện thoại"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-            />
-            <TextField
-              fullWidth
-              placeholder="Website"
-              value={website}
-              onChange={(e) => setWebsite(e.target.value)}
-            />
+    <div className="min-h-screen bg-gray-50">
+      {/* Enhanced Banner Section with Back Button */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 py-12 text-white">
+        <div className="absolute inset-0 bg-black opacity-20"></div>
+        <div className="absolute left-0 top-0 h-full w-full">
+          <div className="absolute left-10 top-10 h-20 w-20 rounded-full bg-white opacity-10"></div>
+          <div className="absolute bottom-10 right-10 h-32 w-32 rounded-full bg-white opacity-5"></div>
+          <div className="absolute left-1/3 top-1/2 h-16 w-16 rounded-full bg-white opacity-10"></div>
+        </div>
+        <div className="relative mx-auto max-w-4xl px-4">
+          {/* Back Button and Title Row */}
+          <div className="mb-6 flex items-center justify-between">
+            <IconButton
+              onClick={handleBack}
+              sx={{
+                backgroundColor: "rgba(255, 255, 255, 0.2)",
+                color: "white",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.3)",
+                  transform: "translateY(-2px)",
+                },
+                transition: "all 0.3s ease",
+              }}
+            >
+              <ArrowBack />
+            </IconButton>
+            <div className="flex flex-1 flex-col items-center text-center">
+              <School sx={{ fontSize: 40, mb: 1, opacity: 0.9 }} />
+              <Typography variant="h3" className="font-bold">
+                Đăng ký Cơ sở Giáo dục
+              </Typography>
+            </div>
+            <div className="w-10"></div> {/* Spacer for balance */}
           </div>
-
-          <TextField
-            fullWidth
-            placeholder="Địa chỉ"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
-
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <TextField
-              fullWidth
-              placeholder="Người đại diện"
-              value={representativeName}
-              onChange={(e) => setRepresentativeName(e.target.value)}
-            />
-            <TextField
-              fullWidth
-              placeholder="Chức vụ"
-              value={position}
-              onChange={(e) => setPosition(e.target.value)}
-            />
-          </div>
-
-          <TextField
-            fullWidth
-            placeholder="Mô tả"
-            multiline
-            rows={3}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-
-          <TextField
-            fullWidth
-            type="number"
-            placeholder="Năm thành lập"
-            value={establishedYear ?? ''}
-            onChange={(e) => setEstablishedYear(+e.target.value)}
-          />
-
-          <div className="pt-4 text-center">
-            <Button type="submit" variant="contained" color="primary">
-              Đăng ký
-            </Button>
-          </div>
-        </form>
+          <Typography variant="h6" className="text-center opacity-90">
+            Tìm kiếm và kết nối với các giảng viên hàng đầu
+          </Typography>
+        </div>
       </div>
-    ))
-}
 
-export default RegisterInstitution
+      {/* Main Content */}
+      <div className="mx-auto -mt-8 max-w-4xl px-4 pb-8">
+        {/* Enhanced Form */}
+        <Paper
+          elevation={3}
+          className="rounded-xl p-8"
+          sx={{
+            borderRadius: 3,
+            background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+          }}
+        >
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Basic Info */}
+            <div>
+              <div className="mb-6 flex items-center pt-10">
+                <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
+                  <Business className="text-2xl text-blue-600" />
+                </div>
+                <div>
+                  <Typography variant="h5" className="font-bold text-blue-600">
+                    Thông tin cơ bản
+                  </Typography>
+                  <Typography variant="body2" className="text-gray-500">
+                    Thông tin định danh của cơ sở giáo dục
+                  </Typography>
+                </div>
+              </div>
+              <div className="space-y-6">
+                <div className="flex flex-col gap-6 md:flex-row">
+                  <TextField
+                    fullWidth
+                    label="Mã số kinh doanh"
+                    placeholder="Nhập mã số đăng ký kinh doanh"
+                    value={businessRegistrationNumber}
+                    onChange={(e) =>
+                      setBusinessRegistrationNumber(e.target.value)
+                    }
+                    required
+                    variant="outlined"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 255, 255, 0.95)",
+                          boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                        },
+                        "&.Mui-focused": {
+                          backgroundColor: "white",
+                          boxShadow: "0 8px 25px rgba(37, 99, 235, 0.15)",
+                        },
+                      },
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="Năm thành lập"
+                    placeholder="Năm thành lập cơ sở"
+                    type="number"
+                    value={establishedYear ?? ""}
+                    onChange={(e) => setEstablishedYear(+e.target.value)}
+                    variant="outlined"
+                    inputProps={{ min: 1900, max: new Date().getFullYear() }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 255, 255, 0.95)",
+                          boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                        },
+                      },
+                    }}
+                  />
+                </div>
+                <div className="flex flex-col gap-6 md:flex-row">
+                  <TextField
+                    fullWidth
+                    label="Tên cơ sở"
+                    placeholder="Tên đầy đủ của cơ sở giáo dục"
+                    value={institutionName}
+                    onChange={(e) => setInstitutionName(e.target.value)}
+                    required
+                    variant="outlined"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 255, 255, 0.95)",
+                          boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                        },
+                        "&.Mui-focused": {
+                          backgroundColor: "white",
+                          boxShadow: "0 8px 25px rgba(37, 99, 235, 0.15)",
+                        },
+                      },
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    select
+                    label="Loại cơ sở"
+                    value={institutionType ?? ""}
+                    onChange={(e) =>
+                      setInstitutionType(
+                        e.target.value as EducationInstitutionType,
+                      )
+                    }
+                    SelectProps={{ native: true }}
+                    required
+                    variant="outlined"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 255, 255, 0.95)",
+                          boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                        },
+                      },
+                    }}
+                  >
+                    <option value="">-- Chọn loại cơ sở --</option>
+                    <option value="UNIVERSITY">🏫 Trường đại học</option>
+                    <option value="TRAINING_CENTER">
+                      🎓 Trung tâm đào tạo
+                    </option>
+                  </TextField>
+                </div>
+              </div>
+            </div>
+
+            <Divider />
+
+            {/* Contact Info */}
+            <div>
+              <div className="mb-6 flex items-center">
+                <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
+                  <ContactMail className="text-2xl text-green-600" />
+                </div>
+                <div>
+                  <Typography variant="h5" className="font-bold text-green-600">
+                    Thông tin liên hệ
+                  </Typography>
+                  <Typography variant="body2" className="text-gray-500">
+                    Thông tin để liên hệ và kết nối
+                  </Typography>
+                </div>
+              </div>
+              <div className="space-y-6">
+                <div className="flex flex-col gap-6 md:flex-row">
+                  <TextField
+                    fullWidth
+                    label="Số điện thoại"
+                    placeholder="Số điện thoại liên hệ"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    required
+                    variant="outlined"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 255, 255, 0.95)",
+                          boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                        },
+                        "&.Mui-focused": {
+                          backgroundColor: "white",
+                          boxShadow: "0 8px 25px rgba(34, 197, 94, 0.15)",
+                        },
+                      },
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="Website"
+                    placeholder="https://example.com"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                    variant="outlined"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 255, 255, 0.95)",
+                          boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                        },
+                      },
+                    }}
+                  />
+                </div>
+                <TextField
+                  fullWidth
+                  label="Địa chỉ"
+                  placeholder="Địa chỉ đầy đủ của cơ sở (số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố)"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  required
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 3,
+                      backgroundColor: "rgba(255, 255, 255, 0.8)",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 0.95)",
+                        boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                      },
+                      "&.Mui-focused": {
+                        backgroundColor: "white",
+                        boxShadow: "0 8px 25px rgba(34, 197, 94, 0.15)",
+                      },
+                    },
+                  }}
+                />
+              </div>
+            </div>
+
+            <Divider />
+
+            {/* Representative */}
+            <div>
+              <div className="mb-6 flex items-center">
+                <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100">
+                  <Person className="text-2xl text-purple-600" />
+                </div>
+                <div>
+                  <Typography
+                    variant="h5"
+                    className="font-bold text-purple-600"
+                  >
+                    Người đại diện
+                  </Typography>
+                  <Typography variant="body2" className="text-gray-500">
+                    Thông tin người đại diện pháp lý
+                  </Typography>
+                </div>
+              </div>
+              <div className="flex flex-col gap-6 md:flex-row">
+                <TextField
+                  fullWidth
+                  label="Họ và tên người đại diện"
+                  placeholder="Họ và tên đầy đủ"
+                  value={representativeName}
+                  onChange={(e) => setRepresentativeName(e.target.value)}
+                  required
+                  variant="outlined"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 3,
+                      backgroundColor: "rgba(255, 255, 255, 0.8)",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 0.95)",
+                        boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                      },
+                      "&.Mui-focused": {
+                        backgroundColor: "white",
+                        boxShadow: "0 8px 25px rgba(168, 85, 247, 0.15)",
+                      },
+                    },
+                  }}
+                />
+                <TextField
+                  fullWidth
+                  label="Chức vụ"
+                  placeholder="Ví dụ: Hiệu trưởng, Giám đốc..."
+                  value={position}
+                  onChange={(e) => setPosition(e.target.value)}
+                  required
+                  variant="outlined"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 3,
+                      backgroundColor: "rgba(255, 255, 255, 0.8)",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 0.95)",
+                        boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                      },
+                      "&.Mui-focused": {
+                        backgroundColor: "white",
+                        boxShadow: "0 8px 25px rgba(168, 85, 247, 0.15)",
+                      },
+                    },
+                  }}
+                />
+              </div>
+            </div>
+
+            <Divider />
+
+            {/* Description */}
+            <div>
+              <div className="mb-6 flex items-center">
+                <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100">
+                  <Description className="text-2xl text-orange-600" />
+                </div>
+                <div>
+                  <Typography
+                    variant="h5"
+                    className="font-bold text-orange-600"
+                  >
+                    Mô tả cơ sở
+                  </Typography>
+                  <Typography variant="body2" className="text-gray-500">
+                    Giới thiệu về cơ sở giáo dục
+                  </Typography>
+                </div>
+              </div>
+              <TextField
+                fullWidth
+                label="Mô tả chi tiết về cơ sở"
+                placeholder="Mô tả về lịch sử, tầm nhìn, sứ mệnh, chương trình đào tạo, cơ sở vật chất, thành tựu nổi bật..."
+                multiline
+                rows={4}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                variant="outlined"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 3,
+                    backgroundColor: "rgba(255, 255, 255, 0.8)",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.95)",
+                      boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                    },
+                    "&.Mui-focused": {
+                      backgroundColor: "white",
+                      boxShadow: "0 8px 25px rgba(251, 146, 60, 0.15)",
+                    },
+                  },
+                }}
+              />
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex justify-center pt-6">
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                sx={{
+                  px: 8,
+                  py: 2,
+                  background:
+                    "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
+                  borderRadius: 3,
+                  fontWeight: "bold",
+                  textTransform: "none",
+                  fontSize: "1.1rem",
+                  boxShadow: "0 8px 25px rgba(33, 150, 243, 0.4)",
+                  "&:hover": {
+                    background:
+                      "linear-gradient(45deg, #1976D2 30%, #1BA3D6 90%)",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 12px 35px rgba(33, 150, 243, 0.6)",
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Đăng ký
+              </Button>
+            </div>
+          </form>
+        </Paper>
+
+        {/* Footer Info */}
+        <div className="mt-6 text-center">
+          <Typography variant="body2" className="text-gray-500">
+            💡 Thông tin sẽ được duyệt trong thời gian sớm nhất.
+          </Typography>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RegisterInstitution;
