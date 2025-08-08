@@ -9,11 +9,11 @@ import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import * as React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import AdminLecturerMainTab from "./AdminLecturerMainTab";
-import AdminLecturerCreateTab from "./AdminLecturerCreateTab";
-import AdminLecturerUpdateTab from "./AdminLecturerUpdateTab";
-import AdminLecturerDegreeTab from "./AdminLecturerDegreeTab";
-import AdminLecturerCourseTab from "./AdminLecturerCourseTab";
+import AdminLecturerMainTab from "./tab/lecturer/AdminLecturerMainTab";
+import AdminLecturerCreateTab from "./tab/lecturer/AdminLecturerCreateTab";
+import AdminLecturerUpdateTab from "./tab/lecturer/AdminLecturerUpdateTab";
+import AdminLecturerDegreeTab from "./tab/lecturer/AdminLecturerDegreeTab";
+import AdminLecturerCourseTab from "./tab/lecturer/AdminLecturerCourseTab";
 import { setLecturerPendingCreate } from "../../redux/slice/LecturerPendingCreateSlice";
 import { setLecturerPendingUpdate } from "../../redux/slice/LecturerPendingUpdateSlice";
 import { setLecturerRequests } from "../../redux/slice/LecturerRquestSlice";
@@ -45,11 +45,13 @@ const AdminLecturerPage = () => {
   // TAB 4 - DEGREE/CERTIFICATE FILTERS
   const [degreeSearchTerm, setDegreeSearchTerm] = useState("");
   const [degreeTypeFilter, setDegreeTypeFilter] = useState("");
+  const [degreeActionFilter, setDegreeActionFilter] = useState("");
   const [degreeDateSort, setDegreeDateSort] = useState("oldest");
 
   // TAB 5 - COURSE FILTERS
   const [courseSearchTerm, setCourseSearchTerm] = useState("");
   const [courseTypeFilter, setCourseTypeFilter] = useState("");
+  const [courseActionFilter, setCourseActionFilter] = useState("");
   const [courseDateSort, setCourseDateSort] = useState("oldest");
 
   // TABLE SORTING & SELECTION
@@ -75,19 +77,23 @@ const AdminLecturerPage = () => {
   // TAB 4 - DEGREE/CERTIFICATE REQUEST DATA
   const lecturerRequestsDGCC = React.useMemo(
     () =>
-      lecturerRequests.filter(
-        (req: any) => req.type === "BC" || req.type === "CC",
-      ),
+      Array.isArray(lecturerRequests)
+        ? lecturerRequests.filter(
+            (req: any) => req.type === "BC" || req.type === "CC",
+          )
+        : [],
     [lecturerRequests],
   );
 
   // TAB 5 - COURSE REQUEST DATA
   const lecturerRequestsCourse = React.useMemo(
     () =>
-      lecturerRequests.filter(
-        (req: any) =>
-          req.type === "AC" || req.type === "OC" || req.type === "RP",
-      ),
+      Array.isArray(lecturerRequests)
+        ? lecturerRequests.filter(
+            (req: any) =>
+              req.type === "AC" || req.type === "OC" || req.type === "RP",
+          )
+        : [],
     [lecturerRequests],
   );
 
@@ -205,28 +211,78 @@ const AdminLecturerPage = () => {
 
   // TAB 4 - FILTERED DEGREE/CERTIFICATE DATA
   const filteredDegreeList = React.useMemo(() => {
+    if (!Array.isArray(lecturerRequestsDGCC)) {
+      return [];
+    }
+
     let filtered = lecturerRequestsDGCC;
 
     if (degreeSearchTerm) {
       filtered = filtered.filter(
-        (item: any) =>
-          item.lecturerInfo?.fullName
+        (item: any) => {
+          const searchTerm = degreeSearchTerm.toLowerCase();
+          
+          // Search by lecturer info
+          const lecturerMatch = item.lecturerInfo?.fullName
             ?.toLowerCase()
-            .includes(degreeSearchTerm.toLowerCase()) ||
-          item.content?.name
-            ?.toLowerCase()
-            .includes(degreeSearchTerm.toLowerCase()) ||
-          item.content?.title
-            ?.toLowerCase()
-            .includes(degreeSearchTerm.toLowerCase()) ||
-          item.content?.description
-            ?.toLowerCase()
-            .includes(degreeSearchTerm.toLowerCase()),
+            .includes(searchTerm);
+
+          // Search by IDs
+          const idMatch = 
+            item.content?.id?.toString().includes(degreeSearchTerm) ||
+            item.content?.original?.id?.toString().includes(degreeSearchTerm) ||
+            item.content?.update?.id?.toString().includes(degreeSearchTerm);
+
+          // Search by content - handle both direct content and nested original/update
+          let contentMatch = false;
+          
+          // Check direct content
+          if (item.content && !item.content.original && !item.content.update) {
+            contentMatch = 
+              item.content.name?.toLowerCase().includes(searchTerm) ||
+              item.content.title?.toLowerCase().includes(searchTerm) ||
+              item.content.description?.toLowerCase().includes(searchTerm) ||
+              item.content.major?.toLowerCase().includes(searchTerm) ||
+              item.content.institution?.toLowerCase().includes(searchTerm) ||
+              item.content.level?.toLowerCase().includes(searchTerm) ||
+              item.content.specialization?.toLowerCase().includes(searchTerm);
+          }
+          
+          // Check original content
+          if (item.content?.original) {
+            contentMatch = contentMatch ||
+              item.content.original.name?.toLowerCase().includes(searchTerm) ||
+              item.content.original.title?.toLowerCase().includes(searchTerm) ||
+              item.content.original.description?.toLowerCase().includes(searchTerm) ||
+              item.content.original.major?.toLowerCase().includes(searchTerm) ||
+              item.content.original.institution?.toLowerCase().includes(searchTerm) ||
+              item.content.original.level?.toLowerCase().includes(searchTerm) ||
+              item.content.original.specialization?.toLowerCase().includes(searchTerm);
+          }
+          
+          // Check update content
+          if (item.content?.update) {
+            contentMatch = contentMatch ||
+              item.content.update.name?.toLowerCase().includes(searchTerm) ||
+              item.content.update.title?.toLowerCase().includes(searchTerm) ||
+              item.content.update.description?.toLowerCase().includes(searchTerm) ||
+              item.content.update.major?.toLowerCase().includes(searchTerm) ||
+              item.content.update.institution?.toLowerCase().includes(searchTerm) ||
+              item.content.update.level?.toLowerCase().includes(searchTerm) ||
+              item.content.update.specialization?.toLowerCase().includes(searchTerm);
+          }
+
+          return lecturerMatch || idMatch || contentMatch;
+        }
       );
     }
 
     if (degreeTypeFilter) {
       filtered = filtered.filter((item: any) => item.type === degreeTypeFilter);
+    }
+
+    if (degreeActionFilter) {
+      filtered = filtered.filter((item: any) => item.label === degreeActionFilter);
     }
 
     filtered = [...filtered].sort((a: any, b: any) => {
@@ -248,33 +304,71 @@ const AdminLecturerPage = () => {
     lecturerRequestsDGCC,
     degreeSearchTerm,
     degreeTypeFilter,
+    degreeActionFilter,
     degreeDateSort,
   ]);
 
   // TAB 5 - FILTERED COURSE DATA
   const filteredCourseList = React.useMemo(() => {
+    if (!Array.isArray(lecturerRequestsCourse)) {
+      return [];
+    }
+
     let filtered = lecturerRequestsCourse;
 
     if (courseSearchTerm) {
       filtered = filtered.filter(
-        (item: any) =>
-          item.lecturerInfo?.fullName
+        (item: any) => {
+          const searchTerm = courseSearchTerm.toLowerCase();
+          
+          // Search by lecturer info
+          const lecturerMatch = item.lecturerInfo?.fullName
             ?.toLowerCase()
-            .includes(courseSearchTerm.toLowerCase()) ||
-          item.content?.name
-            ?.toLowerCase()
-            .includes(courseSearchTerm.toLowerCase()) ||
-          item.content?.title
-            ?.toLowerCase()
-            .includes(courseSearchTerm.toLowerCase()) ||
-          item.content?.description
-            ?.toLowerCase()
-            .includes(courseSearchTerm.toLowerCase()),
+            .includes(searchTerm);
+
+          // Search by IDs
+          const idMatch = 
+            item.content?.id?.toString().includes(courseSearchTerm) ||
+            item.content?.original?.id?.toString().includes(courseSearchTerm);
+
+          // Search by content - handle both direct content and nested original
+          let contentMatch = false;
+          
+          // Check direct content
+          if (item.content && !item.content.original) {
+            contentMatch = 
+              item.content.name?.toLowerCase().includes(searchTerm) ||
+              item.content.title?.toLowerCase().includes(searchTerm) ||
+              item.content.description?.toLowerCase().includes(searchTerm) ||
+              item.content.category?.toLowerCase().includes(searchTerm) ||
+              item.content.level?.toLowerCase().includes(searchTerm) ||
+              item.content.duration?.toString().includes(courseSearchTerm) ||
+              item.content.price?.toString().includes(courseSearchTerm);
+          }
+          
+          // Check original content
+          if (item.content?.original) {
+            contentMatch = contentMatch ||
+              item.content.original.name?.toLowerCase().includes(searchTerm) ||
+              item.content.original.title?.toLowerCase().includes(searchTerm) ||
+              item.content.original.description?.toLowerCase().includes(searchTerm) ||
+              item.content.original.category?.toLowerCase().includes(searchTerm) ||
+              item.content.original.level?.toLowerCase().includes(searchTerm) ||
+              item.content.original.duration?.toString().includes(courseSearchTerm) ||
+              item.content.original.price?.toString().includes(courseSearchTerm);
+          }
+
+          return lecturerMatch || idMatch || contentMatch;
+        }
       );
     }
 
     if (courseTypeFilter) {
       filtered = filtered.filter((item: any) => item.type === courseTypeFilter);
+    }
+
+    if (courseActionFilter) {
+      filtered = filtered.filter((item: any) => item.label === courseActionFilter);
     }
 
     filtered = [...filtered].sort((a: any, b: any) => {
@@ -293,7 +387,7 @@ const AdminLecturerPage = () => {
     });
 
     return filtered;
-  }, [lecturerRequests, courseSearchTerm, courseTypeFilter, courseDateSort]);
+  }, [lecturerRequestsCourse, courseSearchTerm, courseTypeFilter, courseActionFilter, courseDateSort]);
 
   // EVENT HANDLERS
   const handleChange = (_event: SyntheticEvent, newValue: string) => {
@@ -566,6 +660,8 @@ const AdminLecturerPage = () => {
             setDegreeSearchTerm={setDegreeSearchTerm}
             degreeTypeFilter={degreeTypeFilter}
             setDegreeTypeFilter={setDegreeTypeFilter}
+            degreeActionFilter={degreeActionFilter}
+            setDegreeActionFilter={setDegreeActionFilter}
             degreeDateSort={degreeDateSort}
             setDegreeDateSort={setDegreeDateSort}
           />
@@ -579,6 +675,8 @@ const AdminLecturerPage = () => {
             setCourseSearchTerm={setCourseSearchTerm}
             courseTypeFilter={courseTypeFilter}
             setCourseTypeFilter={setCourseTypeFilter}
+            courseActionFilter={courseActionFilter}
+            setCourseActionFilter={setCourseActionFilter}
             courseDateSort={courseDateSort}
             setCourseDateSort={setCourseDateSort}
           />

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Avatar,
   Box,
@@ -19,6 +19,12 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import DateRange from "@mui/icons-material/DateRange";
+import OwnedCourseCreateDialog from "../../../../components/OwnedCourseCreateDialog";
+import OwnedCourseUpdateDialog from "../../../../components/OwnedCourseUpdateDialog";
+import ResearchProjectCreateDialog from "../../../../components/ResearchProjectCreateDialog";
+import ResearchProjectUpdateDialog from "../../../../components/ResearchProjectUpdateDialog";
+import AttendedCourseCreateDialog from "../../../../components/AttendedCourseCreateDialog";
+import AttendedCourseUpdateDialog from "../../../../components/AttendedCourseUpdateDialog";
 
 interface AdminLecturerCourseTabProps {
   filteredCourseList: any[];
@@ -28,6 +34,8 @@ interface AdminLecturerCourseTabProps {
   setCourseTypeFilter: (value: string) => void;
   courseDateSort: string;
   setCourseDateSort: (value: string) => void;
+  courseActionFilter: string;
+  setCourseActionFilter: (value: string) => void;
 }
 
 const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
@@ -38,10 +46,72 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
   setCourseTypeFilter,
   courseDateSort,
   setCourseDateSort,
+  courseActionFilter,
+  setCourseActionFilter,
 }) => {
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
+  const [openOwnedCourseCreateDialog, setOpenOwnedCourseCreateDialog] =
+    useState(false);
+  const [openOwnedCourseUpdateDialog, setOpenOwnedCourseUpdateDialog] =
+    useState(false);
+  const [openAttendedCourseCreateDialog, setOpenAttendedCourseCreateDialog] =
+    useState(false);
+  const [openAttendedCourseUpdateDialog, setOpenAttendedCourseUpdateDialog] =
+    useState(false);
+  const [openResearchProjectCreateDialog, setOpenResearchProjectCreateDialog] =
+    useState(false);
+  const [openResearchProjectUpdateDialog, setOpenResearchProjectUpdateDialog] =
+    useState(false);
+
   const handleCourseItemClick = (item: any) => {
-    console.log("View details for:", item);
-    // TODO: Implement course item detail dialog
+    setSelectedCourse(item);
+    console.log("Course item clicked:", item);
+
+    switch (item.type) {
+      case "OC":
+        item.label === "Create"
+          ? setOpenOwnedCourseCreateDialog(true)
+          : setOpenOwnedCourseUpdateDialog(true);
+        break;
+      case "AC":
+        item.label === "Create"
+          ? setOpenAttendedCourseCreateDialog(true)
+          : setOpenAttendedCourseUpdateDialog(true);
+        break;
+      case "RP":
+        item.label === "Create"
+          ? setOpenResearchProjectCreateDialog(true)
+          : setOpenResearchProjectUpdateDialog(true);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleDialogClose = (dialogType: string) => {
+    switch (dialogType) {
+      case "OwnedCourseCreate":
+        setOpenOwnedCourseCreateDialog(false);
+        break;
+      case "OwnedCourseUpdate":
+        setOpenOwnedCourseUpdateDialog(false);
+        break;
+      case "AttendedCourseCreate":
+        setOpenAttendedCourseCreateDialog(false);
+        break;
+      case "AttendedCourseUpdate":
+        setOpenAttendedCourseUpdateDialog(false);
+        break;
+      case "ResearchProjectCreate":
+        setOpenResearchProjectCreateDialog(false);
+        break;
+      case "ResearchProjectUpdate":
+        setOpenResearchProjectUpdateDialog(false);
+        break;
+      default:
+        break;
+    }
+    setSelectedCourse(null);
   };
 
   return (
@@ -70,16 +140,12 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
             <Avatar
               sx={{
                 bgcolor: "primary.main",
-                background:
-                  "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 width: 56,
                 height: 56,
               }}
             >
-              <Typography
-                variant="h4"
-                sx={{ color: "white", fontWeight: 700 }}
-              >
+              <Typography variant="h4" sx={{ color: "white", fontWeight: 700 }}>
                 📚
               </Typography>
             </Avatar>
@@ -148,6 +214,27 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
             </FormControl>
           </Box>
 
+          <Box sx={{ minWidth: 180, flex: "0 0 auto" }}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Hành động</InputLabel>
+              <Select
+                value={courseActionFilter}
+                label="Hành động"
+                onChange={(e) => setCourseActionFilter(e.target.value)}
+                sx={{
+                  bgcolor: "white",
+                  borderRadius: 2,
+                }}
+              >
+                <MenuItem value="">
+                  <em>Tất cả</em>
+                </MenuItem>
+                <MenuItem value="Create">Tạo mới</MenuItem>
+                <MenuItem value="Update">Cập nhật</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+
           <Box sx={{ flex: "1 1 300px", minWidth: 300 }}>
             <TextField
               fullWidth
@@ -184,7 +271,8 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
         {/* Active Filters Display */}
         {(courseSearchTerm ||
           courseTypeFilter ||
-          courseDateSort !== "oldest") && (
+          courseDateSort !== "oldest" ||
+          courseActionFilter) && (
           <Box
             sx={{
               mt: 2,
@@ -224,12 +312,22 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
               />
             )}
 
+            {courseActionFilter && (
+              <Chip
+                label={`Hành động: ${courseActionFilter === "Create" ? "Tạo mới" : "Cập nhật"}`}
+                size="small"
+                onDelete={() => setCourseActionFilter("")}
+                color="info"
+                variant="outlined"
+              />
+            )}
+
             {courseDateSort !== "oldest" && (
               <Chip
                 label={`Sắp xếp: ${courseDateSort === "newest" ? "Mới nhất trước" : "Cũ nhất trước"}`}
                 size="small"
                 onDelete={() => setCourseDateSort("oldest")}
-                color="info"
+                color="default"
                 variant="outlined"
                 icon={<DateRange />}
               />
@@ -241,6 +339,7 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
                 setCourseSearchTerm("");
                 setCourseTypeFilter("");
                 setCourseDateSort("oldest");
+                setCourseActionFilter("");
               }}
               sx={{ ml: 1, textTransform: "none" }}
             >
@@ -300,9 +399,7 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
                       gap: 2,
                     }}
                   >
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 2 }}
-                    >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                       <Avatar
                         src={item.lecturerInfo?.avatarUrl || ""}
                         sx={{
@@ -381,109 +478,72 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
                             whiteSpace: "nowrap",
                           }}
                         >
-                          {contentData?.title || contentData?.name}
+                          {contentData?.title ||
+                            contentData?.name ||
+                            "Không có tên"}
                         </Typography>
                       </Box>
 
-                      {contentData?.topic && (
-                        <Box>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ fontWeight: 600, mb: 0.5 }}
-                          >
-                            Chuyên đề
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: 500,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {contentData.topic}
-                          </Typography>
-                        </Box>
-                      )}
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ fontWeight: 600, mb: 0.5 }}
+                        >
+                          Chuyên đề
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 500,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {contentData?.topic ||
+                            contentData?.researchArea ||
+                            contentData?.description ||
+                            "Không có thông tin"}
+                        </Typography>
+                      </Box>
 
-                      {contentData?.researchArea && (
-                        <Box>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ fontWeight: 600, mb: 0.5 }}
-                          >
-                            Lĩnh vực
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: 500,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {contentData.researchArea}
-                          </Typography>
-                        </Box>
-                      )}
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ fontWeight: 600, mb: 0.5 }}
+                        >
+                          Thời gian cập nhật
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{ fontWeight: 500, fontSize: "0.75rem" }}
+                        >
+                          {(() => {
+                            const updateTime = new Date(
+                              item.date ||
+                                contentData?.updatedAt ||
+                                contentData?.createdAt ||
+                                Date.now(),
+                            );
+                            const now = new Date();
+                            const diffInHours = Math.floor(
+                              (now.getTime() - updateTime.getTime()) /
+                                (1000 * 60 * 60),
+                            );
 
-                      {contentData?.courseType && (
-                        <Box>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ fontWeight: 600, mb: 0.5 }}
-                          >
-                            Loại hình
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ fontWeight: 500 }}
-                          >
-                            {contentData.courseType === "FORMAL"
-                              ? "Chính quy"
-                              : contentData.courseType === "SPECIALIZED"
-                                ? "Chuyên đề"
-                                : contentData.courseType === "EXTRACURRICULAR"
-                                  ? "Ngoại khóa"
-                                  : "Khác"}
-                          </Typography>
-                        </Box>
-                      )}
-
-                      {contentData?.scale && (
-                        <Box>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ fontWeight: 600, mb: 0.5 }}
-                          >
-                            Quy mô
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ fontWeight: 500 }}
-                          >
-                            {contentData.scale === "INSTITUTIONAL"
-                              ? "Cấp đơn vị"
-                              : contentData.scale === "NATIONAL"
-                                ? "Cấp quốc gia"
-                                : contentData.scale === "INTERNATIONAL"
-                                  ? "Cấp quốc tế"
-                                  : contentData.scale === "UNIVERSITY"
-                                    ? "Cấp trường"
-                                    : contentData.scale === "DEPARTMENTAL"
-                                      ? "Cấp khoa/tỉnh"
-                                      : contentData.scale === "MINISTERIAL"
-                                        ? "Cấp bộ"
-                                        : "Khác"}
-                          </Typography>
-                        </Box>
-                      )}
+                            if (diffInHours < 1) {
+                              return "Vừa cập nhật";
+                            } else if (diffInHours < 48) {
+                              return `${diffInHours}h trước`;
+                            } else {
+                              const diffInDays = Math.floor(diffInHours / 24);
+                              return `${diffInDays}d trước`;
+                            }
+                          })()}
+                        </Typography>
+                      </Box>
 
                       <Button
                         variant="contained"
@@ -529,6 +589,50 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
             Hiện tại không có yêu cầu khóa đào tạo/hoạt động nào cần xử lý.
           </Typography>
         </Paper>
+      )}
+
+      {openOwnedCourseCreateDialog && (
+        <OwnedCourseCreateDialog
+          open={openOwnedCourseCreateDialog}
+          data={selectedCourse}
+          onClose={() => handleDialogClose("OwnedCourseCreate")}
+          
+        />
+      )}
+      {openOwnedCourseUpdateDialog && (
+        <OwnedCourseUpdateDialog
+          open={openOwnedCourseUpdateDialog}
+          data={selectedCourse}
+          onClose={() => handleDialogClose("OwnedCourseUpdate")}
+        />
+      )}
+      {openAttendedCourseCreateDialog && (
+        <AttendedCourseCreateDialog
+          open={openAttendedCourseCreateDialog}
+          data={selectedCourse}
+          onClose={() => handleDialogClose("AttendedCourseCreate")}
+        />
+      )}
+      {openAttendedCourseUpdateDialog && (
+        <AttendedCourseUpdateDialog
+          open={openAttendedCourseUpdateDialog}
+          data={selectedCourse}
+          onClose={() => handleDialogClose("AttendedCourseUpdate")}
+        />
+      )}
+      {openResearchProjectCreateDialog && (
+        <ResearchProjectCreateDialog
+          open={openResearchProjectCreateDialog}
+          data={selectedCourse}
+          onClose={() => handleDialogClose("ResearchProjectCreate")}
+        />
+      )}
+      {openResearchProjectUpdateDialog && (
+        <ResearchProjectUpdateDialog
+          open={openResearchProjectUpdateDialog}
+          data={selectedCourse}
+          onClose={() => handleDialogClose("ResearchProjectUpdate")}
+        />
       )}
     </>
   );

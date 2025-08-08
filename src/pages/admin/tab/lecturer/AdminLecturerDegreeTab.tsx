@@ -21,10 +21,10 @@ import {
   Search as SearchIcon,
   DateRange,
 } from "@mui/icons-material";
-import ApproveDegreeDialog from "../../components/ApproveDegreeDialog";
-import ApproveDegreeUpdateDialog from "../../components/ApproveDegreeUpdateDialog";
-import ApproveCertificationDialog from "../../components/ApproveCertificationDialog";
-import ApproveCertificationUpdateDialog from "../../components/ApproveCertificationUpdateDialog";
+import ApproveDegreeDialog from "../../../../components/ApproveDegreeDialog";
+import ApproveDegreeUpdateDialog from "../../../../components/ApproveDegreeUpdateDialog";
+import ApproveCertificationDialog from "../../../../components/ApproveCertificationDialog";
+import ApproveCertificationUpdateDialog from "../../../../components/ApproveCertificationUpdateDialog";
 
 interface AdminLecturerDegreeTabProps {
   filteredDegreeList: any[];
@@ -32,16 +32,20 @@ interface AdminLecturerDegreeTabProps {
   setDegreeSearchTerm: (value: string) => void;
   degreeTypeFilter: string;
   setDegreeTypeFilter: (value: string) => void;
+  degreeActionFilter: string;
+  setDegreeActionFilter: (value: string) => void;
   degreeDateSort: string;
   setDegreeDateSort: (value: string) => void;
 }
 
-const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> = ({
+const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> = React.memo(({
   filteredDegreeList,
   degreeSearchTerm,
   setDegreeSearchTerm,
   degreeTypeFilter,
   setDegreeTypeFilter,
+  degreeActionFilter,
+  setDegreeActionFilter,
   degreeDateSort,
   setDegreeDateSort,
 }) => {
@@ -51,8 +55,14 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> = ({
   const [openCertificationDialog, setOpenCertificationDialog] = useState(false);
   const [openCertificationUpdateDialog, setOpenCertificationUpdateDialog] = useState(false);
 
-  const handleDegreeItemClick = (item: any) => {
+  // Ensure filteredDegreeList is always an array to prevent conditional rendering issues
+  const safeFilteredDegreeList = React.useMemo(() => {
+    return Array.isArray(filteredDegreeList) ? filteredDegreeList : [];
+  }, [filteredDegreeList]);
+
+  const handleDegreeItemClick = React.useCallback((item: any) => {
     console.log("Selected degree item:", item);
+    console.log("Item type:", item.type, "Item label:", item.label);
 
     setSelectedDegreeItem(item);
 
@@ -66,12 +76,20 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> = ({
       }
     } else if (item.type === "CC") {
       if (item.label === "Create") {
+        console.log("Open certification dialog for item:", item);
         setOpenCertificationDialog(true);
       } else if (item.label === "Update") {
+        console.log("Open certification update dialog for item:", item);
         setOpenCertificationUpdateDialog(true);
       }
     }
-  };
+  }, []);
+
+  const handleRefresh = React.useCallback(() => {
+    // This will be called after successful API operations
+    // The parent component will handle the actual data refresh
+    console.log("Data refresh requested");
+  }, []);
 
   return (
     <>
@@ -121,8 +139,8 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> = ({
               </Typography>
               <Typography variant="body2" sx={{ color: "#6c757d" }}>
                 {degreeSearchTerm || degreeTypeFilter
-                  ? `Đã lọc ${filteredDegreeList?.length || 0} yêu cầu`
-                  : `Tổng cộng ${filteredDegreeList?.length || 0} yêu cầu chứng chỉ và bằng cấp`}
+                  ? `Đã lọc ${safeFilteredDegreeList?.length || 0} yêu cầu`
+                  : `Tổng cộng ${safeFilteredDegreeList?.length || 0} yêu cầu chứng chỉ và bằng cấp`}
               </Typography>
             </Box>
           </Box>
@@ -158,6 +176,27 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> = ({
             </FormControl>
           </Box>
 
+          <Box sx={{ minWidth: 150, flex: "0 0 auto" }}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Hành động</InputLabel>
+              <Select
+                value={degreeActionFilter}
+                label="Hành động"
+                onChange={(e) => setDegreeActionFilter(e.target.value)}
+                sx={{
+                  bgcolor: "white",
+                  borderRadius: 2,
+                }}
+              >
+                <MenuItem value="">
+                  <em>Tất cả</em>
+                </MenuItem>
+                <MenuItem value="Create">Tạo mới</MenuItem>
+                <MenuItem value="Update">Cập nhật</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+
           <Box sx={{ minWidth: 180, flex: "0 0 auto" }}>
             <FormControl fullWidth size="small">
               <InputLabel>Sắp xếp theo ngày</InputLabel>
@@ -181,7 +220,7 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> = ({
               fullWidth
               variant="outlined"
               size="small"
-              placeholder="🔍 Theo ID, tên giảng viên, tên bằng cấp..."
+              placeholder="🔍 Theo ID, tên giảng viên, tên bằng cấp/chứng chỉ, chuyên ngành..."
               value={degreeSearchTerm}
               onChange={(e) => setDegreeSearchTerm(e.target.value)}
               sx={{
@@ -212,6 +251,7 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> = ({
         {/* Active Filters Display */}
         {(degreeSearchTerm ||
           degreeTypeFilter ||
+          degreeActionFilter ||
           degreeDateSort !== "oldest") && (
           <Box
             sx={{
@@ -246,6 +286,16 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> = ({
               />
             )}
 
+            {degreeActionFilter && (
+              <Chip
+                label={`Hành động: ${degreeActionFilter === "Create" ? "Tạo mới" : "Cập nhật"}`}
+                size="small"
+                onDelete={() => setDegreeActionFilter("")}
+                color="info"
+                variant="outlined"
+              />
+            )}
+
             {degreeDateSort !== "oldest" && (
               <Chip
                 label={`Sắp xếp: ${degreeDateSort === "newest" ? "Mới nhất trước" : "Cũ nhất trước"}`}
@@ -262,6 +312,7 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> = ({
               onClick={() => {
                 setDegreeSearchTerm("");
                 setDegreeTypeFilter("");
+                setDegreeActionFilter("");
                 setDegreeDateSort("oldest");
               }}
               sx={{ ml: 1, textTransform: "none" }}
@@ -272,7 +323,7 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> = ({
         )}
       </Paper>
 
-      {filteredDegreeList && filteredDegreeList.length > 0 ? (
+      {safeFilteredDegreeList && safeFilteredDegreeList.length > 0 ? (
         <Box
           sx={{
             display: "grid",
@@ -292,7 +343,7 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> = ({
             },
           }}
         >
-          {filteredDegreeList.map((item: any, index: number) => {
+          {safeFilteredDegreeList.map((item: any, index: number) => {
             const contentData =
               item.label === "Update"
                 ? item.content?.original
@@ -581,24 +632,28 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> = ({
         open={openDegreeDialog}
         onClose={() => setOpenDegreeDialog(false)}
         data={selectedDegreeItem}
+        onSuccess={handleRefresh}
       />
       <ApproveDegreeUpdateDialog
         open={openDegreeUpdateDialog}
         onClose={() => setOpenDegreeUpdateDialog(false)}
         data={selectedDegreeItem}
+        onSuccess={handleRefresh}
       />
       <ApproveCertificationDialog
         open={openCertificationDialog}
         onClose={() => setOpenCertificationDialog(false)}
         data={selectedDegreeItem}
+        onSuccess={handleRefresh}
       />
       <ApproveCertificationUpdateDialog
         open={openCertificationUpdateDialog}
         onClose={() => setOpenCertificationUpdateDialog(false)}
         data={selectedDegreeItem}
+        onSuccess={handleRefresh}
       />
     </>
   );
-};
+});
 
 export default AdminLecturerDegreeTab;

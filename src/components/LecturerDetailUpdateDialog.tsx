@@ -1,45 +1,36 @@
 import {
-  Button,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Box,
+  Typography,
   IconButton,
+  Avatar,
   Card,
   CardContent,
+  CardHeader,
   Chip,
-  Stack,
   Divider,
   TextField,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import PersonIcon from "@mui/icons-material/Person";
+import SchoolIcon from "@mui/icons-material/School";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { API } from "../utils/Fetch";
+import { useDispatch,  } from "react-redux";
+import { setLecturerPendingUpdate } from "../redux/slice/LecturerPendingUpdateSlice";
 import type { Lecturer } from "../types/Lecturer";
+import { setLecturers } from "../redux/slice/LecturerSlice";
+import { getAcademicRankLabel } from "../utils/ChangeText";
 
-export interface LecturerDetailDialogProps {
-  open: boolean;
-  onClose: () => void;
-  lecturer: Lecturer;
-  lecturerUpdate: Lecturer;
-}
 
-const getAcademicRankLabel = (rank: string) => {
-  switch (rank) {
-    case "CN":
-      return "Cử nhân";
-    case "THS":
-      return "Thạc sĩ";
-    case "TS":
-      return "Tiến sĩ";
-    case "PGS":
-      return "Phó giáo sư";
-    case "GS":
-      return "Giáo sư";
-    default:
-      return rank;
-  }
-};
 
 const fieldGroups = [
   {
@@ -79,256 +70,98 @@ const fieldGroups = [
   },
 ];
 
-import React, { useState } from "react";
-import { toast } from "react-toastify";
-import { API } from "../utils/Fetch";
-import { useDispatch, useSelector } from "react-redux";
-import { setLecturerPendingUpdate } from "../redux/slice/LecturerPendingUpdateSlice";
+type LecturerKey = keyof Lecturer;
 
-const FieldCard: React.FC<{
-  field: any;
-  currentValue: any;
-  updateValue: any;
-  isUpdate?: boolean;
-}> = ({ field, currentValue, updateValue, isUpdate = false }) => {
-  const displayValue = field.render
-    ? field.render(isUpdate ? updateValue : currentValue)
-    : isUpdate
-    ? updateValue
-    : currentValue;
-  const hasChanged = isUpdate && currentValue !== updateValue;
-
-  return (
-    <Box sx={{ mb: 2 }}>
-      <TextField
-        label={field.label}
-        value={displayValue ?? "-"}
-        fullWidth
-        variant="outlined"
-        size="small"
-        multiline={field.key === "bio"}
-        rows={field.key === "bio" ? 4 : 1}
-        InputProps={{
-          readOnly: true,
-          endAdornment: hasChanged ? (
-            <Chip
-              label="Đã sửa"
-              size="small"
-              color="warning"
-              variant="outlined"
-              sx={{ 
-                fontSize: "0.7rem", 
-                height: "20px",
-                borderColor: "#ff9800",
-                backgroundColor: "rgba(255, 152, 0, 0.1)"
-              }}
-            />
-          ) : null,
-        }}
-        sx={{
-          "& .MuiOutlinedInput-root": {
-            backgroundColor: hasChanged ? "rgba(255, 152, 0, 0.08)" : "rgba(255, 255, 255, 0.9)",
-            borderRadius: 3,
-            transition: "all 0.3s ease",
-            "&:hover": {
-              backgroundColor: hasChanged ? "rgba(255, 152, 0, 0.12)" : "rgba(255, 255, 255, 0.95)",
-              boxShadow: hasChanged 
-                ? "0 4px 15px rgba(255, 152, 0, 0.2)" 
-                : "0 4px 15px rgba(0,0,0,0.1)",
-            },
-            "&.Mui-focused": {
-              backgroundColor: hasChanged ? "rgba(255, 152, 0, 0.15)" : "white",
-              boxShadow: hasChanged 
-                ? "0 6px 20px rgba(255, 152, 0, 0.25)" 
-                : "0 6px 20px rgba(37, 99, 235, 0.15)",
-            },
-            "& fieldset": {
-              borderColor: hasChanged ? "rgba(255, 152, 0, 0.5)" : "rgba(0, 0, 0, 0.23)",
-              borderWidth: hasChanged ? "2px" : "1px",
-            },
-            "&:hover fieldset": {
-              borderColor: hasChanged ? "rgba(255, 152, 0, 0.7)" : "rgba(0, 0, 0, 0.23)",
-            },
-            "&.Mui-focused fieldset": {
-              borderColor: hasChanged ? "#ff9800" : "primary.main",
-              borderWidth: "2px",
-            },
-          },
-          "& .MuiInputLabel-root": {
-            fontWeight: hasChanged ? 600 : 400,
-            "&.Mui-focused": {
-              color: hasChanged ? "#ff9800" : "primary.main",
-            },
-          },
-          "& .MuiInputBase-input": {
-            fontWeight: hasChanged ? 600 : 400,
-          },
-        }}
-      />
-    </Box>
-  );
-};
-
-const SectionCard: React.FC<{
-  group: any;
-  lecturer: any;
-  lecturerUpdate?: any;
-  isUpdate?: boolean;
-}> = ({ group, lecturer, lecturerUpdate, isUpdate = false }) => {
-  return (
-    <Card 
-      variant="outlined" 
-      sx={{ 
-        mb: 3,
-        borderRadius: 3,
-        border: "1px solid #e5e7eb",
-        overflow: "hidden",
-        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.07)",
-        transition: "all 0.3s ease",
-        "&:hover": {
-          boxShadow: "0 8px 25px rgba(0, 0, 0, 0.1)",
-          transform: "translateY(-2px)",
-        }
-      }}
-    >
-      <CardContent sx={{ p: 0 }}>
-        <Box
-          sx={{
-            p: 3,
-            background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-            borderBottom: "1px solid #e2e8f0",
-          }}
-        >
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontWeight: 700, 
-              fontSize: "1.1rem", 
-              color: "#334155",
-              letterSpacing: "0.5px"
-            }}
-          >
-            {group.title}
-          </Typography>
-        </Box>
-        <Box sx={{ p: 3 }}>
-          {group.fields.map((field: any) => {
-            const currentValue = (lecturer as any)?.[field.key];
-            const updateValue = (lecturerUpdate as any)?.[field.key];
-
-            return (
-              <FieldCard
-                key={field.key}
-                field={field}
-                currentValue={currentValue}
-                updateValue={updateValue}
-                isUpdate={isUpdate}
-              />
-            );
-          })}
-        </Box>
-      </CardContent>
-    </Card>
-  );
-};
-
-const LecturerDetailUpdateDialog: React.FC<LecturerDetailDialogProps> = ({
+const LecturerDetailUpdateDialog = ({
   open,
   onClose,
   lecturer,
   lecturerUpdate,
+}: {
+  open: boolean;
+  onClose: () => void;
+  lecturer: Lecturer;
+  lecturerUpdate: Lecturer;
 }) => {
   const [confirmType, setConfirmType] = useState<null | "approve" | "reject">(
     null,
   );
   const [adminNote, setAdminNote] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const lecturerUpdateList = useSelector((state: any) =>
-    Array.isArray(state.lecturerPendingUpdate)
-      ? state.lecturerPendingUpdate
-      : [],
-  );
   const dispatch = useDispatch();
 
-  const handleApprove = () => {
-    setConfirmType("approve");
-  };
-  const handleReject = () => {
-    setConfirmType("reject");
-  };
-  const handleConfirm = async () => {
-    if (confirmType === "approve") {
-      console.log("APPROVE", (lecturerUpdate as any)?.id);
-      try {
+  if (!open) return null;
+
+  const handleConfirm = async (type: "approve" | "reject") => {
+    if (type === "reject" && !adminNote.trim()) {
+      toast.error("Vui lòng nhập lý do từ chối");
+      return;
+    }
+    setIsProcessing(true);
+    try {
+      if (type === "approve") {
         await API.admin.approveLecturerUpdate({
           id: (lecturerUpdate as any)?.id,
         });
-        dispatch(
-          setLecturerPendingUpdate(
-            (Array.isArray(lecturerUpdateList)
-              ? lecturerUpdateList
-              : []
-            ).filter(
-              (l: any) => l.lecturerUpdate?.id !== (lecturerUpdate as any)?.id,
-            ),
-          ),
-        );
+        const res = await API.admin.getAllLecturers();
+        dispatch(setLecturers(res.data.data));
+        const updateResponse = await API.admin.getLecturerPendingUpdate();
+        dispatch(setLecturerPendingUpdate(updateResponse.data.data));
         toast.success("Duyệt thông tin cập nhật thành công!");
-      } catch (error) {
-        toast.error("Error approving lecturer update:");
-      }
-    } else if (confirmType === "reject") {
-      console.log("REJECT", (lecturerUpdate as any)?.id, adminNote);
-      try {
+      } else if (type === "reject") {
         await API.admin.rejectLecturerUpdate({
           id: (lecturerUpdate as any)?.id,
           adminNote,
         });
-        dispatch(
-          setLecturerPendingUpdate(
-            (Array.isArray(lecturerUpdateList)
-              ? lecturerUpdateList
-              : []
-            ).filter(
-              (l: any) => l.lecturerUpdate?.id !== (lecturerUpdate as any)?.id,
-            ),
-          ),
-        );
+        const res = await API.admin.getAllLecturers();
+        dispatch(setLecturers(res.data.data));
+        const updateResponse = await API.admin.getLecturerPendingUpdate();
+        dispatch(setLecturerPendingUpdate(updateResponse.data.data));
+        toast.success("Duyệt thông tin cập nhật thành công!");
         toast.success("Từ chối thông tin cập nhật thành công!");
-      } catch (error) {
-        toast.error("Error rejecting lecturer update:");
       }
+      setConfirmType(null);
+      setAdminNote("");
+      if (typeof onClose === "function") onClose();
+    } catch (error) {
+      toast.error("Có lỗi xảy ra, vui lòng thử lại");
     }
-    setConfirmType(null);
-    setAdminNote("");
-    if (typeof onClose === "function") onClose();
+    setIsProcessing(false);
   };
-  const handleCancel = () => {
+
+  const handleCancelConfirm = () => {
     setConfirmType(null);
     setAdminNote("");
   };
 
-  if (!open) return null;
+  const renderFieldValue = (field: any, value: any) => {
+    if (field.render) return field.render(value);
+    return value ?? "-";
+  };
+
   return (
     <>
       <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
-        <DialogTitle
-          sx={{
-            m: 0,
-            p: 3,
-            bgcolor: "primary.main",
-            color: "white",
-            fontWeight: "bold",
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            So sánh thông tin cập nhật
-            <Typography
-              component="span"
-              sx={{ fontSize: "0.9rem", opacity: 0.9 }}
+        <DialogTitle>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Avatar
+              src={lecturerUpdate?.avatarUrl || lecturer?.avatarUrl || ""}
+              sx={{ bgcolor: "primary.main", width: 48, height: 48 }}
             >
-              - {(lecturer as any)?.fullName || "N/A"} (ID: {(lecturer as any)?.id || "N/A"})
-            </Typography>
+              <PersonIcon />
+            </Avatar>
+            <Box flex={1}>
+              <Typography variant="h5" component="div">
+                So sánh thông tin cập nhật
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {lecturer?.fullName || lecturerUpdate?.fullName}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                ID: {lecturer?.id || lecturerUpdate?.id}
+              </Typography>
+            </Box>
           </Box>
           <IconButton
             aria-label="close"
@@ -337,146 +170,338 @@ const LecturerDetailUpdateDialog: React.FC<LecturerDetailDialogProps> = ({
               position: "absolute",
               right: 8,
               top: 8,
-              color: "white",
+              color: "primary.main",
+              background: "rgba(240,240,240,0.8)",
+              "&:hover": {
+                bgcolor: "primary.light",
+                color: "white",
+              },
+              transition: "all 0.2s",
             }}
+            size="small"
           >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
-          <Stack direction={{ xs: "column", lg: "row" }} spacing={4}>
-            <Box flex={1}>
-              <Typography
-                variant="h6"
-                sx={{ mb: 3, color: "primary.main", fontWeight: 600 }}
-              >
-                Thông tin hiện tại
-              </Typography>
-              {fieldGroups.map((group) => (
-                <SectionCard
-                  key={`current-${group.title}`}
-                  group={group}
-                  lecturer={lecturer}
-                  lecturerUpdate={lecturerUpdate}
-                  isUpdate={false}
-                />
-              ))}
-            </Box>
 
-            <Divider
-              orientation="vertical"
-              flexItem
-              sx={{ display: { xs: "none", lg: "block" } }}
-            />
-            <Divider sx={{ display: { xs: "block", lg: "none" } }} />
-
-            <Box flex={1}>
-              <Typography
-                variant="h6"
-                sx={{ mb: 3, color: "warning.main", fontWeight: 600 }}
-              >
-                Thông tin cập nhật
-              </Typography>
-              {fieldGroups.map((group) => (
-                <SectionCard
-                  key={`update-${group.title}`}
-                  group={group}
-                  lecturer={lecturer}
-                  lecturerUpdate={lecturerUpdate}
-                  isUpdate={true}
-                />
-              ))}
-            </Box>
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ p: 3, gap: 2, bgcolor: "grey.50" }}>
-          <Box flex={1}>
-            <Typography variant="body2" color="text.secondary">
-              Các trường đã thay đổi được tô màu cam
-            </Typography>
-          </Box>
-          <Button
-            onClick={handleReject}
-            color="error"
-            variant="outlined"
-            sx={{ 
-              minWidth: 100,
-              borderRadius: 3,
-              fontWeight: 600,
-              "&:hover": {
-                transform: "translateY(-1px)",
-                boxShadow: "0 4px 12px rgba(239, 68, 68, 0.3)",
-              }
+        <DialogContent dividers>
+          {/* Status Card */}
+          <Card
+            elevation={0}
+            sx={{
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              color: "white",
+              borderRadius: 2,
+              mb: 3,
             }}
           >
-            Từ chối
-          </Button>
+            <CardContent sx={{ p: 3 }}>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                mb={2}
+              >
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Avatar
+                    sx={{
+                      bgcolor: "rgba(255,255,255,0.2)",
+                      width: 48,
+                      height: 48,
+                    }}
+                  >
+                    <CompareArrowsIcon sx={{ color: "white", fontSize: 24 }} />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h6" fontWeight={600} color="white">
+                      Xét duyệt cập nhật thông tin giảng viên
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "rgba(255,255,255,0.8)" }}
+                    >
+                      So sánh và quyết định phê duyệt
+                    </Typography>
+                  </Box>
+                </Box>
+                <Chip
+                  label="Chờ duyệt"
+                  sx={{
+                    bgcolor: "rgba(255, 193, 7, 0.9)",
+                    color: "white",
+                    fontWeight: 600,
+                    fontSize: "0.875rem",
+                    px: 2,
+                    py: 1,
+                  }}
+                />
+              </Box>
+            </CardContent>
+          </Card>
+
+          {/* Comparison Content */}
+          {fieldGroups.map((group) => (
+            <Card key={group.title} elevation={1} sx={{ mb: 3 }}>
+              <CardHeader
+                avatar={
+                  <Avatar
+                    sx={{ bgcolor: "primary.main", width: 32, height: 32 }}
+                  >
+                    <SchoolIcon />
+                  </Avatar>
+                }
+                title={group.title}
+                sx={{ pb: 1 }}
+              />
+              <CardContent sx={{ pt: 0, p: 0 }}>
+                {/* Header row */}
+                <Box display="flex" sx={{ borderBottom: "2px solid #e0e0e0" }}>
+                  <Box flex={1} sx={{ borderRight: "1px solid #e0e0e0" }}>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      gap={1}
+                      py={2}
+                      px={3}
+                      sx={{ bgcolor: "#f5f5f5" }}
+                    >
+                      <Avatar
+                        sx={{ bgcolor: "info.main", width: 24, height: 24 }}
+                      >
+                        📋
+                      </Avatar>
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        Thông tin hiện tại
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Box flex={1}>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      gap={1}
+                      py={2}
+                      px={3}
+                      sx={{ bgcolor: "#f5f5f5" }}
+                    >
+                      <Avatar
+                        sx={{ bgcolor: "warning.main", width: 24, height: 24 }}
+                      >
+                        ✏️
+                      </Avatar>
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        Thông tin cập nhật
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+
+                {/* Field rows */}
+                {group.fields.map((field, index) => {
+                  const oldVal = lecturer?.[field.key as LecturerKey];
+                  const newVal = lecturerUpdate?.[field.key as LecturerKey];
+                  const hasChanged = oldVal !== newVal;
+
+                  return (
+                    <Box key={field.key}>
+                      <Box display="flex" minHeight={60}>
+                        {/* Current Data */}
+                        <Box flex={1} sx={{ borderRight: "1px solid #e0e0e0" }}>
+                          <Box
+                            display="flex"
+                            flexDirection="column"
+                            py={2}
+                            px={3}
+                            height="100%"
+                          >
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontWeight: 500, mb: 1 }}
+                            >
+                              {field.label}:
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                wordBreak: "break-word",
+                                fontWeight: 500,
+                                flex: 1,
+                              }}
+                            >
+                              {renderFieldValue(field, oldVal)}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        {/* Updated Data */}
+                        <Box flex={1}>
+                          <Box
+                            display="flex"
+                            flexDirection="column"
+                            py={2}
+                            px={3}
+                            height="100%"
+                          >
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontWeight: 500, mb: 1 }}
+                            >
+                              {field.label}:
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                wordBreak: "break-word",
+                                fontWeight: 500,
+                                flex: 1,
+                                ...(hasChanged
+                                  ? {
+                                      backgroundColor: "#fff9c4",
+                                      px: 1,
+                                      py: 0.5,
+                                      borderRadius: 1,
+                                    }
+                                  : {}),
+                              }}
+                            >
+                              {renderFieldValue(field, newVal)}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                      {index < group.fields.length - 1 && <Divider />}
+                    </Box>
+                  );
+                })}
+              </CardContent>
+              <Box>
+                <Divider />
+                <Box
+                  display="flex"
+                  justifyContent="flex-end"
+                  p={2}
+                  sx={{ bgcolor: "#f5f5f5" }}
+                >
+                  <Typography variant="caption" color="text.secondary">
+                    {lecturerUpdate?.updatedAt
+                      ? `Cập nhật lúc: ${new Date(lecturerUpdate.updatedAt).toLocaleString()}`
+                      : "Chưa có thông tin cập nhật"}
+                  </Typography>
+                </Box>
+              </Box>
+            </Card>
+          ))}
+        </DialogContent>
+
+        <DialogActions sx={{ p: 3 }}>
           <Button
-            onClick={handleApprove}
-            color="success"
             variant="contained"
-            sx={{ 
-              minWidth: 100,
-              borderRadius: 3,
-              fontWeight: 600,
-              background: "linear-gradient(45deg, #16a34a 30%, #22c55e 90%)",
-              "&:hover": {
-                background: "linear-gradient(45deg, #15803d 30%, #16a34a 90%)",
-                transform: "translateY(-1px)",
-                boxShadow: "0 4px 12px rgba(34, 197, 94, 0.4)",
-              }
+            color="success"
+            onClick={() => setConfirmType("approve")}
+            startIcon={<CheckCircleIcon />}
+            sx={{
+              textTransform: "none",
+              fontWeight: "bold",
+              borderRadius: 2,
+              px: 3,
             }}
           >
             Duyệt
           </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => setConfirmType("reject")}
+            startIcon={<CancelIcon />}
+            sx={{
+              textTransform: "none",
+              fontWeight: "bold",
+              borderRadius: 2,
+              px: 3,
+            }}
+          >
+            Từ chối
+          </Button>
         </DialogActions>
       </Dialog>
-      {/* Simple Confirm Dialog */}
+
+      {/* Confirmation Dialog */}
       <Dialog
         open={!!confirmType}
-        onClose={handleCancel}
-        maxWidth="xs"
+        onClose={handleCancelConfirm}
+        maxWidth="sm"
         fullWidth
       >
-        <DialogTitle sx={{ fontWeight: "bold", textAlign: "center" }}>
-          {confirmType === "approve" ? "Xác nhận duyệt" : "Xác nhận từ chối"}
+        <DialogTitle
+          sx={{
+            bgcolor: confirmType === "approve" ? "success.main" : "error.main",
+            color: "white",
+            fontWeight: "bold",
+          }}
+        >
+          Xác nhận {confirmType === "approve" ? "duyệt" : "từ chối"} cập nhật
         </DialogTitle>
-        <DialogContent sx={{ pt: 2, pb: 1 }}>
-          {confirmType === "approve" ? (
-            <Typography sx={{ textAlign: "center", mb: 2 }}>
-              Bạn có chắc chắn muốn duyệt thông tin cập nhật này?
-            </Typography>
-          ) : (
-            <>
-              <Typography sx={{ textAlign: "center", mb: 2 }}>
-                Bạn có chắc chắn muốn từ chối thông tin cập nhật này?
-              </Typography>
-              <TextField
-                label="Lý do từ chối"
-                size="small"
-                value={adminNote}
-                onChange={(e) => setAdminNote(e.target.value)}
-                fullWidth
-                multiline
-                rows={2}
-                placeholder="Nhập lý do từ chối..."
-                required
-              />
-            </>
+        <DialogContent sx={{ p: 3 }}>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            {confirmType === "approve"
+              ? "Bạn có chắc chắn muốn duyệt thông tin cập nhật này?"
+              : "Bạn có chắc chắn muốn từ chối thông tin cập nhật này?"}
+          </Typography>
+          {confirmType === "reject" && (
+            <TextField
+              label="Lý do từ chối (bắt buộc)"
+              value={adminNote}
+              onChange={(e) => setAdminNote(e.target.value)}
+              fullWidth
+              multiline
+              rows={3}
+              variant="outlined"
+              required
+              error={!adminNote.trim()}
+              helperText={
+                !adminNote.trim() ? "Vui lòng nhập lý do từ chối" : ""
+              }
+            />
           )}
         </DialogContent>
-        <DialogActions sx={{ justifyContent: "center", pb: 3, gap: 2 }}>
-          <Button onClick={handleCancel} variant="outlined" sx={{ minWidth: 80 }}>
-            Hủy
+        <DialogActions sx={{ p: 3 }}>
+          <Button
+            onClick={() => handleConfirm(confirmType!)}
+            variant="contained"
+            disabled={
+              isProcessing || (confirmType === "reject" && !adminNote.trim())
+            }
+            sx={{
+              bgcolor:
+                confirmType === "approve" ? "success.main" : "error.main",
+              "&:hover": {
+                bgcolor:
+                  confirmType === "approve" ? "success.dark" : "error.dark",
+              },
+              textTransform: "none",
+              fontWeight: "bold",
+              borderRadius: 2,
+            }}
+          >
+            {isProcessing
+              ? "Đang xử lý..."
+              : confirmType === "approve"
+                ? "Xác nhận duyệt"
+                : "Xác nhận từ chối"}
           </Button>
           <Button
-            onClick={handleConfirm}
-            color={confirmType === "approve" ? "success" : "error"}
-            variant="contained"
-            disabled={confirmType === "reject" && !adminNote.trim()}
-            sx={{ minWidth: 80 }}
+            onClick={handleCancelConfirm}
+            variant="outlined"
+            disabled={isProcessing}
+            sx={{
+              textTransform: "none",
+              fontWeight: "bold",
+              borderRadius: 2,
+            }}
           >
-            {confirmType === "approve" ? "Duyệt" : "Từ chối"}
+            Hủy
           </Button>
         </DialogActions>
       </Dialog>
@@ -485,4 +510,3 @@ const LecturerDetailUpdateDialog: React.FC<LecturerDetailDialogProps> = ({
 };
 
 export default LecturerDetailUpdateDialog;
-

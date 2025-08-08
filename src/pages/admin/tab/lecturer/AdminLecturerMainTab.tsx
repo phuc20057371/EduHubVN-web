@@ -27,8 +27,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import type { Lecturer } from "../../types/Lecturer";
-import LecturerUpdateDialog from "../../components/LecturerUpdateDialog";
+import LecturerUpdateDialog from "../../../../components/LecturerUpdateDialog";
+import type { Lecturer } from "../../../../types/Lecturer";
 
 type Order = "asc" | "desc";
 

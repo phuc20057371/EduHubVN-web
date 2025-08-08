@@ -108,11 +108,13 @@ const RegisterPartner = () => {
       representativeName,
       position,
       description,
-      establishedYear: establishedYear ?? new Date().getFullYear(),
+      establishedYear,
     };
+    console.log("🚀 Đang xử lý đăng ký đối tác:", partnerData);
     const validationErrors = validatePartnerInfo(partnerData);
+    console.log("lỗi:", validationErrors);
+
     if (validationErrors && !validationErrors.success) {
-      console.error("🚨 Đăng ký tổ chức thất bại:", validationErrors);
       toast.error(
         validationErrors.error ||
           "Thông tin đăng ký không hợp lệ. Vui lòng kiểm tra lại.",

@@ -21,27 +21,27 @@ import {
   Search as SearchIcon,
   DateRange,
 } from "@mui/icons-material";
-import LecturerDetailDialog from "../../components/LecturerDetailDialog";
+import LecturerDetailUpdateDialog from "../../../../components/LecturerDetailUpdateDialog";
 
-interface AdminLecturerCreateTabProps {
-  filteredCreateList: any[];
-  createSearchTerm: string;
-  setCreateSearchTerm: (value: string) => void;
-  createDateSort: string;
-  setCreateDateSort: (value: string) => void;
+interface AdminLecturerUpdateTabProps {
+  filteredUpdateList: any[];
+  updateSearchTerm: string;
+  setUpdateSearchTerm: (value: string) => void;
+  updateDateSort: string;
+  setUpdateDateSort: (value: string) => void;
   getAcademicRankLabel: (rank: string) => string;
 }
 
-const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
-  filteredCreateList,
-  createSearchTerm,
-  setCreateSearchTerm,
-  createDateSort,
-  setCreateDateSort,
+const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
+  filteredUpdateList,
+  updateSearchTerm,
+  setUpdateSearchTerm,
+  updateDateSort,
+  setUpdateDateSort,
   getAcademicRankLabel,
 }) => {
-  const [openCreateDialog, setOpenCreateDialog] = useState(false);
-  const [selectedLecturerCreate, setSelectedLecturerCreate] = useState<any>(null);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [selectedLecturerUpdate, setSelectedLecturerUpdate] = useState<any>(null);
 
   return (
     <>
@@ -79,7 +79,7 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
                 variant="h4"
                 sx={{ color: "white", fontWeight: 700 }}
               >
-                ✨
+                🔄
               </Typography>
             </Avatar>
             <Box>
@@ -87,12 +87,12 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
                 variant="h5"
                 sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
               >
-                Yêu cầu đăng ký giảng viên mới
+                Yêu cầu cập nhật thông tin giảng viên
               </Typography>
               <Typography variant="body2" sx={{ color: "#6c757d" }}>
-                {createSearchTerm
-                  ? `Đã lọc ${filteredCreateList?.length || 0} yêu cầu`
-                  : `Tổng cộng ${filteredCreateList?.length || 0} yêu cầu đăng ký chờ phê duyệt`}
+                {updateSearchTerm
+                  ? `Đã lọc ${filteredUpdateList?.length || 0} yêu cầu`
+                  : `Tổng cộng ${filteredUpdateList?.length || 0} yêu cầu cập nhật chờ phê duyệt`}
               </Typography>
             </Box>
           </Box>
@@ -111,9 +111,9 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
             <FormControl fullWidth size="small">
               <InputLabel>Sắp xếp theo ngày</InputLabel>
               <Select
-                value={createDateSort}
+                value={updateDateSort}
                 label="Sắp xếp theo ngày"
-                onChange={(e) => setCreateDateSort(e.target.value)}
+                onChange={(e) => setUpdateDateSort(e.target.value)}
                 sx={{
                   bgcolor: "white",
                   borderRadius: 2,
@@ -131,8 +131,8 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
               variant="outlined"
               size="small"
               placeholder="🔍 Tìm kiếm theo ID, tên giảng viên..."
-              value={createSearchTerm}
-              onChange={(e) => setCreateSearchTerm(e.target.value)}
+              value={updateSearchTerm}
+              onChange={(e) => setUpdateSearchTerm(e.target.value)}
               sx={{
                 bgcolor: "white",
                 borderRadius: 2,
@@ -143,11 +143,11 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
                     <SearchIcon sx={{ color: "primary.main" }} />
                   </InputAdornment>
                 ),
-                endAdornment: createSearchTerm && (
+                endAdornment: updateSearchTerm && (
                   <InputAdornment position="end">
                     <IconButton
                       size="small"
-                      onClick={() => setCreateSearchTerm("")}
+                      onClick={() => setUpdateSearchTerm("")}
                     >
                       <ClearIcon />
                     </IconButton>
@@ -159,7 +159,7 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
         </Box>
 
         {/* Active Filters Display */}
-        {(createSearchTerm || createDateSort !== "oldest") && (
+        {(updateSearchTerm || updateDateSort !== "oldest") && (
           <Box
             sx={{
               mt: 2,
@@ -173,21 +173,21 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
               Bộ lọc đang áp dụng:
             </Typography>
 
-            {createSearchTerm && (
+            {updateSearchTerm && (
               <Chip
-                label={`Tìm kiếm: "${createSearchTerm}"`}
+                label={`Tìm kiếm: "${updateSearchTerm}"`}
                 size="small"
-                onDelete={() => setCreateSearchTerm("")}
+                onDelete={() => setUpdateSearchTerm("")}
                 color="primary"
                 variant="outlined"
               />
             )}
 
-            {createDateSort !== "oldest" && (
+            {updateDateSort !== "oldest" && (
               <Chip
-                label={`Sắp xếp: ${createDateSort === "newest" ? "Mới nhất trước" : "Cũ nhất trước"}`}
+                label={`Sắp xếp: ${updateDateSort === "newest" ? "Mới nhất trước" : "Cũ nhất trước"}`}
                 size="small"
-                onDelete={() => setCreateDateSort("oldest")}
+                onDelete={() => setUpdateDateSort("oldest")}
                 color="info"
                 variant="outlined"
                 icon={<DateRange />}
@@ -197,8 +197,8 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
             <Button
               size="small"
               onClick={() => {
-                setCreateSearchTerm("");
-                setCreateDateSort("oldest");
+                setUpdateSearchTerm("");
+                setUpdateDateSort("oldest");
               }}
               sx={{ ml: 1, textTransform: "none" }}
             >
@@ -208,7 +208,7 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
         )}
       </Paper>
 
-      {filteredCreateList && filteredCreateList.length > 0 ? (
+      {filteredUpdateList && filteredUpdateList.length > 0 ? (
         <Box
           sx={{
             display: "grid",
@@ -228,19 +228,19 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
             },
           }}
         >
-          {filteredCreateList.map((item: any) => (
+          {filteredUpdateList.map((item: any) => (
             <Card
               key={item.lecturer.id}
               sx={{
                 transition: "all 0.3s ease",
                 border: "2px solid",
-                borderColor: "success.light",
+                borderColor: "warning.light",
                 borderRadius: 3,
                 height: "fit-content",
                 "&:hover": {
                   transform: "translateY(-4px)",
                   boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-                  borderColor: "success.main",
+                  borderColor: "warning.main",
                 },
               }}
             >
@@ -254,7 +254,7 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
                     <Avatar
                       src={item.lecturer.avatarUrl}
                       sx={{
-                        bgcolor: "success.main",
+                        bgcolor: "warning.main",
                         width: 50,
                         height: 50,
                         fontSize: "1.2rem",
@@ -288,9 +288,9 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
                           sx={{ fontSize: "0.7rem", height: 20 }}
                         />
                         <Chip
-                          label="Mới"
+                          label="Cập nhật"
                           size="small"
-                          color="success"
+                          color="warning"
                           sx={{ fontSize: "0.7rem", height: 20 }}
                         />
                       </Box>
@@ -389,7 +389,7 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
 
                     <Button
                       variant="contained"
-                      color="success"
+                      color="warning"
                       size="small"
                       fullWidth
                       sx={{
@@ -401,8 +401,8 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
                         fontSize: "0.8rem",
                       }}
                       onClick={() => {
-                        setSelectedLecturerCreate(item);
-                        setOpenCreateDialog(true);
+                        setSelectedLecturerUpdate(item);
+                        setOpenUpdateDialog(true);
                       }}
                     >
                       Xem chi tiết
@@ -430,20 +430,20 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
             Không có yêu cầu nào
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Hiện tại không có yêu cầu đăng ký giảng viên mới nào cần xử lý.
+            Hiện tại không có yêu cầu cập nhật thông tin giảng viên nào cần
+            xử lý.
           </Typography>
         </Paper>
       )}
 
-      <LecturerDetailDialog
-        open={openCreateDialog}
-        onClose={() => setOpenCreateDialog(false)}
-        lecturer={selectedLecturerCreate?.lecturer || {}}
-        degrees={selectedLecturerCreate?.degrees || []}
-        certificates={selectedLecturerCreate?.certificates || []}
+      <LecturerDetailUpdateDialog
+        open={openUpdateDialog}
+        onClose={() => setOpenUpdateDialog(false)}
+        lecturer={selectedLecturerUpdate?.lecturer || {}}
+        lecturerUpdate={selectedLecturerUpdate?.lecturerUpdate || {}}
       />
     </>
   );
 };
 
-export default AdminLecturerCreateTab;
+export default AdminLecturerUpdateTab;

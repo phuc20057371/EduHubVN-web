@@ -34,79 +34,40 @@ import { API } from "../utils/Fetch";
 import { toast } from "react-toastify";
 import { setLecturerRequests } from "../redux/slice/LecturerRquestSlice";
 import { useDispatch } from "react-redux";
+import { getAcademicRankLabel } from "../utils/ValidateRegisterLecturer";
 
 interface ApproveDegreeDialogProps {
   open: boolean;
   onClose: () => void;
   data: any;
+  onSuccess?: () => void;
 }
 
 const ApproveDegreeDialog: React.FC<ApproveDegreeDialogProps> = ({
   open,
   onClose,
   data,
+  onSuccess,
 }) => {
   const dispatch = useDispatch();
-  useEffect(() => {
-    if (open) {
-      console.log("ApproveDegreeDialog opened with data:", data);
-    }
-  }, []);
   const [adminNote, setAdminNote] = useState("");
   const [showConfirmDialog, setShowConfirmDialog] = useState<
     "approve" | "reject" | null
   >(null);
   const [loading, setLoading] = useState(false);
 
-  if (!data) return null;
-
-  const contentData = data.content;
-  const lecturerInfo = data.lecturerInfo;
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "APPROVED":
-        return "success";
-      case "REJECTED":
-        return "error";
-      case "PENDING":
-        return "warning";
-      default:
-        return "default";
+  useEffect(() => {
+    if (open && data) {
+      console.log("ApproveDegreeDialog opened with data:", data);
     }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "APPROVED":
-        return "Đã duyệt";
-      case "REJECTED":
-        return "Từ chối";
-      case "PENDING":
-        return "Chờ duyệt";
-      default:
-        return status;
-    }
-  };
-
-  const getAcademicRankLabel = (rank: string) => {
-    switch (rank) {
-      case "CN":
-        return "Cử nhân";
-      case "THS":
-        return "Thạc sĩ";
-      case "TS":
-        return "Tiến sĩ";
-      case "PGS":
-        return "Phó giáo sư";
-      case "GS":
-        return "Giáo sư";
-      default:
-        return rank;
-    }
-  };
+  }, [open, data]);
+  // Always define these variables, but handle null safely
+  const contentData = data?.content;
+  const lecturerInfo = data?.lecturerInfo;
 
   const handleApprove = useCallback(async () => {
+    if (!contentData?.id) return;
+
     setLoading(true);
     try {
       await API.admin.approveDegree({ id: contentData.id });
@@ -115,6 +76,7 @@ const ApproveDegreeDialog: React.FC<ApproveDegreeDialogProps> = ({
       toast.success("Đã duyệt bằng cấp thành công!");
       setShowConfirmDialog(null);
       setAdminNote(""); // Reset admin note
+      onSuccess?.();
       onClose();
     } catch (error) {
       toast.error("Có lỗi xảy ra khi duyệt bằng cấp!");
@@ -122,13 +84,15 @@ const ApproveDegreeDialog: React.FC<ApproveDegreeDialogProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [contentData.id, dispatch, onClose]);
+  }, [contentData?.id, dispatch, onClose]);
 
   const handleReject = useCallback(async () => {
     if (!adminNote.trim()) {
       toast.error("Vui lòng nhập ghi chú từ chối!");
       return;
     }
+
+    if (!contentData?.id) return;
 
     setLoading(true);
     try {
@@ -148,12 +112,17 @@ const ApproveDegreeDialog: React.FC<ApproveDegreeDialogProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [adminNote, contentData.id, dispatch, onClose]);
+  }, [adminNote, contentData?.id, dispatch, onClose]);
 
   const handleCloseConfirmDialog = useCallback(() => {
     setShowConfirmDialog(null);
     setAdminNote(""); // Reset admin note when closing dialog
   }, []);
+
+  // Handle the case where data is null or invalid
+  if (!data || !contentData || !lecturerInfo) {
+    return null;
+  }
 
   return (
     <>
@@ -254,11 +223,6 @@ const ApproveDegreeDialog: React.FC<ApproveDegreeDialogProps> = ({
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>
                     Thông tin bằng cấp
                   </Typography>
-                  <Chip
-                    label={getStatusText(contentData.status)}
-                    color={getStatusColor(contentData.status)}
-                    sx={{ px: 2, py: 1, fontSize: "1rem" }}
-                  />
                 </Box>
                 <Stack spacing={2}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -400,8 +364,8 @@ const ApproveDegreeDialog: React.FC<ApproveDegreeDialogProps> = ({
             ) : (
               <Stack spacing={2}>
                 <Alert severity="warning">
-                  Bạn có chắc chắn muốn từ chối bằng cấp "{contentData.name}" của
-                  giảng viên {lecturerInfo.fullName}?
+                  Bạn có chắc chắn muốn từ chối bằng cấp "{contentData.name}"
+                  của giảng viên {lecturerInfo.fullName}?
                 </Alert>
                 <TextField
                   label="Lý do từ chối *"

@@ -6,10 +6,19 @@ type validateResult = {
   error: string;
   errorField?: string;
 };
-function isValidURL(url: string) {
+function isValidURL(url: string): boolean {
+  const normalizedUrl =
+    url.startsWith("http://") || url.startsWith("https://")
+      ? url
+      : `https://${url}`;
+
   try {
-    new URL(url);
-    return true;
+    const parsedUrl = new URL(normalizedUrl);
+    const hostname = parsedUrl.hostname;
+
+    // Regex mới: chấp nhận subdomain, gạch ngang, nhiều TLD (co.uk, info, v.v.)
+    const domainPattern = /^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
+    return domainPattern.test(hostname);
   } catch (_) {
     return false;
   }
@@ -242,9 +251,24 @@ export const validateInstitutionInfo = (formData: InstitutionRequest) => {
     return errors;
   }
 
-  if (formData.website && !isValidURL(formData.website)) {
+  if (!formData.website || formData.website.trim() === "") {
     errors.success = false;
-    errors.error = "Website không hợp lệ";
+    errors.error = "Website không được để trống";
+    errors.errorField = "website";
+    return errors;
+  }
+
+  if (formData.website.length > 100) {
+    errors.success = false;
+    errors.error = "Website không được dài quá 100 ký tự";
+    errors.errorField = "website";
+    return errors;
+  }
+
+  const validWebsite = isValidURL(formData.website);
+  if (!validWebsite) {
+    errors.success = false;
+    errors.error = "Website không hợp lệ hoặc không phản hồi";
     errors.errorField = "website";
     return errors;
   }
@@ -331,13 +355,23 @@ export const validatePartnerInfo = (formData: PartnerRequest) => {
     return errors;
   }
 
-  if (
-    (formData.website && !isValidURL(formData.website)) ||
-    formData.website.length > 100 ||
-    formData.website === ""
-  ) {
+  if (!formData.website || formData.website.trim() === "") {
     errors.success = false;
-    errors.error = "Website không hợp lệ";
+    errors.error = "Website không được để trống";
+    errors.errorField = "website";
+    return errors;
+  }
+
+  if (formData.website.length > 100) {
+    errors.success = false;
+    errors.error = "Website không được dài quá 100 ký tự";
+    errors.errorField = "website";
+    return errors;
+  }
+  const validWebsite = isValidURL(formData.website);
+  if (!validWebsite) {
+    errors.success = false;
+    errors.error = "Website không hợp lệ hoặc không phản hồi";
     errors.errorField = "website";
     return errors;
   }
@@ -361,10 +395,10 @@ export const validatePartnerInfo = (formData: PartnerRequest) => {
     return errors;
   }
   if (
-    formData.establishedYear &&
-    (isNaN(formData.establishedYear) ||
-      formData.establishedYear < 1900 ||
-      formData.establishedYear > new Date().getFullYear())
+    !formData.establishedYear || // Rỗng hoặc null
+    !/^\d{4}$/.test(formData.establishedYear.toString()) || // Không đúng 4 chữ số
+    formData.establishedYear < 1900 || // Nhỏ hơn 1900
+    formData.establishedYear > new Date().getFullYear() // Lớn hơn năm hiện tại
   ) {
     errors.success = false;
     errors.error = "Năm thành lập không hợp lệ";
@@ -384,4 +418,5 @@ export const validatePartnerInfo = (formData: PartnerRequest) => {
     errors.errorField = "description";
     return errors;
   }
+  return errors;
 };

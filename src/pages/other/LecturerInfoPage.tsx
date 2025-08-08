@@ -4,6 +4,7 @@ import { API } from "../../utils/Fetch";
 import { Box, Paper, CircularProgress, Alert } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { setLecturerProfile } from "../../redux/slice/LecturerProfileSlice";
+import { getVietnameseCourseType, getVietnameseScale } from "../../utils/ChangeText";
 
 const LecturerInfoPage = () => {
   const dispatch = useDispatch();
@@ -65,36 +66,6 @@ const LecturerInfoPage = () => {
     );
   }
 
-  const getVietnameseScale = (scale: string) => {
-    switch (scale) {
-      case "INSTITUTIONAL":
-        return "Cấp đơn vị";
-      case "UNIVERSITY":
-        return "Cấp trường";
-      case "DEPARTMENTAL":
-        return "Cấp khoa / tỉnh";
-      case "MINISTERIAL":
-        return "Cấp bộ";
-      case "NATIONAL":
-        return "Cấp quốc gia";
-      case "INTERNATIONAL":
-        return "Cấp quốc tế";
-      default:
-        return scale;
-    }
-  };
-  const getVietnameseCourseType = (type?: string): string => {
-    switch (type) {
-      case "FORMAL":
-        return "Chính quy";
-      case "SPECIALIZED":
-        return "Chuyên đề";
-      case "EXTRACURRICULAR":
-        return "Ngoại khóa";
-      default:
-        return "Không xác định";
-    }
-  };
   const formatMonthYear = (dateString?: string): string | null => {
     if (!dateString) return null;
 

@@ -28,15 +28,80 @@ export const getStatusColor = (status: string) => {
   }
 };
 
-export  const getStatusLabel = (status: string) => {
-    switch (status?.toUpperCase()) {
-      case "PENDING":
-        return "Chờ duyệt";
-      case "APPROVED":
-        return "Đã duyệt";
-      case "REJECTED":
-        return "Đã từ chối";
+export const getStatusLabel = (status: string) => {
+  switch (status?.toUpperCase()) {
+    case "PENDING":
+      return "Chờ duyệt";
+    case "APPROVED":
+      return "Đã duyệt";
+    case "REJECTED":
+      return "Đã từ chối";
+    default:
+      return status || "Không xác định";
+  }
+};
+
+export const getStatusText = (status: string) => {
+  switch (status?.toUpperCase()) {
+    case "APPROVED":
+      return "Đã duyệt";
+    case "REJECTED":
+      return "Từ chối";
+    case "PENDING":
+      return "Chờ duyệt";
+    default:
+      return status || "Không xác định";
+  }
+};
+
+
+export function formatDateToVietnamTime(dateString: string): string {
+  if (!dateString) return "Không có mô tả";
+
+  const date = new Date(dateString);
+
+  // Chuyển sang múi giờ Việt Nam (UTC+7)
+  const options: Intl.DateTimeFormatOptions = {
+    timeZone: "Asia/Ho_Chi_Minh", // Múi giờ Việt Nam
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  };
+
+  return new Intl.DateTimeFormat("vi-VN", options).format(date);
+}
+
+
+  export const getVietnameseScale = (scale: string) => {
+    switch (scale) {
+      case "INSTITUTIONAL":
+        return "Cấp đơn vị";
+      case "UNIVERSITY":
+        return "Cấp trường";
+      case "DEPARTMENTAL":
+        return "Cấp khoa / tỉnh";
+      case "MINISTERIAL":
+        return "Cấp bộ";
+      case "NATIONAL":
+        return "Cấp quốc gia";
+      case "INTERNATIONAL":
+        return "Cấp quốc tế";
       default:
-        return status || "Không xác định";
+        return scale;
+    }
+  };
+  export const getVietnameseCourseType = (type?: string): string => {
+    switch (type) {
+      case "FORMAL":
+        return "Chính quy";
+      case "SPECIALIZED":
+        return "Chuyên đề";
+      case "EXTRACURRICULAR":
+        return "Ngoại khóa";
+      default:
+        return "Không xác định";
     }
   };
