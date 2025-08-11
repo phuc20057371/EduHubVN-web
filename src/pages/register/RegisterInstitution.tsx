@@ -110,7 +110,7 @@ const RegisterInstitution = () => {
       representativeName,
       position,
       description,
-      establishedYear: establishedYear ?? new Date().getFullYear(), // fallback nếu null
+      establishedYear,
     };
     console.log(validateInstitutionInfo(institutionData));
 

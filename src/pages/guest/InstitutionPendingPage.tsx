@@ -20,9 +20,14 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { Business, Person, ContactMail } from "@mui/icons-material";
 import { toast } from "react-toastify";
+import { validateInstitutionInfo } from "../../utils/Validate";
 
 const InstitutionPendingPage = () => {
   const dispatch = useDispatch();
@@ -34,7 +39,8 @@ const InstitutionPendingPage = () => {
   const [businessRegistrationNumber, setBusinessRegistrationNumber] =
     useState<string>("");
   const [institutionName, setInstitutionName] = useState<string>("");
-  const [institutionType, setInstitutionType] = useState<EducationInstitutionType>("UNIVERSITY");
+  const [institutionType, setInstitutionType] =
+    useState<EducationInstitutionType>("UNIVERSITY");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [website, setWebsite] = useState<string>("");
   const [address, setAddress] = useState<string>("");
@@ -44,6 +50,7 @@ const InstitutionPendingPage = () => {
   const [logoUrl, setLogoUrl] = useState<string>("");
   const [establishedYear, setEstablishedYear] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -118,15 +125,26 @@ const InstitutionPendingPage = () => {
       establishedYear,
       logoUrl,
     };
+    const result = validateInstitutionInfo(institutionData);
+    if (!result.success) {
+      toast.error(result.error);
+      return;
+    }
 
     try {
       const response = await API.user.updateInstitution(institutionData);
       dispatch(setPendingInstitution(response.data.data));
       toast.success("Thông tin đã được lưu thành công!");
-    } catch (error) {
-      console.error("Error saving institution data:", error);
-      toast.error("Đã xảy ra lỗi khi lưu thông tin. Vui lòng thử lại sau.");
-      window.location.reload();
+    } catch (error: any) {
+      if (error.response?.data?.message?.includes("đã tồn tại")) {
+        toast.error("Số ĐKKD đã được đăng ký trước đó.");
+        window.location.reload();
+        return;
+      } else {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+        window.location.reload();
+        return;
+      }
     }
   };
 
@@ -242,7 +260,9 @@ const InstitutionPendingPage = () => {
               </Box>
               <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
                 <FormControl sx={{ flex: 1, minWidth: "300px" }}>
-                  <InputLabel id="institution-type-label">Loại tổ chức</InputLabel>
+                  <InputLabel id="institution-type-label">
+                    Loại tổ chức
+                  </InputLabel>
                   <Select
                     labelId="institution-type-label"
                     value={institutionType}
@@ -250,7 +270,9 @@ const InstitutionPendingPage = () => {
                     onChange={(e) => setInstitutionType(e.target.value)}
                   >
                     <MenuItem value="UNIVERSITY">Trường đại học</MenuItem>
-                    <MenuItem value="TRAINING_CENTER">Trung tâm đào tạo</MenuItem>
+                    <MenuItem value="TRAINING_CENTER">
+                      Trung tâm đào tạo
+                    </MenuItem>
                   </Select>
                 </FormControl>
                 <TextField
@@ -267,7 +289,6 @@ const InstitutionPendingPage = () => {
                 label="Mô tả tổ chức"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-              
                 variant="outlined"
                 multiline
                 rows={4}
@@ -275,39 +296,6 @@ const InstitutionPendingPage = () => {
             </Stack>
           </CardContent>
         </Card>
-
-        {/* 
-      
-        {logoUrl && (
-          <Card elevation={2}>
-            <CardContent>
-              <Box display="flex" alignItems="center" mb={3}>
-                <School color="primary" sx={{ mr: 1 }} />
-                <Typography variant="h6" fontWeight="bold">
-                  Logo tổ chức
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", gap: 3, alignItems: "center", flexWrap: "wrap" }}>
-                <TextField
-                  sx={{ flex: 1, minWidth: "400px" }}
-                  label="URL Logo"
-                  value={logoUrl}
-                  InputProps={{ readOnly: true }}
-                  variant="outlined"
-                />
-                <Box display="flex" justifyContent="center">
-                  <Avatar
-                    src={logoUrl}
-                    alt="Logo tổ chức"
-                    sx={{ width: 120, height: 120 }}
-                    variant="rounded"
-                  />
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        )}
-  */}
 
         {/* Trạng thái */}
         <Paper elevation={1} sx={{ p: 3, bgcolor: "grey.50" }}>
@@ -323,15 +311,37 @@ const InstitutionPendingPage = () => {
               variant="contained"
               color="primary"
               size="large"
-              onClick={() => {
-                handleSaveInstitution();
-              }}
+              onClick={() => setConfirmOpen(true)}
             >
               Lưu
             </Button>
           </Box>
         </Paper>
       </Stack>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+        <DialogTitle>Xác nhận lưu thông tin</DialogTitle>
+        <DialogContent>
+          Bạn có chắc chắn muốn lưu các thay đổi cho thông tin cơ sở giáo dục
+          này?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)} color="inherit">
+            Hủy
+          </Button>
+          <Button
+            onClick={() => {
+              setConfirmOpen(false);
+              handleSaveInstitution();
+            }}
+            color="primary"
+            variant="contained"
+          >
+            Xác nhận
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

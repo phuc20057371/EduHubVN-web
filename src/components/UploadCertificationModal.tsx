@@ -29,6 +29,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { vi } from "date-fns/locale/vi";
 import { certificationLevelsAutoComplete } from "../utils/ValidateRegisterLecturer";
+import { validateCertificateInfo } from "../utils/Validate";
 
 const style = {
   position: "absolute" as const,
@@ -121,62 +122,14 @@ const UploadCertificationModal: React.FC<UploadCertificationModalProps> = ({
       .finally(() => {
         setIsUploading(false);
       });
-
-
   };
 
   const handleSubmit = () => {
-    if (
-      !form.referenceId ||
-      form.referenceId.trim() === "" ||
-      form.referenceId.length < 5 ||
-      form.referenceId.length > 20
-    ) {
-      toast.error("Vui lòng nhập mã tham chiếu hợp lệ (5-20 ký tự)");
+    const result = validateCertificateInfo(form);
+    if (!result.success) {
+      toast.error(result.error);
       return;
     }
-    if (
-      !form.name ||
-      form.name.trim() === "" ||
-      form.name.length < 2 ||
-      form.name.length > 50
-    ) {
-      toast.error("Vui lòng nhập tên chứng chỉ hợp lệ (2-50 ký tự)");
-      return;
-    }
-    if (
-      !form.issuedBy ||
-      form.issuedBy.trim() === "" ||
-      form.issuedBy.length < 2 ||
-      form.issuedBy.length > 50
-    ) {
-      toast.error(
-        "Vui lòng nhập tên chứng chỉ và cơ quan cấp hợp lệ (2-50 ký tự)",
-      );
-      return;
-    }
-    if (!form.certificateUrl || form.certificateUrl.trim() === "") {
-      toast.error("Vui lòng tải lên tài liệu chứng chỉ");
-      return;
-    }
-    if (
-      !form.level ||
-      form.level.trim() === "" ||
-      form.level.length < 2 ||
-      form.level.length > 50
-    ) {
-      toast.error("Vui lòng nhập trình độ chứng chỉ hợp lệ (2-50 ký tự)");
-      return;
-    }
-    if (!form.issueDate) {
-      toast.error("Vui lòng chọn ngày cấp");
-      return;
-    }
-    if (form.expiryDate && form.issueDate >= form.expiryDate) {
-      toast.error("Ngày hết hạn phải sau ngày cấp");
-      return;
-    }
-
     onSubmit(form);
     onClose();
   };

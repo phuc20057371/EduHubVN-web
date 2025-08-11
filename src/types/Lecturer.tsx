@@ -17,4 +17,5 @@ export type Lecturer = {
   createdAt: string;
   updatedAt: string;
   email?: string;
+  hidden?: boolean;
 }

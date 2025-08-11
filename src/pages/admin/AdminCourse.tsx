@@ -30,7 +30,6 @@ import {
   School,
   Search,
   Clear,
-  Visibility,
   People,
   LocationOn,
   Language,
@@ -42,6 +41,7 @@ import {
 import { visuallyHidden } from "@mui/utils";
 import CourseMemberDialog from "../../components/CourseMemberDialog";
 import CreateCourseDialog from "../../components/CreateCourseDialog"; // Uncomment this import
+import EditCourseDialog from "../../components/EditCourseDialog";
 import { toast } from "react-toastify";
 
 type Order = "asc" | "desc";
@@ -141,215 +141,197 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 // Memoize TableRow component to prevent unnecessary re-renders
-const CourseTableRow = memo(({ 
-  row, 
-  isItemSelected, 
-  onRowClick, 
-  onViewMembers,
-  courseTypeConfig,
-  levelConfig,
-  formatPrice,
-  formatDate 
-}: any) => (
-  <TableRow
-    hover
-    onClick={(event) => onRowClick(event, row.course.id)}
-    role="checkbox"
-    aria-checked={isItemSelected}
-    tabIndex={-1}
-    key={row.course.id}
-    selected={isItemSelected}
-    sx={{
-      cursor: "pointer",
-      "&:nth-of-type(odd)": { 
-        bgcolor: isItemSelected ? "rgba(25, 118, 210, 0.15)" : "rgba(0, 0, 0, 0.02)" 
-      },
-      "&:nth-of-type(even)": { 
-        bgcolor: isItemSelected ? "rgba(25, 118, 210, 0.15)" : "white" 
-      },
-      "&:hover": {
-        bgcolor: isItemSelected 
-          ? "rgba(25, 118, 210, 0.2)" 
-          : "rgba(25, 118, 210, 0.04)",
-        transform: "translateY(-1px)",
-        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-      },
-      "&.Mui-selected": {
-        bgcolor: "rgba(25, 118, 210, 0.15)",
-        borderLeft: "4px solid #1976d2",
-        "&:hover": {
-          bgcolor: "rgba(25, 118, 210, 0.2)",
+const CourseTableRow = memo(
+  ({
+    row,
+    isItemSelected,
+    onRowClick,
+    onViewMembers,
+    onEditCourse,
+    courseTypeConfig,
+    levelConfig,
+    formatPrice,
+    formatDate,
+  }: any) => (
+    <TableRow
+      hover
+      onClick={(event) => onRowClick(event, row.course.id)}
+      role="checkbox"
+      aria-checked={isItemSelected}
+      tabIndex={-1}
+      key={row.course.id}
+      selected={isItemSelected}
+      sx={{
+        cursor: "pointer",
+        "&:nth-of-type(odd)": {
+          bgcolor: isItemSelected
+            ? "rgba(25, 118, 210, 0.15)"
+            : "rgba(0, 0, 0, 0.02)",
         },
-      },
-      transition: "all 0.2s ease-in-out",
-    }}
-  >
-    {/* Course Info */}
-    <TableCell sx={{ minWidth: 300, py: 2 }}>
-      <Box sx={{ display: "flex", gap: 2 }}>
-        <Avatar
-          src={row.course.thumbnailUrl}
-          sx={{ width: 60, height: 60, borderRadius: 2 }}
-        >
-          <School />
-        </Avatar>
-        <Box sx={{ flex: 1 }}>
-          <Typography
-            variant="subtitle1"
-            sx={{ fontWeight: 600, mb: 0.5 }}
+        "&:nth-of-type(even)": {
+          bgcolor: isItemSelected ? "rgba(25, 118, 210, 0.15)" : "white",
+        },
+        "&:hover": {
+          bgcolor: isItemSelected
+            ? "rgba(25, 118, 210, 0.2)"
+            : "rgba(25, 118, 210, 0.04)",
+          transform: "translateY(-1px)",
+          boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+        },
+        "&.Mui-selected": {
+          bgcolor: "rgba(25, 118, 210, 0.15)",
+          borderLeft: "4px solid #1976d2",
+          "&:hover": {
+            bgcolor: "rgba(25, 118, 210, 0.2)",
+          },
+        },
+        transition: "all 0.2s ease-in-out",
+      }}
+    >
+      {/* Course Info */}
+      <TableCell sx={{ minWidth: 300, py: 2 }}>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Avatar
+            src={row.course.thumbnailUrl}
+            sx={{ width: 60, height: 60, borderRadius: 2 }}
           >
-            {row.course.title}
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{ color: "#6c757d", mb: 1 }}
-          >
-            {row.course.topic}
-          </Typography>
-          <Box
-            sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}
-          >
-            <Chip
-              label={row.course.language}
-              size="small"
-              icon={<Language sx={{ fontSize: 14 }} />}
-              sx={{ fontSize: "0.75rem", height: 24 }}
-            />
-            <Chip
-              label={
-                row.course.isOnline ? "Trực tuyến" : "Tại lớp"
-              }
-              size="small"
-              color={row.course.isOnline ? "success" : "info"}
-              icon={
-                row.course.isOnline ? undefined : (
-                  <LocationOn sx={{ fontSize: 14 }} />
-                )
-              }
-              sx={{ fontSize: "0.75rem", height: 24 }}
-            />
+            <School />
+          </Avatar>
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
+              {row.course.title}
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#6c757d", mb: 1 }}>
+              {row.course.topic}
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+              <Chip
+                label={row.course.language}
+                size="small"
+                icon={<Language sx={{ fontSize: 14 }} />}
+                sx={{ fontSize: "0.75rem", height: 24 }}
+              />
+              <Chip
+                label={row.course.isOnline ? "Trực tuyến" : "Tại lớp"}
+                size="small"
+                color={row.course.isOnline ? "success" : "info"}
+                icon={
+                  row.course.isOnline ? undefined : (
+                    <LocationOn sx={{ fontSize: 14 }} />
+                  )
+                }
+                sx={{ fontSize: "0.75rem", height: 24 }}
+              />
+            </Box>
           </Box>
         </Box>
-      </Box>
-    </TableCell>
+      </TableCell>
 
-    {/* Type & Level */}
-    <TableCell sx={{ py: 2, minWidth: 180 }}>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 1,
-        }}
-      >
-        <Chip
-          label={`${courseTypeConfig.icon} ${courseTypeConfig.label}`}
-          size="small"
+      {/* Type & Level */}
+      <TableCell sx={{ py: 2, minWidth: 180 }}>
+        <Box
           sx={{
-            bgcolor: courseTypeConfig.bgColor,
-            color: courseTypeConfig.color,
-            fontWeight: 600,
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
           }}
-        />
-        <Chip
-          label={`${levelConfig.icon} ${levelConfig.label}`}
-          size="small"
-          sx={{
-            bgcolor: levelConfig.bgColor,
-            color: levelConfig.color,
-            fontWeight: 600,
-          }}
-        />
-      </Box>
-    </TableCell>
-
-    {/* Price */}
-    <TableCell align="right" sx={{ py: 2 }}>
-      <Typography
-        variant="h6"
-        sx={{
-          fontWeight: 700,
-          color: row.course.price ? "#2e7d32" : "#ed6c02",
-        }}
-      >
-        {row.course.price
-          ? formatPrice(row.course.price)
-          : "Miễn phí"}
-      </Typography>
-    </TableCell>
-
-    {/* Schedule */}
-    <TableCell sx={{ py: 2 }}>
-      <Box>
-        <Typography
-          variant="body2"
-          sx={{ fontWeight: 600, mb: 0.5 }}
         >
-          Từ: {formatDate(row.course.startDate)}
-        </Typography>
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          Đến: {formatDate(row.course.endDate)}
-        </Typography>
-      </Box>
-    </TableCell>
+          <Chip
+            label={`${courseTypeConfig.icon} ${courseTypeConfig.label}`}
+            size="small"
+            sx={{
+              bgcolor: courseTypeConfig.bgColor,
+              color: courseTypeConfig.color,
+              fontWeight: 600,
+            }}
+          />
+          <Chip
+            label={`${levelConfig.icon} ${levelConfig.label}`}
+            size="small"
+            sx={{
+              bgcolor: levelConfig.bgColor,
+              color: levelConfig.color,
+              fontWeight: 600,
+            }}
+          />
+        </Box>
+      </TableCell>
 
-    {/* Status */}
-    <TableCell sx={{ py: 2 }}>
-      <Chip
-        label={
-          row.course.isPublished
-            ? "Đã xuất bản"
-            : "Chưa xuất bản"
-        }
-        size="small"
-        color={row.course.isPublished ? "success" : "warning"}
-        variant="filled"
-      />
-    </TableCell>
+      {/* Price */}
+      <TableCell align="right" sx={{ py: 2 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 700,
+            color: row.course.price ? "#2e7d32" : "#ed6c02",
+          }}
+        >
+          {row.course.price ? formatPrice(row.course.price) : "Miễn phí"}
+        </Typography>
+      </TableCell>
 
-    {/* Members */}
-    <TableCell sx={{ py: 2 }}>
-      <Badge
-        badgeContent={row.members?.length || 0}
-        color="primary"
-      >
-        <Button
-          variant="outlined"
+      {/* Schedule */}
+      <TableCell sx={{ py: 2 }}>
+        <Box>
+          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+            Từ: {formatDate(row.course.startDate)}
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            Đến: {formatDate(row.course.endDate)}
+          </Typography>
+        </Box>
+      </TableCell>
+
+      {/* Status */}
+      <TableCell sx={{ py: 2 }}>
+        <Chip
+          label={row.course.isPublished ? "Đã xuất bản" : "Chưa xuất bản"}
           size="small"
-          startIcon={<People />}
-          sx={{ borderRadius: 2, textTransform: "none" }}
+          color={row.course.isPublished ? "success" : "warning"}
+          variant="filled"
+        />
+      </TableCell>
+
+      {/* Members */}
+      <TableCell sx={{ py: 2 }}>
+        <Badge badgeContent={row.members?.length || 0} color="primary">
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<People />}
+            sx={{ borderRadius: 2, textTransform: "none" }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewMembers(row.members || [], row.course);
+            }}
+          >
+            Giảng viên
+          </Button>
+        </Badge>
+      </TableCell>
+
+      {/* Actions */}
+      <TableCell align="center" sx={{ py: 2 }}>
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<Edit />}
           onClick={(e) => {
             e.stopPropagation();
-            onViewMembers(row.members || [], row.course);
+            onEditCourse(row.course);
+          }}
+          sx={{
+            borderRadius: 2,
+            textTransform: "none",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
           }}
         >
-          Giảng viên
+          Chỉnh sửa
         </Button>
-      </Badge>
-    </TableCell>
-
-    {/* Actions */}
-    <TableCell align="center" sx={{ py: 2 }}>
-      <Button
-        variant="contained"
-        size="small"
-        startIcon={<Visibility />}
-        onClick={(e) => {
-          e.stopPropagation();
-          console.log("View details:", row.course.id);
-        }}
-        sx={{
-          borderRadius: 2,
-          textTransform: "none",
-          background:
-            "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        }}
-      >
-        Chi tiết
-      </Button>
-    </TableCell>
-  </TableRow>
-));
+      </TableCell>
+    </TableRow>
+  ),
+);
 
 const AdminCourse = () => {
   const dispatch = useDispatch();
@@ -367,6 +349,8 @@ const AdminCourse = () => {
   const [selectedCourseMembers, setSelectedCourseMembers] = useState<any[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [createCourseDialogOpen, setCreateCourseDialogOpen] = useState(false); // Add this state
+  const [editCourseDialogOpen, setEditCourseDialogOpen] = useState(false);
+  const [selectedCourseForEdit, setSelectedCourseForEdit] = useState<any>(null);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -477,29 +461,47 @@ const AdminCourse = () => {
       const matchesSearch =
         !debouncedSearchTerm ||
         item.course?.id?.toString().includes(debouncedSearchTerm) ||
-        item.course?.title?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        item.course?.topic?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        item.course?.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+        item.course?.title
+          ?.toLowerCase()
+          .includes(debouncedSearchTerm.toLowerCase()) ||
+        item.course?.topic
+          ?.toLowerCase()
+          .includes(debouncedSearchTerm.toLowerCase()) ||
+        item.course?.description
+          ?.toLowerCase()
+          .includes(debouncedSearchTerm.toLowerCase());
 
       const matchesType =
         !courseTypeFilter || item.course?.courseType === courseTypeFilter;
 
       const matchesStatus =
-        !statusFilter || 
+        !statusFilter ||
         (statusFilter === "published" && item.course?.isPublished) ||
         (statusFilter === "unpublished" && !item.course?.isPublished);
 
       // Date range filtering
-      const courseStartDate = item.course?.startDate ? new Date(item.course.startDate) : null;
-      const courseEndDate = item.course?.endDate ? new Date(item.course.endDate) : null;
-      
-      const matchesStartDate = !startDateFilter || 
+      const courseStartDate = item.course?.startDate
+        ? new Date(item.course.startDate)
+        : null;
+      const courseEndDate = item.course?.endDate
+        ? new Date(item.course.endDate)
+        : null;
+
+      const matchesStartDate =
+        !startDateFilter ||
         (courseStartDate && courseStartDate >= new Date(startDateFilter));
-      
-      const matchesEndDate = !endDateFilter || 
+
+      const matchesEndDate =
+        !endDateFilter ||
         (courseEndDate && courseEndDate <= new Date(endDateFilter));
 
-      return matchesSearch && matchesType && matchesStatus && matchesStartDate && matchesEndDate;
+      return (
+        matchesSearch &&
+        matchesType &&
+        matchesStatus &&
+        matchesStartDate &&
+        matchesEndDate
+      );
     });
 
     // Sort courses
@@ -519,26 +521,44 @@ const AdminCourse = () => {
     });
 
     return { filteredCourses: filtered, sortedCourses: sorted };
-  }, [courses, debouncedSearchTerm, courseTypeFilter, statusFilter, startDateFilter, endDateFilter, order, orderBy]);
+  }, [
+    courses,
+    debouncedSearchTerm,
+    courseTypeFilter,
+    statusFilter,
+    startDateFilter,
+    endDateFilter,
+    order,
+    orderBy,
+  ]);
 
   // Memoize static options
-  const courseTypes = useMemo(() => [
-    { value: "", label: "Tất cả" },
-    { value: "FORMAL", label: "Chính quy" },
-    { value: "SPECIALIZED", label: "Chuyên đề" },
-    { value: "EXTRACURRICULAR", label: "Ngoại khóa" },
-  ], []);
+  const courseTypes = useMemo(
+    () => [
+      { value: "", label: "Tất cả" },
+      { value: "FORMAL", label: "Chính quy" },
+      { value: "SPECIALIZED", label: "Chuyên đề" },
+      { value: "EXTRACURRICULAR", label: "Ngoại khóa" },
+    ],
+    [],
+  );
 
-  const statusOptions = useMemo(() => [
-    { value: "", label: "Tất cả trạng thái" },
-    { value: "published", label: "Đã xuất bản" },
-    { value: "unpublished", label: "Chưa xuất bản" },
-  ], []);
+  const statusOptions = useMemo(
+    () => [
+      { value: "", label: "Tất cả trạng thái" },
+      { value: "published", label: "Đã xuất bản" },
+      { value: "unpublished", label: "Chưa xuất bản" },
+    ],
+    [],
+  );
 
   // Memoize event handlers
-  const handleClick = useCallback((_event: React.MouseEvent<unknown>, courseId: string) => {
-    setSelected(selected === courseId ? null : courseId);
-  }, [selected]);
+  const handleClick = useCallback(
+    (_event: React.MouseEvent<unknown>, courseId: string) => {
+      setSelected(selected === courseId ? null : courseId);
+    },
+    [selected],
+  );
 
   const handleViewMembers = useCallback((members: any[], course: any) => {
     setSelectedCourseMembers([...members]);
@@ -546,40 +566,67 @@ const AdminCourse = () => {
     setMembersDialogOpen(true);
   }, []);
 
-  const handleRequestSort = useCallback((
-    _event: React.MouseEvent<unknown>,
-    property: string,
-  ) => {
-    const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
-  }, [order, orderBy]);
+  const handleRequestSort = useCallback(
+    (_event: React.MouseEvent<unknown>, property: string) => {
+      const isAsc = orderBy === property && order === "asc";
+      setOrder(isAsc ? "desc" : "asc");
+      setOrderBy(property);
+    },
+    [order, orderBy],
+  );
 
-  const handleCreateCourse = useCallback(async (courseData: any) => {
-    try {
-      console.log("Creating course:", courseData);
+  const handleCreateCourse = useCallback(
+    async (courseData: any) => {
+      try {
+        console.log("Creating course:", courseData);
 
-      const response = await API.admin.createCourse(courseData);
-      console.log("Course created successfully:", response.data);
+        const response = await API.admin.createCourse(courseData);
+        console.log("Course created successfully:", response.data);
 
-      const coursesResponse = await API.admin.getAllCourses();
-      dispatch(setCourse(coursesResponse.data.data));
-      
-      const newCourseData = response.data.data;
-      
-      setSelectedCourse(newCourseData.course);
-      setSelectedCourseMembers(newCourseData.members || []);
+        const coursesResponse = await API.admin.getAllCourses();
+        dispatch(setCourse(coursesResponse.data.data));
 
-      handleViewMembers(newCourseData.members || [], newCourseData.course);
+        const newCourseData = response.data.data;
 
-      // setMembersDialogOpen(true);
-      
-      toast.success("Khóa học đã được tạo thành công!");
-    } catch (error) {
-      console.error("Error creating course:", error);
-      toast.error("Có lỗi xảy ra khi tạo khóa học!");
-    }
-  }, [dispatch]);
+        setSelectedCourse(newCourseData.course);
+        setSelectedCourseMembers(newCourseData.members || []);
+
+        handleViewMembers(newCourseData.members || [], newCourseData.course);
+
+        // setMembersDialogOpen(true);
+
+        toast.success("Khóa học đã được tạo thành công!");
+      } catch (error) {
+        console.error("Error creating course:", error);
+        toast.error("Có lỗi xảy ra khi tạo khóa học!");
+      }
+    },
+    [dispatch],
+  );
+
+  const handleEditCourse = useCallback((course: any) => {
+    setSelectedCourseForEdit(course);
+    setEditCourseDialogOpen(true);
+  }, []);
+
+  const handleUpdateCourse = useCallback(
+    async (courseData: any) => {
+      try {
+        console.log("Updating course:", courseData);
+
+        const response = await API.admin.updateCourse(courseData);
+        console.log("Course updated successfully:", response.data.data);
+        // Refresh courses list
+        const coursesResponse = await API.admin.getAllCourses();
+        dispatch(setCourse(coursesResponse.data.data));
+        toast.success("Khóa học đã được cập nhật thành công!");
+      } catch (error) {
+        console.error("Error updating course:", error);
+        toast.error("Có lỗi xảy ra khi cập nhật khóa học!");
+      }
+    },
+    [dispatch],
+  );
 
   // const clearAllFilters = useCallback(() => {
   //   setSearchTerm("");
@@ -647,8 +694,11 @@ const AdminCourse = () => {
                 Quản lý Khóa học
               </Typography>
               <Typography variant="body2" sx={{ color: "#6c757d" }}>
-                {(searchTerm || courseTypeFilter || statusFilter || hasDateFilters) 
-                  ? `Đã lọc ${filteredCourses?.length || 0} khóa học` 
+                {searchTerm ||
+                courseTypeFilter ||
+                statusFilter ||
+                hasDateFilters
+                  ? `Đã lọc ${filteredCourses?.length || 0} khóa học`
                   : `Tổng cộng ${filteredCourses?.length || 0} khóa học`}
               </Typography>
             </Box>
@@ -671,7 +721,8 @@ const AdminCourse = () => {
                 fontSize: "1rem",
                 boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
                 "&:hover": {
-                  background: "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                  background:
+                    "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
                   transform: "translateY(-2px)",
                   boxShadow: "0 6px 20px rgba(102, 126, 234, 0.6)",
                 },
@@ -863,11 +914,19 @@ const AdminCourse = () => {
 
         {/* Active Filters Display */}
         {(searchTerm || courseTypeFilter || statusFilter || hasDateFilters) && (
-          <Box sx={{ mt: 2, display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }}>
+          <Box
+            sx={{
+              mt: 2,
+              display: "flex",
+              gap: 1,
+              flexWrap: "wrap",
+              alignItems: "center",
+            }}
+          >
             <Typography variant="body2" sx={{ color: "#6c757d", mr: 1 }}>
               Bộ lọc đang áp dụng:
             </Typography>
-            
+
             {searchTerm && (
               <Chip
                 label={`Tìm kiếm: "${searchTerm}"`}
@@ -877,10 +936,10 @@ const AdminCourse = () => {
                 variant="outlined"
               />
             )}
-            
+
             {courseTypeFilter && (
               <Chip
-                label={`Loại: ${courseTypes.find(t => t.value === courseTypeFilter)?.label}`}
+                label={`Loại: ${courseTypes.find((t) => t.value === courseTypeFilter)?.label}`}
                 size="small"
                 onDelete={() => setCourseTypeFilter("")}
                 color="secondary"
@@ -890,17 +949,17 @@ const AdminCourse = () => {
 
             {statusFilter && (
               <Chip
-                label={`Trạng thái: ${statusOptions.find(s => s.value === statusFilter)?.label}`}
+                label={`Trạng thái: ${statusOptions.find((s) => s.value === statusFilter)?.label}`}
                 size="small"
                 onDelete={() => setStatusFilter("")}
                 color="success"
                 variant="outlined"
               />
             )}
-            
+
             {startDateFilter && (
               <Chip
-                label={`Từ: ${new Date(startDateFilter).toLocaleDateString('vi-VN')}`}
+                label={`Từ: ${new Date(startDateFilter).toLocaleDateString("vi-VN")}`}
                 size="small"
                 onDelete={() => setStartDateFilter("")}
                 color="info"
@@ -908,10 +967,10 @@ const AdminCourse = () => {
                 icon={<DateRange />}
               />
             )}
-            
+
             {endDateFilter && (
               <Chip
-                label={`Đến: ${new Date(endDateFilter).toLocaleDateString('vi-VN')}`}
+                label={`Đến: ${new Date(endDateFilter).toLocaleDateString("vi-VN")}`}
                 size="small"
                 onDelete={() => setEndDateFilter("")}
                 color="info"
@@ -919,7 +978,7 @@ const AdminCourse = () => {
                 icon={<DateRange />}
               />
             )}
-            
+
             <Button
               size="small"
               onClick={() => {
@@ -958,7 +1017,9 @@ const AdminCourse = () => {
                 if (!row || !row.course) return null;
 
                 const isItemSelected = selected === row.course.id;
-                const courseTypeConfig = getCourseTypeConfig(row.course.courseType || "");
+                const courseTypeConfig = getCourseTypeConfig(
+                  row.course.courseType || "",
+                );
                 const levelConfig = getLevelConfig(row.course.level || "");
 
                 return (
@@ -968,6 +1029,7 @@ const AdminCourse = () => {
                     isItemSelected={isItemSelected}
                     onRowClick={handleClick}
                     onViewMembers={handleViewMembers}
+                    onEditCourse={handleEditCourse}
                     courseTypeConfig={courseTypeConfig}
                     levelConfig={levelConfig}
                     formatPrice={formatPrice}
@@ -996,6 +1058,17 @@ const AdminCourse = () => {
         open={createCourseDialogOpen}
         onClose={() => setCreateCourseDialogOpen(false)}
         onSubmit={handleCreateCourse}
+      />
+
+      {/* Edit Course Dialog */}
+      <EditCourseDialog
+        open={editCourseDialogOpen}
+        onClose={() => {
+          setEditCourseDialogOpen(false);
+          setSelectedCourseForEdit(null);
+        }}
+        onSubmit={handleUpdateCourse}
+        courseData={selectedCourseForEdit}
       />
     </Box>
   );

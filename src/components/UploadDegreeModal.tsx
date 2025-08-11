@@ -5,7 +5,7 @@ import {
   School,
 } from "@mui/icons-material";
 import {
-    Autocomplete,
+  Autocomplete,
   Box,
   Button,
   Card,
@@ -21,6 +21,7 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 import type { DegreeRequest } from "../types/DegreeRequest";
 import { API } from "../utils/Fetch";
+import { validateDegreeInfo } from "../utils/Validate";
 
 const style = {
   position: "absolute" as const,
@@ -112,60 +113,10 @@ const UploadDegreeModal: React.FC<UploadDegreeModalProps> = ({
   };
 
   const handleSubmit = () => {
-    if (
-      !form.referenceId ||
-      form.referenceId.trim() === "" ||
-      form.referenceId.length < 5 ||
-      form.referenceId.length > 20
-    ) {
-      toast.error("Mã tham chiếu không hợp lệ.");
-      return;
-    }
-    if (
-      !form.name ||
-      form.name.trim() === "" ||
-      form.name.length < 2 ||
-      form.name.length > 50
-    ) {
-      toast.error("Vui lòng nhập tên bằng cấp hợp lệ");
-      return;
-    }
-    if (
-      !form.institution ||
-      form.institution.trim() === "" ||
-      form.institution.length < 2 ||
-      form.institution.length > 50
-    ) {
-      toast.error("Tên cơ sở đào tạo không hợp lệ");
-      return;
-    }
-    if (
-      form.startYear <= 0 ||
-      form.startYear > new Date().getFullYear() ||
-      form.graduationYear <= 0 ||
-      form.startYear > form.graduationYear ||
-      form.graduationYear - form.startYear > 10
-    ) {
-      toast.error(
-        "Thời gian không hợp lệ.",
-      );
-      return;
-    }
-    if (!form.url) {
-      toast.error("Vui lòng tải lên tài liệu bằng cấp");
-      return;
-    }
-    if (!form.major.trim() || form.major.length < 2 || form.major.length > 50) {
-      toast.error("Vui lòng nhập ngành học hợp lệ (2-50 ký tự)");
-      return;
-    }
+    const results = validateDegreeInfo(form);
 
-    if (!form.level.trim() || form.level.length < 2 || form.level.length > 50) {
-      toast.error("Vui lòng chọn trình độ bằng cấp hợp lệ (2-50 ký tự)");
-      return;
-    }
-    if (form.description.length > 500 ) {
-      toast.error("Mô tả không được quá 500 ký tự");
+    if (!results.success) {
+      toast.error(results.error);
       return;
     }
 
@@ -185,16 +136,17 @@ const UploadDegreeModal: React.FC<UploadDegreeModalProps> = ({
       .then((response: any) => {
         console.log("✅ File uploaded successfully:", response.data);
         setForm((prev) => ({ ...prev, url: response.data }));
+        toast.success("Tải lên tài liệu thành công");
       })
       .catch((error: any) => {
         console.error("❌ Error uploading file:", error);
         toast.error("Tải lên tài liệu không thành công. (.pdf, .jpg, .png)");
+        setSelectedFile(null);
+        setForm((prev) => ({ ...prev, url: "" }));
       })
       .finally(() => {
         setIsUploading(false);
       });
-
-    toast.success("Tải lên tài liệu thành công");
   };
 
   return (
@@ -224,7 +176,9 @@ const UploadDegreeModal: React.FC<UploadDegreeModalProps> = ({
             {editMode ? "Chỉnh sửa bằng cấp" : "Thêm bằng cấp mới"}
           </Typography>
           <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
-            {editMode ? "Cập nhật thông tin bằng cấp của bạn" : "Nhập thông tin chi tiết về bằng cấp của bạn"}
+            {editMode
+              ? "Cập nhật thông tin bằng cấp của bạn"
+              : "Nhập thông tin chi tiết về bằng cấp của bạn"}
           </Typography>
         </Box>
 

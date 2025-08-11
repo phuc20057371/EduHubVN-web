@@ -52,7 +52,7 @@ export const validateCourseForm = (formData: any) => {
     return errors;
   }
 
-  if (formData.description.length > 100) {
+  if (formData.description.length > 500) {
     errors.success = false;
     errors.error = "Mô tả khóa học không được vượt quá 100 ký tự.";
     return errors;
@@ -83,14 +83,6 @@ export const validateCourseForm = (formData: any) => {
 
   return errors;
 };
-
-// const checkCitizenId = async (citizenId: string) => {
-//   const response = await API.other.checkCitizenId(citizenId);
-//   if (response.data.data) {
-//     return true;
-//   }
-//   return false;
-// };
 
 export const validateLecturerInfo = (formData: any) => {
   const errors: validateResult = {
@@ -189,9 +181,9 @@ export const validateLecturerInfo = (formData: any) => {
     errors.errorField = "jobField";
     return errors;
   }
-  if (formData.address === "" || formData.address.length > 100) {
+  if (formData.address === "" || formData.address.length > 60) {
     errors.success = false;
-    errors.error = "Vui lòng nhập địa chỉ";
+    errors.error = "Vui lòng nhập địa chỉ hợp lệ (tối đa 60 ký tự)";
     errors.errorField = "address";
     return errors;
   }
@@ -295,10 +287,10 @@ export const validateInstitutionInfo = (formData: InstitutionRequest) => {
     return errors;
   }
   if (
-    formData.establishedYear &&
-    (isNaN(formData.establishedYear) ||
-      formData.establishedYear < 1900 ||
-      formData.establishedYear > new Date().getFullYear())
+    !formData.establishedYear ||
+    isNaN(formData.establishedYear) ||
+    formData.establishedYear < 1900 ||
+    formData.establishedYear > new Date().getFullYear()
   ) {
     errors.success = false;
     errors.error = "Năm thành lập không hợp lệ";
@@ -418,5 +410,183 @@ export const validatePartnerInfo = (formData: PartnerRequest) => {
     errors.errorField = "description";
     return errors;
   }
+  return errors;
+};
+
+export const validateDegreeInfo = (formData: any) => {
+  const errors: validateResult = {
+    success: true,
+    errorField: "",
+    error: "",
+  };
+
+  if (
+    formData.referenceId.trim() === "" ||
+    formData.referenceId.length > 15 ||
+    formData.referenceId.length < 5
+  ) {
+    errors.success = false;
+    errors.error =
+      "Reference Id không được để trống, quá dài (tối đa 15 ký tự), quá ngắn (tối thiểu 5 ký tự) hoặc chứa ký tự đặc biệt";
+    errors.errorField = "referenceId";
+    return errors;
+  }
+  if (
+    formData.name.trim() === "" ||
+    formData.name.length > 30 ||
+    formData.name.length < 3
+  ) {
+    errors.success = false;
+    errors.error =
+      "Tên bằng cấp không được để trống, quá dài (tối đa 30 ký tự) hoặc quá ngắn (tối thiểu 3 ký tự)";
+    errors.errorField = "name";
+    return errors;
+  }
+  if (
+    formData.major.trim() === "" ||
+    formData.major.length > 30 ||
+    formData.major.length < 3
+  ) {
+    errors.success = false;
+    errors.error =
+      "Ngành học không được để trống, quá dài (tối đa 30 ký tự) hoặc quá ngắn (tối thiểu 3 ký tự)";
+    errors.errorField = "major";
+    return errors;
+  }
+  if (
+    formData.level.trim() === "" ||
+    formData.level.length > 20 ||
+    formData.level.length < 3
+  ) {
+    errors.success = false;
+    errors.error =
+      "Trình độ không được để trống hoặc quá dài (tối đa 20 ký tự)";
+    errors.errorField = "level";
+    return errors;
+  }
+  if (
+    formData.institution.trim() === "" ||
+    formData.institution.length > 50 ||
+    formData.institution.length < 3
+  ) {
+    errors.success = false;
+    errors.error =
+      "Tên cơ sở đào tạo không được để trống hoặc quá dài (tối đa 50 ký tự)";
+    errors.errorField = "institution";
+    return errors;
+  }
+  if (
+    formData.startYear === "" ||
+    isNaN(formData.startYear) ||
+    formData.startYear < 1900 ||
+    formData.startYear > new Date().getFullYear()
+  ) {
+    errors.success = false;
+    errors.error = "Năm bắt đầu không hợp lệ";
+    errors.errorField = "startYear";
+    return errors;
+  }
+  if (
+    formData.graduationYear === "" ||
+    isNaN(formData.graduationYear) ||
+    formData.graduationYear < formData.startYear ||
+    formData.graduationYear > new Date().getFullYear()
+  ) {
+    errors.success = false;
+    errors.error = "Năm tốt nghiệp không hợp lệ";
+    errors.errorField = "graduationYear";
+    return errors;
+  }
+  if (!formData.url) {
+    errors.success = false;
+    errors.error = "Vui lòng tải lên tài liệu bằng cấp";
+    errors.errorField = "url";
+    return errors;
+  }
+
+  if (formData.description && formData.description.length > 200) {
+    errors.success = false;
+    errors.error = "Mô tả không được quá 200 ký tự";
+    errors.errorField = "description";
+    return errors;
+  }
+  return errors;
+};
+
+export const validateCertificateInfo = (formData: any) => {
+  const errors: validateResult = {
+    success: true,
+    errorField: "",
+    error: "",
+  };
+
+  if (
+    !formData.referenceId ||
+    formData.referenceId.trim() === "" ||
+    formData.referenceId.length < 5 ||
+    formData.referenceId.length > 15
+  ) {
+    errors.success = false;
+    errors.error =
+      "Vui lòng nhập mã tham chiếu hợp lệ (5-15 ký tự, chỉ chứa chữ cái và số)";
+    errors.errorField = "referenceId";
+    return errors;
+  }
+  if (
+    !formData.name ||
+    formData.name.trim() === "" ||
+    formData.name.length < 2 ||
+    formData.name.length > 50
+  ) {
+    errors.success = false;
+    errors.error = "Vui lòng nhập tên chứng chỉ hợp lệ (2-50 ký tự)";
+    errors.errorField = "name";
+    return errors;
+  }
+  if (
+    !formData.issuedBy ||
+    formData.issuedBy.trim() === "" ||
+    formData.issuedBy.length < 2 ||
+    formData.issuedBy.length > 50
+  ) {
+    errors.success = false;
+    errors.error =
+      "Vui lòng nhập tên tổ chức cấp chứng chỉ hợp lệ (2-50 ký tự)";
+    errors.errorField = "issuedBy";
+    return errors;
+  }
+  if (!formData.certificateUrl || formData.certificateUrl.trim() === "") {
+    errors.success = false;
+    errors.error = "Vui lòng tải lên tài liệu chứng chỉ";
+    errors.errorField = "certificateUrl";
+    return errors;
+  }
+  if (
+    !formData.level ||
+    formData.level.trim() === "" ||
+    formData.level.length < 2 ||
+    formData.level.length > 50
+  ) {
+    errors.success = false;
+    errors.error = "Vui lòng nhập trình độ chứng chỉ hợp lệ (2-50 ký tự)";
+    errors.errorField = "level";
+    return errors;
+  }
+  if (!formData.issueDate) {
+    errors.success = false;
+    errors.error = "Vui lòng chọn ngày cấp";
+    errors.errorField = "issueDate";
+    return errors;
+  }
+  if (
+    formData.expiryDate &&
+    new Date(formData.issueDate) >= new Date(formData.expiryDate)
+  ) {
+    errors.success = false;
+    errors.error = "Ngày hết hạn phải sau ngày cấp";
+    errors.errorField = "expiryDate";
+    return errors;
+  }
+
   return errors;
 };

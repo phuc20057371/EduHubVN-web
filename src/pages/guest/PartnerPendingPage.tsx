@@ -15,6 +15,10 @@ import {
   Paper,
   Stack,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { Business, Person, ContactMail } from "@mui/icons-material";
 import { toast } from "react-toastify";
@@ -24,7 +28,8 @@ const PartnerPendingPage = () => {
   const navigate = useNavigate();
   const pendingPartner = useSelector((state: any) => state.pendingPartner);
 
-  const [businessRegistrationNumber, setBusinessRegistrationNumber] = useState("");
+  const [businessRegistrationNumber, setBusinessRegistrationNumber] =
+    useState("");
   const [organizationName, setOrganizationName] = useState("");
   const [industry, setIndustry] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -36,6 +41,7 @@ const PartnerPendingPage = () => {
   const [establishedYear, setEstablishedYear] = useState<number | null>(null);
   const [logoUrl, setLogoUrl] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -62,7 +68,7 @@ const PartnerPendingPage = () => {
     };
     fetchPendingPartner();
   }, [dispatch]);
-  
+
   useEffect(() => {
     if (pendingPartner) {
       setBusinessRegistrationNumber(pendingPartner.businessRegistrationNumber);
@@ -80,7 +86,7 @@ const PartnerPendingPage = () => {
     setIsLoading(false);
   }, [pendingPartner]);
 
-   if (isLoading) {
+  if (isLoading) {
     return (
       <Box
         display="flex"
@@ -112,10 +118,13 @@ const PartnerPendingPage = () => {
       const response = await API.user.updatePartner(partnerData);
       dispatch(setPendingPartner(response.data.data));
       toast.success("Thông tin đã được lưu thành công!");
-    } catch (error) {
-      console.error("Error saving partner data:", error);
-      toast.error("Đã xảy ra lỗi khi lưu thông tin. Vui lòng thử lại sau.");
-      window.location.reload();
+    } catch (error: any) {
+      if (error.response?.data?.message?.includes("đã tồn tại")) {
+        toast.error("Số ĐKKD đã được đăng ký trước đó.");
+      } else {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+        window.location.reload();
+      }
     }
   };
 
@@ -137,7 +146,7 @@ const PartnerPendingPage = () => {
       )}
 
       <Stack spacing={3}>
-         {/* Thông tin liên hệ */}
+        {/* Thông tin liên hệ */}
         <Card elevation={2}>
           <CardContent>
             <Box display="flex" alignItems="center" mb={3}>
@@ -249,7 +258,9 @@ const PartnerPendingPage = () => {
                   sx={{ flex: 1, minWidth: "300px" }}
                   label="Năm thành lập"
                   value={establishedYear || ""}
-                  onChange={(e) => setEstablishedYear(Number(e.target.value) || null)}
+                  onChange={(e) =>
+                    setEstablishedYear(Number(e.target.value) || null)
+                  }
                   variant="outlined"
                   type="number"
                   InputLabelProps={{ shrink: !!establishedYear }}
@@ -268,8 +279,6 @@ const PartnerPendingPage = () => {
             </Stack>
           </CardContent>
         </Card>
-
-       
 
         {/* Logo URL (tùy chọn) */}
         {/* {logoUrl && (
@@ -299,15 +308,36 @@ const PartnerPendingPage = () => {
               variant="contained"
               color="primary"
               size="large"
-              onClick={() => {
-                handleSavePartner();
-              }}
+              onClick={() => setConfirmOpen(true)}
             >
               Lưu
             </Button>
           </Box>
         </Paper>
       </Stack>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+        <DialogTitle>Xác nhận lưu thông tin</DialogTitle>
+        <DialogContent>
+          Bạn có chắc chắn muốn lưu các thay đổi cho thông tin đối tác này?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)} color="inherit">
+            Hủy
+          </Button>
+          <Button
+            onClick={() => {
+              setConfirmOpen(false);
+              handleSavePartner();
+            }}
+            color="primary"
+            variant="contained"
+          >
+            Xác nhận
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

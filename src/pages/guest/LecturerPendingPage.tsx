@@ -49,7 +49,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import LinearProgress from "@mui/material/LinearProgress";
 import Box from "@mui/material/Box";
-import { setUserProfile } from "../../redux/slice/userSlice";
+import { clearUserProfile, setUserProfile } from "../../redux/slice/userSlice";
 import { useNavigate } from "react-router-dom";
 import { navigateToRole } from "../../utils/navigationRole";
 import { toast } from "react-toastify";
@@ -104,8 +104,20 @@ const LecturerPendingPage = () => {
         const response = await API.user.getPendingLecturer();
         dispatch(setPendingLecturer(response.data.data));
         console.log("Pending lecturers:", response.data.data);
-      } catch (error) {
-        console.error("Error fetching pending lecturers:", error);
+      } catch (error: any) {
+        if (
+          error.response?.data?.message?.includes("Không có quyền truy cập")
+        ) {
+          dispatch(clearUserProfile());
+          localStorage.removeItem("accessToken");
+          navigate("/guest");
+
+          toast.error(
+            "Phiên đăng nhập đã hết hạn hoặc tài khoản không khả dụng.",
+          );
+        } else {
+          toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+        }
       }
     };
     fetchPendingLecturers();
@@ -253,8 +265,11 @@ const LecturerPendingPage = () => {
 
       if (validateLecturerInfo(updatedLecturer).success === false) {
         toast.error(validateLecturerInfo(updatedLecturer).error);
-        console.log("Validation failed:", validateLecturerInfo(updatedLecturer).error);
-        
+        console.log(
+          "Validation failed:",
+          validateLecturerInfo(updatedLecturer).error,
+        );
+
         return;
       }
       console.log("Updated lecturer:", updatedLecturer);
@@ -271,9 +286,16 @@ const LecturerPendingPage = () => {
         dispatch(setPendingLecturer(response.data.data));
       }
       toast.success("Đã lưu thay đổi thông tin giảng viên thành công");
-    } catch (error) {
-      toast.error("Lỗi khi lưu thay đổi: ");
-      // window.location.reload();
+    } catch (error: any) {
+      if (error.response?.data?.message?.includes("đã tồn tại")) {
+        toast.error("Số CCCD/CMND đã được đăng ký trước đó.");
+        window.location.reload();
+        return;
+      } else {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+        window.location.reload();
+        return;
+      }
     } finally {
       setLoading(false);
     }
@@ -602,7 +624,7 @@ const LecturerPendingPage = () => {
                     />
 
                     <TextField
-                      label="Tiểu sử"
+                      label="Giới thiệu"
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
                       fullWidth

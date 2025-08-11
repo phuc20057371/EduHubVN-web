@@ -27,7 +27,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import PersonIcon from "@mui/icons-material/Person";
 import SchoolIcon from "@mui/icons-material/School";
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch} from "react-redux";
 import { toast } from "react-toastify";
 import { setLecturers } from "../redux/slice/LecturerSlice";
 import { API } from "../utils/Fetch";
@@ -45,7 +45,6 @@ const LecturerUpdateDialog = ({
   lecturer,
 }: LecturerUpdateDialogProps) => {
   if (!open || !lecturer) return null;
-  const lecturers = useSelector((state: any) => state.lecturer || []);
   const dispatch = useDispatch();
   const [fullName, setFullName] = useState(lecturer.fullName || "");
   const [citizenId, setCitizenId] = useState(lecturer.citizenId || "");
@@ -140,28 +139,19 @@ const LecturerUpdateDialog = ({
         toast.error(res.data.error);
         return;
       }
-      let updatedLecturerData = res.data.data;
-      updatedLecturerData = {
-        ...updatedLecturerData,
-        email: email.trim(),
-      };
-
-      dispatch(
-        setLecturers(
-          lecturers.map((l: Lecturer) =>
-            l.id === lecturer.id ? updatedLecturerData : l,
-          ),
-        ),
-      );
+      const response = await API.admin.getAllLecturers();
+      dispatch(setLecturers(response.data.data));
       console.log("Update response:", res.data);
-      // Print the updated lecturer object
-      console.log("Lecturer to update:", updatedLecturer);
       toast.success("Cập nhật thông tin giảng viên thành công");
       onClose();
-    } catch (error) {
-      console.error("Error updating lecturer:", error);
-      toast.error("Cập nhật thông tin giảng viên thất bại");
-      return;
+    } catch (error: any) {
+      if (error.response?.data?.message?.includes("đã tồn tại")) {
+        toast.error("Số CCCD/CMND đã được đăng ký trước đó.");
+        return;
+      } else {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+        return;
+      }
     }
   };
 

@@ -156,13 +156,13 @@ export const API = {
     // Degree
     createDegree: (data: any) => fetch.post("/api/v1/user/create-degree", data),
     deleteDegree: (data: string) =>
-      fetch.post("/api/v1/user/delete-degree", {id: data}),
+      fetch.post("/api/v1/user/delete-degree", { id: data }),
 
     // Certification
     createCertification: (data: any) =>
       fetch.post("/api/v1/user/create-certification", data),
     deleteCertification: (data: string) =>
-      fetch.post("/api/v1/user/delete-certification", {id: data}),
+      fetch.post("/api/v1/user/delete-certification", { id: data }),
   },
   lecturer: {
     // Get
@@ -204,7 +204,7 @@ export const API = {
   },
   institution: {
     // Get
-
+    getLecturers: () => fetch.get("/api/v1/institution/get-lecturers"),
     // Institution
     updateInstitutionProfile: (data: InstitutionRequest) =>
       fetch.post("/api/v1/institution/update-profile", data),
@@ -244,8 +244,7 @@ export const API = {
     getAllInstitutions: () => fetch.get("/api/v1/admin/get-all-institutions"),
     getAllPartners: () => fetch.get("/api/v1/admin/get-all-partners"),
 
-    getLecturerRequests: () =>
-      fetch.get("/api/v1/admin/get-lecturer-requests"),
+    getLecturerRequests: () => fetch.get("/api/v1/admin/get-lecturer-requests"),
     //Lecturer
     approveLecturer: (data: IdRequest) =>
       fetch.post("/api/v1/admin/approve-lecturer", data),
@@ -269,9 +268,9 @@ export const API = {
       fetch.post("/api/v1/admin/approve-institution-update", data),
     rejectInstitutionUpdate: (data: RejectRequest) =>
       fetch.post("/api/v1/admin/reject-institution-update", data),
-
     updateInstitution: (data: Institution) =>
       fetch.post("/api/v1/admin/update-institution", data),
+
     // Partner
 
     approvePartner: (data: IdRequest) =>
@@ -341,10 +340,11 @@ export const API = {
     getCourseById: (id: number) => fetch.get(`/api/v1/admin/get-course/${id}`),
     updateCourseMember: (data: any) =>
       fetch.post("/api/v1/admin/update-course-member", data),
-    getOwnedCourses: () =>
-      fetch.get("/api/v1/admin/get-new-owned-courses"),
+    getOwnedCourses: () => fetch.get("/api/v1/admin/get-new-owned-courses"),
     createCourse: (data: any) =>
       fetch.post("/api/v1/admin/create-course", data),
+    updateCourse: (data: any) =>
+      fetch.post("/api/v1/admin/update-course", data),
   },
 
   other: {
@@ -353,7 +353,6 @@ export const API = {
     },
     checkCitizenId: (citizenId: string) => {
       return fetch.get("/api/v1/user/check-citizen-id/" + citizenId);
-    }
+    },
   },
-
 };

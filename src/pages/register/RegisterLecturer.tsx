@@ -410,7 +410,6 @@ const RegisterLecturer = () => {
                   </Typography>
                 </div>
               </div>
-              <Divider className="mb-8" />
 
               <div className="space-y-8">
                 {/* Full Name */}
@@ -580,7 +579,6 @@ const RegisterLecturer = () => {
                   </Typography>
                 </div>
               </div>
-              <Divider className="mb-8" />
 
               <div className="space-y-8">
                 {/* Academic Rank and Specialization Row */}
@@ -713,7 +711,6 @@ const RegisterLecturer = () => {
                   </Typography>
                 </div>
               </div>
-              <Divider className="mb-8" />
 
               <TextField
                 fullWidth

@@ -106,6 +106,8 @@ const AdminLecturerPage = () => {
       try {
         const res = await API.admin.getAllLecturers();
         dispatch(setLecturers(res.data.data));
+        console.log(res.data.data);
+
         const response = await API.admin.getLecturerPendingCreate();
         dispatch(setLecturerPendingCreate(response.data.data));
         const updateResponse = await API.admin.getLecturerPendingUpdate();
