@@ -499,7 +499,7 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
     () => [...filteredInstitutions].sort(getComparator(order, orderBy)).slice(),
     [filteredInstitutions, order, orderBy],
   );
-  
+
   const emptyRows = 10 - visibleRows.length > 0 ? 10 - visibleRows.length : 0;
 
   // Enhanced search handlers
@@ -629,11 +629,7 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
                 justifyContent: "center",
               }}
             >
-              <Typography
-                variant="h6"
-                color="text.secondary"
-                sx={{ mb: 1 }}
-              >
+              <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
                 Không tìm thấy kết quả
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -797,13 +793,13 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
                         <Button
                           variant="contained"
                           size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(
-                              `/institution-info/${row.id}`,
-                              "_blank",
-                            );
-                          }}
+                          // onClick={(e) => {
+                          // e.stopPropagation();
+                          // window.open(
+                          //   `/institution-info/${row.id}`,
+                          //   "_blank",
+                          // );
+                          // }}
                           sx={{
                             minWidth: 100,
                             borderRadius: 2,
@@ -813,7 +809,7 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
                             fontWeight: 600,
                           }}
                         >
-                          Chi tiết
+                          Chỉnh sửa
                         </Button>
                       </TableCell>
                     </TableRow>

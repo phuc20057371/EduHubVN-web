@@ -24,6 +24,7 @@ import type {
 import type { Lecturer } from "../types/Lecturer";
 import type { Institution } from "../types/Institution";
 import type { Partner } from "../types/Parner";
+import type { EmailSent } from "../types/EmailSent";
 
 // const BASE_URL = "http://localhost:8080";
 const domain = window.location.hostname;
@@ -201,6 +202,7 @@ export const API = {
       fetch.post("/api/v1/lecturer/update-research-project", data),
     editResearchProject: (data: ResearchProjectUpdateRequest) =>
       fetch.post("/api/v1/lecturer/edit-research-project", data),
+    hiddenProfile: (data: any) => fetch.post("/api/v1/lecturer/hidden-profile", data),
   },
   institution: {
     // Get
@@ -353,6 +355,9 @@ export const API = {
     },
     checkCitizenId: (citizenId: string) => {
       return fetch.get("/api/v1/user/check-citizen-id/" + citizenId);
+    },
+    sendEmail: (data: EmailSent) => {
+      return fetch.post("/api/v1/auth/send-mail", data);
     },
   },
 };

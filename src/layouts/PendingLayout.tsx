@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { API } from "../utils/Fetch";
 import { setUserProfile } from "../redux/slice/userSlice";
 import { navigateToRole } from "../utils/navigationRole";
@@ -8,7 +8,6 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  Button,
   Box,
   Container,
   Avatar,
@@ -16,6 +15,9 @@ import {
   Menu,
   MenuItem,
   Divider,
+  Chip,
+  Paper,
+  alpha,
 } from "@mui/material";
 import {
   AccountCircle,
@@ -23,13 +25,24 @@ import {
   Logout,
   HourglassEmpty,
   Notifications,
+  Help,
+  Support,
+  KeyboardArrowDown,
+  Facebook,
+  Twitter,
+  LinkedIn,
+  Email,
+  LocationOn,
+  Phone,
 } from "@mui/icons-material";
 import { toast } from "react-toastify";
+import { colors } from "../theme/colors";
+import Logoweb from "../assets/eduhub-02.png";
 
 const PendingLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const userProfile = useSelector((state: any) => state.user);
+  const userProfile = useSelector((state: any) => state.userProfile);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
@@ -69,159 +82,607 @@ const PendingLayout = () => {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      {/* Header */}
-      <AppBar position="static" sx={{ bgcolor: "#f57c00" }}>
-        <Container maxWidth="xl">
-          <Toolbar disableGutters>
-            {/* Logo */}
-            <HourglassEmpty
-              sx={{ display: { xs: "none", md: "flex" }, mr: 1 }}
-            />
-            <Typography
-              variant="h6"
-              noWrap
-              component="div"
+      {/* Header - HomeLayout Style */}
+      <AppBar
+        position="static"
+        elevation={0}
+        sx={{
+          background: colors.background.gradient.primary,
+          borderBottom: `1px solid ${colors.border.light}`,
+          backdropFilter: "blur(20px)",
+          alignItems: "center",
+        }}
+      >
+        <Toolbar
+          disableGutters
+          sx={{
+            alignItems: "center",
+            minHeight: { xs: 64, md: 80 },
+            py: 1,
+            px: 3,
+            justifyContent: "space-between",
+            width: "80%",
+          }}
+        >
+          {/* Logo Section - HomeLayout Style */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              cursor: "pointer",
+              transition: "transform 0.3s ease",
+              "&:hover": {
+                transform: "scale(1.05)",
+              },
+            }}
+            onClick={() => navigate("/")}
+          >
+            <Box
               sx={{
+                width: 48,
+                height: 48,
+                borderRadius: 3,
+                background: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.indigo})`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 mr: 2,
-                display: { xs: "flex", md: "flex" },
-                fontFamily: "monospace",
-                fontWeight: 700,
-                letterSpacing: ".3rem",
-                color: "inherit",
-                textDecoration: "none",
-                flexGrow: 1,
+                boxShadow: "0 8px 25px rgba(6, 182, 212, 0.3)",
               }}
             >
-              EduHubVN
-            </Typography>
+              <img
+                src={Logoweb}
+                alt="EduHubVN Logo"
+                style={{
+                  height: 28,
+                  filter: "brightness(0) invert(1)",
+                }}
+              />
+            </Box>
+            <Box>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 800,
+                  color: "white",
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1,
+                }}
+              >
+                EduHubVN
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  fontFamily: "'Inter', sans-serif",
+                  color: "rgba(255,255,255,0.8)",
+                  fontSize: "0.7rem",
+                  fontWeight: 500,
+                  letterSpacing: "1px",
+                }}
+              >
+                EDUCATION PLATFORM
+              </Typography>
+            </Box>
+          </Box>
 
-            {/* Status Badge */}
-            <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
+          {/* Right Section */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {/* Status Badge with Enhanced Styling */}
+            <Paper
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                px: 3,
+                py: 1.5,
+                backgroundColor: "rgba(255, 152, 0, 0.2)",
+                backdropFilter: "blur(20px)",
+                border: "1px solid rgba(255, 193, 7, 0.3)",
+                borderRadius: 3,
+                animation: "pulse 2s infinite",
+                "@keyframes pulse": {
+                  "0%, 100%": { opacity: 1 },
+                  "50%": { opacity: 0.8 },
+                },
+              }}
+            >
+              <HourglassEmpty
+                sx={{
+                  color: "#fff3cd",
+                  fontSize: 20,
+                  animation: "rotate 2s linear infinite",
+                  "@keyframes rotate": {
+                    "0%": { transform: "rotate(0deg)" },
+                    "100%": { transform: "rotate(180deg)" },
+                  },
+                }}
+              />
               <Typography
                 variant="body2"
                 sx={{
-                  backgroundColor: "rgba(255, 255, 255, 0.2)",
-                  px: 2,
-                  py: 0.5,
-                  borderRadius: 1,
-                  fontWeight: 500,
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 600,
+                  color: "white",
                 }}
               >
-                Tài khoản đang chờ duyệt
+                Đang chờ phê duyệt
               </Typography>
-            </Box>
+            </Paper>
 
             {/* Notifications */}
-            <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
-              <IconButton color="inherit">
-                <Notifications />
-              </IconButton>
+            <IconButton
+              sx={{
+                color: "white",
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.1)",
+                },
+              }}
+            >
+              <Notifications />
+            </IconButton>
+
+            {/* User Profile - HomeLayout Style */}
+            <Paper
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                px: 2,
+                py: 1,
+                backgroundColor: "rgba(255,255,255,0.1)",
+                backdropFilter: "blur(20px)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: 3,
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  transform: "translateY(-1px)",
+                },
+              }}
+              onClick={handleMenuOpen}
+            >
+              <Avatar
+                alt={userProfile?.lecturer?.fullName || "User"}
+                src={userProfile?.avatarUrl}
+                sx={{
+                  width: 36,
+                  height: 36,
+                  border: "2px solid rgba(255,255,255,0.3)",
+                }}
+              >
+                {userProfile?.lecturer?.fullName?.charAt(0)}
+              </Avatar>
+              <Box sx={{ display: { xs: "none", sm: "block" } }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontFamily: "'Inter', sans-serif",
+                    color: "white",
+                    fontWeight: 600,
+                    lineHeight: 1,
+                  }}
+                >
+                  {userProfile?.lecturer?.fullName || "User"}
+                </Typography>
+                <Chip
+                  label="Chờ duyệt"
+                  size="small"
+                  sx={{
+                    height: 18,
+                    fontSize: "0.7rem",
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 500,
+                    backgroundColor: colors.warning[500],
+                    color: "white",
+                    mt: 0.5,
+                  }}
+                />
+              </Box>
+              <KeyboardArrowDown sx={{ color: "rgba(255,255,255,0.8)" }} />
+            </Paper>
+          </Box>
+
+          {/* Enhanced User Menu */}
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+            PaperProps={{
+              sx: {
+                mt: 1,
+                minWidth: 280,
+                borderRadius: 3,
+                boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+                border: `1px solid ${colors.border.light}`,
+                "& .MuiMenuItem-root": {
+                  fontFamily: "'Inter', sans-serif",
+                  borderRadius: 2,
+                  mx: 1,
+                  my: 0.5,
+                  "&:hover": {
+                    backgroundColor: colors.primary[50],
+                  },
+                },
+              },
+            }}
+          >
+            {/* User Info Header */}
+            <Box
+              sx={{ p: 3, borderBottom: `1px solid ${colors.border.light}` }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Avatar
+                  src={userProfile?.avatarUrl}
+                  sx={{ width: 50, height: 50 }}
+                >
+                  {userProfile?.lecturer?.fullName?.charAt(0)}
+                </Avatar>
+                <Box>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 600,
+                      color: colors.text.primary,
+                    }}
+                  >
+                    {userProfile?.lecturer?.fullName}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      color: colors.text.tertiary,
+                    }}
+                  >
+                    {userProfile?.email}
+                  </Typography>
+                  <Chip
+                    label="Đang chờ phê duyệt"
+                    size="small"
+                    sx={{
+                      mt: 1,
+                      backgroundColor: colors.warning[500],
+                      color: "white",
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 500,
+                    }}
+                  />
+                </Box>
+              </Box>
             </Box>
 
-            {/* User Menu */}
-            <Box sx={{ flexGrow: 0 }}>
-              <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
-                <Avatar
-                  alt={userProfile?.fullName || "User"}
-                  src="/static/images/avatar/2.jpg"
-                />
-              </IconButton>
-              <Menu
-                sx={{ mt: "45px" }}
-                id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-              >
-                <MenuItem onClick={handleProfile}>
-                  <AccountCircle sx={{ mr: 1 }} />
-                  <Typography textAlign="center">Hồ sơ</Typography>
-                </MenuItem>
-                <MenuItem onClick={handleMenuClose}>
-                  <Settings sx={{ mr: 1 }} />
-                  <Typography textAlign="center">Cài đặt</Typography>
-                </MenuItem>
-                <Divider />
-                <MenuItem onClick={handleLogout}>
-                  <Logout sx={{ mr: 1 }} />
-                  <Typography textAlign="center">Đăng xuất</Typography>
-                </MenuItem>
-              </Menu>
-            </Box>
-          </Toolbar>
-        </Container>
+            <MenuItem onClick={handleProfile}>
+              <AccountCircle sx={{ mr: 2, color: colors.primary[600] }} />
+              <Typography>Hồ sơ cá nhân</Typography>
+            </MenuItem>
+
+            <MenuItem onClick={handleMenuClose}>
+              <Settings sx={{ mr: 2, color: colors.neutral[600] }} />
+              <Typography>Cài đặt tài khoản</Typography>
+            </MenuItem>
+
+            <MenuItem onClick={handleMenuClose}>
+              <Help sx={{ mr: 2, color: colors.neutral[600] }} />
+              <Typography>Hướng dẫn đăng ký</Typography>
+            </MenuItem>
+
+            <MenuItem onClick={handleMenuClose}>
+              <Support sx={{ mr: 2, color: colors.neutral[600] }} />
+              <Typography>Hỗ trợ kỹ thuật</Typography>
+            </MenuItem>
+
+            <Divider sx={{ my: 1 }} />
+
+            <MenuItem
+              onClick={handleLogout}
+              sx={{
+                color: colors.error[600],
+                "&:hover": {
+                  backgroundColor: colors.error[50],
+                },
+              }}
+            >
+              <Logout sx={{ mr: 2 }} />
+              <Typography>Đăng xuất</Typography>
+            </MenuItem>
+          </Menu>
+        </Toolbar>
       </AppBar>
 
       {/* Main Content */}
-      <Box component="main" sx={{ flexGrow: 1, bgcolor: "#fff3e0", py: 3 }}>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          background: `
+            linear-gradient(135deg, ${colors.background.secondary} 0%, ${alpha(
+              colors.warning[50],
+              0.3,
+            )} 100%),
+            url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${colors.warning[50].slice(
+              1,
+            )}' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+          `,
+          py: 4,
+          position: "relative",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `
+              radial-gradient(circle at 20% 50%, ${alpha(colors.warning[50], 0.1)} 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, ${alpha(colors.primary[100], 0.1)} 0%, transparent 50%)
+            `,
+            zIndex: -1,
+          },
+        }}
+      >
         <Container maxWidth="xl">
           <Outlet />
         </Container>
       </Box>
 
-      {/* Footer */}
+      {/* Footer - GuestLayout Style */}
       <Box
         component="footer"
         sx={{
-          py: 4,
-          px: 2,
-          mt: "auto",
-          backgroundColor: "#f57c00",
+          background: "linear-gradient(135deg, #134e4a 0%, #0f3b36 100%)",
           color: "white",
+          pt: 6,
+          pb: 3,
         }}
       >
-        <Container maxWidth="xl">
+        <Container maxWidth="lg">
           <Box
             sx={{
               display: "flex",
+              flexWrap: "wrap",
+              gap: 4,
               flexDirection: { xs: "column", md: "row" },
-              justifyContent: "space-between",
-              alignItems: { xs: "center", md: "center" },
-              gap: { xs: 2, md: 0 },
             }}
           >
-            <Box sx={{ textAlign: { xs: "center", md: "left" } }}>
-              <Typography variant="h6" gutterBottom>
-                EduHub - Đang chờ duyệt
+            {/* Logo và mô tả */}
+            <Box
+              sx={{ flex: { xs: "1 1 100%", md: "1 1 300px" }, minWidth: 220 }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <img
+                  src={Logoweb}
+                  alt="EduHubVN Logo"
+                  style={{ height: 32, marginRight: 12 }}
+                />
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 700,
+                    color: "#14b8a6",
+                    fontFamily: "'Inter', sans-serif",
+                  }}
+                >
+                  EduHubVN
+                </Typography>
+              </Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 600,
+                  mb: 2,
+                  color: colors.warning[300],
+                }}
+              >
+                Tài khoản đang chờ phê duyệt
               </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                Tài khoản của bạn đang được xem xét
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#a0aec0",
+                  lineHeight: 1.6,
+                  mb: 3,
+                  fontSize: { xs: "0.85rem", md: "1rem" },
+                }}
+              >
+                Hồ sơ của bạn đang được xem xét bởi đội ngũ quản trị viên. Chúng
+                tôi sẽ thông báo kết quả trong thời gian sớm nhất.
               </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                © {new Date().getFullYear()} EduHub Vietnam. Vui lòng chờ quản
-                trị viên duyệt tài khoản của bạn.
-              </Typography>
+              <Box sx={{ display: "flex", gap: 1 }}>
+                {[Facebook, Twitter, LinkedIn, Email].map((Icon, index) => (
+                  <IconButton
+                    key={index}
+                    sx={{
+                      color: "#14b8a6",
+                      bgcolor: "rgba(20, 184, 166, 0.1)",
+                      "&:hover": {
+                        bgcolor: "#14b8a6",
+                        color: "white",
+                        transform: "translateY(-2px)",
+                      },
+                      transition: "all 0.3s ease",
+                    }}
+                  >
+                    <Icon />
+                  </IconButton>
+                ))}
+              </Box>
             </Box>
 
+            {/* Hỗ trợ */}
             <Box
-              sx={{
-                display: "flex",
-                flexDirection: { xs: "column", md: "row" },
-                gap: { xs: 1, md: 2 },
-                alignItems: "center",
-              }}
+              sx={{ flex: { xs: "1 1 100%", sm: "1 1 150px" }, minWidth: 150 }}
             >
-              <Button color="inherit" size="small">
-                Hướng dẫn đăng ký
-              </Button>
-              <Button color="inherit" size="small">
-                Hỗ trợ kỹ thuật
-              </Button>
-              <Button color="inherit" size="small">
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: "#14b8a6",
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                Hỗ trợ
+              </Typography>
+              {[
+                "Hướng dẫn đăng ký",
+                "Câu hỏi thường gặp",
+                "Hỗ trợ kỹ thuật",
+                "Chính sách bảo mật",
+                "Điều khoản sử dụng",
+              ].map((item) => (
+                <Link
+                  key={item}
+                  to="#"
+                  
+                  style={{
+                    display: "block",
+                    color: "#a0aec0",
+                    textDecoration: "none",
+                    fontSize: "0.875rem",
+                    transition: "color 0.3s ease",
+                  }}
+                >
+                  {item}
+                </Link>
+              ))}
+            </Box>
+
+            {/* Dịch vụ */}
+            <Box
+              sx={{ flex: { xs: "1 1 100%", sm: "1 1 200px" }, minWidth: 180 }}
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: "#14b8a6",
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                Dịch vụ
+              </Typography>
+              {[
+                "Đào tạo trực tuyến",
+                "Chứng chỉ nghề nghiệp",
+                "Tư vấn học tập",
+                "Hỗ trợ kỹ thuật",
+              ].map((item) => (
+                <Link
+                  key={item}
+                  to="#"
+                  style={{
+                    display: "block",
+                    color: "#a0aec0",
+                    textDecoration: "none",
+                    fontSize: "0.875rem",
+                    transition: "color 0.3s ease",
+                  }}
+                >
+                  {item}
+                </Link>
+              ))}
+            </Box>
+
+            {/* Thông tin liên hệ */}
+            <Box
+              sx={{ flex: { xs: "1 1 100%", md: "1 1 250px" }, minWidth: 200 }}
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: "#14b8a6",
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
                 Liên hệ
-              </Button>
-              <Button color="inherit" size="small">
-                Câu hỏi thường gặp
-              </Button>
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  mb: 2,
+                  color: "#a0aec0",
+                  fontSize: { xs: "0.9rem", md: "1rem" },
+                }}
+              >
+                <LocationOn sx={{ mr: 2, color: "#14b8a6" }} />
+                <Typography variant="body2">
+                  123 Đường ABC, Quận 1, TP.HCM
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  mb: 2,
+                  color: "#a0aec0",
+                  fontSize: { xs: "0.9rem", md: "1rem" },
+                }}
+              >
+                <Phone sx={{ mr: 2, color: "#14b8a6" }} />
+                <Typography variant="body2">(+84) 123 456 789</Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  mb: 2,
+                  color: "#a0aec0",
+                  fontSize: { xs: "0.9rem", md: "1rem" },
+                }}
+              >
+                <Email sx={{ mr: 2, color: "#14b8a6" }} />
+                <Typography variant="body2">support@eduhubvn.com</Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Copyright */}
+          <Box
+            sx={{
+              borderTop: "1px solid rgba(255,255,255,0.1)",
+              mt: 4,
+              pt: 3,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexDirection: { xs: "column", md: "row" },
+              gap: 2,
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{ color: "#a0aec0", fontSize: { xs: "0.85rem", md: "1rem" } }}
+            >
+              © {new Date().getFullYear()} EduHubVN. All rights reserved.
+            </Typography>
+            <Box sx={{ display: "flex", gap: 3 }}>
+              {[
+                "Chính sách bảo mật",
+                "Điều khoản sử dụng",
+                "Cookie Policy",
+              ].map((item) => (
+                <Link
+                  key={item}
+                  to="#"
+                  style={{
+                    color: "#a0aec0",
+                    textDecoration: "none",
+                    fontSize: "0.875rem",
+                    transition: "color 0.3s ease",
+                  }}
+                >
+                  {item}
+                </Link>
+              ))}
             </Box>
           </Box>
         </Container>

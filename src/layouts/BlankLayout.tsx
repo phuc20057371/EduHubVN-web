@@ -12,6 +12,7 @@ const BlankLayout = () => {
         if (!userProfile || userProfile.id === null) {
           const response = await API.user.getUserProfile();
           dispatch(setUserProfile(response.data.data));
+          // navigateToRole(response.data.data, navigate);
         }
       } catch (error) {
         console.error("Error fetching user data:", error);

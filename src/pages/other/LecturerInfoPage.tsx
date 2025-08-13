@@ -4,7 +4,10 @@ import { API } from "../../utils/Fetch";
 import { Box, Paper, CircularProgress, Alert } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { setLecturerProfile } from "../../redux/slice/LecturerProfileSlice";
-import { getVietnameseCourseType, getVietnameseScale } from "../../utils/ChangeText";
+import {
+  getVietnameseCourseType,
+  getVietnameseScale,
+} from "../../utils/ChangeText";
 
 const LecturerInfoPage = () => {
   const dispatch = useDispatch();
@@ -214,29 +217,34 @@ const LecturerInfoPage = () => {
                       new Date(b.issueDate).getTime(),
                   )
                   .map((cert: any) => (
-                    <div key={cert.id} className="mb-4 text-sm">
-                      <div className="flex gap-2">
-                        <span className="min-w-[60px] font-medium">
-                          {new Date(cert.issueDate).getFullYear()}
-                        </span>
+                    <div key={cert.id} className="mb-4 flex text-sm">
+                      {/* Cột năm có độ rộng cố định */}
+                      <span className="w-[120px] font-medium">
+                        {new Date(cert.issueDate).getFullYear()}
+                        {cert.expiryDate &&
+                          ` – ${new Date(cert.expiryDate).getFullYear()}`}
+                      </span>
+
+                      {/* Cột nội dung */}
+                      <div>
                         <div>
                           <span className="font-semibold">{cert.name}:</span>{" "}
                           {cert.level && `${cert.level} – `}Cấp bởi{" "}
                           {cert.issuedBy}
                         </div>
+                        {cert.certificateUrl && (
+                          <div>
+                            <a
+                              href={cert.certificateUrl}
+                              className="text-blue-600 underline"
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Bấm vào đây để xem
+                            </a>
+                          </div>
+                        )}
                       </div>
-                      {cert.certificateUrl && (
-                        <div className="ml-[68px]">
-                          <a
-                            href={cert.certificateUrl}
-                            className="text-blue-600 underline"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Bấm vào đây để xem
-                          </a>
-                        </div>
-                      )}
                     </div>
                   ))}
             </section>

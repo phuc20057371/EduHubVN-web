@@ -30,9 +30,11 @@ import type { Lecturer } from "../types/Lecturer";
 import type { Certificate } from "../types/Certificate";
 import { toast } from "react-toastify";
 import { API } from "../utils/Fetch";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setLecturerPendingCreate } from "../redux/slice/LecturerPendingCreateSlice";
 import { setLecturers } from "../redux/slice/LecturerSlice";
+import CircularProgress from "@mui/material/CircularProgress";
+
 interface ConfirmDialogProps {
   open: boolean;
   title: string;
@@ -83,9 +85,6 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
 }) => {
   // State for admin notes and status
   const dispatch = useDispatch();
-  const lecturerPendingCreate = useSelector(
-    (state: any) => state.lecturerPendingCreate,
-  );
   const [lecturerStatus, setLecturerStatus] = useState<
     "PENDING" | "APPROVED" | "REJECTED"
   >("PENDING");
@@ -106,6 +105,7 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
     type: "Degree" | "Certification" | "Lecturer";
     note?: string;
   } | null>(null);
+  const [loading, setLoading] = useState(false);
   // Load from localStorage on open
   // const domain = window.location.hostname;
   // const BASE_URL = `http://${domain}:8080`;
@@ -1533,123 +1533,199 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={handleDialogClose} color="primary">
+        <Button onClick={handleDialogClose} color="primary" disabled={loading}>
           Đóng
         </Button>
-        <Button
-          color="success"
-          variant="contained"
-          onClick={async () => {
-            // Check for any pending status
-            const pendingDegrees = Object.entries(degreeStates).filter(
-              ([_, v]) => v.status === "PENDING",
-            );
-            const pendingCerts = Object.entries(certStates).filter(
-              ([_, v]) => v.status === "PENDING",
-            );
-            if (
-              lecturerStatus === "PENDING" ||
-              pendingDegrees.length > 0 ||
-              pendingCerts.length > 0
-            ) {
-              toast.error(
-                "Vui lòng duyệt hoặc từ chối tất cả các mục trước khi lưu!",
+        <Box sx={{ position: "relative", display: "inline-block" }}>
+          <Button
+            color="success"
+            variant="contained"
+            disabled={loading}
+            onClick={async () => {
+              setLoading(true);
+              // Check for any pending status
+              const pendingDegrees = Object.entries(degreeStates).filter(
+                ([_, v]) => v.status === "PENDING",
               );
-              return;
-            }
+              const pendingCerts = Object.entries(certStates).filter(
+                ([_, v]) => v.status === "PENDING",
+              );
+              if (
+                lecturerStatus === "PENDING" ||
+                pendingDegrees.length > 0 ||
+                pendingCerts.length > 0
+              ) {
+                toast.error(
+                  "Vui lòng duyệt hoặc từ chối tất cả các mục trước khi lưu!",
+                );
+                setLoading(false);
+                return;
+              }
 
-            try {
-              // Save lecturer status
-              if (lecturerStatus === "REJECTED") {
-                try {
-                  const response = await API.admin.rejectLecturer({
-                    id: lecturer.id,
-                    adminNote: lecturerNote,
-                  });
-                  if (response?.data?.success) {
-                    localStorage.removeItem(`Lecturer${lecturer.id}`);
-                    // Remove lecturer from redux state (must pass new array, not a function)
-                    dispatch(
-                      setLecturerPendingCreate(
-                        (Array.isArray(lecturerPendingCreate)
-                          ? lecturerPendingCreate
-                          : []
-                        ).filter((l: any) => l.id !== lecturer.id),
-                      ),
-                    );
-                  } else {
-                    toast.error("Từ chối giảng viên thất bại!");
+              try {
+                // Save lecturer status
+                let sendMailType: "APPROVED" | "REJECTED" | null = null;
+                let sendMailData: { to: string; subject: string; body: string } | null = null;
+
+                if (lecturerStatus === "REJECTED") {
+                  try {
+                    const response = await API.admin.rejectLecturer({
+                      id: lecturer.id,
+                      adminNote: lecturerNote,
+                    });
+                    if (response?.data?.success) {
+                      localStorage.removeItem(`Lecturer${lecturer.id}`);
+                      const response = await API.admin.getLecturerPendingCreate();
+                      dispatch(setLecturerPendingCreate(response.data.data));
+                      // Chuẩn bị gửi mail sau
+                      if (lecturer.email) {
+                        sendMailType = "REJECTED";
+                        sendMailData = {
+                          to: lecturer.email,
+                          subject: "Hồ sơ Giảng viên bị từ chối",
+                          body: `
+                            <div style="font-family: Arial, sans-serif; background: #f6f8fa; padding: 32px;">
+                              <div style="max-width: 600px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 32px;">
+                                <h2 style="color: #e53935; margin-bottom: 16px;">Hồ sơ của bạn đã bị từ chối</h2>
+                                <p style="font-size: 16px; color: #333;">
+                                  Xin chào <strong>${lecturer.fullName || ""}</strong>,<br/><br/>
+                                  Rất tiếc! Hồ sơ đăng ký Giảng viên của bạn trên hệ thống <strong>EduHubVN</strong> đã bị từ chối.<br/>
+                                  <b>Lý do từ chối:</b><br/>
+                                  <span style="color: #e53935;">${lecturerNote || "Không có lý do cụ thể."}</span><br/><br/>
+                                  Hãy cập nhật lại thông tin <br/>
+                                  Nếu bạn cần hỗ trợ, vui lòng liên hệ qua email: <a href="mailto:support@eduhubvn.com">support@eduhubvn.com</a>.<br/><br/>
+                                  Trân trọng,<br/>
+                                  <span style="color: #2563eb; font-weight: bold;">EduHubVN Team</span>
+                                </p>
+                                <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;" />
+                                <div style="font-size: 13px; color: #888;">
+                                  Đây là email tự động, vui lòng không trả lời trực tiếp email này.
+                                </div>
+                              </div>
+                            </div>
+                          `,
+                        };
+                      }
+                    } else {
+                      toast.error("Từ chối giảng viên thất bại!");
+                    }
+                  } catch (err) {
+                    toast.error("Lỗi khi gọi API từ chối giảng viên!");
+                    setLoading(false);
+                    return;
                   }
-                } catch (err) {
-                  toast.error("Lỗi khi gọi API từ chối giảng viên!");
-                  return;
-                }
-              } else if (lecturerStatus === "APPROVED") {
-                try {
-                  const response = await API.admin.approveLecturer({
-                    id: lecturer.id,
-                  });
-                  if (response?.data?.success) {
-                    localStorage.removeItem(`Lecturer${lecturer.id}`);
-                    // Remove lecturer from redux state (must pass new array, not a function)
-                    dispatch(
-                      setLecturerPendingCreate(
-                        (Array.isArray(lecturerPendingCreate)
-                          ? lecturerPendingCreate
-                          : []
-                        ).filter((l: any) => l.id !== lecturer.id),
-                      ),
-                    );
-                  } else {
-                    toast.error("Duyệt giảng viên thất bại!");
+                } else if (lecturerStatus === "APPROVED") {
+                  try {
+                    const response = await API.admin.approveLecturer({
+                      id: lecturer.id,
+                    });
+                    if (response?.data?.success) {
+                      localStorage.removeItem(`Lecturer${lecturer.id}`);
+                      const response = await API.admin.getLecturerPendingCreate();
+                      dispatch(setLecturerPendingCreate(response.data.data));
+                      if (lecturer.email) {
+                        sendMailType = "APPROVED";
+                        sendMailData = {
+                          to: lecturer.email,
+                          subject: "Hồ sơ Giảng viên đã được duyệt",
+                          body: `
+                            <div style="font-family: Arial, sans-serif; background: #f6f8fa; padding: 32px;">
+                              <div style="max-width: 600px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 32px;">
+                                <h2 style="color: #2563eb; margin-bottom: 16px;">Hồ sơ của bạn đã được duyệt!</h2>
+                                <p style="font-size: 16px; color: #333;">
+                                  Xin chào <strong>${lecturer.fullName || ""}</strong>,<br/><br/>
+                                  Chúc mừng! Hồ sơ đăng ký Giảng viên của bạn trên hệ thống <strong>EduHubVN</strong> đã được duyệt.<br/>
+                                  Bạn có thể truy cập hệ thống và sử dụng các chức năng dành cho Giảng viên.<br/><br/>
+                                  <b>Thông tin tài khoản:</b><br/>
+                                  - Họ tên: ${lecturer.fullName || ""}<br/>
+                                  - Email: ${lecturer.email}<br/>
+                                  <br/>
+                                  Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ qua email: <a href="mailto:support@eduhubvn.com">support@eduhubvn.com</a>.<br/><br/>
+                                  Trân trọng,<br/>
+                                  <span style="color: #2563eb; font-weight: bold;">EduHubVN Team</span>
+                                </p>
+                                <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;" />
+                                <div style="font-size: 13px; color: #888;">
+                                  Đây là email tự động, vui lòng không trả lời trực tiếp email này.
+                                </div>
+                              </div>
+                            </div>
+                          `,
+                        };
+                      }
+                    } else {
+                      toast.error("Duyệt giảng viên thất bại!");
+                    }
+                  } catch (err) {
+                    toast.error("Lỗi khi gọi API duyệt giảng viên!");
+                    setLoading(false);
+                    return;
                   }
-                } catch (err) {
-                  toast.error("Lỗi khi gọi API duyệt giảng viên!");
-                  return;
                 }
-              }
 
-              // Save Degrees
-              for (const [id, v] of Object.entries(degreeStates)) {
-                if (v.status === "APPROVED") {
-                  await API.admin.approveDegree({ id: id }); // Use string ID
-                } else if (v.status === "REJECTED") {
-                  await API.admin.rejectDegree({
-                    id: id, // Use string ID
-                    adminNote: v.note,
-                  });
+                // Save Degrees
+                for (const [id, v] of Object.entries(degreeStates)) {
+                  if (v.status === "APPROVED") {
+                    await API.admin.approveDegree({ id: id }); // Use string ID
+                  } else if (v.status === "REJECTED") {
+                    await API.admin.rejectDegree({
+                      id: id, // Use string ID
+                      adminNote: v.note,
+                    });
+                  }
                 }
-              }
 
-              // Save Certifications
-              for (const [id, v] of Object.entries(certStates)) {
-                if (v.status === "APPROVED") {
-                  await API.admin.approveCertification({ id: id }); // Use string ID
-                } else if (v.status === "REJECTED") {
-                  await API.admin.rejectCertification({
-                    id: id, // Use string ID
-                    adminNote: v.note,
-                  });
+                // Save Certifications
+                for (const [id, v] of Object.entries(certStates)) {
+                  if (v.status === "APPROVED") {
+                    await API.admin.approveCertification({ id: id }); // Use string ID
+                  } else if (v.status === "REJECTED") {
+                    await API.admin.rejectCertification({
+                      id: id, // Use string ID
+                      adminNote: v.note,
+                    });
+                  }
                 }
+                toast.success("Lưu trạng thái thành công!");
+
+                localStorage.removeItem(`Lecturer${lecturer.id}`);
+                localStorage.removeItem(`Degrees${lecturer.id}`);
+                localStorage.removeItem(`Certification${lecturer.id}`);
+
+                const res = await API.admin.getAllLecturers();
+                dispatch(setLecturers(res.data.data));
+
+                handleDialogClose();
+
+                // Gửi email sau khi xử lý xong, không chặn giao diện
+                if (sendMailType && sendMailData) {
+                  setTimeout(() => {
+                    API.other.sendEmail(sendMailData);
+                  }, 0);
+                }
+              } catch (error) {
+                console.error("Error saving lecturer details:", error);
+                toast.error("Lỗi khi lưu trạng thái. Vui lòng thử lại sau.");
               }
-              toast.success("Lưu trạng thái thành công!");
-
-              localStorage.removeItem(`Lecturer${lecturer.id}`);
-              localStorage.removeItem(`Degrees${lecturer.id}`);
-              localStorage.removeItem(`Certification${lecturer.id}`);
-
-              const res = await API.admin.getAllLecturers();
-              dispatch(setLecturers(res.data.data));
-
-              handleDialogClose();
-            } catch (error) {
-              console.error("Error saving lecturer details:", error);
-              toast.error("Lỗi khi lưu trạng thái. Vui lòng thử lại sau.");
-            }
-          }}
-        >
-          Lưu
-        </Button>
+              setLoading(false);
+            }}
+          >
+            Lưu
+          </Button>
+          {loading && (
+            <CircularProgress
+              size={32}
+              sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                marginTop: "-16px",
+                marginLeft: "-16px",
+                zIndex: 1,
+              }}
+            />
+          )}
+        </Box>
       </DialogActions>
 
       <ConfirmDialog

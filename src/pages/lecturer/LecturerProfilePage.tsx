@@ -1,37 +1,38 @@
+import {
+  Assignment,
+  Business,
+  Cake,
+  CalendarToday,
+  Edit,
+  Email,
+  Grade,
+  Link as LinkIcon,
+  LocationOn,
+  Person,
+  Phone,
+  School,
+  Science,
+  Timeline,
+  WorkHistory,
+} from "@mui/icons-material";
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Divider,
+  Typography,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setLecturerProfile } from "../../redux/slice/LecturerProfileSlice";
+import { colors } from "../../theme/colors";
 import { API } from "../../utils/Fetch";
-import {
-  Box,
-  Container,
-  Typography,
-  Avatar,
-  Chip,
-  Card,
-  CardContent,
-  Divider,
-  Button,
-  Alert,
-} from "@mui/material";
-import {
-  Person,
-  School,
-  WorkHistory,
-  Science,
-  Assignment,
-  Edit,
-  Phone,
-  Email,
-  LocationOn,
-  Cake,
-  CalendarToday,
-  Grade,
-  Business,
-  Link as LinkIcon,
-  Timeline,
-} from "@mui/icons-material";
 
 interface StatCardProps {
   icon: React.ReactNode;
@@ -77,6 +78,8 @@ const LecturerProfilePage = () => {
 
     fetchLecturerProfile();
   }, [dispatch]);
+
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -458,11 +461,17 @@ const LecturerProfilePage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: colors.background.secondary }}
+    >
       <Container maxWidth="xl" className="py-8">
         {/* Header Section */}
         <Card className="mb-8 overflow-hidden">
-          <div className="h-32 bg-gradient-to-r from-blue-600 to-purple-700"></div>
+          <div
+            className="h-32"
+            style={{ background: colors.background.gradient.primary }}
+          ></div>
           <CardContent className="relative -mt-16 p-8">
             <div className="flex flex-col items-start gap-6 lg:flex-row">
               <div className="relative">
@@ -537,15 +546,47 @@ const LecturerProfilePage = () => {
                       </div>
                     </div>
                   </div>
-
-                  <Button
-                    variant="contained"
-                    startIcon={<Edit />}
-                    onClick={() => navigate("/lecturer/edit-profile")}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    Chỉnh sửa hồ sơ
-                  </Button>
+                  <Box gap={2} className="flex flex-col lg:flex-row">
+                    <Button
+                      variant="contained"
+                      startIcon={<Edit />}
+                      onClick={() => navigate("/lecturer/edit-profile")}
+                      sx={{
+                        fontFamily: "'Inter', sans-serif",
+                        background: colors.background.gradient.secondary,
+                        color: "white",
+                        fontWeight: 600,
+                        textTransform: "none",
+                        borderRadius: 3,
+                        "&:hover": {
+                          background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
+                          transform: "translateY(-1px)",
+                        },
+                      }}
+                    >
+                      Chỉnh sửa hồ sơ
+                    </Button>
+                    <Button
+                      variant="contained"
+                      onClick={() =>
+                        window.open(`/lecturer-info/${lecturer.id}`, "_blank")
+                      }
+                      sx={{
+                        fontFamily: "'Inter', sans-serif",
+                        background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[600]} 100%)`,
+                        color: "white",
+                        fontWeight: 600,
+                        textTransform: "none",
+                        borderRadius: 3,
+                        "&:hover": {
+                          background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
+                          transform: "translateY(-1px)",
+                        },
+                      }}
+                    >
+                      CV của tôi
+                    </Button>
+                  </Box>
                 </div>
               </div>
             </div>
@@ -557,8 +598,18 @@ const LecturerProfilePage = () => {
           <div className="lg:w-80">
             <Card className="sticky top-8">
               <CardContent className="p-0">
-                <div className="border-b p-6">
-                  <Typography variant="h6" className="font-semibold">
+                <div
+                  className="border-b p-6"
+                  style={{ backgroundColor: colors.background.tertiary }}
+                >
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 600,
+                      color: colors.text.primary,
+                    }}
+                  >
                     Menu
                   </Typography>
                 </div>
@@ -567,25 +618,47 @@ const LecturerProfilePage = () => {
                     <button
                       key={item.id}
                       onClick={() => setActiveSection(item.id)}
-                      className={`mb-2 flex w-full items-center justify-between rounded-lg p-4 transition-colors ${
-                        activeSection === item.id
-                          ? "border border-blue-200 bg-blue-100 text-blue-700"
-                          : "text-gray-700 hover:bg-gray-50"
-                      }`}
+                      className="mb-2 flex w-full items-center justify-between rounded-lg p-4 transition-colors"
+                      style={{
+                        backgroundColor:
+                          activeSection === item.id
+                            ? colors.primary[50]
+                            : "transparent",
+                        color:
+                          activeSection === item.id
+                            ? colors.primary[700]
+                            : colors.text.tertiary,
+                        border:
+                          activeSection === item.id
+                            ? `1px solid ${colors.primary[200]}`
+                            : "1px solid transparent",
+                      }}
                     >
                       <div className="flex items-center gap-3">
                         {item.icon}
-                        <span className="font-medium">{item.label}</span>
+                        <span
+                          className="font-medium"
+                          style={{ fontFamily: "'Inter', sans-serif" }}
+                        >
+                          {item.label}
+                        </span>
                       </div>
                       {item.count !== undefined && (
                         <Chip
                           label={item.count}
                           size="small"
-                          className={
-                            activeSection === item.id
-                              ? "bg-blue-200"
-                              : "bg-gray-200"
-                          }
+                          sx={{
+                            backgroundColor:
+                              activeSection === item.id
+                                ? colors.primary[200]
+                                : colors.neutral[200],
+                            color:
+                              activeSection === item.id
+                                ? colors.primary[700]
+                                : colors.neutral[600],
+                            fontFamily: "'Inter', sans-serif",
+                            fontWeight: 600,
+                          }}
                         />
                       )}
                     </button>

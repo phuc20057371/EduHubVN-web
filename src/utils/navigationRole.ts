@@ -1,8 +1,6 @@
-
-
-export function navigateToRole( user: any, navigate: Function) {
+export function navigateToRole(user: any, navigate: Function) {
   console.log("Navigating to role:", user);
-  
+
   if (user.role === "ADMIN") {
     navigate("/admin");
     return;
@@ -30,6 +28,9 @@ export function navigateToRole( user: any, navigate: Function) {
     }
     // navigate("/guest");
     // return;
-
+  }
+  if (!user || !user.role) {
+    navigate("/guest");
+    return;
   }
 }

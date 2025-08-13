@@ -21,6 +21,8 @@ import {
   Tooltip,
   Fade,
   Slide,
+  Box,
+  alpha,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import UploadDegreeModal from "../../components/UploadDegreeModal";
@@ -37,13 +39,9 @@ import {
   CheckCircle,
   Badge,
   Work,
-  LocationOn,
-  Phone,
-  CalendarToday,
   Edit,
   Description,
   AccountCircle,
-  Psychology,
   ArrowBack,
 } from "@mui/icons-material";
 import { toast } from "react-toastify";
@@ -53,6 +51,8 @@ import {
   majorAutoComplete,
 } from "../../utils/ValidateRegisterLecturer";
 import { validateLecturerInfo } from "../../utils/Validate";
+import { useSelector } from "react-redux";
+import { colors } from "../../theme/colors";
 
 const RegisterLecturer = () => {
   const steps = [
@@ -74,6 +74,7 @@ const RegisterLecturer = () => {
   ];
 
   const navigate = useNavigate();
+  const userProfile = useSelector((state: any) => state.userProfile);
 
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set<number>());
@@ -282,6 +283,36 @@ const RegisterLecturer = () => {
 
         localStorage.removeItem("registerLecturerForm");
         navigate("/pending-lecturer", { replace: true });
+        const res = await API.other.sendEmail({
+          to: userProfile.email,
+          subject: "Xác nhận đăng ký tài khoản Giảng Viên thành công",
+          body: `
+            <div style="font-family: Arial, sans-serif; background: #f6f8fa; padding: 32px;">
+              <div style="max-width: 600px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 32px;">
+                <h2 style="color: #2563eb; margin-bottom: 16px;">Chúc mừng bạn đã đăng ký thành công!</h2>
+                <p style="font-size: 16px; color: #333;">
+                  Xin chào <strong>${userProfile.fullName || ""}</strong>,<br/><br/>
+                  Bạn đã đăng ký tài khoản Giảng Viên trên hệ thống <strong>EduHubVN</strong> thành công.<br/>
+                  Hồ sơ của bạn đang được <span style="color: #f59e42; font-weight: bold;">chờ phê duyệt</span> bởi quản trị viên.<br/><br/>
+                  <b>Thông tin đăng ký:</b><br/>
+                  - Họ tên: ${lecturerData.fullName || ""}<br/>
+                  - Email: ${userProfile.email}<br/>
+                  <br/>
+                  Chúng tôi sẽ kiểm tra thông tin và cập nhật trạng thái hồ sơ của bạn trong thời gian sớm nhất.<br/>
+                  Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ qua email: <a href="mailto:support@eduhubvn.com">support@eduhubvn.com</a>.<br/><br/>
+                  Trân trọng,<br/>
+                  <span style="color: #2563eb; font-weight: bold;">EduHubVN Team</span>
+                </p>
+                <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;" />
+                <div style="font-size: 13px; color: #888;">
+                  Đây là email tự động, vui lòng không trả lời trực tiếp email này.
+                </div>
+              </div>
+            </div>
+          `,
+        });
+        console.log("✅ Email xác nhận đã gửi thành công:", res.data);
+
       } catch (error: any) {
         if (error.response?.data?.message?.includes("đã tồn tại")) {
           toast.error("Số CCCD/CMND đã được đăng ký trước đó.");
@@ -359,60 +390,216 @@ const RegisterLecturer = () => {
 
   const renderPersonalInfoStep = () => (
     <Fade in={activeStep === 0} timeout={500}>
-      <div className="mx-auto mt-8 w-full max-w-6xl px-4">
+      <Box sx={{ mx: "auto", mt: 4, maxWidth: "1200px", px: 2 }}>
         <Paper
-          elevation={8}
-          className="overflow-hidden rounded-3xl bg-gradient-to-br from-white via-blue-50 to-indigo-50"
+          elevation={0}
           sx={{
-            background:
-              "linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #e0f2fe 100%)",
-            backdropFilter: "blur(10px)",
+            borderRadius: 4,
+            background: colors.background.primary,
+            border: `1px solid ${colors.border.light}`,
+            overflow: "hidden",
+            position: "relative",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: `
+                radial-gradient(circle at 20% 80%, ${alpha(colors.primary[100], 0.4)} 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, ${alpha(colors.secondary[100], 0.4)} 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, ${alpha(colors.accent.lightBlue, 0.1)} 0%, transparent 50%)
+              `,
+              zIndex: 0,
+            },
           }}
         >
-          {/* Header Section */}
-          <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 px-8 py-12 text-white">
-            <div className="flex flex-col items-center text-center">
-              <Avatar
-                className="mb-6 shadow-2xl"
+          {/* Enhanced Header with Pattern */}
+          <Box
+            sx={{
+              background: `
+                linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[600]} 100%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+              `,
+              px: 6,
+              py: 8,
+              color: "white",
+              position: "relative",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: "linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%)",
+                zIndex: 1,
+              },
+              "&::after": {
+                content: '""',
+                position: "absolute",
+                top: "-50%",
+                right: "-10%",
+                width: "200px",
+                height: "200px",
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.05)",
+                zIndex: 0,
+              },
+            }}
+          >
+            <Box sx={{ textAlign: "center", position: "relative", zIndex: 2 }}>
+              <Box
                 sx={{
-                  width: 80,
-                  height: 80,
-                  bgcolor: "white",
-                  color: "#2563eb",
+                  position: "relative",
+                  display: "inline-block",
+                  mb: 3,
                 }}
               >
-                <Person sx={{ fontSize: 40 }} />
-              </Avatar>
-              <Typography variant="h3" className="mb-4 font-bold">
+                <Avatar
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    bgcolor: "rgba(255,255,255,0.2)",
+                    backdropFilter: "blur(20px)",
+                    border: "2px solid rgba(255,255,255,0.3)",
+                    mx: "auto",
+                    position: "relative",
+                    zIndex: 1,
+                  }}
+                >
+                  <Person sx={{ fontSize: 40 }} />
+                </Avatar>
+                {/* Floating particles */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: -10,
+                    right: -10,
+                    width: 20,
+                    height: 20,
+                    borderRadius: "50%",
+                    background: "rgba(255,255,255,0.3)",
+                    animation: "float 3s ease-in-out infinite",
+                    "@keyframes float": {
+                      "0%, 100%": { transform: "translateY(0px)" },
+                      "50%": { transform: "translateY(-10px)" },
+                    },
+                  }}
+                />
+                <Box
+                  sx={{
+                    position: "absolute",
+                    bottom: -5,
+                    left: -15,
+                    width: 15,
+                    height: 15,
+                    borderRadius: "50%",
+                    background: "rgba(255,255,255,0.2)",
+                    animation: "float 3s ease-in-out infinite 1s",
+                  }}
+                />
+              </Box>
+              
+              <Typography
+                variant="h3"
+                sx={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 700,
+                  mb: 2,
+                  textShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  background: "linear-gradient(45deg, #fff 30%, rgba(255,255,255,0.8) 100%)",
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
                 Thông tin cá nhân
               </Typography>
-              <Typography variant="h6" className="max-w-2xl opacity-90">
-                Vui lòng điền đầy đủ thông tin để hoàn tất quá trình đăng ký
-                giảng viên
+              <Typography
+                variant="h6"
+                sx={{
+                  fontFamily: "'Inter', sans-serif",
+                  opacity: 0.9,
+                  maxWidth: 600,
+                  mx: "auto",
+                  lineHeight: 1.6,
+                }}
+              >
+                Vui lòng điền đầy đủ thông tin để hoàn tất quá trình đăng ký giảng viên
               </Typography>
-            </div>
-          </div>
+            </Box>
+          </Box>
 
-          {/* Form Content */}
-          <div className="p-8 md:p-12">
+          {/* Form Content with Enhanced Background */}
+          <Box sx={{ p: 6, position: "relative", zIndex: 1 }}>
             {/* Basic Information Section */}
-            <div className="mb-12">
-              <div className="mb-8 flex items-center">
-                <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
-                  <AccountCircle className="text-2xl text-blue-600" />
-                </div>
-                <div>
-                  <Typography variant="h5" className="font-bold text-gray-800">
+            <Box sx={{ mb: 8 }}>
+              <Box 
+                sx={{ 
+                  display: "flex", 
+                  alignItems: "center", 
+                  mb: 4,
+                  position: "relative",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    left: -20,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    width: 4,
+                    height: 40,
+                    background: colors.background.gradient.primary,
+                    borderRadius: 2,
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 3,
+                    background: `
+                      linear-gradient(135deg, ${alpha(colors.primary[500], 0.1)} 0%, ${alpha(colors.primary[300], 0.05)} 100%),
+                      url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23${colors.primary[200].slice(1)}' fill-opacity='0.1'%3E%3Cpath d='M0 0h20v20H0V0zm10 18a8 8 0 100-16 8 8 0 000 16z'/%3E%3C/g%3E%3C/svg%3E")
+                    `,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mr: 3,
+                    border: `1px solid ${alpha(colors.primary[300], 0.3)}`,
+                    boxShadow: `0 4px 12px ${alpha(colors.primary[500], 0.1)}`,
+                  }}
+                >
+                  <AccountCircle sx={{ fontSize: 28, color: colors.primary[600] }} />
+                </Box>
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 700,
+                      color: colors.text.primary,
+                      mb: 0.5,
+                    }}
+                  >
                     Thông tin cơ bản
                   </Typography>
-                  <Typography variant="body2" className="text-gray-500">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: colors.text.tertiary,
+                      fontFamily: "'Inter', sans-serif",
+                    }}
+                  >
                     Thông tin định danh và liên hệ của bạn
                   </Typography>
-                </div>
-              </div>
+                </Box>
+              </Box>
 
-              <div className="space-y-8">
-                {/* Full Name */}
+              {/* Enhanced Form Fields */}
+              <Box sx={{ display: "grid", gap: 4 }}>
                 <TextField
                   fullWidth
                   label="Họ và tên"
@@ -420,28 +607,33 @@ const RegisterLecturer = () => {
                   onChange={(e) => setFullName(e.target.value)}
                   required
                   variant="outlined"
-                  InputProps={{
-                    startAdornment: <Badge className="mr-3 text-blue-500" />,
-                  }}
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: 3,
-                      backgroundColor: "rgba(255, 255, 255, 0.8)",
+                      background: `
+                        linear-gradient(135deg, ${colors.background.secondary} 0%, rgba(255,255,255,0.8) 100%),
+                        url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23${colors.primary[100].slice(1)}' fill-opacity='0.03'%3E%3Cpath d='M20 20c0-11.046-8.954-20-20-20v20h20z'/%3E%3C/g%3E%3C/svg%3E")
+                      `,
                       transition: "all 0.3s ease",
+                      border: `1px solid ${colors.border.light}`,
+                      position: "relative",
                       "&:hover": {
-                        backgroundColor: "rgba(255, 255, 255, 0.95)",
-                        boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                        background: colors.background.primary,
+                        borderColor: colors.primary[300],
+                        boxShadow: `0 4px 12px ${alpha(colors.primary[500], 0.15)}`,
+                        transform: "translateY(-2px)",
                       },
                       "&.Mui-focused": {
-                        backgroundColor: "white",
-                        boxShadow: "0 8px 25px rgba(37, 99, 235, 0.15)",
+                        background: colors.background.primary,
+                        borderColor: colors.primary[500],
+                        boxShadow: `0 4px 20px ${alpha(colors.primary[500], 0.2)}`,
+                        transform: "translateY(-2px)",
                       },
                     },
                   }}
                 />
 
-                {/* ID and Phone Row */}
-                <div className="flex flex-col gap-6 lg:flex-row">
+                <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 4 }}>
                   <TextField
                     fullWidth
                     label="Số CCCD/CMND"
@@ -449,18 +641,15 @@ const RegisterLecturer = () => {
                     onChange={(e) => setCitizenId(e.target.value)}
                     required
                     variant="outlined"
-                    InputProps={{
-                      startAdornment: <Badge className="mr-3 text-green-500" />,
-                    }}
-                    className="lg:flex-1"
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 3,
-                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        backgroundColor: colors.background.secondary,
                         transition: "all 0.3s ease",
+                        border: `1px solid ${colors.border.light}`,
                         "&:hover": {
-                          backgroundColor: "rgba(255, 255, 255, 0.95)",
-                          boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                          backgroundColor: colors.background.primary,
+                          borderColor: colors.primary[300],
                         },
                       },
                     }}
@@ -472,28 +661,22 @@ const RegisterLecturer = () => {
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     required
                     variant="outlined"
-                    InputProps={{
-                      startAdornment: (
-                        <Phone className="mr-3 text-purple-500" />
-                      ),
-                    }}
-                    className="lg:flex-1"
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 3,
-                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        backgroundColor: colors.background.secondary,
                         transition: "all 0.3s ease",
+                        border: `1px solid ${colors.border.light}`,
                         "&:hover": {
-                          backgroundColor: "rgba(255, 255, 255, 0.95)",
-                          boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                          backgroundColor: colors.background.primary,
+                          borderColor: colors.primary[300],
                         },
                       },
                     }}
                   />
-                </div>
+                </Box>
 
-                {/* Birth Date, Gender and Address Row */}
-                <div className="flex flex-col gap-6 lg:flex-row">
+                <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 4 }}>
                   <TextField
                     fullWidth
                     label="Ngày sinh"
@@ -503,16 +686,11 @@ const RegisterLecturer = () => {
                     required
                     variant="outlined"
                     InputLabelProps={{ shrink: true }}
-                    InputProps={{
-                      startAdornment: (
-                        <CalendarToday className="mr-3 text-orange-500" />
-                      ),
-                    }}
-                    className="lg:flex-1"
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 3,
-                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        backgroundColor: colors.background.secondary,
+                        border: `1px solid ${colors.border.light}`,
                       },
                     }}
                   />
@@ -524,18 +702,18 @@ const RegisterLecturer = () => {
                     onChange={(e) => setGender(e.target.value)}
                     required
                     variant="outlined"
-                    className="lg:flex-1"
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 3,
-                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        backgroundColor: colors.background.secondary,
+                        border: `1px solid ${colors.border.light}`,
                       },
                     }}
                   >
                     <MenuItem value="male">Nam</MenuItem>
                     <MenuItem value="female">Nữ</MenuItem>
                   </TextField>
-                </div>
+                </Box>
 
                 <TextField
                   fullWidth
@@ -544,45 +722,64 @@ const RegisterLecturer = () => {
                   onChange={(e) => setAddress(e.target.value)}
                   required
                   variant="outlined"
-                  InputProps={{
-                    startAdornment: (
-                      <LocationOn className="mr-3 text-red-500" />
-                    ),
-                  }}
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: 3,
-                      backgroundColor: "rgba(255, 255, 255, 0.8)",
-                      transition: "all 0.3s ease",
+                      backgroundColor: colors.background.secondary,
+                      border: `1px solid ${colors.border.light}`,
                       "&:hover": {
-                        backgroundColor: "rgba(255, 255, 255, 0.95)",
-                        boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                        backgroundColor: colors.background.primary,
+                        borderColor: colors.primary[300],
                       },
                     },
                   }}
                 />
-              </div>
-            </div>
+              </Box>
+            </Box>
 
             {/* Professional Information Section */}
-            <div className="mb-12">
-              <div className="mb-8 flex items-center">
-                <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100">
-                  <Work className="text-2xl text-purple-600" />
-                </div>
-                <div>
-                  <Typography variant="h5" className="font-bold text-gray-800">
+            <Box sx={{ mb: 8 }}>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
+                <Box
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 3,
+                    background: alpha(colors.secondary[500], 0.1),
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mr: 3,
+                  }}
+                >
+                  <Work sx={{ fontSize: 28, color: colors.secondary[600] }} />
+                </Box>
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 700,
+                      color: colors.text.primary,
+                      mb: 0.5,
+                    }}
+                  >
                     Thông tin nghề nghiệp
                   </Typography>
-                  <Typography variant="body2" className="text-gray-500">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: colors.text.tertiary,
+                      fontFamily: "'Inter', sans-serif",
+                    }}
+                  >
                     Kinh nghiệm và chuyên môn của bạn
                   </Typography>
-                </div>
-              </div>
+                </Box>
+              </Box>
 
-              <div className="space-y-8">
-                {/* Academic Rank and Specialization Row */}
-                <div className="flex flex-col gap-6 lg:flex-row">
+              <Box sx={{ display: "grid", gap: 4 }}>
+                <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 4 }}>
                   <TextField
                     select
                     fullWidth
@@ -591,11 +788,11 @@ const RegisterLecturer = () => {
                     onChange={(e) => setAcademicRank(e.target.value)}
                     required
                     variant="outlined"
-                    className="lg:flex-1"
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 3,
-                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        backgroundColor: colors.background.secondary,
+                        border: `1px solid ${colors.border.light}`,
                       },
                     }}
                   >
@@ -603,7 +800,7 @@ const RegisterLecturer = () => {
                     <MenuItem value="CN">Cử nhân</MenuItem>
                     <MenuItem value="THS">Thạc sĩ</MenuItem>
                     <MenuItem value="TS">Tiến sĩ</MenuItem>
-                    <MenuItem value="PGS">Phó giáo sư</MenuItem>
+                    <MenuItem value="PGS">Phố giáo sư</MenuItem>
                     <MenuItem value="GS">Giáo sư</MenuItem>
                   </TextField>
 
@@ -611,13 +808,8 @@ const RegisterLecturer = () => {
                     freeSolo
                     options={majorAutoComplete}
                     value={specialization}
-                    className="lg:flex-1"
-                    onChange={(_event, newValue) =>
-                      setSpecialization(newValue || "")
-                    }
-                    onInputChange={(_event, newInputValue) =>
-                      setSpecialization(newInputValue)
-                    }
+                    onChange={(_event, newValue) => setSpecialization(newValue || "")}
+                    onInputChange={(_event, newInputValue) => setSpecialization(newInputValue)}
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -627,45 +819,33 @@ const RegisterLecturer = () => {
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             borderRadius: 3,
-                            backgroundColor: "rgba(255, 255, 255, 0.8)",
+                            backgroundColor: colors.background.secondary,
+                            border: `1px solid ${colors.border.light}`,
                           },
                         }}
                       />
                     )}
                   />
-                </div>
+                </Box>
 
-                {/* Job Field and Experience Row */}
-                <div className="flex flex-col gap-6 lg:flex-row">
+                <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 4 }}>
                   <Autocomplete
                     freeSolo
                     options={jobFieldsAutoComplete}
                     value={jobField || ""}
-                    className="lg:flex-1"
                     onChange={(_e, newValue) => setJobField(newValue || "")}
-                    onInputChange={(_e, newInputValue) =>
-                      setJobField(newInputValue || "")
-                    }
+                    onInputChange={(_e, newInputValue) => setJobField(newInputValue || "")}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         label="Lĩnh vực công việc"
                         required
                         variant="outlined"
-                        value={jobField || ""}
-                        InputProps={{
-                          ...params.InputProps,
-                          startAdornment: (
-                            <>
-                              <Work className="mr-3 text-teal-500" />
-                              {params.InputProps.startAdornment}
-                            </>
-                          ),
-                        }}
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             borderRadius: 3,
-                            backgroundColor: "rgba(255, 255, 255, 0.8)",
+                            backgroundColor: colors.background.secondary,
+                            border: `1px solid ${colors.border.light}`,
                           },
                         }}
                       />
@@ -679,44 +859,64 @@ const RegisterLecturer = () => {
                     onChange={(e) => setExperienceYears(e.target.value)}
                     required
                     variant="outlined"
-                    InputProps={{
-                      startAdornment: (
-                        <Psychology className="mr-3 text-indigo-500" />
-                      ),
-                    }}
-                    className="lg:flex-1"
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 3,
-                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        backgroundColor: colors.background.secondary,
+                        border: `1px solid ${colors.border.light}`,
                       },
                     }}
                   />
-                </div>
-              </div>
-            </div>
+                </Box>
+              </Box>
+            </Box>
 
             {/* Bio Section */}
-            <div>
-              <div className="mb-8 flex items-center">
-                <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
-                  <Description className="text-2xl text-green-600" />
-                </div>
-                <div>
-                  <Typography variant="h5" className="font-bold text-gray-800">
+            <Box>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
+                <Box
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 3,
+                    background: alpha(colors.accent.lightBlue, 0.1),
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mr: 3,
+                  }}
+                >
+                  <Description sx={{ fontSize: 28, color: colors.accent.lightBlue }} />
+                </Box>
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 700,
+                      color: colors.text.primary,
+                      mb: 0.5,
+                    }}
+                  >
                     Giới thiệu bản thân
                   </Typography>
-                  <Typography variant="body2" className="text-gray-500">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: colors.text.tertiary,
+                      fontFamily: "'Inter', sans-serif",
+                    }}
+                  >
                     Chia sẻ về kinh nghiệm và mục tiêu của bạn
                   </Typography>
-                </div>
-              </div>
+                </Box>
+              </Box>
 
               <TextField
                 fullWidth
                 label="Giới thiệu bản thân"
                 multiline
-                rows={5}
+                rows={4}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Chia sẻ về kinh nghiệm, thành tích và mục tiêu nghề nghiệp của bạn..."
@@ -724,99 +924,148 @@ const RegisterLecturer = () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    backgroundColor: "rgba(255, 255, 255, 0.8)",
+                    backgroundColor: colors.background.secondary,
+                    border: `1px solid ${colors.border.light}`,
                     transition: "all 0.3s ease",
                     "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 0.95)",
-                      boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                      backgroundColor: colors.background.primary,
+                      borderColor: colors.primary[300],
                     },
                     "&.Mui-focused": {
-                      backgroundColor: "white",
-                      boxShadow: "0 8px 25px rgba(37, 99, 235, 0.15)",
+                      backgroundColor: colors.background.primary,
+                      borderColor: colors.primary[500],
+                      boxShadow: `0 4px 20px ${alpha(colors.primary[500], 0.15)}`,
                     },
                   },
                 }}
               />
-            </div>
-          </div>
+            </Box>
+          </Box>
         </Paper>
-      </div>
+      </Box>
     </Fade>
   );
 
   const renderCredentialsStep = () => (
     <Fade in={activeStep === 1} timeout={500}>
-      <div className="mx-auto mt-8 w-full max-w-7xl px-4">
-        <div className="flex flex-col gap-8 xl:flex-row">
-          {/* Degrees Section */}
-          <div className="flex-1">
-            <Paper
-              elevation={8}
-              className="h-full overflow-hidden rounded-3xl"
+      <Box sx={{ mx: "auto", mt: 4, maxWidth: "1400px", px: 2 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" }, gap: 4 }}>
+          {/* Enhanced Degrees Section */}
+          <Paper
+            elevation={0}
+            sx={{
+              borderRadius: 4,
+              background: colors.background.primary,
+              border: `1px solid ${colors.border.light}`,
+              overflow: "hidden",
+              position: "relative",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: `
+                  radial-gradient(circle at 10% 20%, ${alpha(colors.primary[50], 0.8)} 0%, transparent 50%),
+                  url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${colors.primary[100].slice(1)}' fill-opacity='0.03'%3E%3Cpath d='M30 30c16.569 0 30-13.431 30-30H30z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+                `,
+                zIndex: 0,
+              },
+            }}
+          >
+            <Box
               sx={{
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: `
+                  ${colors.background.gradient.primary},
+                  url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M0 40c20 0 40-20 40-40H0v40zm40 0c0 20 20 40 40 40V40H40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+                `,
+                p: 4,
+                color: "white",
+                position: "relative",
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  top: "10%",
+                  right: "-5%",
+                  width: "100px",
+                  height: "100px",
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.1)",
+                  animation: "pulse 4s ease-in-out infinite",
+                  "@keyframes pulse": {
+                    "0%, 100%": { transform: "scale(1)", opacity: 0.1 },
+                    "50%": { transform: "scale(1.1)", opacity: 0.2 },
+                  },
+                },
               }}
             >
-              {/* Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-8 text-white">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Avatar
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Avatar
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      bgcolor: "rgba(255,255,255,0.2)",
+                      backdropFilter: "blur(20px)",
+                      border: "1px solid rgba(255,255,255,0.3)",
+                      mr: 3,
+                    }}
+                  >
+                    <School sx={{ fontSize: 28 }} />
+                  </Avatar>
+                  <Box>
+                    <Typography
+                      variant="h5"
                       sx={{
-                        width: 56,
-                        height: 56,
-                        bgcolor: "white",
-                        color: "#2563eb",
-                        mr: 3,
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 700,
+                        mb: 0.5,
                       }}
                     >
-                      <School sx={{ fontSize: 28 }} />
-                    </Avatar>
-                    <div>
-                      <Typography variant="h5" className="mb-1 font-bold">
-                        Bằng cấp
-                      </Typography>
-                      <Typography variant="body1" className="opacity-80">
-                        {degrees.length} bằng cấp đã thêm
-                      </Typography>
-                    </div>
-                  </div>
-                  <Chip
-                    label={degrees.length}
-                    sx={{
-                      bgcolor: "white",
-                      color: "#2563eb",
-                      fontWeight: "bold",
-                      fontSize: "1.1rem",
-                      height: 40,
-                      minWidth: 60,
-                    }}
-                  />
-                </div>
-              </div>
+                      Bằng cấp
+                    </Typography>
+                    <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                      {degrees.length} bằng cấp đã thêm
+                    </Typography>
+                  </Box>
+                </Box>
+                <Chip
+                  label={degrees.length}
+                  sx={{
+                    bgcolor: "rgba(255,255,255,0.2)",
+                    color: "white",
+                    fontWeight: "bold",
+                    fontSize: "1rem",
+                    height: 36,
+                    minWidth: 50,
+                  }}
+                />
+              </Box>
+            </Box>
 
-              {/* Content */}
-              <div className="bg-white p-6 md:p-8">
-                <div className="mb-8 max-h-96 space-y-4 overflow-y-auto pr-2">
-                  {degrees.length === 0 ? (
-                    <div className="py-16 text-center">
-                      <School className="mx-auto mb-6 text-8xl text-gray-300" />
-                      <Typography
-                        variant="h5"
-                        className="mb-3 font-bold text-gray-500"
-                      >
-                        Chưa có bằng cấp nào
-                      </Typography>
-                      <Typography
-                        variant="body1"
-                        className="mx-auto max-w-md text-gray-400"
-                      >
-                        Thêm bằng cấp để nâng cao uy tín và chứng minh trình độ
-                        chuyên môn của bạn
-                      </Typography>
-                    </div>
-                  ) : (
-                    degrees.map((degree, index) => (
+            <Box sx={{ p: 4, position: "relative", zIndex: 1 }}>
+              <Box sx={{ maxHeight: 400, overflow: "auto", mb: 4 }}>
+                {degrees.length === 0 ? (
+                  <Box sx={{ py: 8, textAlign: "center" }}>
+                    <School sx={{ fontSize: 80, color: colors.neutral[300], mb: 3 }} />
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 600,
+                        color: colors.text.tertiary,
+                        mb: 2,
+                      }}
+                    >
+                      Chưa có bằng cấp nào
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: colors.text.tertiary }}>
+                      Thêm bằng cấp để nâng cao uy tín và chứng minh trình độ
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Box sx={{ display: "grid", gap: 3 }}>
+                    {degrees.map((degree, index) => (
                       <Slide
                         key={index}
                         direction="up"
@@ -918,99 +1167,170 @@ const RegisterLecturer = () => {
                           </CardContent>
                         </Card>
                       </Slide>
-                    ))
-                  )}
-                </div>
+                    ))}
+                  </Box>
+                )}
+              </Box>
 
-                <Button
-                  variant="contained"
-                  startIcon={<Add />}
-                  onClick={() => setOpenModal(true)}
-                  fullWidth
-                  size="large"
-                  className="py-4 text-lg font-semibold"
-                  sx={{
-                    borderRadius: 3,
-                    background:
-                      "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
-                    boxShadow: "0 6px 20px rgba(33, 203, 243, .4)",
-                    "&:hover": {
-                      background:
-                        "linear-gradient(45deg, #1976D2 30%, #1CB5E0 90%)",
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 8px 25px rgba(33, 203, 243, .5)",
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => setOpenModal(true)}
+                fullWidth
+                size="large"
+                sx={{
+                  borderRadius: 3,
+                  background: `
+                    ${colors.background.gradient.primary},
+                    url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M0 0h20v20H0V0zm10 17a7 7 0 100-14 7 7 0 000 14z'/%3E%3C/g%3E%3C/svg%3E")
+                  `,
+                  py: 2,
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  boxShadow: `0 4px 16px ${alpha(colors.primary[500], 0.3)}`,
+                  position: "relative",
+                  overflow: "hidden",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    top: 0,
+                    left: "-100%",
+                    width: "100%",
+                    height: "100%",
+                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
+                    transition: "left 0.6s",
+                  },
+                  "&:hover": {
+                    boxShadow: `0 6px 20px ${alpha(colors.primary[500], 0.4)}`,
+                    transform: "translateY(-2px)",
+                    "&::before": {
+                      left: "100%",
                     },
-                  }}
-                >
-                  Thêm bằng cấp
-                </Button>
-              </div>
-            </Paper>
-          </div>
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Thêm bằng cấp
+              </Button>
+            </Box>
+          </Paper>
 
-          {/* Certifications Section */}
-          <div className="flex-1">
-            <Paper elevation={8} className="h-full overflow-hidden rounded-3xl">
-              {/* Header */}
-              <div className="bg-gradient-to-r from-purple-600 to-purple-800 px-6 py-8 text-white">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Avatar
+          {/* Enhanced Certifications Section - Similar structure */}
+          <Paper
+            elevation={0}
+            sx={{
+              borderRadius: 4,
+              background: colors.background.primary,
+              border: `1px solid ${colors.border.light}`,
+              overflow: "hidden",
+              position: "relative",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: `
+                  radial-gradient(circle at 10% 20%, ${alpha(colors.primary[50], 0.8)} 0%, transparent 50%),
+                  url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${colors.primary[100].slice(1)}' fill-opacity='0.03'%3E%3Cpath d='M30 30c16.569 0 30-13.431 30-30H30z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+                `,
+                zIndex: 0,
+              },
+            }}
+          >
+            <Box
+              sx={{
+                background: `
+                  ${colors.background.gradient.secondary},
+                  url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M60 60c33.137 0 60-26.863 60-60H60v60zm0 0c-33.137 0-60 26.863-60 60h60V60z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+                `,
+                p: 4,
+                color: "white",
+                position: "relative",
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  top: "10%",
+                  right: "-5%",
+                  width: "100px",
+                  height: "100px",
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.1)",
+                  animation: "pulse 4s ease-in-out infinite",
+                  "@keyframes pulse": {
+                    "0%, 100%": { transform: "scale(1)", opacity: 0.1 },
+                    "50%": { transform: "scale(1.1)", opacity: 0.2 },
+                  },
+                },
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Avatar
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      bgcolor: "rgba(255,255,255,0.2)",
+                      backdropFilter: "blur(20px)",
+                      border: "1px solid rgba(255,255,255,0.3)",
+                      mr: 3,
+                    }}
+                  >
+                    <Badge sx={{ fontSize: 28 }} />
+                  </Avatar>
+                  <Box>
+                    <Typography
+                      variant="h5"
                       sx={{
-                        width: 56,
-                        height: 56,
-                        bgcolor: "white",
-                        color: "#93333ea",
-                        mr: 3,
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 700,
+                        mb: 0.5,
                       }}
                     >
-                      <Badge sx={{ fontSize: 28 }} />
-                    </Avatar>
-                    <div>
-                      <Typography variant="h5" className="mb-1 font-bold">
-                        Chứng chỉ
-                      </Typography>
-                      <Typography variant="body1" className="opacity-80">
-                        {certifications.length} chứng chỉ đã thêm
-                      </Typography>
-                    </div>
-                  </div>
-                  <Chip
-                    label={certifications.length}
-                    sx={{
-                      bgcolor: "white",
-                      color: "#93333ea",
-                      fontWeight: "bold",
-                      fontSize: "1.1rem",
-                      height: 40,
-                      minWidth: 60,
-                    }}
-                  />
-                </div>
-              </div>
+                      Chứng chỉ
+                    </Typography>
+                    <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                      {certifications.length} chứng chỉ đã thêm
+                    </Typography>
+                  </Box>
+                </Box>
+                <Chip
+                  label={certifications.length}
+                  sx={{
+                    bgcolor: "rgba(255,255,255,0.2)",
+                    color: "white",
+                    fontWeight: "bold",
+                    fontSize: "1rem",
+                    height: 36,
+                    minWidth: 50,
+                  }}
+                />
+              </Box>
+            </Box>
 
-              {/* Content */}
-              <div className="bg-white p-6 md:p-8">
-                <div className="mb-8 max-h-96 space-y-4 overflow-y-auto pr-2">
-                  {certifications.length === 0 ? (
-                    <div className="py-16 text-center">
-                      <Badge className="mx-auto mb-6 text-8xl text-gray-300" />
-                      <Typography
-                        variant="h5"
-                        className="mb-3 font-bold text-gray-500"
-                      >
-                        Chưa có chứng chỉ nào
-                      </Typography>
-                      <Typography
-                        variant="body1"
-                        className="mx-auto max-w-md text-gray-400"
-                      >
-                        Thêm chứng chỉ để chứng minh năng lực chuyên môn và kinh
-                        nghiệm thực tế
-                      </Typography>
-                    </div>
-                  ) : (
-                    certifications.map((cert, index) => (
+            <Box sx={{ p: 4, position: "relative", zIndex: 1 }}>
+              <Box sx={{ maxHeight: 400, overflow: "auto", mb: 4 }}>
+                {certifications.length === 0 ? (
+                  <Box sx={{ py: 8, textAlign: "center" }}>
+                    <Badge sx={{ fontSize: 80, color: colors.neutral[300], mb: 3 }} />
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 600,
+                        color: colors.text.tertiary,
+                        mb: 2,
+                      }}
+                    >
+                      Chưa có chứng chỉ nào
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: colors.text.tertiary }}>
+                      Thêm chứng chỉ để chứng minh năng lực chuyên môn và kinh nghiệm thực tế
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Box sx={{ display: "grid", gap: 3 }}>
+                    {certifications.map((cert, index) => (
                       <Slide
                         key={index}
                         direction="up"
@@ -1118,91 +1438,201 @@ const RegisterLecturer = () => {
                           </CardContent>
                         </Card>
                       </Slide>
-                    ))
-                  )}
-                </div>
+                    ))}
+                  </Box>
+                )}
+              </Box>
 
-                <Button
-                  variant="contained"
-                  startIcon={<Add />}
-                  onClick={() => setOpenCertificationModal(true)}
-                  fullWidth
-                  size="large"
-                  className="py-4 text-lg font-semibold"
-                  sx={{
-                    borderRadius: 3,
-                    background:
-                      "linear-gradient(45deg, #9C27B0 30%, #E91E63 90%)",
-                    boxShadow: "0 6px 20px rgba(156, 39, 176, .4)",
-                    "&:hover": {
-                      background:
-                        "linear-gradient(45deg, #7B1FA2 30%, #C2185B 90%)",
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 8px 25px rgba(156, 39, 176, .5)",
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => setOpenCertificationModal(true)}
+                fullWidth
+                size="large"
+                sx={{
+                  borderRadius: 3,
+                  background: `
+                    ${colors.background.gradient.secondary},
+                    url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23${colors.primary[50].slice(1)}' fill-opacity='0.1'%3E%3Cpath d='M0 0h20v20H0V0zm10 17a7 7 0 100-14 7 7 0 000 14z'/%3E%3C/g%3E%3C/svg%3E")
+                  `,
+                  py: 2,
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  boxShadow: `0 4px 16px ${alpha(colors.primary[500], 0.3)}`,
+                  position: "relative",
+                  overflow: "hidden",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    top: 0,
+                    left: "-100%",
+                    width: "100%",
+                    height: "100%",
+                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
+                    transition: "left 0.6s",
+                  },
+                  "&:hover": {
+                    boxShadow: `0 6px 20px ${alpha(colors.primary[500], 0.4)}`,
+                    transform: "translateY(-2px)",
+                    "&::before": {
+                      left: "100%",
                     },
-                  }}
-                >
-                  Thêm chứng chỉ
-                </Button>
-              </div>
-            </Paper>
-          </div>
-        </div>
-      </div>
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Thêm chứng chỉ
+              </Button>
+            </Box>
+          </Paper>
+        </Box>
+      </Box>
     </Fade>
   );
 
   const renderConfirmationStep = () => (
     <Fade in={activeStep === 2} timeout={500}>
-      <div className="mx-auto mt-8 w-full max-w-6xl px-4">
+      <Box sx={{ mx: "auto", mt: 4, maxWidth: "1200px", px: 2 }}>
         <Paper
-          elevation={8}
-          className="overflow-hidden rounded-3xl"
+          elevation={0}
           sx={{
-            background:
-              "linear-gradient(135deg, #ffffff 0%, #f0fdf4 50%, #ecfdf5 100%)",
+            borderRadius: 4,
+            background: colors.background.primary,
+            border: `1px solid ${colors.border.light}`,
+            overflow: "hidden",
+            position: "relative",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: `
+                radial-gradient(circle at 70% 30%, ${alpha(colors.success[50], 0.8)} 0%, transparent 50%),
+                radial-gradient(circle at 30% 70%, ${alpha(colors.primary[50], 0.6)} 0%, transparent 50%),
+                url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23${colors.success[50].slice(1)}' fill-opacity='0.03'%3E%3Cpath d='M50 50c27.614 0 50-22.386 50-50H50z'/%3E%3C/g%3E%3C/svg%3E")
+              `,
+              zIndex: 0,
+            },
           }}
         >
-          {/* Header */}
-          <div className="bg-gradient-to-r from-green-600 to-green-800 px-8 py-12 text-white">
-            <div className="flex flex-col items-center text-center">
-              <Avatar
-                className="mb-6 shadow-2xl"
+          <Box
+            sx={{
+              background: `
+                ${colors.background.gradient.secondary},
+                url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M60 60c33.137 0 60-26.863 60-60H60v60zm0 0c-33.137 0-60 26.863-60 60h60V60z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+              `,
+              p: 6,
+              color: "white",
+              textAlign: "center",
+              position: "relative",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: "20%",
+                left: "10%",
+                width: "80px",
+                height: "80px",
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.08)",
+                animation: "float 6s ease-in-out infinite",
+              },
+              "&::after": {
+                content: '""',
+                position: "absolute",
+                bottom: "20%",
+                right: "15%",
+                width: "60px",
+                height: "60px",
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.06)",
+                animation: "float 6s ease-in-out infinite 3s",
+              },
+            }}
+          >
+            <Box sx={{ position: "relative", zIndex: 1 }}>
+              <Box
                 sx={{
-                  width: 80,
-                  height: 80,
-                  bgcolor: "white",
-                  color: "#16a34a",
+                  position: "relative",
+                  display: "inline-block",
+                  mb: 3,
                 }}
               >
-                <CheckCircle sx={{ fontSize: 40 }} />
-              </Avatar>
-              <Typography variant="h3" className="mb-4 font-bold">
+                <Avatar
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    bgcolor: "rgba(255,255,255,0.2)",
+                    backdropFilter: "blur(20px)",
+                    border: "2px solid rgba(255,255,255,0.3)",
+                    mx: "auto",
+                    position: "relative",
+                    animation: "glow 2s ease-in-out infinite alternate",
+                    "@keyframes glow": {
+                      "0%": { boxShadow: "0 0 20px rgba(255,255,255,0.3)" },
+                      "100%": { boxShadow: "0 0 30px rgba(255,255,255,0.5)" },
+                    },
+                  }}
+                >
+                  <CheckCircle sx={{ fontSize: 40 }} />
+                </Avatar>
+                {/* Success particles */}
+                {[...Array(3)].map((_, i) => (
+                  <Box
+                    key={i}
+                    sx={{
+                      position: "absolute",
+                      top: `${20 + i * 15}%`,
+                      left: `${10 + i * 30}%`,
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      background: "rgba(255,255,255,0.4)",
+                      animation: `sparkle 2s ease-in-out infinite ${i * 0.5}s`,
+                      "@keyframes sparkle": {
+                        "0%, 100%": { opacity: 0, transform: "scale(0)" },
+                        "50%": { opacity: 1, transform: "scale(1)" },
+                      },
+                    }}
+                  />
+                ))}
+              </Box>
+              <Typography
+                variant="h3"
+                sx={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 700,
+                  mb: 2,
+                }}
+              >
                 Xác nhận thông tin
               </Typography>
-              <Typography variant="h6" className="max-w-3xl opacity-90">
-                Kiểm tra lại thông tin trước khi gửi yêu cầu đăng ký. Sau khi
-                gửi, tài khoản sẽ chờ phê duyệt
+              <Typography
+                variant="h6"
+                sx={{
+                  opacity: 0.9,
+                  maxWidth: 600,
+                  mx: "auto",
+                  lineHeight: 1.6,
+                }}
+              >
+                Kiểm tra lại thông tin trước khi gửi yêu cầu đăng ký
               </Typography>
-            </div>
-          </div>
+            </Box>
+          </Box>
 
-          {/* Content */}
-          <div className="p-8 md:p-12">
+          <Box sx={{ p: 6, position: "relative", zIndex: 1 }}>
             <Alert
               severity="info"
-              className="mb-8"
               sx={{
+                mb: 6,
                 borderRadius: 3,
-                fontSize: "1.1rem",
-                "& .MuiAlert-icon": {
-                  fontSize: "2rem",
-                },
+                border: `1px solid ${colors.info[200]}`,
+                backgroundColor: colors.info[50],
               }}
             >
-              <AlertTitle className="text-lg font-bold">
-                Thông tin quan trọng
-              </AlertTitle>
+              <AlertTitle sx={{ fontWeight: 700 }}>Thông tin quan trọng</AlertTitle>
               Vui lòng kiểm tra kỹ thông tin trước khi gửi yêu cầu. Sau khi gửi,
               tài khoản của bạn sẽ chờ được quản trị viên phê duyệt.
             </Alert>
@@ -1392,31 +1822,85 @@ const RegisterLecturer = () => {
                 )}
               </div>
             </div>
-          </div>
+          </Box>
         </Paper>
-      </div>
+      </Box>
     </Fade>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8">
+    <Box 
+      sx={{ 
+        minHeight: "100vh", 
+        background: `
+          linear-gradient(135deg, ${colors.background.secondary} 0%, ${alpha(colors.primary[50], 0.3)} 100%),
+          url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${colors.primary[100].slice(1)}' fill-opacity='0.02'%3E%3Cpath d='M100 100c55.228 0 100-44.772 100-100H100z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+        `,
+        py: 4,
+        position: "relative",
+        "&::before": {
+          content: '""',
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `
+            radial-gradient(circle at 20% 50%, ${alpha(colors.primary[100], 0.1)} 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, ${alpha(colors.secondary[100], 0.1)} 0%, transparent 50%),
+            radial-gradient(circle at 40% 80%, ${alpha(colors.accent.lightBlue, 0.05)} 0%, transparent 50%)
+          `,
+          zIndex: -1,
+          animation: "backgroundShift 20s ease-in-out infinite",
+          "@keyframes backgroundShift": {
+            "0%, 100%": { transform: "translateX(0) translateY(0)" },
+            "25%": { transform: "translateX(5px) translateY(-5px)" },
+            "50%": { transform: "translateX(-5px) translateY(5px)" },
+            "75%": { transform: "translateX(5px) translateY(5px)" },
+          },
+        },
+      }}
+    >
       <Container maxWidth="xl">
-        {/* Compact Header with Back Button */}
+        {/* Enhanced Header */}
         <Paper
-          elevation={8}
-          className="mb-8 overflow-hidden rounded-3xl"
+          elevation={0}
           sx={{
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            mb: 4,
+            borderRadius: 4,
+            background: `
+              ${colors.background.gradient.primary},
+              url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M0 50c25 0 50-25 50-50H0v50zm50 0c0 25 25 50 50 50V50H50z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+            `,
+            color: "white",
+            border: `1px solid ${colors.border.light}`,
+            overflow: "hidden",
+            position: "relative",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              top: "-50%",
+              left: "-50%",
+              width: "200%",
+              height: "200%",
+              background: "linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%)",
+              animation: "shine 8s ease-in-out infinite",
+              "@keyframes shine": {
+                "0%": { transform: "translateX(-100%) translateY(-100%) rotate(45deg)" },
+                "100%": { transform: "translateX(100%) translateY(100%) rotate(45deg)" },
+              },
+            },
           }}
         >
-          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-800 px-6 py-8 text-white">
-            {/* Back Button and Title Row */}
-            <div className="mb-6 flex items-center justify-between">
+          <Box sx={{ p: 6, position: "relative", zIndex: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 4 }}>
               <IconButton
                 onClick={handleBackToHome}
                 sx={{
                   backgroundColor: "rgba(255, 255, 255, 0.2)",
                   color: "white",
+                  backdropFilter: "blur(20px)",
+                  border: "1px solid rgba(255,255,255,0.3)",
                   "&:hover": {
                     backgroundColor: "rgba(255, 255, 255, 0.3)",
                     transform: "translateY(-2px)",
@@ -1426,19 +1910,27 @@ const RegisterLecturer = () => {
               >
                 <ArrowBack />
               </IconButton>
-              <Typography variant="h4" className="font-bold text-center flex-1">
+              <Typography
+                variant="h4"
+                sx={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 700,
+                  textAlign: "center",
+                  flex: 1,
+                }}
+              >
                 Đăng ký tài khoản Giảng viên
               </Typography>
-              <div className="w-10"></div> {/* Spacer for balance */}
-            </div>
+              <Box sx={{ width: 48 }} /> {/* Spacer */}
+            </Box>
 
-            {/* Compact Stepper */}
+            {/* Modern Stepper */}
             <Stepper
               activeStep={activeStep}
               alternativeLabel
               sx={{
                 "& .MuiStepConnector-line": {
-                  borderTopWidth: "3px",
+                  borderTopWidth: 2,
                   borderColor: "rgba(255,255,255,0.3)",
                 },
                 "& .MuiStepConnector-active .MuiStepConnector-line": {
@@ -1455,65 +1947,63 @@ const RegisterLecturer = () => {
                     icon={
                       <Avatar
                         sx={{
-                          bgcolor:
-                            index <= activeStep
-                              ? "#fff"
-                              : "rgba(255,255,255,0.3)",
-                          color: index <= activeStep ? "#2563eb" : "#fff",
-                          width: 40,
-                          height: 40,
+                          bgcolor: index <= activeStep ? "#fff" : "rgba(255,255,255,0.3)",
+                          color: index <= activeStep ? colors.primary[600] : "#fff",
+                          width: 48,
+                          height: 48,
                           fontSize: "1.2rem",
-                          boxShadow:
-                            index <= activeStep
-                              ? "0 4px 15px rgba(0,0,0,0.2)"
-                              : "none",
+                          border: index <= activeStep ? "none" : "2px solid rgba(255,255,255,0.3)",
+                          boxShadow: index <= activeStep ? `0 4px 12px ${alpha(colors.primary[500], 0.3)}` : "none",
                         }}
                       >
                         {step.icon}
                       </Avatar>
                     }
                   >
-                    <div className="mt-2">
+                    <Box sx={{ mt: 2 }}>
                       <Typography
                         variant="body1"
-                        className={`font-semibold ${index === activeStep ? "text-white" : "text-gray-200"}`}
+                        sx={{
+                          fontFamily: "'Inter', sans-serif",
+                          fontWeight: 600,
+                          color: index === activeStep ? "white" : "rgba(255,255,255,0.8)",
+                        }}
                       >
                         {step.label}
                       </Typography>
                       <Typography
                         variant="body2"
-                        className={`${index === activeStep ? "text-gray-100" : "text-gray-300"}`}
+                        sx={{
+                          color: index === activeStep ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.6)",
+                        }}
                       >
                         {step.description}
                       </Typography>
-                    </div>
+                    </Box>
                   </StepLabel>
                 </Step>
               ))}
             </Stepper>
 
             {isSubmitting && (
-              <div className="mt-6">
+              <Box sx={{ mt: 4 }}>
                 <LinearProgress
                   sx={{
-                    borderRadius: 3,
-                    height: 8,
+                    borderRadius: 2,
+                    height: 6,
                     backgroundColor: "rgba(255,255,255,0.3)",
                     "& .MuiLinearProgress-bar": {
                       backgroundColor: "#fff",
-                      borderRadius: 3,
+                      borderRadius: 2,
                     },
                   }}
                 />
-                <Typography
-                  variant="body1"
-                  className="mt-3 text-center text-gray-100"
-                >
+                <Typography variant="body1" sx={{ mt: 2, textAlign: "center", opacity: 0.9 }}>
                   Đang xử lý đăng ký của bạn...
                 </Typography>
-              </div>
+              </Box>
             )}
-          </div>
+          </Box>
         </Paper>
 
         {/* Step Content */}
@@ -1521,49 +2011,63 @@ const RegisterLecturer = () => {
         {activeStep === 1 && renderCredentialsStep()}
         {activeStep === 2 && renderConfirmationStep()}
 
-        {/* Navigation Buttons */}
+        {/* Enhanced Navigation */}
         <Paper
-          elevation={4}
-          className="mt-8 rounded-3xl p-8"
+          elevation={0}
           sx={{
-            background: "rgba(255,255,255,0.9)",
-            backdropFilter: "blur(10px)",
+            mt: 4,
+            borderRadius: 4,
+            background: `
+              ${colors.background.primary},
+              url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23${colors.primary[50].slice(1)}' fill-opacity='0.1'%3E%3Cpath d='M20 20c11.046 0 20-8.954 20-20H20z'/%3E%3C/g%3E%3C/svg%3E")
+            `,
+            border: `1px solid ${colors.border.light}`,
+            p: 4,
+            position: "relative",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 2,
+              background: colors.background.gradient.primary,
+              borderRadius: "4px 4px 0 0",
+            },
           }}
         >
-          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <Button
               disabled={activeStep === 0}
               onClick={handleBack}
               variant="outlined"
               size="large"
-              className="order-2 px-8 py-4 text-lg font-semibold md:order-1"
               sx={{
                 borderRadius: 3,
-                borderWidth: 2,
-                minWidth: 150,
+                px: 4,
+                py: 1.5,
+                borderColor: colors.neutral[300],
+                color: colors.text.secondary,
                 "&:hover": {
-                  borderWidth: 2,
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                  borderColor: colors.primary[300],
+                  backgroundColor: colors.primary[50],
                 },
               }}
             >
               Trở lại
             </Button>
 
-            <div className="order-1 flex items-center gap-4 md:order-2">
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               {isStepOptional(activeStep) && (
                 <Button
                   color="inherit"
                   onClick={handleSkip}
                   size="large"
-                  className="px-6 py-4 text-lg font-semibold"
                   sx={{
                     borderRadius: 3,
-                    minWidth: 120,
-                    "&:hover": {
-                      backgroundColor: "rgba(0,0,0,0.04)",
-                    },
+                    px: 4,
+                    py: 1.5,
+                    color: colors.text.tertiary,
                   }}
                 >
                   Bỏ qua
@@ -1574,83 +2078,80 @@ const RegisterLecturer = () => {
                 variant="contained"
                 size="large"
                 disabled={isSubmitting}
-                className="px-8 py-4 text-lg font-semibold"
                 sx={{
                   borderRadius: 3,
-                  minWidth: 200,
-                  background:
-                    "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
-                  boxShadow: "0 6px 20px rgba(33, 203, 243, .4)",
+                  px: 6,
+                  py: 1.5,
+                  background: colors.background.gradient.primary,
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  boxShadow: `0 4px 16px ${alpha(colors.primary[500], 0.3)}`,
                   "&:hover": {
-                    background:
-                      "linear-gradient(45deg, #1976D2 30%, #1CB5E0 90%)",
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 8px 25px rgba(33, 203, 243, .5)",
+                    boxShadow: `0 6px 20px ${alpha(colors.primary[500], 0.4)}`,
+                    transform: "translateY(-1px)",
                   },
-                  "&:disabled": {
-                    background: "#ccc",
-                  },
+                  transition: "all 0.3s ease",
                 }}
               >
-                {activeStep === steps.length - 1
-                  ? "Hoàn tất đăng ký"
-                  : "Tiếp tục"}
+                {activeStep === steps.length - 1 ? "Hoàn tất đăng ký" : "Tiếp tục"}
               </Button>
-            </div>
-          </div>
+            </Box>
+          </Box>
 
-          {/* Progress indicator */}
-          <div className="mt-8">
-            <div className="mb-4 flex items-center justify-between">
-              <Typography variant="h6" className="font-semibold text-gray-600">
+          {/* Progress */}
+          <Box sx={{ mt: 4 }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: colors.text.secondary }}>
                 Bước {activeStep + 1} / {steps.length}
               </Typography>
-              <Typography variant="h6" className="font-semibold text-gray-600">
-                {Math.round(((activeStep + 1) / steps.length) * 100)}% hoàn
-                thành
+              <Typography variant="body2" sx={{ fontWeight: 600, color: colors.text.secondary }}>
+                {Math.round(((activeStep + 1 ) / steps.length) * 100)}% hoàn thành
               </Typography>
-            </div>
+            </Box>
             <LinearProgress
               variant="determinate"
               value={((activeStep + 1) / steps.length) * 100}
               sx={{
-                borderRadius: 3,
-                height: 8,
-                backgroundColor: "#e5e7eb",
+                borderRadius: 2,
+                height: 6,
+                backgroundColor: colors.neutral[200],
                 "& .MuiLinearProgress-bar": {
-                  backgroundColor: "#3b82f6",
-                  borderRadius: 3,
+                  backgroundColor: colors.primary[500],
+                  borderRadius: 2,
                 },
               }}
             />
-          </div>
+          </Box>
         </Paper>
-
-        {/* Completion Status */}
-        {activeStep === steps.length - 1 && (
-          <Slide direction="up" in={true} timeout={500}>
-            <Alert
-              severity="success"
-              className="mt-8 rounded-3xl"
-              sx={{
-                fontSize: "1.1rem",
-                padding: "24px",
-                "& .MuiAlert-icon": {
-                  fontSize: "2.5rem",
-                },
-              }}
-            >
-              <AlertTitle className="mb-2 text-xl font-bold">
-                Sẵn sàng hoàn tất!
-              </AlertTitle>
-              <Typography variant="body1" className="text-lg">
-                Bạn đã hoàn thành tất cả các bước! Nhấn "Hoàn tất đăng ký" để
-                gửi yêu cầu đến quản trị viên.
-              </Typography>
-            </Alert>
-          </Slide>
-        )}
       </Container>
+
+      {/* Floating Background Elements */}
+      <Box
+        sx={{
+          position: "fixed",
+          top: "10%",
+          right: "5%",
+          width: 150,
+          height: 150,
+          borderRadius: "50%",
+          background: `radial-gradient(circle, ${alpha(colors.primary[200], 0.1)} 0%, transparent 70%)`,
+          animation: "float 8s ease-in-out infinite",
+          zIndex: -1,
+        }}
+      />
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: "15%",
+          left: "8%",
+          width: 100,
+          height: 100,
+          borderRadius: "50%",
+          background: `radial-gradient(circle, ${alpha(colors.secondary[200], 0.1)} 0%, transparent 70%)`,
+          animation: "float 6s ease-in-out infinite 2s",
+          zIndex: -1,
+        }}
+      />
 
       {/* Modals */}
       <UploadDegreeModal
@@ -1673,7 +2174,7 @@ const RegisterLecturer = () => {
             : undefined
         }
       />
-    </div>
+    </Box>
   );
 };
 

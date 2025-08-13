@@ -60,7 +60,9 @@ const InstitutionPage = () => {
   const [showLecturerSearch, setShowLecturerSearch] = useState(false);
 
   const dispatch = useDispatch();
-  const lecturers = useSelector((state: any) => state.lecturer as Lecturer[] || []);
+  const lecturers = useSelector(
+    (state: any) => (state.lecturer as Lecturer[]) || [],
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -86,8 +88,10 @@ const InstitutionPage = () => {
   ];
 
   // Calculate statistics
-  const approvedLecturers = lecturers.filter((lecturer: Lecturer) => lecturer.status === "APPROVED");
-  
+  const approvedLecturers = lecturers.filter(
+    (lecturer: Lecturer) => lecturer.status === "APPROVED",
+  );
+
   // Filtered search results
   const searchResults = React.useMemo(() => {
     if (!searchQuery.trim() && !selectedAcademicRank) {
@@ -105,13 +109,13 @@ const InstitutionPage = () => {
           lecturer.specialization?.toLowerCase().includes(searchTerm) ||
           lecturer.jobField?.toLowerCase().includes(searchTerm) ||
           lecturer.phoneNumber?.includes(searchQuery) ||
-          lecturer.email?.toLowerCase().includes(searchTerm)
+          lecturer.email?.toLowerCase().includes(searchTerm),
       );
     }
 
     if (selectedAcademicRank) {
       filtered = filtered.filter(
-        (lecturer: Lecturer) => lecturer.academicRank === selectedAcademicRank
+        (lecturer: Lecturer) => lecturer.academicRank === selectedAcademicRank,
       );
     }
 
@@ -142,10 +146,30 @@ const InstitutionPage = () => {
 
   // Mock data for projects and contracts
   const stats = [
-    { title: "Đề tài đang thực hiện", value: 12, icon: <Assignment />, color: "primary" },
-    { title: "Hợp đồng hoạt động", value: 8, icon: <HandshakeOutlined />, color: "success" },
-    { title: "Giảng viên hợp tác", value: approvedLecturers.length, icon: <Person />, color: "info" },
-    { title: "Dự án hoàn thành", value: 24, icon: <TrendingUp />, color: "warning" },
+    {
+      title: "Đề tài đang thực hiện",
+      value: 12,
+      icon: <Assignment />,
+      color: "primary",
+    },
+    {
+      title: "Hợp đồng hoạt động",
+      value: 8,
+      icon: <HandshakeOutlined />,
+      color: "success",
+    },
+    {
+      title: "Giảng viên hợp tác",
+      value: approvedLecturers.length,
+      icon: <Person />,
+      color: "info",
+    },
+    {
+      title: "Dự án hoàn thành",
+      value: 24,
+      icon: <TrendingUp />,
+      color: "warning",
+    },
   ];
 
   return (
@@ -166,18 +190,26 @@ const InstitutionPage = () => {
           {stats.map((stat, index) => (
             <Card key={index} sx={{ minWidth: 250, flex: 1 }}>
               <CardContent>
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
                   <Box>
-                    <Typography variant="h4" component="div" color={`${stat.color}.main`}>
+                    <Typography
+                      variant="h4"
+                      component="div"
+                      color={`${stat.color}.main`}
+                    >
                       {stat.value}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {stat.title}
                     </Typography>
                   </Box>
-                  <Box sx={{ color: `${stat.color}.main` }}>
-                    {stat.icon}
-                  </Box>
+                  <Box sx={{ color: `${stat.color}.main` }}>{stat.icon}</Box>
                 </Box>
               </CardContent>
             </Card>
@@ -189,7 +221,9 @@ const InstitutionPage = () => {
           {/* Project Management */}
           <Card sx={{ flex: 1, minWidth: 300 }}>
             <CardContent>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
+              >
                 <Assignment color="primary" />
                 <Typography variant="h6">Quản lý Đề tài</Typography>
               </Box>
@@ -210,7 +244,9 @@ const InstitutionPage = () => {
           {/* Contract Management */}
           <Card sx={{ flex: 1, minWidth: 300 }}>
             <CardContent>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
+              >
                 <HandshakeOutlined color="success" />
                 <Typography variant="h6">Quản lý Hợp đồng</Typography>
               </Box>
@@ -218,7 +254,12 @@ const InstitutionPage = () => {
                 Quản lý hợp đồng với giảng viên và theo dõi trạng thái
               </Typography>
               <Stack direction="row" spacing={1}>
-                <Button variant="contained" size="small" color="success" startIcon={<Add />}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="success"
+                  startIcon={<Add />}
+                >
                   Tạo hợp đồng
                 </Button>
                 <Button variant="outlined" size="small">
@@ -236,13 +277,21 @@ const InstitutionPage = () => {
           </Typography>
           <List>
             <ListItem sx={{ px: 0 }}>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
                 <Box>
                   <Typography variant="subtitle1">
                     Nghiên cứu ứng dụng AI trong giáo dục
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Trạng thái: Đang thực hiện • Tiến độ: 65% • Giảng viên: TS. Nguyễn Văn A
+                    Trạng thái: Đang thực hiện • Tiến độ: 65% • Giảng viên: TS.
+                    Nguyễn Văn A
                   </Typography>
                 </Box>
                 <Chip label="Đang thực hiện" color="primary" size="small" />
@@ -250,13 +299,21 @@ const InstitutionPage = () => {
             </ListItem>
             <Divider />
             <ListItem sx={{ px: 0 }}>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
                 <Box>
                   <Typography variant="subtitle1">
                     Phát triển hệ thống quản lý học tập
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Trạng thái: Chuẩn bị • Tiến độ: 20% • Giảng viên: ThS. Trần Thị B
+                    Trạng thái: Chuẩn bị • Tiến độ: 20% • Giảng viên: ThS. Trần
+                    Thị B
                   </Typography>
                 </Box>
                 <Chip label="Chuẩn bị" color="warning" size="small" />
@@ -264,13 +321,21 @@ const InstitutionPage = () => {
             </ListItem>
             <Divider />
             <ListItem sx={{ px: 0 }}>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
                 <Box>
                   <Typography variant="subtitle1">
                     Nghiên cứu blockchain trong tài chính
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Trạng thái: Hoàn thành • Tiến độ: 100% • Giảng viên: PGS. Lê Văn C
+                    Trạng thái: Hoàn thành • Tiến độ: 100% • Giảng viên: PGS. Lê
+                    Văn C
                   </Typography>
                 </Box>
                 <Chip label="Hoàn thành" color="success" size="small" />
@@ -283,9 +348,7 @@ const InstitutionPage = () => {
         <Paper sx={{ p: 3, mb: 4 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
             <Notifications color="primary" />
-            <Typography variant="h6">
-              Thông báo quan trọng
-            </Typography>
+            <Typography variant="h6">Thông báo quan trọng</Typography>
           </Box>
           <List>
             <ListItem>
@@ -295,7 +358,8 @@ const InstitutionPage = () => {
             </ListItem>
             <ListItem>
               <Typography variant="body2">
-                • Đề tài "Nghiên cứu AI trong giáo dục" cần báo cáo tiến độ tháng 3
+                • Đề tài "Nghiên cứu AI trong giáo dục" cần báo cáo tiến độ
+                tháng 3
               </Typography>
             </ListItem>
             <ListItem>
@@ -308,12 +372,17 @@ const InstitutionPage = () => {
 
         {/* Lecturer Search Section */}
         <Paper sx={{ p: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mb: 2,
+            }}
+          >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <FindInPage color="primary" />
-              <Typography variant="h6">
-                Tìm kiếm Giảng viên
-              </Typography>
+              <Typography variant="h6">Tìm kiếm Giảng viên</Typography>
             </Box>
             <Button
               variant="outlined"
@@ -327,7 +396,9 @@ const InstitutionPage = () => {
           <Collapse in={showLecturerSearch}>
             <Box sx={{ mb: 3 }}>
               {/* Search Bar */}
-              <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 3 }}>
+              <Box
+                sx={{ display: "flex", gap: 2, alignItems: "center", mb: 3 }}
+              >
                 <TextField
                   fullWidth
                   placeholder="Tìm kiếm giảng viên theo tên, chuyên môn, email, số điện thoại..."
@@ -375,37 +446,94 @@ const InstitutionPage = () => {
                       {searchResults.map((lecturer, index) => (
                         <Box key={lecturer.id}>
                           <ListItem sx={{ px: 0, alignItems: "flex-start" }}>
-                            <Box sx={{ display: "flex", width: "100%", gap: 2 }}>
+                            <Box
+                              sx={{ display: "flex", width: "100%", gap: 2 }}
+                            >
                               <Avatar
                                 src={lecturer.avatarUrl || ""}
-                                sx={{ width: 48, height: 48, mt: 1 }}
+                                sx={{ width: 64, height: 64, mt: 1 }}
                               >
                                 <Person />
                               </Avatar>
                               <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                                  <Typography variant="subtitle1" component="div">
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                    mb: 1,
+                                  }}
+                                >
+                                  <Typography variant="body1" component="div">
                                     {lecturer.fullName || "***"}
                                   </Typography>
                                   <Chip
-                                    label={getAcademicRankDisplay(lecturer.academicRank || "")}
+                                    label={getAcademicRankDisplay(
+                                      lecturer.academicRank || "",
+                                    )}
                                     size="small"
                                     color="primary"
                                     variant="outlined"
                                   />
+                                  {/* <Chip
+                                    label={lecturer.status === "APPROVED" ? "Đã duyệt" : lecturer.status}
+                                    size="small"
+                                    color={lecturer.status === "APPROVED" ? "success" : "default"}
+                                    variant="outlined"
+                                  /> */}
                                 </Box>
-                                <Typography variant="body2" color="text.secondary">
-                                  {lecturer.specialization || "***"} • {lecturer.experienceYears || "***"} năm kinh nghiệm
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  <b>Chuyên ngành:</b>{" "}
+                                  {lecturer.specialization || "***"}
                                 </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                  {lecturer.email || "***"}
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  <b>Email:</b> {lecturer.email || "***"}
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  <b>SĐT:</b> {lecturer.phoneNumber || "***"}
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  <b>Kinh nghiệm:</b>{" "}
+                                  {lecturer.experienceYears || "***"} năm trong
+                                  lĩnh vực {lecturer.jobField || "***"}
                                 </Typography>
                               </Box>
-                              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                                <Button variant="contained" size="small" startIcon={<HandshakeOutlined />}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: 1,
+                                }}
+                              >
+                                <Button
+                                  variant="contained"
+                                  size="small"
+                                  startIcon={<HandshakeOutlined />}
+                                >
                                   Tạo hợp đồng
                                 </Button>
-                                <Button variant="outlined" size="small">
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  onClick={() =>
+                                    window.open(
+                                      `/lecturer-info/${lecturer.id}`,
+                                      "_blank",
+                                    )
+                                  }
+                                >
                                   Xem hồ sơ
                                 </Button>
                               </Box>
@@ -420,21 +548,27 @@ const InstitutionPage = () => {
               )}
 
               {/* No Results */}
-              {(searchQuery || selectedAcademicRank) && searchResults.length === 0 && (
-                <Box sx={{ textAlign: "center", py: 3 }}>
-                  <Person sx={{ fontSize: 48, color: "text.secondary", mb: 1 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Không tìm thấy giảng viên phù hợp
-                  </Typography>
-                </Box>
-              )}
+              {(searchQuery || selectedAcademicRank) &&
+                searchResults.length === 0 && (
+                  <Box sx={{ textAlign: "center", py: 3 }}>
+                    <Person
+                      sx={{ fontSize: 48, color: "text.secondary", mb: 1 }}
+                    />
+                    <Typography variant="body2" color="text.secondary">
+                      Không tìm thấy giảng viên phù hợp
+                    </Typography>
+                  </Box>
+                )}
 
               {/* Empty State */}
               {!searchQuery && !selectedAcademicRank && (
                 <Box sx={{ textAlign: "center", py: 3 }}>
-                  <Search sx={{ fontSize: 48, color: "text.secondary", mb: 1 }} />
+                  <Search
+                    sx={{ fontSize: 48, color: "text.secondary", mb: 1 }}
+                  />
                   <Typography variant="body2" color="text.secondary">
-                    Nhập từ khóa hoặc chọn học vị để tìm kiếm giảng viên phù hợp cho đề tài
+                    Nhập từ khóa hoặc chọn học vị để tìm kiếm giảng viên phù hợp
+                    cho đề tài
                   </Typography>
                 </Box>
               )}
@@ -443,7 +577,15 @@ const InstitutionPage = () => {
 
           {/* Quick Stats for Lecturers */}
           <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-            <Box sx={{ textAlign: "center", p: 2, bgcolor: "primary.50", borderRadius: 1, minWidth: 150 }}>
+            <Box
+              sx={{
+                textAlign: "center",
+                p: 2,
+                bgcolor: "primary.50",
+                borderRadius: 1,
+                minWidth: 150,
+              }}
+            >
               <Typography variant="h5" color="primary.main">
                 {approvedLecturers.length}
               </Typography>
@@ -451,17 +593,45 @@ const InstitutionPage = () => {
                 Giảng viên khả dụng
               </Typography>
             </Box>
-            <Box sx={{ textAlign: "center", p: 2, bgcolor: "success.50", borderRadius: 1, minWidth: 150 }}>
+            <Box
+              sx={{
+                textAlign: "center",
+                p: 2,
+                bgcolor: "success.50",
+                borderRadius: 1,
+                minWidth: 150,
+              }}
+            >
               <Typography variant="h5" color="success.main">
-                {approvedLecturers.filter(l => l.academicRank === "TS" || l.academicRank === "PGS" || l.academicRank === "GS").length}
+                {
+                  approvedLecturers.filter(
+                    (l) =>
+                      l.academicRank === "TS" ||
+                      l.academicRank === "PGS" ||
+                      l.academicRank === "GS",
+                  ).length
+                }
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Tiến sĩ trở lên
               </Typography>
             </Box>
-            <Box sx={{ textAlign: "center", p: 2, bgcolor: "info.50", borderRadius: 1, minWidth: 150 }}>
+            <Box
+              sx={{
+                textAlign: "center",
+                p: 2,
+                bgcolor: "info.50",
+                borderRadius: 1,
+                minWidth: 150,
+              }}
+            >
               <Typography variant="h5" color="info.main">
-                {Math.round(approvedLecturers.reduce((sum, l) => sum + (l.experienceYears || 0), 0) / approvedLecturers.length) || 0}
+                {Math.round(
+                  approvedLecturers.reduce(
+                    (sum, l) => sum + (l.experienceYears || 0),
+                    0,
+                  ) / approvedLecturers.length,
+                ) || 0}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Kinh nghiệm TB (năm)
@@ -475,4 +645,3 @@ const InstitutionPage = () => {
 };
 
 export default InstitutionPage;
-
