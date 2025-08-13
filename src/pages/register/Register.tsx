@@ -73,9 +73,12 @@ const Register = () => {
       localStorage.setItem("refreshToken", response.data.data.refreshToken);
       toast.success("Đăng ký thành công!");
       navigate("/");
-    } catch (error) {
-      console.error("Đăng ký thất bại:", error);
-      toast.error("Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.");
+    } catch (error: any) {
+      if (error.response?.data?.message?.includes("Email already exists")) {
+        toast.error("Email đã được sử dụng.");
+      } else {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+      }
     } finally {
       setLoading(false);
     }
@@ -95,12 +98,16 @@ const Register = () => {
       await API.auth.sendOtp(email);
       setError("");
       toast.success("Mã OTP đã được gửi đến email của bạn!");
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.data?.message?.includes("Email already exists")) {
+        toast.error("Email đã được sử dụng.");
+      } else {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+      }
       console.error("Gửi mã OTP thất bại:", error);
       setError("Gửi mã OTP thất bại. Vui lòng kiểm tra lại email.");
       setOtpSent(false);
       setSecondsLeft(0);
-      toast.error("Gửi mã OTP thất bại. Vui lòng kiểm tra lại email.");
     } finally {
       setLoadingOtp(false);
     }
@@ -125,9 +132,12 @@ const Register = () => {
 
   const getPasswordStrength = (password: string) => {
     if (password.length === 0) return { label: "", color: "", width: 0 };
-    if (password.length < 6) return { label: "Yếu", color: colors.error[500], width: 25 };
-    if (password.length < 8) return { label: "Trung bình", color: colors.warning[500], width: 50 };
-    if (validatePassword(password)) return { label: "Mạnh", color: colors.success[500], width: 100 };
+    if (password.length < 6)
+      return { label: "Yếu", color: colors.error[500], width: 25 };
+    if (password.length < 8)
+      return { label: "Trung bình", color: colors.warning[500], width: 50 };
+    if (validatePassword(password))
+      return { label: "Mạnh", color: colors.success[500], width: 100 };
     return { label: "Trung bình", color: colors.warning[500], width: 75 };
   };
 
@@ -150,7 +160,8 @@ const Register = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: "radial-gradient(circle at 70% 30%, rgba(255,255,255,0.08) 0%, transparent 50%)",
+          background:
+            "radial-gradient(circle at 70% 30%, rgba(255,255,255,0.08) 0%, transparent 50%)",
         },
         "&::after": {
           content: '""',
@@ -159,9 +170,10 @@ const Register = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><defs><pattern id=\"grain\" width=\"100\" height=\"100\" patternUnits=\"userSpaceOnUse\"><circle cx=\"25\" cy=\"25\" r=\"1\" fill=\"%23ffffff\" opacity=\"0.05\"/><circle cx=\"75\" cy=\"75\" r=\"1\" fill=\"%23ffffff\" opacity=\"0.05\"/><circle cx=\"50\" cy=\"10\" r=\"0.5\" fill=\"%23ffffff\" opacity=\"0.03\"/></pattern></defs><rect width=\"100\" height=\"100\" fill=\"url(%23grain)\"/></svg>')",
+          background:
+            'url(\'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23ffffff" opacity="0.05"/><circle cx="75" cy="75" r="1" fill="%23ffffff" opacity="0.05"/><circle cx="50" cy="10" r="0.5" fill="%23ffffff" opacity="0.03"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>\')',
           opacity: 0.3,
-        }
+        },
       }}
     >
       <Container maxWidth="sm" sx={{ position: "relative", zIndex: 2 }}>
@@ -173,7 +185,7 @@ const Register = () => {
             boxShadow: "0 25px 80px rgba(0,0,0,0.15)",
             border: `1px solid ${colors.border.light}`,
             backdropFilter: "blur(20px)",
-            background: "rgba(255,255,255,0.98)"
+            background: "rgba(255,255,255,0.98)",
           }}
         >
           {/* Header Section */}
@@ -193,14 +205,15 @@ const Register = () => {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: "linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%)",
+                background:
+                  "linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%)",
                 transform: "translateX(-100%)",
-                animation: "shimmer 3s infinite"
+                animation: "shimmer 3s infinite",
               },
               "@keyframes shimmer": {
                 "0%": { transform: "translateX(-100%)" },
-                "100%": { transform: "translateX(100%)" }
-              }
+                "100%": { transform: "translateX(100%)" },
+              },
             }}
           >
             <Box sx={{ position: "relative", zIndex: 1 }}>
@@ -210,7 +223,7 @@ const Register = () => {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  mb: 3
+                  mb: 3,
                 }}
               >
                 <Box
@@ -232,8 +245,8 @@ const Register = () => {
                       borderRadius: "50%",
                       background: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.indigo})`,
                       opacity: 0.3,
-                      filter: "blur(6px)"
-                    }
+                      filter: "blur(6px)",
+                    },
                   }}
                 >
                   <img
@@ -243,7 +256,7 @@ const Register = () => {
                       height: 30,
                       filter: "brightness(0) invert(1)",
                       position: "relative",
-                      zIndex: 1
+                      zIndex: 1,
                     }}
                   />
                 </Box>
@@ -261,7 +274,7 @@ const Register = () => {
                     background: `linear-gradient(135deg, #ffffff, ${colors.accent.blue})`,
                     backgroundClip: "text",
                     WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent"
+                    WebkitTextFillColor: "transparent",
                   }}
                 >
                   EduHubVN
@@ -275,7 +288,7 @@ const Register = () => {
                     fontWeight: 500,
                     letterSpacing: "1px",
                     fontFamily: "'Inter', sans-serif",
-                    color: colors.accent.blue
+                    color: colors.accent.blue,
                   }}
                 >
                   EDUCATION PLATFORM
@@ -290,7 +303,7 @@ const Register = () => {
                     fontFamily: "'Inter', sans-serif",
                     fontWeight: 600,
                     mb: 1,
-                    fontSize: { xs: "1.3rem", md: "1.5rem" }
+                    fontSize: { xs: "1.3rem", md: "1.5rem" },
                   }}
                 >
                   Tạo tài khoản mới
@@ -323,7 +336,7 @@ const Register = () => {
                     mb: 1.5,
                     display: "flex",
                     alignItems: "center",
-                    gap: 1
+                    gap: 1,
                   }}
                 >
                   <Box
@@ -334,7 +347,7 @@ const Register = () => {
                       background: `linear-gradient(135deg, ${colors.accent.indigo}, ${colors.accent.blue})`,
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center"
+                      justifyContent: "center",
                     }}
                   >
                     <Email sx={{ fontSize: 12, color: "white" }} />
@@ -359,19 +372,19 @@ const Register = () => {
                       transition: "all 0.3s ease",
                       "& fieldset": {
                         borderColor: colors.border.light,
-                        borderWidth: 2
+                        borderWidth: 2,
                       },
                       "&:hover fieldset": {
-                        borderColor: colors.border.medium
+                        borderColor: colors.border.medium,
                       },
                       "&.Mui-focused fieldset": {
                         borderColor: colors.primary[600],
-                        boxShadow: `0 0 0 3px ${colors.primary[50]}`
-                      }
+                        boxShadow: `0 0 0 3px ${colors.primary[50]}`,
+                      },
                     },
                     "& .MuiInputBase-input": {
-                      py: 2
-                    }
+                      py: 2,
+                    },
                   }}
                 />
               </Box>
@@ -387,7 +400,7 @@ const Register = () => {
                     mb: 1.5,
                     display: "flex",
                     alignItems: "center",
-                    gap: 1
+                    gap: 1,
                   }}
                 >
                   <Box
@@ -398,7 +411,7 @@ const Register = () => {
                       background: `linear-gradient(135deg, ${colors.accent.indigo}, ${colors.accent.blue})`,
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center"
+                      justifyContent: "center",
                     }}
                   >
                     <Lock sx={{ fontSize: 12, color: "white" }} />
@@ -421,11 +434,11 @@ const Register = () => {
                         <IconButton
                           onClick={() => setShowPassword(!showPassword)}
                           edge="end"
-                          sx={{ 
+                          sx={{
                             color: colors.primary[600],
                             "&:hover": {
-                              backgroundColor: colors.primary[50]
-                            }
+                              backgroundColor: colors.primary[50],
+                            },
                           }}
                         >
                           {showPassword ? <VisibilityOff /> : <Visibility />}
@@ -442,27 +455,37 @@ const Register = () => {
                       transition: "all 0.3s ease",
                       "& fieldset": {
                         borderColor: colors.border.light,
-                        borderWidth: 2
+                        borderWidth: 2,
                       },
                       "&:hover fieldset": {
-                        borderColor: colors.border.medium
+                        borderColor: colors.border.medium,
                       },
                       "&.Mui-focused fieldset": {
                         borderColor: colors.primary[600],
-                        boxShadow: `0 0 0 3px ${colors.primary[50]}`
-                      }
+                        boxShadow: `0 0 0 3px ${colors.primary[50]}`,
+                      },
                     },
                     "& .MuiInputBase-input": {
-                      py: 2
-                    }
+                      py: 2,
+                    },
                   }}
                 />
-                
+
                 {/* Password Strength Indicator */}
                 {password && (
                   <Box sx={{ mt: 2 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                      <Typography variant="caption" sx={{ color: colors.text.tertiary }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        mb: 1,
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{ color: colors.text.tertiary }}
+                      >
                         Độ mạnh mật khẩu:
                       </Typography>
                       <Chip
@@ -471,7 +494,7 @@ const Register = () => {
                         sx={{
                           bgcolor: passwordStrength.color,
                           color: "white",
-                          fontSize: "0.7rem"
+                          fontSize: "0.7rem",
                         }}
                       />
                     </Box>
@@ -481,7 +504,7 @@ const Register = () => {
                         height: 4,
                         bgcolor: colors.neutral[200],
                         borderRadius: 2,
-                        overflow: "hidden"
+                        overflow: "hidden",
                       }}
                     >
                       <Box
@@ -489,7 +512,7 @@ const Register = () => {
                           width: `${passwordStrength.width}%`,
                           height: "100%",
                           bgcolor: passwordStrength.color,
-                          transition: "all 0.3s ease"
+                          transition: "all 0.3s ease",
                         }}
                       />
                     </Box>
@@ -508,7 +531,7 @@ const Register = () => {
                     mb: 1.5,
                     display: "flex",
                     alignItems: "center",
-                    gap: 1
+                    gap: 1,
                   }}
                 >
                   <Box
@@ -519,7 +542,7 @@ const Register = () => {
                       background: `linear-gradient(135deg, ${colors.accent.indigo}, ${colors.accent.blue})`,
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center"
+                      justifyContent: "center",
                     }}
                   >
                     <CheckCircle sx={{ fontSize: 12, color: "white" }} />
@@ -539,16 +562,22 @@ const Register = () => {
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
                           edge="end"
-                          sx={{ 
+                          sx={{
                             color: colors.primary[600],
                             "&:hover": {
-                              backgroundColor: colors.primary[50]
-                            }
+                              backgroundColor: colors.primary[50],
+                            },
                           }}
                         >
-                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                          {showConfirmPassword ? (
+                            <VisibilityOff />
+                          ) : (
+                            <Visibility />
+                          )}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -562,19 +591,19 @@ const Register = () => {
                       transition: "all 0.3s ease",
                       "& fieldset": {
                         borderColor: colors.border.light,
-                        borderWidth: 2
+                        borderWidth: 2,
                       },
                       "&:hover fieldset": {
-                        borderColor: colors.border.medium
+                        borderColor: colors.border.medium,
                       },
                       "&.Mui-focused fieldset": {
                         borderColor: colors.primary[600],
-                        boxShadow: `0 0 0 3px ${colors.primary[50]}`
-                      }
+                        boxShadow: `0 0 0 3px ${colors.primary[50]}`,
+                      },
                     },
                     "& .MuiInputBase-input": {
-                      py: 2
-                    }
+                      py: 2,
+                    },
                   }}
                 />
               </Box>
@@ -590,7 +619,7 @@ const Register = () => {
                     mb: 1.5,
                     display: "flex",
                     alignItems: "center",
-                    gap: 1
+                    gap: 1,
                   }}
                 >
                   <Box
@@ -601,21 +630,23 @@ const Register = () => {
                       background: `linear-gradient(135deg, ${colors.accent.indigo}, ${colors.accent.blue})`,
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center"
+                      justifyContent: "center",
                     }}
                   >
                     <Security sx={{ fontSize: 12, color: "white" }} />
                   </Box>
                   Mã xác thực OTP
                 </Typography>
-                
+
                 <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
                   <TextField
                     fullWidth
                     type="text"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    placeholder={otpSent ? "Nhập mã OTP từ email" : "Nhấn gửi OTP trước"}
+                    placeholder={
+                      otpSent ? "Nhập mã OTP từ email" : "Nhấn gửi OTP trước"
+                    }
                     disabled={!otpSent}
                     required={otpSent}
                     variant="outlined"
@@ -627,19 +658,19 @@ const Register = () => {
                         fontSize: "1rem",
                         "& fieldset": {
                           borderColor: colors.border.light,
-                          borderWidth: 2
+                          borderWidth: 2,
                         },
                         "&:hover fieldset": {
-                          borderColor: colors.border.medium
+                          borderColor: colors.border.medium,
                         },
                         "&.Mui-focused fieldset": {
                           borderColor: colors.primary[600],
-                          boxShadow: `0 0 0 3px ${colors.primary[50]}`
-                        }
+                          boxShadow: `0 0 0 3px ${colors.primary[50]}`,
+                        },
                       },
                       "& .MuiInputBase-input": {
-                        py: 2
-                      }
+                        py: 2,
+                      },
                     }}
                   />
                   <Button
@@ -658,44 +689,51 @@ const Register = () => {
                       minWidth: 120,
                       "&:hover": {
                         borderColor: colors.primary[600],
-                        backgroundColor: colors.primary[50]
+                        backgroundColor: colors.primary[50],
                       },
                       "&:disabled": {
                         borderColor: colors.neutral[300],
-                        color: colors.neutral[400]
-                      }
+                        color: colors.neutral[400],
+                      },
                     }}
                   >
-                    {loadingOtp ? "Đang gửi..." : secondsLeft > 0 ? `${secondsLeft}s` : otpSent ? "Gửi lại" : "Gửi OTP"}
+                    {loadingOtp
+                      ? "Đang gửi..."
+                      : secondsLeft > 0
+                        ? `${secondsLeft}s`
+                        : otpSent
+                          ? "Gửi lại"
+                          : "Gửi OTP"}
                   </Button>
                 </Box>
 
                 {otpSent && (
-                  <Alert 
-                    severity="info" 
-                    sx={{ 
+                  <Alert
+                    severity="info"
+                    sx={{
                       borderRadius: 3,
                       "& .MuiAlert-message": {
                         fontFamily: "'Inter', sans-serif",
-                        fontSize: "0.9rem"
-                      }
+                        fontSize: "0.9rem",
+                      },
                     }}
                   >
-                    Mã OTP đã được gửi đến email {email}. Vui lòng kiểm tra hộp thư.
+                    Mã OTP đã được gửi đến email {email}. Vui lòng kiểm tra hộp
+                    thư.
                   </Alert>
                 )}
               </Box>
 
               {/* Error Message */}
               {error && (
-                <Alert 
-                  severity="error" 
-                  sx={{ 
+                <Alert
+                  severity="error"
+                  sx={{
                     mb: 3,
                     borderRadius: 3,
                     "& .MuiAlert-message": {
-                      fontFamily: "'Inter', sans-serif"
-                    }
+                      fontFamily: "'Inter', sans-serif",
+                    },
                   }}
                 >
                   {error}
@@ -721,14 +759,14 @@ const Register = () => {
                   "&:hover": {
                     background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
                     transform: "translateY(-2px)",
-                    boxShadow: `0 12px 35px ${hexToRgba(colors.primary[500], 0.4)}`
+                    boxShadow: `0 12px 35px ${hexToRgba(colors.primary[500], 0.4)}`,
                   },
                   "&:disabled": {
                     background: colors.neutral[300],
                     color: colors.neutral[500],
                     transform: "none",
-                    boxShadow: "none"
-                  }
+                    boxShadow: "none",
+                  },
                 }}
               >
                 {loading ? "Đang đăng ký..." : "Tạo tài khoản"}
@@ -742,7 +780,7 @@ const Register = () => {
               borderTop: `1px solid ${colors.border.light}`,
               p: 4,
               textAlign: "center",
-              background: colors.background.tertiary
+              background: colors.background.tertiary,
             }}
           >
             <Typography
@@ -750,7 +788,7 @@ const Register = () => {
               sx={{
                 color: colors.text.tertiary,
                 fontFamily: "'Inter', sans-serif",
-                mb: 3
+                mb: 3,
               }}
             >
               Bạn đã có tài khoản?
@@ -774,8 +812,8 @@ const Register = () => {
                   color: colors.primary[700],
                   backgroundColor: colors.primary[50],
                   transform: "translateY(-1px)",
-                  boxShadow: `0 4px 12px ${hexToRgba(colors.primary[500], 0.2)}`
-                }
+                  boxShadow: `0 4px 12px ${hexToRgba(colors.primary[500], 0.2)}`,
+                },
               }}
             >
               Đăng nhập ngay
@@ -790,19 +828,19 @@ const Register = () => {
             sx={{
               color: "rgba(255,255,255,0.8)",
               fontFamily: "'Inter', sans-serif",
-              lineHeight: 1.6
+              lineHeight: 1.6,
             }}
           >
             Bằng việc đăng ký, bạn đồng ý với{" "}
             <Box
               component="span"
-              sx={{ 
+              sx={{
                 color: colors.accent.blue,
-                textDecoration: "underline", 
+                textDecoration: "underline",
                 cursor: "pointer",
                 "&:hover": {
-                  color: "white"
-                }
+                  color: "white",
+                },
               }}
             >
               Điều khoản sử dụng
@@ -810,13 +848,13 @@ const Register = () => {
             và{" "}
             <Box
               component="span"
-              sx={{ 
+              sx={{
                 color: colors.accent.blue,
-                textDecoration: "underline", 
+                textDecoration: "underline",
                 cursor: "pointer",
                 "&:hover": {
-                  color: "white"
-                }
+                  color: "white",
+                },
               }}
             >
               Chính sách bảo mật

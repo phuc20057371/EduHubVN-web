@@ -75,16 +75,55 @@ const PartnerDetailDialog = ({
 
     setIsProcessing(true);
     try {
+      let sendMailData: { to: string; subject: string; body: string } | null =
+        null;
       if (confirmDialog.action === "approve") {
         const response = await API.admin.approvePartner({ id: partner.id });
         if (response.data.success) {
           toast.success("Đối tác đã được duyệt thành công");
-          // Dispatch any necessary actions here
         }
         const responseData = await API.admin.getPartnerPendingCreate();
         dispatch(setPartnerPendingCreate(responseData.data.data));
         const res = await API.admin.getAllPartners();
         dispatch(setPartner(res.data.data));
+
+        // Chuẩn bị gửi email duyệt
+        if (partner.email) {
+          sendMailData = {
+            to: partner.email,
+            subject: "Hồ sơ Đối tác đã được duyệt",
+            body: `
+            <div style="font-family: Arial, sans-serif; background: #f6f8fa; padding: 32px;">
+              <div style="max-width: 600px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 32px;">
+                <h2 style="color: #3f51b5; margin-bottom: 16px;">Chúc mừng tổ chức của bạn đã được duyệt!</h2>
+                <p style="font-size: 16px; color: #333;">
+                  Xin chào <strong>${partner.representativeName || ""}</strong>,<br/><br/>
+                  Hồ sơ đăng ký của tổ chức <strong>${partner.organizationName || ""}</strong> trên hệ thống <strong>EduHubVN</strong> đã được duyệt.<br/>
+                  Quý vị có thể truy cập hệ thống và sử dụng các chức năng dành cho Đối tác.<br/><br/>
+                  <b>Thông tin tổ chức:</b><br/>
+                  - Tên tổ chức: ${partner.organizationName || ""}<br/>
+                  - Mã số kinh doanh: ${partner.businessRegistrationNumber || ""}<br/>
+                  - Năm thành lập: ${partner.establishedYear || ""}<br/>
+                  - Ngành nghề: ${partner.industry || ""}<br/>
+                  - Người đại diện: ${partner.representativeName || ""} (${partner.position || ""})<br/>
+                  - Số điện thoại: ${partner.phoneNumber || ""}<br/>
+                  - Email liên hệ: ${partner.email}<br/>
+                  - Website: ${partner.website || ""}<br/>
+                  - Địa chỉ: ${partner.address || ""}<br/>
+                  <br/>
+                  Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ qua email: <a href="mailto:support@eduhubvn.com">support@eduhubvn.com</a>.<br/><br/>
+                  Trân trọng,<br/>
+                  <span style="color: #3f51b5; font-weight: bold;">EduHubVN Team</span>
+                </p>
+                <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;" />
+                <div style="font-size: 13px; color: #888;">
+                  Đây là email tự động, vui lòng không trả lời trực tiếp email này.
+                </div>
+              </div>
+            </div>
+          `,
+          };
+        }
       } else if (confirmDialog.action === "reject") {
         const response = await API.admin.rejectPartner({
           id: partner.id,
@@ -92,17 +131,51 @@ const PartnerDetailDialog = ({
         });
         if (response.data.success) {
           toast.success("Đối tác đã bị từ chối thành công");
-          // Dispatch any necessary actions here
         }
         const responseData = await API.admin.getPartnerPendingCreate();
         dispatch(setPartnerPendingCreate(responseData.data.data));
         const res = await API.admin.getAllPartners();
         dispatch(setPartner(res.data.data));
+
+        // Chuẩn bị gửi email từ chối
+        if (partner.email) {
+          sendMailData = {
+            to: partner.email,
+            subject: "Hồ sơ Đối tác bị từ chối",
+            body: `
+            <div style="font-family: Arial, sans-serif; background: #f6f8fa; padding: 32px;">
+              <div style="max-width: 600px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 32px;">
+                <h2 style="color: #e53935; margin-bottom: 16px;">Hồ sơ của tổ chức đã bị từ chối</h2>
+                <p style="font-size: 16px; color: #333;">
+                  Xin chào <strong>${partner.representativeName || ""}</strong>,<br/><br/>
+                  Rất tiếc! Hồ sơ đăng ký của tổ chức <strong>${partner.organizationName || ""}</strong> trên hệ thống <strong>EduHubVN</strong> đã bị từ chối.<br/>
+                  <b>Lý do từ chối:</b><br/>
+                  <span style="color: #e53935;">${adminNote || "Không có lý do cụ thể."}</span><br/><br/>
+                  Nếu bạn cần hỗ trợ, vui lòng liên hệ qua email: <a href="mailto:support@eduhubvn.com">support@eduhubvn.com</a>.<br/><br/>
+                  Trân trọng,<br/>
+                  <span style="color: #3f51b5; font-weight: bold;">EduHubVN Team</span>
+                </p>
+                <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;" />
+                <div style="font-size: 13px; color: #888;">
+                  Đây là email tự động, vui lòng không trả lời trực tiếp email này.
+                </div>
+              </div>
+            </div>
+          `,
+          };
+        }
       }
 
       setConfirmDialog({ open: false, action: "", title: "", message: "" });
       setAdminNote("");
       onClose();
+
+      // Gửi email sau khi xử lý xong, không chặn giao diện
+      if (sendMailData) {
+        setTimeout(() => {
+          API.other.sendEmail(sendMailData);
+        }, 0);
+      }
     } catch (error) {
       console.error("Error updating partner status:", error);
       toast.error("Có lỗi xảy ra, vui lòng thử lại");

@@ -1,6 +1,7 @@
 
 export type Institution = {
   id: string;
+  email?: string;
   businessRegistrationNumber: string;
   institutionName: string;
   institutionType: string;

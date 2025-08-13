@@ -12,7 +12,7 @@ import { ArrowBack } from "@mui/icons-material";
 import type { InstitutionRequest } from "../../types/InstitutionRequest";
 import { API } from "../../utils/Fetch";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setUserProfile } from "../../redux/slice/userSlice";
 import {
   School,
@@ -27,6 +27,8 @@ import { toast } from "react-toastify";
 const RegisterInstitution = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const userProfile = useSelector((state: any) => state.userProfile);
 
   const [businessRegistrationNumber, setBusinessRegistrationNumber] =
     useState<string>("");
@@ -132,6 +134,42 @@ const RegisterInstitution = () => {
       if (user && user.role) {
         dispatch(setUserProfile(user));
         navigate("/pending-institution", { replace: true });
+        const res = await API.other.sendEmail({
+          to: userProfile.email,
+          subject: "Xác nhận đăng ký Cơ sở Giáo dục thành công",
+          body: `
+    <div style="font-family: Arial, sans-serif; background: #f6f8fa; padding: 32px;">
+      <div style="max-width: 600px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 32px;">
+        <h2 style="color: #2563eb; margin-bottom: 16px;">Chúc mừng Cơ sở của bạn đã đăng ký thành công!</h2>
+        <p style="font-size: 16px; color: #333;">
+          Xin chào <strong>${representativeName || ""}</strong>,<br/><br/>
+          Cơ sở của bạn đã đăng ký tài khoản <strong>${institutionType === "UNIVERSITY" ? "Trường" : "Trung tâm đào tạo"}</strong> trên hệ thống <strong>EduHubVN</strong> thành công.<br/>
+          Hồ sơ của Cơ sở của bạn đang được <span style="color: #f59e42; font-weight: bold;">chờ phê duyệt</span> bởi quản trị viên.<br/><br/>
+          <b>Thông tin đăng ký:</b><br/>
+          - Tên cơ sở: ${institutionName || ""}<br/>
+          - Mã số kinh doanh: ${businessRegistrationNumber || ""}<br/>
+          - Năm thành lập: ${establishedYear || ""}<br/>
+          - Loại cơ sở: ${institutionType === "UNIVERSITY" ? "Trường" : "Trung tâm đào tạo"}<br/>
+          - Người đại diện: ${representativeName || ""} (${position || ""})<br/>
+          - Số điện thoại: ${phoneNumber || ""}<br/>
+          - Email liên hệ: ${userProfile.email}<br/>
+          - Website: ${website || ""}<br/>
+          - Địa chỉ: ${address || ""}<br/>
+          <br/>
+          Chúng tôi sẽ kiểm tra thông tin và cập nhật trạng thái hồ sơ của Cơ sở của bạn trong thời gian sớm nhất.<br/>
+          Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ qua email: <a href="mailto:support@eduhubvn.com">support@eduhubvn.com</a>.<br/><br/>
+          Trân trọng,<br/>
+          <span style="color: #2563eb; font-weight: bold;">EduHubVN Team</span>
+        </p>
+        <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;" />
+        <div style="font-size: 13px; color: #888;">
+          Đây là email tự động, vui lòng không trả lời trực tiếp email này.
+        </div>
+      </div>
+    </div>
+  `,
+        });
+        console.log("✅ Email xác nhận đã gửi thành công:", res.data);
       } else {
         console.warn("User profile không hợp lệ:", user);
       }
@@ -312,11 +350,8 @@ const RegisterInstitution = () => {
                       },
                     }}
                   >
-                    <option value="">-- Chọn loại cơ sở --</option>
-                    <option value="UNIVERSITY">🏫 Trường đại học</option>
-                    <option value="TRAINING_CENTER">
-                      🎓 Trung tâm đào tạo
-                    </option>
+                    <option value="UNIVERSITY">Trường</option>
+                    <option value="TRAINING_CENTER">Trung tâm đào tạo</option>
                   </TextField>
                 </div>
               </div>

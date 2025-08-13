@@ -75,6 +75,8 @@ const InstitutionDetailDialog = ({
     }
     setIsProcessing(true);
     try {
+      let sendMailData: { to: string; subject: string; body: string } | null =
+        null;
       if (confirmDialog.action === "approve") {
         await API.admin.approveInstitution({ id: institution.id });
         const response = await API.admin.getInstitutionPendingCreate();
@@ -82,6 +84,51 @@ const InstitutionDetailDialog = ({
         const res = await API.admin.getAllInstitutions();
         dispatch(setInstitutions(res.data.data));
         toast.success("Yêu cầu đã được duyệt thành công!");
+
+        // Chuẩn bị gửi email duyệt
+        if (institution.email) {
+          // Tự động chọn "Quý trường" hoặc "Quý trung tâm"
+          const recipient =
+            institution.institutionType === "UNIVERSITY"
+              ? "Quý trường"
+              : institution.institutionType === "TRAINING_CENTER"
+                ? "Quý trung tâm"
+                : "Quý đơn vị";
+          sendMailData = {
+            to: institution.email,
+            subject: "Hồ sơ Cơ sở Giáo dục đã được duyệt",
+            body: `
+            <div style="font-family: Arial, sans-serif; background: #f6f8fa; padding: 32px;">
+              <div style="max-width: 600px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 32px;">
+                <h2 style="color: #2563eb; margin-bottom: 16px;">${recipient} đã được duyệt!</h2>
+                <p style="font-size: 16px; color: #333;">
+                  Xin chào <strong>${institution.representativeName || ""}</strong>,<br/><br/>
+                  Hồ sơ đăng ký của ${recipient.toLowerCase()} trên hệ thống <strong>EduHubVN</strong> đã được duyệt.<br/>
+                  Quý vị có thể truy cập hệ thống và sử dụng các chức năng dành cho Cơ sở Giáo dục.<br/><br/>
+                  <b>Thông tin cơ sở:</b><br/>
+                  - Tên cơ sở: ${institution.institutionName || ""}<br/>
+                  - Mã số kinh doanh: ${institution.businessRegistrationNumber || ""}<br/>
+                  - Năm thành lập: ${institution.establishedYear || ""}<br/>
+                  - Loại cơ sở: ${institution.institutionType || ""}<br/>
+                  - Người đại diện: ${institution.representativeName || ""} (${institution.position || ""})<br/>
+                  - Số điện thoại: ${institution.phoneNumber || ""}<br/>
+                  - Email liên hệ: ${institution.email}<br/>
+                  - Website: ${institution.website || ""}<br/>
+                  - Địa chỉ: ${institution.address || ""}<br/>
+                  <br/>
+                  Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ qua email: <a href="mailto:support@eduhubvn.com">support@eduhubvn.com</a>.<br/><br/>
+                  Trân trọng,<br/>
+                  <span style="color: #2563eb; font-weight: bold;">EduHubVN Team</span>
+                </p>
+                <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;" />
+                <div style="font-size: 13px; color: #888;">
+                  Đây là email tự động, vui lòng không trả lời trực tiếp email này.
+                </div>
+              </div>
+            </div>
+          `,
+          };
+        }
       } else if (confirmDialog.action === "reject") {
         await API.admin.rejectInstitution({ id: institution.id, adminNote });
         const response = await API.admin.getInstitutionPendingCreate();
@@ -89,10 +136,51 @@ const InstitutionDetailDialog = ({
         const res = await API.admin.getAllInstitutions();
         dispatch(setInstitutions(res.data.data));
         toast.success("Yêu cầu đã được từ chối thành công!");
+
+        // Chuẩn bị gửi email từ chối
+        if (institution.email) {
+          const recipient =
+            institution.institutionType === "UNIVERSITY"
+              ? "Quý trường"
+              : institution.institutionType === "TRAINING_CENTER"
+                ? "Quý trung tâm"
+                : "Quý đơn vị";
+          sendMailData = {
+            to: institution.email,
+            subject: "Hồ sơ Cơ sở Giáo dục bị từ chối",
+            body: `
+            <div style="font-family: Arial, sans-serif; background: #f6f8fa; padding: 32px;">
+              <div style="max-width: 600px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 32px;">
+                <h2 style="color: #e53935; margin-bottom: 16px;">Hồ sơ của ${recipient.toLowerCase()} đã bị từ chối</h2>
+                <p style="font-size: 16px; color: #333;">
+                  Xin chào <strong>${institution.representativeName || ""}</strong>,<br/><br/>
+                  Rất tiếc! Hồ sơ đăng ký của ${recipient.toLowerCase()} trên hệ thống <strong>EduHubVN</strong> đã bị từ chối.<br/>
+                  <b>Lý do từ chối:</b><br/>
+                  <span style="color: #e53935;">${adminNote || "Không có lý do cụ thể."}</span><br/><br/>
+                  Nếu bạn cần hỗ trợ, vui lòng liên hệ qua email: <a href="mailto:support@eduhubvn.com">support@eduhubvn.com</a>.<br/><br/>
+                  Trân trọng,<br/>
+                  <span style="color: #2563eb; font-weight: bold;">EduHubVN Team</span>
+                </p>
+                <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;" />
+                <div style="font-size: 13px; color: #888;">
+                  Đây là email tự động, vui lòng không trả lời trực tiếp email này.
+                </div>
+              </div>
+            </div>
+          `,
+          };
+        }
       }
       setConfirmDialog({ open: false, action: "", title: "", message: "" });
       setAdminNote("");
       onClose();
+
+      // Gửi email sau khi xử lý xong, không chặn giao diện
+      if (sendMailData) {
+        setTimeout(() => {
+          API.other.sendEmail(sendMailData);
+        }, 0);
+      }
     } catch (error) {
       console.error("Error updating institution status:", error);
       toast.error("Có lỗi xảy ra, vui lòng thử lại");

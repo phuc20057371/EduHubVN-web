@@ -95,6 +95,7 @@ const RegisterPartner = () => {
     navigate(-1);
   };
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -132,6 +133,45 @@ const RegisterPartner = () => {
       const profileResponse = await API.user.getUserProfile();
       const user = profileResponse?.data?.data;
       toast.success("Đăng ký thành công! Vui lòng chờ duyệt.");
+
+      // Gửi email xác nhận đăng ký thành công
+      if (user && user.email) {
+        await API.other.sendEmail({
+          to: user.email,
+          subject: "Xác nhận đăng ký Đối tác thành công",
+          body: `
+          <div style="font-family: Arial, sans-serif; background: #f6f8fa; padding: 32px;">
+            <div style="max-width: 600px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 32px;">
+              <h2 style="color: #3f51b5; margin-bottom: 16px;">Chúc mừng tổ chức của bạn đã đăng ký thành công!</h2>
+              <p style="font-size: 16px; color: #333;">
+                Xin chào <strong>${representativeName || ""}</strong>,<br/><br/>
+                Tổ chức của bạn đã đăng ký tài khoản <strong>Đối tác</strong> trên hệ thống <strong>EduHubVN</strong> thành công.<br/>
+                Hồ sơ của tổ chức đang được <span style="color: #f59e42; font-weight: bold;">chờ phê duyệt</span> bởi quản trị viên.<br/><br/>
+                <b>Thông tin đăng ký:</b><br/>
+                - Tên tổ chức: ${organizationName || ""}<br/>
+                - Mã số kinh doanh: ${businessRegistrationNumber || ""}<br/>
+                - Năm thành lập: ${establishedYear || ""}<br/>
+                - Ngành nghề: ${industry || ""}<br/>
+                - Người đại diện: ${representativeName || ""} (${position || ""})<br/>
+                - Số điện thoại: ${phoneNumber || ""}<br/>
+                - Email liên hệ: ${user.email}<br/>
+                - Website: ${website || ""}<br/>
+                - Địa chỉ: ${address || ""}<br/>
+                <br/>
+                Chúng tôi sẽ kiểm tra thông tin và cập nhật trạng thái hồ sơ của tổ chức trong thời gian sớm nhất.<br/>
+                Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ qua email: <a href="mailto:support@eduhubvn.com">support@eduhubvn.com</a>.<br/><br/>
+                Trân trọng,<br/>
+                <span style="color: #3f51b5; font-weight: bold;">EduHubVN Team</span>
+              </p>
+              <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;" />
+              <div style="font-size: 13px; color: #888;">
+                Đây là email tự động, vui lòng không trả lời trực tiếp email này.
+              </div>
+            </div>
+          </div>
+        `,
+        });
+      }
 
       if (user && user.role) {
         dispatch(setUserProfile(user));

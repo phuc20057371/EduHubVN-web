@@ -107,7 +107,7 @@ const HomeLayout = () => {
       case "INSTITUTION":
         return colors.secondary[500];
       case "PARTNER":
-        return colors.accent.emerald;
+        return colors.accent.lightBlue;
       case "ADMIN":
         return colors.error[500];
       default:
@@ -157,7 +157,7 @@ const HomeLayout = () => {
                 width: 48,
                 height: 48,
                 borderRadius: 3,
-                background: `linear-gradient(135deg, ${colors.accent.cyan}, ${colors.accent.teal})`,
+                background: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.indigo})`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -537,7 +537,7 @@ const HomeLayout = () => {
                   sx={{
                     fontFamily: "'Inter', sans-serif",
                     fontWeight: 700,
-                    color: colors.accent.cyan,
+                    color: colors.accent.blue,
                   }}
                 >
                   EduHubVN
@@ -577,7 +577,7 @@ const HomeLayout = () => {
                   fontFamily: "'Inter', sans-serif",
                   fontWeight: 600,
                   mb: 2,
-                  color: colors.accent.cyan,
+                  color: colors.accent.blue,
                   textAlign: { xs: "center", md: "left" },
                 }}
               >
@@ -609,7 +609,7 @@ const HomeLayout = () => {
                       minWidth: "auto",
                       justifyContent: { xs: "center", md: "flex-start" },
                       "&:hover": {
-                        color: colors.accent.cyan,
+                        color: colors.accent.blue,
                         backgroundColor: "transparent",
                       },
                     }}
@@ -628,7 +628,7 @@ const HomeLayout = () => {
                   fontFamily: "'Inter', sans-serif",
                   fontWeight: 600,
                   mb: 2,
-                  color: colors.accent.cyan,
+                  color: colors.accent.blue,
                   textAlign: { xs: "center", md: "left" },
                 }}
               >
