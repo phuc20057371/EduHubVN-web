@@ -1,18 +1,13 @@
 import {
   Assignment,
-  Business,
   Cake,
-  CalendarToday,
   Edit,
   Email,
-  Grade,
-  Link as LinkIcon,
   LocationOn,
   Person,
   Phone,
   School,
   Science,
-  Timeline,
   WorkHistory,
 } from "@mui/icons-material";
 import {
@@ -24,47 +19,28 @@ import {
   CardContent,
   Chip,
   Container,
-  Divider,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import LecturerUpdateInfoDialog from "../../components/LecturerUpdateInfoDialog";
 import { setLecturerProfile } from "../../redux/slice/LecturerProfileSlice";
 import { colors } from "../../theme/colors";
 import { API } from "../../utils/Fetch";
-
-interface StatCardProps {
-  icon: React.ReactNode;
-  title: string;
-  value: number;
-  color: string;
-}
-
-const StatCard = ({ icon, title, value, color }: StatCardProps) => (
-  <Card className="h-full">
-    <CardContent className="p-6 text-center">
-      <Box
-        className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-${color}-100`}
-      >
-        {icon}
-      </Box>
-      <Typography variant="h4" className="mb-2 font-bold text-gray-800">
-        {value}
-      </Typography>
-      <Typography variant="body2" className="text-gray-600">
-        {title}
-      </Typography>
-    </CardContent>
-  </Card>
-);
+import {
+  OverviewTab,
+  DegreesTab,
+  CertificatesTab,
+  CoursesTab,
+  ResearchTab,
+} from "./tab";
 
 const LecturerProfilePage = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const lecturerProfile = useSelector((state: any) => state.lecturerProfile);
   const userProfile = useSelector((state: any) => state.userProfile);
   const [activeSection, setActiveSection] = useState("overview");
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchLecturerProfile = async () => {
@@ -78,8 +54,6 @@ const LecturerProfilePage = () => {
 
     fetchLecturerProfile();
   }, [dispatch]);
-
-
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -97,7 +71,7 @@ const LecturerProfilePage = () => {
   const getAcademicRankDisplay = (rank: string) => {
     const ranks: { [key: string]: string } = {
       TS: "Tiến sĩ",
-      ThS: "Thạc sĩ",
+      THS: "Thạc sĩ",
       CN: "Cử nhân",
       KS: "Kỹ sư",
       PGS: "Phó Giáo sư",
@@ -108,6 +82,40 @@ const LecturerProfilePage = () => {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("vi-VN");
+  };
+
+
+  const handleAddAttendedCourse = () => {
+    console.log("Add attended course clicked");
+    // TODO: Implement add attended course logic
+  };
+
+  const handleAddOwnedCourse = () => {
+    console.log("Add owned course clicked");
+    // TODO: Implement add owned course logic
+  };
+
+  const handleAddResearchProject = () => {
+    console.log("Add research project clicked");
+    // TODO: Implement add research project logic
+  };
+
+  const handleEdit = (item: any) => {
+    console.log("Edit item:", item);
+    // TODO: Implement edit logic
+  };
+
+  const handleDelete = (item: any) => {
+    console.log("Delete item:", item);
+    // TODO: Implement delete logic with confirmation
+  };
+
+  const handleEditProfile = () => {
+    setEditDialogOpen(true);
+  };
+
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false);
   };
 
   if (!lecturerProfile?.lecturer) {
@@ -133,332 +141,107 @@ const LecturerProfilePage = () => {
   } = lecturerProfile;
 
   const menuItems = [
-    { id: "overview", label: "Tổng quan", icon: <Person /> },
+    {
+      id: "overview",
+      label: "Tổng quan",
+      icon: <Person />,
+      description: "Thông tin chung và thống kê",
+    },
     {
       id: "degrees",
       label: "Bằng cấp",
       icon: <School />,
       count: degrees?.length || 0,
+      description: "Học vị và bằng cấp",
     },
     {
       id: "certificates",
       label: "Chứng chỉ",
       icon: <Assignment />,
       count: certificates?.length || 0,
+      description: "Chứng chỉ nghề nghiệp",
     },
     {
       id: "courses",
-      label: "Khóa học",
+      label: "Kinh nghiệm Đào tạo",
       icon: <WorkHistory />,
       count:
         (attendedTrainingCourses?.length || 0) +
         (ownedTrainingCourses?.length || 0),
+      description: "Khóa học và đào tạo",
     },
     {
       id: "research",
-      label: "Nghiên cứu",
+      label: "Kinh nghiệm nghiên cứu",
       icon: <Science />,
       count: researchProjects?.length || 0,
+      description: "Dự án nghiên cứu",
     },
   ];
 
   const renderOverview = () => (
-    <div className="space-y-8">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          icon={<School className="text-blue-600" />}
-          title="Bằng cấp"
-          value={degrees?.length || 0}
-          color="blue"
-        />
-        <StatCard
-          icon={<Assignment className="text-green-600" />}
-          title="Chứng chỉ"
-          value={certificates?.length || 0}
-          color="green"
-        />
-        <StatCard
-          icon={<WorkHistory className="text-purple-600" />}
-          title="Khóa học"
-          value={
-            (attendedTrainingCourses?.length || 0) +
-            (ownedTrainingCourses?.length || 0)
-          }
-          color="purple"
-        />
-        <StatCard
-          icon={<Science className="text-red-600" />}
-          title="Nghiên cứu"
-          value={researchProjects?.length || 0}
-          color="red"
-        />
-      </div>
-
-      {/* Bio Section */}
-      {lecturer.bio && (
-        <Card>
-          <CardContent className="p-6">
-            <Typography
-              variant="h6"
-              className="mb-4 flex items-center gap-2 font-semibold"
-            >
-              <Person className="text-blue-600" />
-              Giới thiệu
-            </Typography>
-            <Typography
-              variant="body1"
-              className="leading-relaxed text-gray-700"
-            >
-              {lecturer.bio}
-            </Typography>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Recent Activities */}
-      <Card>
-        <CardContent className="p-6">
-          <Typography
-            variant="h6"
-            className="mb-4 flex items-center gap-2 font-semibold"
-          >
-            <Timeline className="text-green-600" />
-            Hoạt động gần đây
-          </Typography>
-          <div className="space-y-4">
-            {degrees?.slice(0, 2).map((degree: any) => (
-              <div
-                key={degree.id}
-                className="flex items-start gap-4 rounded-lg bg-gray-50 p-4"
-              >
-                <School className="mt-1 text-blue-600" />
-                <div>
-                  <Typography variant="subtitle2" className="font-medium">
-                    {degree.name}
-                  </Typography>
-                  <Typography variant="body2" className="text-gray-600">
-                    {degree.institution}
-                  </Typography>
-                  <Chip
-                    label={degree.status}
-                    color={getStatusColor(degree.status) as any}
-                    size="small"
-                    className="mt-2"
-                  />
-                </div>
-              </div>
-            ))}
-            {certificates?.slice(0, 1).map((cert: any) => (
-              <div
-                key={cert.id}
-                className="flex items-start gap-4 rounded-lg bg-gray-50 p-4"
-              >
-                <Assignment className="mt-1 text-green-600" />
-                <div>
-                  <Typography variant="subtitle2" className="font-medium">
-                    {cert.name}
-                  </Typography>
-                  <Typography variant="body2" className="text-gray-600">
-                    {cert.issuedBy}
-                  </Typography>
-                  <Chip
-                    label={cert.status}
-                    color={getStatusColor(cert.status) as any}
-                    size="small"
-                    className="mt-2"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <OverviewTab
+      lecturer={lecturer}
+      degrees={degrees}
+      certificates={certificates}
+      getStatusColor={getStatusColor}
+    />
   );
 
-  const renderSection = (items: any[], type: string) => (
-    <div className="space-y-6">
-      {items && items.length > 0 ? (
-        items.map((item: any) => (
-          <Card
-            key={item.id}
-            className="transition-shadow duration-300 hover:shadow-lg"
-          >
-            <CardContent className="p-6">
-              <div className="mb-4 flex items-start justify-between">
-                <div className="flex items-start gap-4">
-                  {type === "degrees" && (
-                    <School className="mt-1 text-blue-600" />
-                  )}
-                  {type === "certificates" && (
-                    <Assignment className="mt-1 text-green-600" />
-                  )}
-                  {type === "courses" && (
-                    <WorkHistory className="mt-1 text-purple-600" />
-                  )}
-                  {type === "research" && (
-                    <Science className="mt-1 text-red-600" />
-                  )}
-                  <div>
-                    <Typography variant="h6" className="mb-1 font-semibold">
-                      {item.name || item.title}
-                    </Typography>
-                    <Typography variant="body2" className="mb-2 text-gray-600">
-                      {item.major ||
-                        item.issuedBy ||
-                        item.organizer ||
-                        item.researchArea}
-                    </Typography>
-                  </div>
-                </div>
-                <Chip
-                  label={item.status}
-                  color={getStatusColor(item.status) as any}
-                  size="small"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
-                {type === "degrees" && (
-                  <>
-                    <div className="flex items-center gap-2">
-                      <Business className="text-gray-500" fontSize="small" />
-                      <span className="text-gray-700">{item.institution}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CalendarToday
-                        className="text-gray-500"
-                        fontSize="small"
-                      />
-                      <span className="text-gray-700">
-                        {item.startYear} - {item.graduationYear}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Grade className="text-gray-500" fontSize="small" />
-                      <span className="text-gray-700">{item.level}</span>
-                    </div>
-                  </>
-                )}
-
-                {type === "certificates" && (
-                  <>
-                    <div className="flex items-center gap-2">
-                      <CalendarToday
-                        className="text-gray-500"
-                        fontSize="small"
-                      />
-                      <span className="text-gray-700">
-                        Cấp: {formatDate(item.issueDate)}
-                      </span>
-                    </div>
-                    {item.expiryDate && (
-                      <div className="flex items-center gap-2">
-                        <CalendarToday
-                          className="text-gray-500"
-                          fontSize="small"
-                        />
-                        <span className="text-gray-700">
-                          Hết hạn: {formatDate(item.expiryDate)}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <Grade className="text-gray-500" fontSize="small" />
-                      <span className="text-gray-700">
-                        Cấp độ: {item.level}
-                      </span>
-                    </div>
-                  </>
-                )}
-
-                {type === "courses" && (
-                  <>
-                    <div className="flex items-center gap-2">
-                      <CalendarToday
-                        className="text-gray-500"
-                        fontSize="small"
-                      />
-                      <span className="text-gray-700">
-                        {formatDate(item.startDate)} -{" "}
-                        {formatDate(item.endDate)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <LocationOn className="text-gray-500" fontSize="small" />
-                      <span className="text-gray-700">{item.location}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Assignment className="text-gray-500" fontSize="small" />
-                      <span className="text-gray-700">
-                        {item.numberOfHour} giờ
-                      </span>
-                    </div>
-                  </>
-                )}
-
-                {type === "research" && (
-                  <>
-                    <div className="flex items-center gap-2">
-                      <CalendarToday
-                        className="text-gray-500"
-                        fontSize="small"
-                      />
-                      <span className="text-gray-700">
-                        {formatDate(item.startDate)} -{" "}
-                        {formatDate(item.endDate)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Business className="text-gray-500" fontSize="small" />
-                      <span className="text-gray-700">
-                        {item.foundingSource}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Person className="text-gray-500" fontSize="small" />
-                      <span className="text-gray-700">
-                        Vai trò: {item.roleInProject}
-                      </span>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {item.description && (
-                <>
-                  <Divider className="my-4" />
-                  <Typography variant="body2" className="text-gray-600">
-                    {item.description}
-                  </Typography>
-                </>
-              )}
-
-              {(item.url || item.certificateUrl || item.publishedUrl) && (
-                <div className="mt-4">
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<LinkIcon />}
-                    href={item.url || item.certificateUrl || item.publishedUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Xem chi tiết
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))
-      ) : (
-        <Alert severity="info" className="text-center">
-          Chưa có thông tin trong mục này
-        </Alert>
-      )}
-    </div>
-  );
+  const renderSection = (items: any[], type: string) => {
+    switch (type) {
+      case "degrees":
+        return (
+          <DegreesTab
+            degrees={items}
+            getStatusColor={getStatusColor}
+            formatDate={formatDate}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        );
+      case "certificates":
+        return (
+          <CertificatesTab
+            certificates={items}
+            getStatusColor={getStatusColor}
+            formatDate={formatDate}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        );
+      case "courses":
+        return (
+          <CoursesTab
+            attendedTrainingCourses={attendedTrainingCourses || []}
+            ownedTrainingCourses={ownedTrainingCourses || []}
+            getStatusColor={getStatusColor}
+            formatDate={formatDate}
+            onAddAttended={handleAddAttendedCourse}
+            onAddOwned={handleAddOwnedCourse}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        );
+      case "research":
+        return (
+          <ResearchTab
+            researchProjects={items}
+            getStatusColor={getStatusColor}
+            formatDate={formatDate}
+            onAdd={handleAddResearchProject}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        );
+      default:
+        return (
+          <Alert severity="info" className="text-center">
+            Chưa có thông tin trong mục này
+          </Alert>
+        );
+    }
+  };
 
   return (
     <div
@@ -467,201 +250,317 @@ const LecturerProfilePage = () => {
     >
       <Container maxWidth="xl" className="py-8">
         {/* Header Section */}
-        <Card className="mb-8 overflow-hidden">
-          <div
-            className="h-32"
-            style={{ background: colors.background.gradient.primary }}
-          ></div>
-          <CardContent className="relative -mt-16 p-8">
-            <div className="flex flex-col items-start gap-6 lg:flex-row">
-              <div className="relative">
-                <Avatar
-                  src={lecturer.avatarUrl}
-                  className="h-32 w-32 border-4 border-white shadow-xl"
-                  sx={{ width: 128, height: 128 }}
-                >
-                  {lecturer.fullName?.charAt(0)}
-                </Avatar>
-                {lecturerUpdate && lecturerUpdate.status === "PENDING" && (
-                  <div className="absolute -right-2 -top-2">
-                    <Chip
-                      label="Chờ duyệt"
-                      color="warning"
-                      size="small"
-                      className="shadow-md"
-                    />
-                  </div>
-                )}
-              </div>
+        <Card
+          className="mb-8 overflow-hidden"
+          sx={{
+            borderRadius: 4,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+            background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
+            color: "white",
+            position: "relative",
+          }}
+        >
+          {/* Pattern overlay */}
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              background: `url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='20' cy='20' r='2'/%3E%3C/g%3E%3C/svg%3E")`,
+              zIndex: 0,
+            }}
+          />
 
-              <div className="flex-1">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div>
-                    <Typography
-                      variant="h4"
-                      className="mb-2 font-bold text-gray-800"
-                    >
-                      <strong>{lecturer.fullName}</strong>
-                    </Typography>
+          <CardContent
+            sx={{
+              position: "relative",
+              zIndex: 1,
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              alignItems: { xs: "center", md: "flex-start" },
+              gap: 4,
+              p: { xs: 4, md: 6 },
+            }}
+          >
+            {/* Avatar */}
+            <Box sx={{ position: "relative" }}>
+              <Avatar
+                src={lecturer.avatarUrl}
+                sx={{
+                  width: 140,
+                  height: 140,
+                  border: "4px solid rgba(255,255,255,0.5)",
+                  boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
+                  fontSize: "3rem",
+                  fontWeight: 700,
+                }}
+              >
+                {lecturer.fullName?.charAt(0)}
+              </Avatar>
+              {lecturerUpdate?.status === "PENDING" && (
+                <Chip
+                  label="Chờ duyệt"
+                  color="warning"
+                  size="small"
+                  sx={{
+                    position: "absolute",
+                    top: -8,
+                    right: -8,
+                    fontWeight: 600,
+                  }}
+                />
+              )}
+            </Box>
+
+            {/* Info */}
+            <Box sx={{ flex: 1 }}>
+              {/* Name & Buttons */}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", md: "row" },
+                  justifyContent: "space-between",
+                  alignItems: { xs: "center", md: "flex-start" },
+                  gap: 2,
+                }}
+              >
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                  {/* Tên giảng viên */}
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 0,
+                      color: "#fff", // trắng để nổi trên nền xanh
+                      textShadow: "0 2px 4px rgba(0,0,0,0.3)", // tạo chiều sâu
+                    }}
+                  >
+                    {lecturer.fullName}
+                  </Typography>
+
+                  {/* Học hàm + chuyên ngành */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <Chip
+                      label={getAcademicRankDisplay(lecturer.academicRank)}
+                      size="medium"
+                      sx={{
+                        background: "linear-gradient(135deg, #FF9800, #FFC107)", // Gradient cam-vàng nổi bật
+                        color: "#fff",
+                        fontWeight: 600,
+                        border: "none",
+                        borderRadius: "16px",
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                      }}
+                    />
                     <Typography
                       variant="h6"
-                      className="mb-4 pt-5 text-gray-600"
+                      sx={{
+                        opacity: 0.9,
+                        fontWeight: 500,
+                        color: "#f5f5f5", // xám nhạt để mềm hơn
+                      }}
                     >
-                      {getAcademicRankDisplay(lecturer.academicRank)} -{" "}
                       {lecturer.specialization}
                     </Typography>
-
-                    <div className="mb-4 flex flex-col flex-wrap gap-4 text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <WorkHistory fontSize="small" />
-                        <Chip
-                          label={`${lecturer.experienceYears} năm`}
-                          size="small"
-                          variant="outlined"
-                          color="info"
-                        />
-                        <span>
-                          kinh nghiệm trong lĩnh vực {lecturer.jobField}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Phone fontSize="small" />
-                        <span>{lecturer.phoneNumber}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Email fontSize="small" />
-                        <span>
-                          {lecturer.email ||
-                            userProfile?.email ||
-                            "Chưa cập nhật email"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Cake fontSize="small" />
-                        <span>{formatDate(lecturer.dateOfBirth)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <LocationOn fontSize="small" />
-                        <span>{lecturer.address}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <Box gap={2} className="flex flex-col lg:flex-row">
-                    <Button
-                      variant="contained"
-                      startIcon={<Edit />}
-                      onClick={() => navigate("/lecturer/edit-profile")}
-                      sx={{
-                        fontFamily: "'Inter', sans-serif",
-                        background: colors.background.gradient.secondary,
-                        color: "white",
-                        fontWeight: 600,
-                        textTransform: "none",
-                        borderRadius: 3,
-                        "&:hover": {
-                          background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
-                          transform: "translateY(-1px)",
-                        },
-                      }}
-                    >
-                      Chỉnh sửa hồ sơ
-                    </Button>
-                    <Button
-                      variant="contained"
-                      onClick={() =>
-                        window.open(`/lecturer-info/${lecturer.id}`, "_blank")
-                      }
-                      sx={{
-                        fontFamily: "'Inter', sans-serif",
-                        background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[600]} 100%)`,
-                        color: "white",
-                        fontWeight: 600,
-                        textTransform: "none",
-                        borderRadius: 3,
-                        "&:hover": {
-                          background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
-                          transform: "translateY(-1px)",
-                        },
-                      }}
-                    >
-                      CV của tôi
-                    </Button>
                   </Box>
-                </div>
-              </div>
-            </div>
+                </Box>
+
+                <Box gap={2} display="flex">
+                  <Button
+                    variant="contained"
+                    startIcon={<Edit />}
+                    onClick={handleEditProfile}
+                    sx={{
+                      background: colors.background.gradient.secondary,
+                      color: "white",
+                      fontWeight: 600,
+                      borderRadius: 3,
+                      textTransform: "none",
+                      "&:hover": {
+                        background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
+                        transform: "translateY(-1px)",
+                      },
+                    }}
+                  >
+                    Chỉnh sửa hồ sơ
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={() =>
+                      window.open(`/lecturer-info/${lecturer.id}`, "_blank")
+                    }
+                    sx={{
+                      background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[600]} 100%)`,
+                      color: "white",
+                      fontWeight: 600,
+                      borderRadius: 3,
+                      textTransform: "none",
+                      "&:hover": {
+                        background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
+                        transform: "translateY(-1px)",
+                      },
+                    }}
+                  >
+                    CV của tôi
+                  </Button>
+                </Box>
+              </Box>
+
+              {/* Contact info */}
+              <Box
+                sx={{
+                  mt: 3,
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                  gap: 2,
+                }}
+              >
+                <Box display="flex" alignItems="center" gap={1}>
+                  <WorkHistory fontSize="small" />{" "}
+                  <span>
+                    {lecturer.experienceYears} năm • {lecturer.jobField}
+                  </span>
+                </Box>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Cake fontSize="small" /> {formatDate(lecturer.dateOfBirth)}
+                </Box>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Email fontSize="small" />{" "}
+                  {lecturer.email || userProfile?.email || "Chưa cập nhật"}
+                </Box>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <LocationOn fontSize="small" /> {lecturer.address}
+                </Box>
+
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Phone fontSize="small" /> {lecturer.phoneNumber}
+                </Box>
+              </Box>
+            </Box>
           </CardContent>
         </Card>
 
         <div className="flex flex-col gap-8 lg:flex-row">
-          {/* Sidebar Navigation */}
-          <div className="lg:w-80">
-            <Card className="sticky top-8">
+          {/* Enhanced Sidebar Navigation - Made wider */}
+          <div className="lg:w-96">
+            <Card
+              className="sticky top-8"
+              sx={{
+                borderRadius: 4,
+                boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                border: `1px solid ${colors.primary[100]}`,
+                overflow: "hidden",
+              }}
+            >
               <CardContent className="p-0">
-                <div
-                  className="border-b p-6"
-                  style={{ backgroundColor: colors.background.tertiary }}
-                >
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontFamily: "'Inter', sans-serif",
-                      fontWeight: 600,
-                      color: colors.text.primary,
-                    }}
-                  >
-                    Menu
-                  </Typography>
-                </div>
-                <div className="p-2">
+                {/* Menu Items - Enhanced spacing */}
+                <div className="p-5">
                   {menuItems.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveSection(item.id)}
-                      className="mb-2 flex w-full items-center justify-between rounded-lg p-4 transition-colors"
-                      style={{
-                        backgroundColor:
-                          activeSection === item.id
-                            ? colors.primary[50]
-                            : "transparent",
-                        color:
-                          activeSection === item.id
-                            ? colors.primary[700]
-                            : colors.text.tertiary,
-                        border:
-                          activeSection === item.id
-                            ? `1px solid ${colors.primary[200]}`
-                            : "1px solid transparent",
-                      }}
-                    >
-                      <div className="flex items-center gap-3">
-                        {item.icon}
-                        <span
-                          className="font-medium"
-                          style={{ fontFamily: "'Inter', sans-serif" }}
-                        >
-                          {item.label}
-                        </span>
-                      </div>
-                      {item.count !== undefined && (
-                        <Chip
-                          label={item.count}
-                          size="small"
-                          sx={{
-                            backgroundColor:
-                              activeSection === item.id
-                                ? colors.primary[200]
-                                : colors.neutral[200],
-                            color:
-                              activeSection === item.id
-                                ? colors.primary[700]
-                                : colors.neutral[600],
-                            fontFamily: "'Inter', sans-serif",
-                            fontWeight: 600,
+                    <div key={item.id} className="mb-4">
+                      <button
+                        onClick={() => setActiveSection(item.id)}
+                        className="group relative w-full overflow-hidden rounded-xl p-5 transition-all duration-300"
+                        style={{
+                          background:
+                            activeSection === item.id
+                              ? `linear-gradient(135deg, ${colors.primary[50]} 0%, ${colors.secondary[50]} 100%)`
+                              : "transparent",
+                          border:
+                            activeSection === item.id
+                              ? `2px solid ${colors.primary[300]}`
+                              : "2px solid transparent",
+                          transform:
+                            activeSection === item.id
+                              ? "scale(1.02)"
+                              : "scale(1)",
+                        }}
+                      >
+                        {/* Hover effect background */}
+                        <div
+                          className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                          style={{
+                            background: `linear-gradient(135deg, ${colors.primary[25]} 0%, ${colors.secondary[50]} 100%)`,
                           }}
                         />
-                      )}
-                    </button>
+
+                        <div className="relative z-10 flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <Box
+                              className="rounded-lg p-3 transition-all duration-300"
+                              sx={{
+                                background:
+                                  activeSection === item.id
+                                    ? `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`
+                                    : `${colors.primary[100]}`,
+                                color:
+                                  activeSection === item.id
+                                    ? "white"
+                                    : colors.primary[600],
+                              }}
+                            >
+                              {item.icon}
+                            </Box>
+                            <div className="text-left">
+                              <Typography
+                                variant="subtitle1"
+                                sx={{
+                                  fontFamily: "'Inter', sans-serif",
+                                  fontWeight: 600,
+                                  color:
+                                    activeSection === item.id
+                                      ? colors.primary[700]
+                                      : colors.text.primary,
+                                  fontSize: "1rem",
+                                }}
+                              >
+                                {item.label}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color:
+                                    activeSection === item.id
+                                      ? colors.primary[600]
+                                      : colors.text.tertiary,
+                                  fontSize: "0.8rem",
+                                  lineHeight: 1.4,
+                                }}
+                              >
+                                {item.description}
+                              </Typography>
+                            </div>
+                          </div>
+
+                          {item.count !== undefined && (
+                            <Chip
+                              label={item.count}
+                              size="small"
+                              sx={{
+                                background:
+                                  activeSection === item.id
+                                    ? "linear-gradient(135deg, #FF9800, #F57C00)"
+                                    : colors.background.tertiary,
+                                color:
+                                  activeSection === item.id
+                                    ? "#fff"
+                                    : colors.text.secondary,
+                                fontFamily: "'Inter', sans-serif",
+                                fontWeight: 700,
+                                minWidth: "32px",
+                                height: "28px",
+                                fontSize: "0.75rem",
+                              }}
+                            />
+                          )}
+                        </div>
+                      </button>
+                    </div>
                   ))}
                 </div>
               </CardContent>
@@ -674,18 +573,18 @@ const LecturerProfilePage = () => {
             {activeSection === "degrees" && renderSection(degrees, "degrees")}
             {activeSection === "certificates" &&
               renderSection(certificates, "certificates")}
-            {activeSection === "courses" &&
-              renderSection(
-                [
-                  ...(attendedTrainingCourses || []),
-                  ...(ownedTrainingCourses || []),
-                ],
-                "courses",
-              )}
+            {activeSection === "courses" && renderSection([], "courses")}
             {activeSection === "research" &&
               renderSection(researchProjects, "research")}
           </div>
         </div>
+
+        {/* Edit Profile Dialog */}
+        <LecturerUpdateInfoDialog
+          open={editDialogOpen}
+          onClose={handleCloseEditDialog}
+          lecturer={lecturerUpdate}
+        />
       </Container>
     </div>
   );

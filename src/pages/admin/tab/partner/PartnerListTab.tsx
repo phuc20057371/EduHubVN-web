@@ -233,7 +233,7 @@ function EnhancedTableToolbar({
               variant="h5"
               sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
             >
-              Quản lý Đối tác
+              Quản lý Đơn vị đối tác
             </Typography>
             <Typography variant="body2" sx={{ color: "#6c757d" }}>
               {searchTerm || industryFilter || statusFilter !== "APPROVED"

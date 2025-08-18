@@ -140,7 +140,7 @@ const GuestPage = () => {
             <Typography
               variant="h1"
               sx={{
-                // fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontWeight: 800,
                 mb: 4,
                 fontSize: { xs: "2.8rem", md: "4.2rem", lg: "4.8rem" },
@@ -158,7 +158,7 @@ const GuestPage = () => {
             <Typography
               variant="h5"
               sx={{
-                // fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 mb: 6,
                 opacity: 0.92,
                 lineHeight: 1.65,

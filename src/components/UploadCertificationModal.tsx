@@ -107,8 +107,13 @@ const UploadCertificationModal: React.FC<UploadCertificationModalProps> = ({
       setSelectedFile(null);
       setIsUploading(false);
     } else if (editMode && editData) {
-      // Pre-fill form with edit data
-      setForm(editData);
+      setForm({
+        ...editData,
+        issueDate: editData.issueDate
+          ? new Date(editData.issueDate)
+          : new Date(),
+        expiryDate: editData.expiryDate ? new Date(editData.expiryDate) : null,
+      });
     }
   }, [open, editMode, editData]);
 
@@ -229,18 +234,18 @@ const UploadCertificationModal: React.FC<UploadCertificationModalProps> = ({
             sx={{
               position: "absolute",
               top: {
-                xs: 8,    // Mobile: closer to top
-                md: 12,   // Desktop: more space from top
+                xs: 8, // Mobile: closer to top
+                md: 12, // Desktop: more space from top
               },
               right: {
-                xs: 8,    // Mobile: closer to right
-                md: 12,   // Desktop: more space from right
+                xs: 8, // Mobile: closer to right
+                md: 12, // Desktop: more space from right
               },
               zIndex: 10,
               minWidth: "auto",
               width: {
-                xs: 32,   // Mobile: smaller button
-                md: 40,   // Desktop: larger button
+                xs: 32, // Mobile: smaller button
+                md: 40, // Desktop: larger button
               },
               height: {
                 xs: 32,
@@ -257,12 +262,14 @@ const UploadCertificationModal: React.FC<UploadCertificationModalProps> = ({
               transition: "all 0.2s ease-in-out",
             }}
           >
-            <Close sx={{ 
-              fontSize: {
-                xs: 18,   // Mobile: smaller icon
-                md: 20,   // Desktop: larger icon
-              }
-            }} />
+            <Close
+              sx={{
+                fontSize: {
+                  xs: 18, // Mobile: smaller icon
+                  md: 20, // Desktop: larger icon
+                },
+              }}
+            />
           </Button>
 
           <Box sx={{ position: "relative", zIndex: 1 }}>
@@ -694,12 +701,13 @@ const UploadCertificationModal: React.FC<UploadCertificationModalProps> = ({
                     adapterLocale={vi}
                   >
                     <DatePicker
-                      label="Ngày cấp"
-                      value={form.issueDate}
+                      label="Ngày hết hạn (không bắt buộc)"
+                      value={form.expiryDate}
                       onChange={(newValue) =>
-                        handleChange("issueDate", newValue)
+                        handleChange("expiryDate", newValue)
                       }
                       slotProps={{
+                        field: { clearable: true }, // Cho phép nút xóa
                         textField: {
                           fullWidth: true,
                           variant: "outlined",
@@ -744,11 +752,7 @@ const UploadCertificationModal: React.FC<UploadCertificationModalProps> = ({
                     type="date"
                     label="Ngày hết hạn (không bắt buộc)"
                     InputLabelProps={{ shrink: true }}
-                    value={
-                      form.expiryDate
-                        ? form.expiryDate.toISOString().substring(0, 10)
-                        : ""
-                    }
+                    value={form.expiryDate ? form.expiryDate : ""}
                     onChange={(e) => {
                       const val = e.target.value;
                       handleChange("expiryDate", val ? new Date(val) : null);

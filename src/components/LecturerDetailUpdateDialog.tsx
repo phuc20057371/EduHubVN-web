@@ -24,13 +24,11 @@ import SchoolIcon from "@mui/icons-material/School";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { API } from "../utils/Fetch";
-import { useDispatch,  } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setLecturerPendingUpdate } from "../redux/slice/LecturerPendingUpdateSlice";
 import type { Lecturer } from "../types/Lecturer";
 import { setLecturers } from "../redux/slice/LecturerSlice";
 import { getAcademicRankLabel } from "../utils/ChangeText";
-
-
 
 const fieldGroups = [
   {
@@ -102,7 +100,7 @@ const LecturerDetailUpdateDialog = ({
     try {
       if (type === "approve") {
         await API.admin.approveLecturerUpdate({
-          id: (lecturerUpdate as any)?.id,
+          id: lecturerUpdate.id,
         });
         const res = await API.admin.getAllLecturers();
         dispatch(setLecturers(res.data.data));

@@ -14,6 +14,7 @@ import AdminLecturerCreateTab from "./tab/lecturer/AdminLecturerCreateTab";
 import AdminLecturerUpdateTab from "./tab/lecturer/AdminLecturerUpdateTab";
 import AdminLecturerDegreeTab from "./tab/lecturer/AdminLecturerDegreeTab";
 import AdminLecturerCourseTab from "./tab/lecturer/AdminLecturerCourseTab";
+import AdminLecturerResearchTab from "./tab/lecturer/AdminLecturerResearchTab";
 import { setLecturerPendingCreate } from "../../redux/slice/LecturerPendingCreateSlice";
 import { setLecturerPendingUpdate } from "../../redux/slice/LecturerPendingUpdateSlice";
 import { setLecturerRequests } from "../../redux/slice/LecturerRquestSlice";
@@ -28,7 +29,7 @@ type Order = "asc" | "desc";
 const AdminLecturerPage = () => {
   // TAB STATE & GENERAL FILTERS
   const [value, setValue] = useState("1");
-  
+
   // TAB 1 - MAIN LECTURER LIST FILTERS
   const [searchTerm, setSearchTerm] = useState("");
   const [academicRankFilter, setAcademicRankFilter] = useState("");
@@ -53,6 +54,11 @@ const AdminLecturerPage = () => {
   const [courseTypeFilter, setCourseTypeFilter] = useState("");
   const [courseActionFilter, setCourseActionFilter] = useState("");
   const [courseDateSort, setCourseDateSort] = useState("oldest");
+
+  // TAB 6 - RESEARCH PROJECT FILTERS
+  const [researchSearchTerm, setResearchSearchTerm] = useState("");
+  const [researchActionFilter, setResearchActionFilter] = useState("");
+  const [researchDateSort, setResearchDateSort] = useState("oldest");
 
   // TABLE SORTING & SELECTION
   const [order, setOrder] = React.useState<Order>("asc");
@@ -85,14 +91,22 @@ const AdminLecturerPage = () => {
     [lecturerRequests],
   );
 
-  // TAB 5 - COURSE REQUEST DATA
+  // TAB 5 - COURSE REQUEST DATA (AC và OC only)
   const lecturerRequestsCourse = React.useMemo(
     () =>
       Array.isArray(lecturerRequests)
         ? lecturerRequests.filter(
-            (req: any) =>
-              req.type === "AC" || req.type === "OC" || req.type === "RP",
+            (req: any) => req.type === "AC" || req.type === "OC",
           )
+        : [],
+    [lecturerRequests],
+  );
+
+  // TAB 6 - RESEARCH PROJECT REQUEST DATA (RP only)
+  const lecturerRequestsResearch = React.useMemo(
+    () =>
+      Array.isArray(lecturerRequests)
+        ? lecturerRequests.filter((req: any) => req.type === "RP")
         : [],
     [lecturerRequests],
   );
@@ -220,63 +234,75 @@ const AdminLecturerPage = () => {
     let filtered = lecturerRequestsDGCC;
 
     if (degreeSearchTerm) {
-      filtered = filtered.filter(
-        (item: any) => {
-          const searchTerm = degreeSearchTerm.toLowerCase();
-          
-          // Search by lecturer info
-          const lecturerMatch = item.lecturerInfo?.fullName
-            ?.toLowerCase()
-            .includes(searchTerm);
+      filtered = filtered.filter((item: any) => {
+        const searchTerm = degreeSearchTerm.toLowerCase();
 
-          // Search by IDs
-          const idMatch = 
-            item.content?.id?.toString().includes(degreeSearchTerm) ||
-            item.content?.original?.id?.toString().includes(degreeSearchTerm) ||
-            item.content?.update?.id?.toString().includes(degreeSearchTerm);
+        // Search by lecturer info
+        const lecturerMatch = item.lecturerInfo?.fullName
+          ?.toLowerCase()
+          .includes(searchTerm);
 
-          // Search by content - handle both direct content and nested original/update
-          let contentMatch = false;
-          
-          // Check direct content
-          if (item.content && !item.content.original && !item.content.update) {
-            contentMatch = 
-              item.content.name?.toLowerCase().includes(searchTerm) ||
-              item.content.title?.toLowerCase().includes(searchTerm) ||
-              item.content.description?.toLowerCase().includes(searchTerm) ||
-              item.content.major?.toLowerCase().includes(searchTerm) ||
-              item.content.institution?.toLowerCase().includes(searchTerm) ||
-              item.content.level?.toLowerCase().includes(searchTerm) ||
-              item.content.specialization?.toLowerCase().includes(searchTerm);
-          }
-          
-          // Check original content
-          if (item.content?.original) {
-            contentMatch = contentMatch ||
-              item.content.original.name?.toLowerCase().includes(searchTerm) ||
-              item.content.original.title?.toLowerCase().includes(searchTerm) ||
-              item.content.original.description?.toLowerCase().includes(searchTerm) ||
-              item.content.original.major?.toLowerCase().includes(searchTerm) ||
-              item.content.original.institution?.toLowerCase().includes(searchTerm) ||
-              item.content.original.level?.toLowerCase().includes(searchTerm) ||
-              item.content.original.specialization?.toLowerCase().includes(searchTerm);
-          }
-          
-          // Check update content
-          if (item.content?.update) {
-            contentMatch = contentMatch ||
-              item.content.update.name?.toLowerCase().includes(searchTerm) ||
-              item.content.update.title?.toLowerCase().includes(searchTerm) ||
-              item.content.update.description?.toLowerCase().includes(searchTerm) ||
-              item.content.update.major?.toLowerCase().includes(searchTerm) ||
-              item.content.update.institution?.toLowerCase().includes(searchTerm) ||
-              item.content.update.level?.toLowerCase().includes(searchTerm) ||
-              item.content.update.specialization?.toLowerCase().includes(searchTerm);
-          }
+        // Search by IDs
+        const idMatch =
+          item.content?.id?.toString().includes(degreeSearchTerm) ||
+          item.content?.original?.id?.toString().includes(degreeSearchTerm) ||
+          item.content?.update?.id?.toString().includes(degreeSearchTerm);
 
-          return lecturerMatch || idMatch || contentMatch;
+        // Search by content - handle both direct content and nested original/update
+        let contentMatch = false;
+
+        // Check direct content
+        if (item.content && !item.content.original && !item.content.update) {
+          contentMatch =
+            item.content.name?.toLowerCase().includes(searchTerm) ||
+            item.content.title?.toLowerCase().includes(searchTerm) ||
+            item.content.description?.toLowerCase().includes(searchTerm) ||
+            item.content.major?.toLowerCase().includes(searchTerm) ||
+            item.content.institution?.toLowerCase().includes(searchTerm) ||
+            item.content.level?.toLowerCase().includes(searchTerm) ||
+            item.content.specialization?.toLowerCase().includes(searchTerm);
         }
-      );
+
+        // Check original content
+        if (item.content?.original) {
+          contentMatch =
+            contentMatch ||
+            item.content.original.name?.toLowerCase().includes(searchTerm) ||
+            item.content.original.title?.toLowerCase().includes(searchTerm) ||
+            item.content.original.description
+              ?.toLowerCase()
+              .includes(searchTerm) ||
+            item.content.original.major?.toLowerCase().includes(searchTerm) ||
+            item.content.original.institution
+              ?.toLowerCase()
+              .includes(searchTerm) ||
+            item.content.original.level?.toLowerCase().includes(searchTerm) ||
+            item.content.original.specialization
+              ?.toLowerCase()
+              .includes(searchTerm);
+        }
+
+        // Check update content
+        if (item.content?.update) {
+          contentMatch =
+            contentMatch ||
+            item.content.update.name?.toLowerCase().includes(searchTerm) ||
+            item.content.update.title?.toLowerCase().includes(searchTerm) ||
+            item.content.update.description
+              ?.toLowerCase()
+              .includes(searchTerm) ||
+            item.content.update.major?.toLowerCase().includes(searchTerm) ||
+            item.content.update.institution
+              ?.toLowerCase()
+              .includes(searchTerm) ||
+            item.content.update.level?.toLowerCase().includes(searchTerm) ||
+            item.content.update.specialization
+              ?.toLowerCase()
+              .includes(searchTerm);
+        }
+
+        return lecturerMatch || idMatch || contentMatch;
+      });
     }
 
     if (degreeTypeFilter) {
@@ -284,7 +310,9 @@ const AdminLecturerPage = () => {
     }
 
     if (degreeActionFilter) {
-      filtered = filtered.filter((item: any) => item.label === degreeActionFilter);
+      filtered = filtered.filter(
+        (item: any) => item.label === degreeActionFilter,
+      );
     }
 
     filtered = [...filtered].sort((a: any, b: any) => {
@@ -319,50 +347,55 @@ const AdminLecturerPage = () => {
     let filtered = lecturerRequestsCourse;
 
     if (courseSearchTerm) {
-      filtered = filtered.filter(
-        (item: any) => {
-          const searchTerm = courseSearchTerm.toLowerCase();
-          
-          // Search by lecturer info
-          const lecturerMatch = item.lecturerInfo?.fullName
-            ?.toLowerCase()
-            .includes(searchTerm);
+      filtered = filtered.filter((item: any) => {
+        const searchTerm = courseSearchTerm.toLowerCase();
 
-          // Search by IDs
-          const idMatch = 
-            item.content?.id?.toString().includes(courseSearchTerm) ||
-            item.content?.original?.id?.toString().includes(courseSearchTerm);
+        // Search by lecturer info
+        const lecturerMatch = item.lecturerInfo?.fullName
+          ?.toLowerCase()
+          .includes(searchTerm);
 
-          // Search by content - handle both direct content and nested original
-          let contentMatch = false;
-          
-          // Check direct content
-          if (item.content && !item.content.original) {
-            contentMatch = 
-              item.content.name?.toLowerCase().includes(searchTerm) ||
-              item.content.title?.toLowerCase().includes(searchTerm) ||
-              item.content.description?.toLowerCase().includes(searchTerm) ||
-              item.content.category?.toLowerCase().includes(searchTerm) ||
-              item.content.level?.toLowerCase().includes(searchTerm) ||
-              item.content.duration?.toString().includes(courseSearchTerm) ||
-              item.content.price?.toString().includes(courseSearchTerm);
-          }
-          
-          // Check original content
-          if (item.content?.original) {
-            contentMatch = contentMatch ||
-              item.content.original.name?.toLowerCase().includes(searchTerm) ||
-              item.content.original.title?.toLowerCase().includes(searchTerm) ||
-              item.content.original.description?.toLowerCase().includes(searchTerm) ||
-              item.content.original.category?.toLowerCase().includes(searchTerm) ||
-              item.content.original.level?.toLowerCase().includes(searchTerm) ||
-              item.content.original.duration?.toString().includes(courseSearchTerm) ||
-              item.content.original.price?.toString().includes(courseSearchTerm);
-          }
+        // Search by IDs
+        const idMatch =
+          item.content?.id?.toString().includes(courseSearchTerm) ||
+          item.content?.original?.id?.toString().includes(courseSearchTerm);
 
-          return lecturerMatch || idMatch || contentMatch;
+        // Search by content - handle both direct content and nested original
+        let contentMatch = false;
+
+        // Check direct content
+        if (item.content && !item.content.original) {
+          contentMatch =
+            item.content.name?.toLowerCase().includes(searchTerm) ||
+            item.content.title?.toLowerCase().includes(searchTerm) ||
+            item.content.description?.toLowerCase().includes(searchTerm) ||
+            item.content.category?.toLowerCase().includes(searchTerm) ||
+            item.content.level?.toLowerCase().includes(searchTerm) ||
+            item.content.duration?.toString().includes(courseSearchTerm) ||
+            item.content.price?.toString().includes(courseSearchTerm);
         }
-      );
+
+        // Check original content
+        if (item.content?.original) {
+          contentMatch =
+            contentMatch ||
+            item.content.original.name?.toLowerCase().includes(searchTerm) ||
+            item.content.original.title?.toLowerCase().includes(searchTerm) ||
+            item.content.original.description
+              ?.toLowerCase()
+              .includes(searchTerm) ||
+            item.content.original.category
+              ?.toLowerCase()
+              .includes(searchTerm) ||
+            item.content.original.level?.toLowerCase().includes(searchTerm) ||
+            item.content.original.duration
+              ?.toString()
+              .includes(courseSearchTerm) ||
+            item.content.original.price?.toString().includes(courseSearchTerm);
+        }
+
+        return lecturerMatch || idMatch || contentMatch;
+      });
     }
 
     if (courseTypeFilter) {
@@ -370,7 +403,9 @@ const AdminLecturerPage = () => {
     }
 
     if (courseActionFilter) {
-      filtered = filtered.filter((item: any) => item.label === courseActionFilter);
+      filtered = filtered.filter(
+        (item: any) => item.label === courseActionFilter,
+      );
     }
 
     filtered = [...filtered].sort((a: any, b: any) => {
@@ -389,7 +424,96 @@ const AdminLecturerPage = () => {
     });
 
     return filtered;
-  }, [lecturerRequestsCourse, courseSearchTerm, courseTypeFilter, courseActionFilter, courseDateSort]);
+  }, [
+    lecturerRequestsCourse,
+    courseSearchTerm,
+    courseTypeFilter,
+    courseActionFilter,
+    courseDateSort,
+  ]);
+
+  // TAB 6 - FILTERED RESEARCH PROJECT DATA
+  const filteredResearchList = React.useMemo(() => {
+    if (!Array.isArray(lecturerRequestsResearch)) {
+      return [];
+    }
+
+    let filtered = lecturerRequestsResearch;
+
+    if (researchSearchTerm) {
+      filtered = filtered.filter((item: any) => {
+        const searchTerm = researchSearchTerm.toLowerCase();
+
+        // Search by lecturer info
+        const lecturerMatch = item.lecturerInfo?.fullName
+          ?.toLowerCase()
+          .includes(searchTerm);
+
+        // Search by IDs
+        const idMatch =
+          item.content?.id?.toString().includes(researchSearchTerm) ||
+          item.content?.original?.id?.toString().includes(researchSearchTerm);
+
+        // Search by content - handle both direct content and nested original
+        let contentMatch = false;
+
+        // Check direct content
+        if (item.content && !item.content.original) {
+          contentMatch =
+            item.content.name?.toLowerCase().includes(searchTerm) ||
+            item.content.title?.toLowerCase().includes(searchTerm) ||
+            item.content.description?.toLowerCase().includes(searchTerm) ||
+            item.content.category?.toLowerCase().includes(searchTerm) ||
+            item.content.level?.toLowerCase().includes(searchTerm);
+        }
+
+        // Check original content
+        if (item.content?.original) {
+          contentMatch =
+            contentMatch ||
+            item.content.original.name?.toLowerCase().includes(searchTerm) ||
+            item.content.original.title?.toLowerCase().includes(searchTerm) ||
+            item.content.original.description
+              ?.toLowerCase()
+              .includes(searchTerm) ||
+            item.content.original.category
+              ?.toLowerCase()
+              .includes(searchTerm) ||
+            item.content.original.level?.toLowerCase().includes(searchTerm);
+        }
+
+        return lecturerMatch || idMatch || contentMatch;
+      });
+    }
+
+    if (researchActionFilter) {
+      filtered = filtered.filter(
+        (item: any) => item.label === researchActionFilter,
+      );
+    }
+
+    filtered = [...filtered].sort((a: any, b: any) => {
+      const dateA = new Date(
+        a.date || a.content?.updatedAt || a.content?.createdAt || 0,
+      );
+      const dateB = new Date(
+        b.date || b.content?.updatedAt || b.content?.createdAt || 0,
+      );
+
+      if (researchDateSort === "oldest") {
+        return dateA.getTime() - dateB.getTime();
+      } else {
+        return dateB.getTime() - dateA.getTime();
+      }
+    });
+
+    return filtered;
+  }, [
+    lecturerRequestsResearch,
+    researchSearchTerm,
+    researchActionFilter,
+    researchDateSort,
+  ]);
 
   // EVENT HANDLERS
   const handleChange = (_event: SyntheticEvent, newValue: string) => {
@@ -495,7 +619,7 @@ const AdminLecturerPage = () => {
                       flexWrap: "nowrap",
                     }}
                   >
-                    <span>Tạo mới</span>
+                    <span>Tạo mới hồ sơ</span>
                     <Chip
                       size="small"
                       label={filteredCreateList.length}
@@ -524,7 +648,7 @@ const AdminLecturerPage = () => {
                       flexWrap: "nowrap",
                     }}
                   >
-                    <span>Cập nhật</span>
+                    <span>Cập nhật hồ sơ</span>
                     <Chip
                       size="small"
                       label={filteredUpdateList.length}
@@ -584,7 +708,9 @@ const AdminLecturerPage = () => {
                       flexWrap: "nowrap",
                     }}
                   >
-                    <span style={{ whiteSpace: "nowrap" }}>Khóa đào tạo</span>
+                    <span style={{ whiteSpace: "nowrap" }}>
+                      Kinh nghiệm đào tạo
+                    </span>
                     <Chip
                       size="small"
                       label={filteredCourseList.length}
@@ -602,6 +728,37 @@ const AdminLecturerPage = () => {
                   </Box>
                 }
                 value="5"
+              />
+              <Tab
+                label={
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: { xs: 0.5, sm: 1 },
+                      flexWrap: "nowrap",
+                    }}
+                  >
+                    <span style={{ whiteSpace: "nowrap" }}>
+                      Kinh nghiệm nghiên cứu
+                    </span>
+                    <Chip
+                      size="small"
+                      label={filteredResearchList.length}
+                      color="success"
+                      sx={{
+                        fontWeight: 600,
+                        minWidth: "auto",
+                        height: { xs: 18, sm: 20 },
+                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                        "& .MuiChip-label": {
+                          px: { xs: 0.5, sm: 1 },
+                        },
+                      }}
+                    />
+                  </Box>
+                }
+                value="6"
               />
             </TabList>
           </Box>
@@ -681,6 +838,19 @@ const AdminLecturerPage = () => {
             setCourseActionFilter={setCourseActionFilter}
             courseDateSort={courseDateSort}
             setCourseDateSort={setCourseDateSort}
+          />
+        </TabPanel>
+
+        {/* TAB 6 - RESEARCH PROJECT REQUESTS */}
+        <TabPanel value="6" sx={{ p: 0 }}>
+          <AdminLecturerResearchTab
+            filteredResearchList={filteredResearchList}
+            researchSearchTerm={researchSearchTerm}
+            setResearchSearchTerm={setResearchSearchTerm}
+            researchActionFilter={researchActionFilter}
+            setResearchActionFilter={setResearchActionFilter}
+            researchDateSort={researchDateSort}
+            setResearchDateSort={setResearchDateSort}
           />
         </TabPanel>
       </TabContext>

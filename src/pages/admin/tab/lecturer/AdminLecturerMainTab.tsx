@@ -261,16 +261,12 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
             <Avatar
               sx={{
                 bgcolor: "primary.main",
-                background:
-                  "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 width: 56,
                 height: 56,
               }}
             >
-              <Typography
-                variant="h4"
-                sx={{ color: "white", fontWeight: 700 }}
-              >
+              <Typography variant="h4" sx={{ color: "white", fontWeight: 700 }}>
                 👨‍🏫
               </Typography>
             </Avatar>
@@ -279,12 +275,10 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                 variant="h5"
                 sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
               >
-                Quản lý Giảng viên
+                Quản lý hồ sơ Giảng viên
               </Typography>
               <Typography variant="body2" sx={{ color: "#6c757d" }}>
-                {searchTerm ||
-                academicRankFilter ||
-                statusFilter !== "APPROVED"
+                {searchTerm || academicRankFilter || statusFilter !== "APPROVED"
                   ? `Đã lọc ${filteredLecturers?.length || 0} giảng viên`
                   : `Tổng cộng ${filteredLecturers?.length || 0} giảng viên`}
               </Typography>
@@ -409,10 +403,7 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                 ),
                 endAdornment: searchTerm && (
                   <InputAdornment position="end">
-                    <IconButton
-                      size="small"
-                      onClick={() => setSearchTerm("")}
-                    >
+                    <IconButton size="small" onClick={() => setSearchTerm("")}>
                       <ClearIcon />
                     </IconButton>
                   </InputAdornment>
@@ -423,9 +414,7 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
         </Box>
 
         {/* Active Filters Display */}
-        {(searchTerm ||
-          academicRankFilter ||
-          statusFilter !== "APPROVED") && (
+        {(searchTerm || academicRankFilter || statusFilter !== "APPROVED") && (
           <Box
             sx={{
               mt: 2,
@@ -524,7 +513,18 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                     tabIndex={-1}
                     key={row.id}
                     selected={isItemSelected}
-                    sx={{ cursor: "pointer" }}
+                    sx={{
+                      cursor: "pointer",
+                      "&:hover": {
+                        backgroundColor: "#bbdefb !important", // hover nhẹ khi chưa chọn
+                      },
+                      "&.Mui-selected": {
+                        backgroundColor: "#64b5f6 !important",
+                        "&:hover": {
+                          backgroundColor: "#42a5f5 !important", // hover khi selected đậm hơn chút
+                        },
+                      },
+                    }}
                   >
                     <TableCell>{row.fullName}</TableCell>
                     <TableCell>
@@ -555,7 +555,11 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                       <Chip
                         label={getStatusLabel(row.status)}
                         size="small"
-                        color={getStatusColor(row.status) as any}
+                        color={
+                          row.status === "APPROVED"
+                            ? "success"
+                            : (getStatusColor(row.status) as any)
+                        }
                         variant="filled"
                       />
                     </TableCell>

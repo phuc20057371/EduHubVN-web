@@ -32,10 +32,18 @@ import type { Institution } from "../../../../types/Institution";
 import InstitutionEditDialog from "../../../../components/InstitutionEditDialog";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-  if (b[orderBy] < a[orderBy]) {
+  const aValue = a[orderBy];
+  const bValue = b[orderBy];
+
+  // Handle undefined/null values
+  if (bValue == null && aValue == null) return 0;
+  if (bValue == null) return -1;
+  if (aValue == null) return 1;
+
+  if (bValue < aValue) {
     return -1;
   }
-  if (b[orderBy] > a[orderBy]) {
+  if (bValue > aValue) {
     return 1;
   }
   return 0;
@@ -43,13 +51,10 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 
 type Order = "asc" | "desc";
 
-function getComparator<Key extends keyof any>(
+function getComparator<Key extends keyof Institution>(
   order: Order,
   orderBy: Key,
-): (
-  a: { [key in Key]: number | string },
-  b: { [key in Key]: number | string },
-) => number {
+): (a: Institution, b: Institution) => number {
   return order === "desc"
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);

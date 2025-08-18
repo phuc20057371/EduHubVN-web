@@ -75,14 +75,20 @@ const LecturerLayout = () => {
         const response = await API.user.getUserProfile();
         dispatch(setUserProfile(response.data.data));
         if (response.data.data) {
-          navigateToRole(response.data.data, navigate);
+          // Chỉ thực hiện navigation khi đang ở trang root hoặc chưa có path cụ thể
+          const currentPath = location.pathname;
+          const isAtRootOrLogin = currentPath === "/" || currentPath === "/login" || currentPath === "/lecturer";
+          
+          if (isAtRootOrLogin) {
+            navigateToRole(response.data.data, navigate);
+          }
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
     fetchUserData();
-  }, [dispatch, navigate]);
+  }, [dispatch, navigate, location.pathname]);
 
   useEffect(() => {
     const fetchData = async () => {

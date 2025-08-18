@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { API } from "../utils/Fetch";
 import { setUserProfile } from "../redux/slice/userSlice";
-import { navigateToRole } from "../utils/navigationRole";
 import {
   AppBar,
   Toolbar,
@@ -69,9 +68,6 @@ const AdminLayout = () => {
       try {
         const response = await API.user.getUserProfile();
         dispatch(setUserProfile(response.data.data));
-        if (response.data.data) {
-          navigateToRole(response.data.data, navigate);
-        }
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
