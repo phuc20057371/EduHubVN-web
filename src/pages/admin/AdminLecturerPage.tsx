@@ -23,7 +23,6 @@ import type { Lecturer } from "../../types/Lecturer";
 import { API } from "../../utils/Fetch";
 import { getAcademicRankLabel } from "../../utils/ValidateRegisterLecturer";
 import { getStatusColor, getStatusLabel } from "../../utils/adminUtils";
-
 type Order = "asc" | "desc";
 
 const AdminLecturerPage = () => {
@@ -120,20 +119,16 @@ const AdminLecturerPage = () => {
       try {
         const res = await API.admin.getAllLecturers();
         dispatch(setLecturers(res.data.data));
-        console.log(res.data.data);
-
         const response = await API.admin.getLecturerPendingCreate();
         dispatch(setLecturerPendingCreate(response.data.data));
         const updateResponse = await API.admin.getLecturerPendingUpdate();
         dispatch(setLecturerPendingUpdate(updateResponse.data.data));
         const responseData = await API.admin.getLecturerRequests();
         dispatch(setLecturerRequests(responseData.data.data));
-        console.log(res.data.data);
       } catch (error) {
         console.error("Error initializing AdminLecturerPage:", error);
       }
     };
-
     fetchData();
   }, []);
 
@@ -238,12 +233,21 @@ const AdminLecturerPage = () => {
         const searchTerm = degreeSearchTerm.toLowerCase();
 
         // Search by lecturer info
-        const lecturerMatch = item.lecturerInfo?.fullName
-          ?.toLowerCase()
-          .includes(searchTerm);
+        const lecturerMatch =
+          item.lecturerInfo?.fullName?.toLowerCase().includes(searchTerm) ||
+          item.lecturerInfo?.id?.toString().includes(degreeSearchTerm);
 
-        // Search by IDs
+        // Enhanced ID search - including main request ID, referenceId and all nested IDs
         const idMatch =
+          item.id?.toString().includes(degreeSearchTerm) ||
+          item.content?.referenceId?.toString().includes(degreeSearchTerm) ||
+          item.content?.original?.referenceId
+            ?.toString()
+            .includes(degreeSearchTerm) ||
+          item.content?.update?.referenceId
+            ?.toString()
+            .includes(degreeSearchTerm) ||
+          item.lecturerInfo?.id?.toString().includes(degreeSearchTerm) ||
           item.content?.id?.toString().includes(degreeSearchTerm) ||
           item.content?.original?.id?.toString().includes(degreeSearchTerm) ||
           item.content?.update?.id?.toString().includes(degreeSearchTerm);
@@ -316,12 +320,8 @@ const AdminLecturerPage = () => {
     }
 
     filtered = [...filtered].sort((a: any, b: any) => {
-      const dateA = new Date(
-        a.date || a.content?.updatedAt || a.content?.createdAt || 0,
-      );
-      const dateB = new Date(
-        b.date || b.content?.updatedAt || b.content?.createdAt || 0,
-      );
+      const dateA = new Date(a.date || 0);
+      const dateB = new Date(b.date || 0);
 
       if (degreeDateSort === "oldest") {
         return dateA.getTime() - dateB.getTime();
@@ -336,6 +336,7 @@ const AdminLecturerPage = () => {
     degreeTypeFilter,
     degreeActionFilter,
     degreeDateSort,
+    lecturerRequests,
   ]);
 
   // TAB 5 - FILTERED COURSE DATA

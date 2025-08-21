@@ -43,6 +43,11 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [selectedLecturerUpdate, setSelectedLecturerUpdate] = useState<any>(null);
 
+  const handleDataReloaded = (updatedItem: any) => {
+    // Update the selected lecturer with the latest data
+    setSelectedLecturerUpdate(updatedItem);
+  };
+
   return (
     <>
       <Paper
@@ -441,6 +446,7 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
         onClose={() => setOpenUpdateDialog(false)}
         lecturer={selectedLecturerUpdate?.lecturer || {}}
         lecturerUpdate={selectedLecturerUpdate?.lecturerUpdate || {}}
+        onDataReloaded={handleDataReloaded}
       />
     </>
   );

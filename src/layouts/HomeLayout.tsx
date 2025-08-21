@@ -32,6 +32,7 @@ import {
 } from "@mui/icons-material";
 import { colors } from "../theme/colors";
 import Logoweb from "../assets/eduhub-02.png";
+import WebSocketService from "../services/WebSocketService";
 
 const HomeLayout = () => {
   const dispatch = useDispatch();
@@ -56,6 +57,25 @@ const HomeLayout = () => {
     };
     fetchUserData();
   }, []);
+
+  // WebSocket connection effect
+  useEffect(() => {
+    if (userProfile) {
+      WebSocketService.connect(
+        userProfile,
+        () => console.log("✅ Home WebSocket connected"),
+        (message) => {
+          console.log("📨 Home received message:", message);
+          // Xử lý message chung cho tất cả user
+        }
+      );
+    }
+
+    // Cleanup khi component unmount
+    return () => {
+      WebSocketService.disconnect();
+    };
+  }, [userProfile]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);

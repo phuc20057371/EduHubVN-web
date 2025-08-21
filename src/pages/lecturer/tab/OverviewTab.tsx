@@ -1,14 +1,4 @@
-import {
-  Assignment,
-  School
-} from "@mui/icons-material";
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Typography
-} from "@mui/material";
+import { Card, CardContent, Typography } from "@mui/material";
 import { colors } from "../../../theme/colors";
 
 interface OverviewTabProps {
@@ -18,7 +8,7 @@ interface OverviewTabProps {
   getStatusColor: (status: string) => string;
 }
 
-const OverviewTab = ({ lecturer, degrees, certificates, getStatusColor }: OverviewTabProps) => {
+const OverviewTab = ({ lecturer }: OverviewTabProps) => {
   return (
     <div className="space-y-6">
       {/* Bio Section - Enhanced */}
@@ -56,7 +46,7 @@ const OverviewTab = ({ lecturer, degrees, certificates, getStatusColor }: Overvi
       )}
 
       {/* Recent Activities - Enhanced */}
-      <div>
+      {/* <div>
         <Typography
           variant="h6"
           className="mb-4 font-semibold"
@@ -150,7 +140,7 @@ const OverviewTab = ({ lecturer, degrees, certificates, getStatusColor }: Overvi
             </div>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
     </div>
   );
 };

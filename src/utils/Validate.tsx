@@ -1,5 +1,7 @@
 import type { InstitutionRequest } from "../types/InstitutionRequest";
 import type { PartnerRequest } from "../types/PartnerRequest";
+import type { AttendedCourseRequest } from "../types/AttendedCourse";
+import type { ResearchProjectRequest } from "../types/ResearchProject";
 
 type validateResult = {
   success: boolean;
@@ -79,6 +81,136 @@ export const validateCourseForm = (formData: any) => {
   ) {
     errors.success = false;
     errors.error = "Ngày bắt đầu phải trước ngày kết thúc.";
+  }
+
+  return errors;
+};
+
+export const validateAttendedCourseForm = (formData: AttendedCourseRequest) => {
+  const errors: validateResult = {
+    success: true,
+    error: "",
+  };
+
+  // Validate title
+  if (
+    !formData.title ||
+    formData.title.trim() === "" ||
+    formData.title.length < 3 ||
+    formData.title.length > 100
+  ) {
+    errors.success = false;
+    errors.error = "Tiêu đề khóa học không hợp lệ (3-100 ký tự).";
+    return errors;
+  }
+
+  // Validate topic
+  if (
+    !formData.topic ||
+    formData.topic.trim() === "" ||
+    formData.topic.length < 3 ||
+    formData.topic.length > 50
+  ) {
+    errors.success = false;
+    errors.error = "Chủ đề khóa học không hợp lệ (3-50 ký tự).";
+    return errors;
+  }
+
+  // Validate organizer
+  if (
+    !formData.organizer ||
+    formData.organizer.trim() === "" ||
+    formData.organizer.length < 3 ||
+    formData.organizer.length > 100
+  ) {
+    errors.success = false;
+    errors.error = "Đơn vị tổ chức không hợp lệ (3-100 ký tự).";
+    return errors;
+  }
+
+  // Validate courseType
+  if (!formData.courseType || formData.courseType.trim() === "") {
+    errors.success = false;
+    errors.error = "Loại khóa học là bắt buộc.";
+    return errors;
+  }
+
+  // Validate scale
+  if (!formData.scale || formData.scale.trim() === "") {
+    errors.success = false;
+    errors.error = "Quy mô khóa học là bắt buộc.";
+    return errors;
+  }
+
+  // Validate startDate
+  if (!formData.startDate) {
+    errors.success = false;
+    errors.error = "Ngày bắt đầu là bắt buộc.";
+    return errors;
+  }
+
+  // Validate endDate
+  if (!formData.endDate) {
+    errors.success = false;
+    errors.error = "Ngày kết thúc là bắt buộc.";
+    return errors;
+  }
+
+  // Validate date logic
+  if (
+    formData.startDate &&
+    formData.endDate &&
+    new Date(formData.startDate) >= new Date(formData.endDate)
+  ) {
+    errors.success = false;
+    errors.error = "Ngày bắt đầu phải trước ngày kết thúc.";
+    return errors;
+  }
+
+  // Validate numberOfHour
+  if (
+    !formData.numberOfHour ||
+    isNaN(Number(formData.numberOfHour)) ||
+    Number(formData.numberOfHour) <= 0 ||
+    Number(formData.numberOfHour) > 1000
+  ) {
+    errors.success = false;
+    errors.error = "Số giờ học không hợp lệ (1-1000 giờ).";
+    return errors;
+  }
+
+  // Validate location
+  if (
+    !formData.location ||
+    formData.location.trim() === "" ||
+    formData.location.length < 3 ||
+    formData.location.length > 200
+  ) {
+    errors.success = false;
+    errors.error = "Địa điểm không hợp lệ (3-200 ký tự).";
+    return errors;
+  }
+
+  // Validate description (optional but with limit)
+  if (formData.description && formData.description.length > 500) {
+    errors.success = false;
+    errors.error = "Mô tả khóa học không được vượt quá 500 ký tự.";
+    return errors;
+  }
+
+  // Validate courseUrl (optional but must be valid URL if provided)
+  if (formData.courseUrl && formData.courseUrl.trim() !== "") {
+    if (formData.courseUrl.length > 200) {
+      errors.success = false;
+      errors.error = "URL khóa học không được vượt quá 200 ký tự.";
+      return errors;
+    }
+    
+    if (!isValidURL(formData.courseUrl)) {
+      errors.success = false;
+      errors.error = "URL khóa học không hợp lệ.";
+      return errors;
+    }
   }
 
   return errors;
@@ -585,6 +717,142 @@ export const validateCertificateInfo = (formData: any) => {
     errors.success = false;
     errors.error = "Ngày hết hạn phải sau ngày cấp";
     errors.errorField = "expiryDate";
+    return errors;
+  }
+
+  return errors;
+};
+
+export const validateResearchProjectForm = (formData: ResearchProjectRequest) => {
+  const errors: validateResult = {
+    success: true,
+    error: "",
+  };
+
+  // Validate title
+  if (
+    !formData.title ||
+    formData.title.trim() === "" ||
+    formData.title.length < 3 ||
+    formData.title.length > 100
+  ) {
+    errors.success = false;
+    errors.error = "Tiêu đề dự án không hợp lệ (3-100 ký tự).";
+    return errors;
+  }
+
+  // Validate researchArea
+  if (
+    !formData.researchArea ||
+    formData.researchArea.trim() === "" ||
+    formData.researchArea.length < 3 ||
+    formData.researchArea.length > 100
+  ) {
+    errors.success = false;
+    errors.error = "Lĩnh vực nghiên cứu không hợp lệ (3-100 ký tự).";
+    return errors;
+  }
+
+  // Validate scale
+  if (!formData.scale || formData.scale.trim() === "") {
+    errors.success = false;
+    errors.error = "Quy mô dự án là bắt buộc.";
+    return errors;
+  }
+
+  // Validate startDate
+  if (!formData.startDate) {
+    errors.success = false;
+    errors.error = "Ngày bắt đầu là bắt buộc.";
+    return errors;
+  }
+
+  // Validate endDate
+  if (!formData.endDate) {
+    errors.success = false;
+    errors.error = "Ngày kết thúc là bắt buộc.";
+    return errors;
+  }
+
+  // Validate date logic
+  if (
+    formData.startDate &&
+    formData.endDate &&
+    new Date(formData.startDate) >= new Date(formData.endDate)
+  ) {
+    errors.success = false;
+    errors.error = "Ngày bắt đầu phải trước ngày kết thúc.";
+    return errors;
+  }
+
+  // Validate foundingAmount
+  if (
+    formData.foundingAmount !== undefined &&
+    formData.foundingAmount !== null &&
+    (isNaN(Number(formData.foundingAmount)) || Number(formData.foundingAmount) < 0)
+  ) {
+    errors.success = false;
+    errors.error = "Số tiền tài trợ không hợp lệ.";
+    return errors;
+  }
+
+  // Validate foundingSource
+  if (
+    !formData.foundingSource ||
+    formData.foundingSource.trim() === "" ||
+    formData.foundingSource.length < 3 ||
+    formData.foundingSource.length > 100
+  ) {
+    errors.success = false;
+    errors.error = "Nguồn tài trợ không hợp lệ (3-100 ký tự).";
+    return errors;
+  }
+
+  // Validate projectType
+  if (!formData.projectType || formData.projectType.trim() === "") {
+    errors.success = false;
+    errors.error = "Loại dự án là bắt buộc.";
+    return errors;
+  }
+
+  // Validate roleInProject
+  if (
+    !formData.roleInProject ||
+    formData.roleInProject.trim() === "" ||
+    formData.roleInProject.length < 3 ||
+    formData.roleInProject.length > 50
+  ) {
+    errors.success = false;
+    errors.error = "Vai trò trong dự án không hợp lệ (3-50 ký tự).";
+    return errors;
+  }
+
+  // Validate publishedUrl (optional but must be valid URL if provided)
+  if (formData.publishedUrl && formData.publishedUrl.trim() !== "") {
+    if (formData.publishedUrl.length > 200) {
+      errors.success = false;
+      errors.error = "URL xuất bản không được vượt quá 200 ký tự.";
+      return errors;
+    }
+    
+    if (!isValidURL(formData.publishedUrl)) {
+      errors.success = false;
+      errors.error = "URL xuất bản không hợp lệ.";
+      return errors;
+    }
+  }
+
+  // Validate courseStatus
+  if (!formData.courseStatus || formData.courseStatus.trim() === "") {
+    errors.success = false;
+    errors.error = "Trạng thái khóa học là bắt buộc.";
+    return errors;
+  }
+
+  // Validate description (optional but with limit)
+  if (formData.description && formData.description.length > 500) {
+    errors.success = false;
+    errors.error = "Mô tả dự án không được vượt quá 500 ký tự.";
     return errors;
   }
 

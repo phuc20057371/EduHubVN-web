@@ -44,7 +44,7 @@ export const specializationAutoComplete = [
   "Kỹ thuật phần cứng",
   "Kỹ thuật nhúng",
   "Phát triển trò chơi (Game Development)",
-  
+
   // Kinh tế & Quản lý
   "Kinh tế học",
   "Quản trị kinh doanh",
@@ -56,7 +56,7 @@ export const specializationAutoComplete = [
   "Thương mại điện tử",
   "Kinh doanh quốc tế",
   "Quản trị nhân sự",
-  
+
   // Khoa học Tự nhiên
   "Toán học",
   "Toán ứng dụng",
@@ -67,7 +67,7 @@ export const specializationAutoComplete = [
   "Sinh học",
   "Khoa học môi trường",
   "Địa chất học",
-  
+
   // Kỹ thuật & Công nghệ
   "Kỹ thuật cơ khí",
   "Kỹ thuật điện",
@@ -79,7 +79,7 @@ export const specializationAutoComplete = [
   "Kỹ thuật vật liệu",
   "Kỹ thuật năng lượng",
   "Cơ điện tử",
-  
+
   // Y dược & Sức khỏe
   "Y khoa",
   "Điều dưỡng",
@@ -88,7 +88,7 @@ export const specializationAutoComplete = [
   "Y tế công cộng",
   "Răng - Hàm - Mặt",
   "Y học cổ truyền",
-  
+
   // Khoa học xã hội & Nhân văn
   "Luật học",
   "Khoa học chính trị",
@@ -99,7 +99,7 @@ export const specializationAutoComplete = [
   "Lịch sử",
   "Triết học",
   "Nhân học",
-  
+
   // Ngoại ngữ
   "Tiếng Anh",
   "Tiếng Trung",
@@ -109,7 +109,7 @@ export const specializationAutoComplete = [
   "Tiếng Đức",
   "Tiếng Nga",
   "Tiếng Tây Ban Nha",
-  
+
   // Nghệ thuật & Thiết kế
   "Mỹ thuật",
   "Thiết kế đồ họa",
@@ -120,7 +120,6 @@ export const specializationAutoComplete = [
   "Sân khấu - Điện ảnh",
   "Kiến trúc",
 ];
-
 
 export const jobFieldAutoComplete = [
   // Công nghệ & Kỹ thuật
@@ -134,7 +133,7 @@ export const jobFieldAutoComplete = [
   "Kỹ thuật xây dựng",
   "Kỹ thuật điều khiển & Tự động hóa",
   "Năng lượng & Môi trường",
-  
+
   // Kinh tế & Quản lý
   "Kinh tế",
   "Tài chính - Ngân hàng",
@@ -145,20 +144,20 @@ export const jobFieldAutoComplete = [
   "Logistics - Chuỗi cung ứng",
   "Thương mại điện tử",
   "Nhân sự",
-  
+
   // Y tế & Chăm sóc sức khỏe
   "Y khoa",
   "Dược",
   "Điều dưỡng",
   "Y tế công cộng",
   "Kỹ thuật y sinh",
-  
+
   // Giáo dục & Nghiên cứu
   "Giáo dục",
   "Nghiên cứu khoa học",
   "Ngôn ngữ học",
   "Tâm lý học",
-  
+
   // Nghệ thuật & Sáng tạo
   "Mỹ thuật",
   "Thiết kế đồ họa",
@@ -166,7 +165,7 @@ export const jobFieldAutoComplete = [
   "Kiến trúc",
   "Âm nhạc",
   "Điện ảnh - Truyền hình",
-  
+
   // Dịch vụ & Du lịch
   "Du lịch - Khách sạn",
   "Ẩm thực",
@@ -174,3 +173,29 @@ export const jobFieldAutoComplete = [
   "Vận tải",
 ];
 
+//====================
+
+export const majors = [
+  "Công nghệ thông tin",
+  "Kỹ thuật phần mềm",
+  "Quản trị kinh doanh",
+  "Kế toán",
+  "Ngôn ngữ Anh",
+  "Sư phạm Toán",
+  "Sư phạm Văn",
+  "Y đa khoa",
+  "Dược học",
+  "Luật",
+];
+
+export const degreeLevels = [
+  "Kĩ sư",
+  "Cử nhân",
+  "Thạc sĩ",
+  "Tiến sĩ",
+  "Phó Giáo sư",
+  "Giáo sư",
+];
+
+// Research Project Types
+export const researchProjectStatus = ["Đang thực hiện", "Hoàn thành", "Tạm dừng"];

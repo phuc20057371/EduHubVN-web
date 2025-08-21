@@ -42,9 +42,11 @@ import {
   DarkMode,
   AdminPanelSettings,
 } from "@mui/icons-material";
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import LogoWeb from "../assets/eduhub-03.png";
 import { colors } from "../theme/colors";
+import WebSocketService from "../services/WebSocketService";
+import { AdminMessageHandler } from "../services/AdminMessageHandler";
 
 const AdminLayout = () => {
   const dispatch = useDispatch();
@@ -54,6 +56,8 @@ const AdminLayout = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Sử dụng AdminMessageHandler để xử lý message WebSocket
 
   // Function to check if current path matches button path
   const isActivePath = (path: string) => {
@@ -74,6 +78,24 @@ const AdminLayout = () => {
     };
     fetchUserData();
   }, [dispatch, navigate]);
+
+  // WebSocket connection effect
+  useEffect(() => {
+    if (userProfile && userProfile.role === "ADMIN") {
+      WebSocketService.connect(
+        userProfile,
+        () => console.log("✅ Admin WebSocket connected"),
+        (message) => {
+          AdminMessageHandler.handleIncomingMessage(message, dispatch);
+        },
+      );
+    }
+
+    // Cleanup khi component unmount
+    return () => {
+      WebSocketService.disconnect();
+    };
+  }, [userProfile]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -104,50 +126,57 @@ const AdminLayout = () => {
   };
 
   const menuItems = [
-    { 
-      text: "Dashboard", 
-      icon: <Dashboard />, 
+    {
+      text: "Dashboard",
+      icon: <Dashboard />,
       path: "/admin",
-      description: "Tổng quan hệ thống"
+      description: "Tổng quan hệ thống",
     },
-    { 
-      text: "Giảng viên", 
-      icon: <Person />, 
+    {
+      text: "Giảng viên",
+      icon: <Person />,
       path: "/admin/lecturers",
-      description: "Quản lý giảng viên"
+      description: "Quản lý giảng viên",
     },
     {
       text: "Trung tâm đào tạo",
       icon: <School />,
       path: "/admin/institutions",
-      description: "Quản lý trung tâm"
+      description: "Quản lý trung tâm",
     },
-    { 
-      text: "Đơn vị tổ chức", 
-      icon: <Business />, 
+    {
+      text: "Đơn vị tổ chức",
+      icon: <Business />,
       path: "/admin/partners",
-      description: "Quản lý đối tác"
+      description: "Quản lý đối tác",
     },
-    { 
-      text: "Khóa học", 
-      icon: <AccountBalanceWalletIcon />, 
+    {
+      text: "Khóa học",
+      icon: <AccountBalanceWalletIcon />,
       path: "/admin/courses",
-      description: "Quản lý khóa học"
+      description: "Quản lý khóa học",
     },
   ];
 
   const drawer = (
     <Box sx={{ height: "100%", background: colors.background.secondary }}>
       {/* Logo Section */}
-      <Box 
-        sx={{ 
-          p: 3, 
+      <Box
+        sx={{
+          p: 3,
           background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[700]} 100%)`,
           color: "white",
-          textAlign: "center"
+          textAlign: "center",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            mb: 1,
+          }}
+        >
           <img
             src={LogoWeb}
             style={{ width: "32px", height: "32px", marginRight: "12px" }}
@@ -155,10 +184,10 @@ const AdminLayout = () => {
           />
           <Typography
             variant="h6"
-            sx={{ 
+            sx={{
               fontWeight: 700,
               fontSize: "1.1rem",
-              letterSpacing: "0.5px"
+              letterSpacing: "0.5px",
             }}
           >
             EduHubVN
@@ -171,13 +200,13 @@ const AdminLayout = () => {
             bgcolor: alpha("#fff", 0.2),
             color: "white",
             fontSize: "0.75rem",
-            height: "20px"
+            height: "20px",
           }}
         />
       </Box>
 
       <Divider sx={{ borderColor: colors.border.light }} />
-      
+
       {/* Navigation Items */}
       <List sx={{ px: 2, py: 2 }}>
         {menuItems.map((item) => (
@@ -189,8 +218,8 @@ const AdminLayout = () => {
                 backgroundColor: isActivePath(item.path)
                   ? colors.primary[50]
                   : "transparent",
-                border: isActivePath(item.path) 
-                  ? `1px solid ${colors.primary[200]}` 
+                border: isActivePath(item.path)
+                  ? `1px solid ${colors.primary[200]}`
                   : "1px solid transparent",
                 "&:hover": {
                   backgroundColor: isActivePath(item.path)
@@ -209,10 +238,12 @@ const AdminLayout = () => {
               <ListItemIcon
                 sx={{
                   minWidth: 44,
-                  color: isActivePath(item.path) ? colors.primary[600] : colors.neutral[600],
+                  color: isActivePath(item.path)
+                    ? colors.primary[600]
+                    : colors.neutral[600],
                   "& .MuiSvgIcon-root": {
-                    fontSize: "1.3rem"
-                  }
+                    fontSize: "1.3rem",
+                  },
                 }}
               >
                 {item.icon}
@@ -222,15 +253,17 @@ const AdminLayout = () => {
                 secondary={item.description}
                 sx={{
                   "& .MuiListItemText-primary": {
-                    color: isActivePath(item.path) ? colors.primary[700] : colors.neutral[800],
+                    color: isActivePath(item.path)
+                      ? colors.primary[700]
+                      : colors.neutral[800],
                     fontWeight: isActivePath(item.path) ? 600 : 500,
                     fontSize: "0.95rem",
                   },
                   "& .MuiListItemText-secondary": {
                     color: colors.neutral[500],
                     fontSize: "0.75rem",
-                    marginTop: "2px"
-                  }
+                    marginTop: "2px",
+                  },
                 }}
               />
               {isActivePath(item.path) && (
@@ -240,7 +273,7 @@ const AdminLayout = () => {
                     height: 20,
                     bgcolor: colors.primary[500],
                     borderRadius: 2,
-                    ml: 1
+                    ml: 1,
                   }}
                 />
               )}
@@ -256,7 +289,7 @@ const AdminLayout = () => {
             background: `linear-gradient(135deg, ${colors.accent.lightBlue} 0%, ${colors.accent.sky} 100%)`,
             color: "white",
             textAlign: "center",
-            py: 2
+            py: 2,
           }}
         >
           <CardContent sx={{ py: "16px !important" }}>
@@ -276,13 +309,13 @@ const AdminLayout = () => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       {/* Modern Header */}
-      <AppBar 
-        position="static" 
+      <AppBar
+        position="static"
         elevation={0}
-        sx={{ 
+        sx={{
           background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[700]} 100%)`,
           borderBottom: `1px solid ${colors.border.light}`,
-          backdropFilter: "blur(10px)"
+          backdropFilter: "blur(10px)",
         }}
       >
         <Container maxWidth="xl">
@@ -293,13 +326,13 @@ const AdminLayout = () => {
               aria-label="open drawer"
               edge="start"
               onClick={handleDrawerToggle}
-              sx={{ 
-                mr: 2, 
+              sx={{
+                mr: 2,
                 display: { md: "none" },
                 bgcolor: alpha("#fff", 0.1),
                 "&:hover": {
                   bgcolor: alpha("#fff", 0.2),
-                }
+                },
               }}
             >
               <MenuIcon />
@@ -314,7 +347,7 @@ const AdminLayout = () => {
                   p: 1,
                   borderRadius: 2,
                   bgcolor: alpha("#fff", 0.1),
-                  mr: 2
+                  mr: 2,
                 }}
               >
                 <img
@@ -333,7 +366,7 @@ const AdminLayout = () => {
                     letterSpacing: "-0.5px",
                     color: "white",
                     lineHeight: 1.2,
-                    display: { xs: "none", sm: "block" }
+                    display: { xs: "none", sm: "block" },
                   }}
                 >
                   EduHubVN
@@ -343,7 +376,7 @@ const AdminLayout = () => {
                   sx={{
                     color: alpha("#fff", 0.8),
                     fontWeight: 500,
-                    display: { xs: "none", sm: "block" }
+                    display: { xs: "none", sm: "block" },
                   }}
                 >
                   Admin Dashboard
@@ -353,11 +386,11 @@ const AdminLayout = () => {
 
             {/* Desktop Navigation */}
             <Box
-              sx={{ 
-                flexGrow: 1, 
-                display: { xs: "none", md: "flex" }, 
+              sx={{
+                flexGrow: 1,
+                display: { xs: "none", md: "flex" },
                 gap: 1,
-                ml: 2
+                ml: 2,
               }}
             >
               {menuItems.map((item) => (
@@ -373,8 +406,8 @@ const AdminLayout = () => {
                     backgroundColor: isActivePath(item.path)
                       ? alpha("#fff", 0.2)
                       : "transparent",
-                    border: isActivePath(item.path) 
-                      ? `1px solid ${alpha("#fff", 0.3)}` 
+                    border: isActivePath(item.path)
+                      ? `1px solid ${alpha("#fff", 0.3)}`
                       : "1px solid transparent",
                     "&:hover": {
                       backgroundColor: alpha("#fff", 0.15),
@@ -384,7 +417,7 @@ const AdminLayout = () => {
                     transition: "all 0.2s ease-in-out",
                     textTransform: "none",
                     fontWeight: isActivePath(item.path) ? 600 : 500,
-                    fontSize: "0.9rem"
+                    fontSize: "0.9rem",
                   }}
                 >
                   {item.text}
@@ -408,27 +441,27 @@ const AdminLayout = () => {
               </IconButton> */}
 
               {/* Theme Toggle */}
-              <IconButton 
+              <IconButton
                 onClick={toggleTheme}
                 color="inherit"
                 sx={{
                   bgcolor: alpha("#fff", 0.1),
                   "&:hover": {
                     bgcolor: alpha("#fff", 0.2),
-                  }
+                  },
                 }}
               >
                 {isDarkMode ? <LightMode /> : <DarkMode />}
               </IconButton>
 
               {/* Notifications */}
-              <IconButton 
+              <IconButton
                 color="inherit"
                 sx={{
                   bgcolor: alpha("#fff", 0.1),
                   "&:hover": {
                     bgcolor: alpha("#fff", 0.2),
-                  }
+                  },
                 }}
               >
                 <Badge badgeContent={3} color="error" variant="dot">
@@ -450,28 +483,39 @@ const AdminLayout = () => {
                   "&:hover": {
                     bgcolor: alpha("#fff", 0.2),
                   },
-                  textTransform: "none"
+                  textTransform: "none",
                 }}
               >
                 <Avatar
                   alt={userProfile?.fullName || "Admin"}
                   src="/static/images/avatar/admin.jpg"
-                  sx={{ 
-                    width: 32, 
-                    height: 32, 
+                  sx={{
+                    width: 32,
+                    height: 32,
                     mr: 1,
                     bgcolor: colors.secondary[500],
                     fontSize: "0.9rem",
-                    fontWeight: 600
+                    fontWeight: 600,
                   }}
                 >
                   {userProfile?.fullName?.charAt(0) || "A"}
                 </Avatar>
-                <Box sx={{ textAlign: "left", display: { xs: "none", sm: "block" } }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+                <Box
+                  sx={{
+                    textAlign: "left",
+                    display: { xs: "none", sm: "block" },
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 600, lineHeight: 1.2 }}
+                  >
                     {userProfile?.fullName || "Administrator"}
                   </Typography>
-                  <Typography variant="caption" sx={{ opacity: 0.8, lineHeight: 1 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ opacity: 0.8, lineHeight: 1 }}
+                  >
                     Quản trị viên
                   </Typography>
                 </Box>
@@ -479,14 +523,14 @@ const AdminLayout = () => {
 
               {/* Enhanced User Menu */}
               <Menu
-                sx={{ 
+                sx={{
                   mt: "45px",
                   "& .MuiPaper-root": {
                     borderRadius: 2,
                     minWidth: 200,
                     boxShadow: `0 8px 24px ${alpha("#000", 0.12)}`,
-                    border: `1px solid ${colors.border.light}`
-                  }
+                    border: `1px solid ${colors.border.light}`,
+                  },
                 }}
                 id="menu-appbar"
                 anchorEl={anchorEl}
@@ -502,51 +546,63 @@ const AdminLayout = () => {
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
               >
-                <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${colors.border.light}` }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: colors.text.primary }}>
+                <Box
+                  sx={{
+                    px: 2,
+                    py: 1.5,
+                    borderBottom: `1px solid ${colors.border.light}`,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ fontWeight: 600, color: colors.text.primary }}
+                  >
                     {userProfile?.fullName || "Administrator"}
                   </Typography>
-                  <Typography variant="caption" sx={{ color: colors.text.tertiary }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: colors.text.tertiary }}
+                  >
                     {userProfile?.email || "admin@eduhubvn.com"}
                   </Typography>
                 </Box>
-                
-                <MenuItem 
+
+                <MenuItem
                   onClick={handleProfile}
                   sx={{
                     py: 1.5,
                     "&:hover": {
-                      bgcolor: colors.primary[50]
-                    }
+                      bgcolor: colors.primary[50],
+                    },
                   }}
                 >
                   <AccountCircle sx={{ mr: 2, color: colors.primary[500] }} />
                   <Typography>Hồ sơ cá nhân</Typography>
                 </MenuItem>
-                
-                <MenuItem 
+
+                <MenuItem
                   onClick={handleMenuClose}
                   sx={{
                     py: 1.5,
                     "&:hover": {
-                      bgcolor: colors.primary[50]
-                    }
+                      bgcolor: colors.primary[50],
+                    },
                   }}
                 >
                   <Settings sx={{ mr: 2, color: colors.primary[500] }} />
                   <Typography>Cài đặt hệ thống</Typography>
                 </MenuItem>
-                
+
                 <Divider sx={{ my: 1 }} />
-                
-                <MenuItem 
+
+                <MenuItem
                   onClick={handleLogout}
                   sx={{
                     py: 1.5,
                     color: colors.error[600],
                     "&:hover": {
-                      bgcolor: colors.error[50]
-                    }
+                      bgcolor: colors.error[50],
+                    },
                   }}
                 >
                   <Logout sx={{ mr: 2 }} />
@@ -568,11 +624,11 @@ const AdminLayout = () => {
         }}
         sx={{
           display: { xs: "block", md: "none" },
-          "& .MuiDrawer-paper": { 
-            boxSizing: "border-box", 
+          "& .MuiDrawer-paper": {
+            boxSizing: "border-box",
             width: 280,
             border: "none",
-            boxShadow: `0 8px 32px ${alpha("#000", 0.12)}`
+            boxShadow: `0 8px 32px ${alpha("#000", 0.12)}`,
           },
         }}
       >
@@ -580,13 +636,13 @@ const AdminLayout = () => {
       </Drawer>
 
       {/* Modern Main Content */}
-      <Box 
-        component="main" 
-        sx={{ 
-          flexGrow: 1, 
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
           background: `linear-gradient(180deg, ${colors.background.tertiary} 0%, ${colors.background.secondary} 100%)`,
           minHeight: "calc(100vh - 140px)",
-          position: "relative"
+          position: "relative",
         }}
       >
         <Box
@@ -598,11 +654,14 @@ const AdminLayout = () => {
             height: "200px",
             background: `radial-gradient(circle at 20% 20%, ${alpha(colors.primary[200], 0.3)} 0%, transparent 50%),
                         radial-gradient(circle at 80% 80%, ${alpha(colors.secondary[200], 0.3)} 0%, transparent 50%)`,
-            zIndex: 0
+            zIndex: 0,
           }}
         />
-        
-        <Container maxWidth="xl" sx={{ py: 4, position: "relative", zIndex: 1 }}>
+
+        <Container
+          maxWidth="xl"
+          sx={{ py: 4, position: "relative", zIndex: 1 }}
+        >
           <Outlet />
         </Container>
       </Box>
@@ -615,7 +674,7 @@ const AdminLayout = () => {
           color: "white",
           mt: "auto",
           position: "relative",
-          overflow: "hidden"
+          overflow: "hidden",
         }}
       >
         {/* Footer Background Pattern */}
@@ -628,10 +687,10 @@ const AdminLayout = () => {
             bottom: 0,
             background: `radial-gradient(circle at 10% 20%, ${alpha(colors.primary[500], 0.1)} 0%, transparent 50%),
                         radial-gradient(circle at 90% 80%, ${alpha(colors.secondary[500], 0.1)} 0%, transparent 50%)`,
-            zIndex: 0
+            zIndex: 0,
           }}
         />
-        
+
         <Container maxWidth="xl" sx={{ position: "relative", zIndex: 1 }}>
           <Box sx={{ py: 4 }}>
             <Box
@@ -641,23 +700,41 @@ const AdminLayout = () => {
                 justifyContent: "space-between",
                 alignItems: { xs: "center", md: "flex-start" },
                 gap: { xs: 3, md: 4 },
-                mb: 3
+                mb: 3,
               }}
             >
               {/* Brand Section */}
               <Box sx={{ textAlign: { xs: "center", md: "left" } }}>
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2, justifyContent: { xs: "center", md: "flex-start" } }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    mb: 2,
+                    justifyContent: { xs: "center", md: "flex-start" },
+                  }}
+                >
                   <img
                     src={LogoWeb}
-                    style={{ width: "32px", height: "32px", marginRight: "12px" }}
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      marginRight: "12px",
+                    }}
                     alt="EduHubVN"
                   />
-                  <Typography variant="h6" sx={{ fontWeight: 700, fontSize: "1.25rem" }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 700, fontSize: "1.25rem" }}
+                  >
                     EduHub Admin
                   </Typography>
                 </Box>
-                <Typography variant="body2" sx={{ opacity: 0.8, mb: 1, maxWidth: 300 }}>
-                  Hệ thống quản trị toàn diện cho nền tảng giáo dục trực tuyến hàng đầu Việt Nam
+                <Typography
+                  variant="body2"
+                  sx={{ opacity: 0.8, mb: 1, maxWidth: 300 }}
+                >
+                  Hệ thống quản trị toàn diện cho nền tảng giáo dục trực tuyến
+                  hàng đầu Việt Nam
                 </Typography>
                 <Typography variant="caption" sx={{ opacity: 0.6 }}>
                   © 2025 EduHub Vietnam. Tất cả quyền được bảo lưu.
@@ -668,48 +745,61 @@ const AdminLayout = () => {
               <Box
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    sm: "repeat(2, 1fr)",
+                    md: "repeat(3, 1fr)",
+                  },
                   gap: 3,
-                  minWidth: { md: "400px" }
+                  minWidth: { md: "400px" },
                 }}
               >
                 {/* Management Links */}
                 <Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, color: colors.primary[300] }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 600,
+                      mb: 1.5,
+                      color: colors.primary[300],
+                    }}
+                  >
                     Quản lý
                   </Typography>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.8 }}>
-                    <Button 
-                      color="inherit" 
-                      size="small" 
-                      sx={{ 
-                        justifyContent: "flex-start", 
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", gap: 0.8 }}
+                  >
+                    <Button
+                      color="inherit"
+                      size="small"
+                      sx={{
+                        justifyContent: "flex-start",
                         opacity: 0.8,
-                        "&:hover": { opacity: 1, color: colors.primary[300] }
+                        "&:hover": { opacity: 1, color: colors.primary[300] },
                       }}
                       onClick={() => navigate("/admin/lecturers")}
                     >
                       Giảng viên
                     </Button>
-                    <Button 
-                      color="inherit" 
-                      size="small" 
-                      sx={{ 
-                        justifyContent: "flex-start", 
+                    <Button
+                      color="inherit"
+                      size="small"
+                      sx={{
+                        justifyContent: "flex-start",
                         opacity: 0.8,
-                        "&:hover": { opacity: 1, color: colors.primary[300] }
+                        "&:hover": { opacity: 1, color: colors.primary[300] },
                       }}
                       onClick={() => navigate("/admin/institutions")}
                     >
                       Trung tâm đào tạo
                     </Button>
-                    <Button 
-                      color="inherit" 
-                      size="small" 
-                      sx={{ 
-                        justifyContent: "flex-start", 
+                    <Button
+                      color="inherit"
+                      size="small"
+                      sx={{
+                        justifyContent: "flex-start",
                         opacity: 0.8,
-                        "&:hover": { opacity: 1, color: colors.primary[300] }
+                        "&:hover": { opacity: 1, color: colors.primary[300] },
                       }}
                       onClick={() => navigate("/admin/courses")}
                     >
@@ -720,39 +810,48 @@ const AdminLayout = () => {
 
                 {/* Support Links */}
                 <Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, color: colors.primary[300] }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 600,
+                      mb: 1.5,
+                      color: colors.primary[300],
+                    }}
+                  >
                     Hỗ trợ
                   </Typography>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.8 }}>
-                    <Button 
-                      color="inherit" 
-                      size="small" 
-                      sx={{ 
-                        justifyContent: "flex-start", 
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", gap: 0.8 }}
+                  >
+                    <Button
+                      color="inherit"
+                      size="small"
+                      sx={{
+                        justifyContent: "flex-start",
                         opacity: 0.8,
-                        "&:hover": { opacity: 1, color: colors.primary[300] }
+                        "&:hover": { opacity: 1, color: colors.primary[300] },
                       }}
                     >
                       Hướng dẫn quản trị
                     </Button>
-                    <Button 
-                      color="inherit" 
-                      size="small" 
-                      sx={{ 
-                        justifyContent: "flex-start", 
+                    <Button
+                      color="inherit"
+                      size="small"
+                      sx={{
+                        justifyContent: "flex-start",
                         opacity: 0.8,
-                        "&:hover": { opacity: 1, color: colors.primary[300] }
+                        "&:hover": { opacity: 1, color: colors.primary[300] },
                       }}
                     >
                       Hỗ trợ kỹ thuật
                     </Button>
-                    <Button 
-                      color="inherit" 
-                      size="small" 
-                      sx={{ 
-                        justifyContent: "flex-start", 
+                    <Button
+                      color="inherit"
+                      size="small"
+                      sx={{
+                        justifyContent: "flex-start",
                         opacity: 0.8,
-                        "&:hover": { opacity: 1, color: colors.primary[300] }
+                        "&:hover": { opacity: 1, color: colors.primary[300] },
                       }}
                     >
                       Báo cáo sự cố
@@ -762,10 +861,19 @@ const AdminLayout = () => {
 
                 {/* System Info */}
                 <Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, color: colors.primary[300] }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 600,
+                      mb: 1.5,
+                      color: colors.primary[300],
+                    }}
+                  >
                     Hệ thống
                   </Typography>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.8 }}>
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", gap: 0.8 }}
+                  >
                     <Typography variant="caption" sx={{ opacity: 0.7 }}>
                       Phiên bản: 2.1.0
                     </Typography>
@@ -780,7 +888,7 @@ const AdminLayout = () => {
                         color: "white",
                         fontSize: "0.7rem",
                         height: "20px",
-                        width: "fit-content"
+                        width: "fit-content",
                       }}
                     />
                   </Box>
@@ -790,7 +898,7 @@ const AdminLayout = () => {
 
             {/* Bottom Border */}
             <Divider sx={{ borderColor: alpha("#fff", 0.1), mb: 2 }} />
-            
+
             {/* Bottom Footer */}
             <Box
               sx={{
@@ -798,13 +906,13 @@ const AdminLayout = () => {
                 flexDirection: { xs: "column", md: "row" },
                 justifyContent: "space-between",
                 alignItems: "center",
-                gap: 2
+                gap: 2,
               }}
             >
               <Typography variant="caption" sx={{ opacity: 0.6 }}>
                 Được phát triển với ❤️ bởi đội ngũ EduHub Vietnam
               </Typography>
-              
+
               <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
                 <Typography variant="caption" sx={{ opacity: 0.6 }}>
                   Bảo mật SSL

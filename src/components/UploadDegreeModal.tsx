@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import type { DegreeRequest } from "../types/DegreeRequest";
 import { API } from "../utils/Fetch";
 import { validateDegreeInfo } from "../utils/Validate";
+import { degreeLevels, majors } from "../utils/AutoComplete";
 
 const style = {
   position: "absolute" as const,
@@ -49,28 +50,6 @@ const style = {
     md: 0, // Desktop: no margin needed
   },
 };
-
-const degreeLevels = [
-  ,
-  "Kĩ sư",
-  "Cử nhân",
-  "Thạc sĩ",
-  "Tiến sĩ",
-  "Phó Giáo sư",
-  "Giáo sư",
-];
-const majors = [
-  "Công nghệ thông tin",
-  "Kỹ thuật phần mềm",
-  "Quản trị kinh doanh",
-  "Kế toán",
-  "Ngôn ngữ Anh",
-  "Sư phạm Toán",
-  "Sư phạm Văn",
-  "Y đa khoa",
-  "Dược học",
-  "Luật",
-];
 
 interface UploadDegreeModalProps {
   open: boolean;

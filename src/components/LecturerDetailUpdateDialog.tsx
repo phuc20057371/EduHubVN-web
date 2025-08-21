@@ -24,7 +24,7 @@ import SchoolIcon from "@mui/icons-material/School";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { API } from "../utils/Fetch";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setLecturerPendingUpdate } from "../redux/slice/LecturerPendingUpdateSlice";
 import type { Lecturer } from "../types/Lecturer";
 import { setLecturers } from "../redux/slice/LecturerSlice";
@@ -75,15 +75,23 @@ const LecturerDetailUpdateDialog = ({
   onClose,
   lecturer,
   lecturerUpdate,
+  onDataReloaded,
 }: {
   open: boolean;
   onClose: () => void;
   lecturer: Lecturer;
   lecturerUpdate: Lecturer;
+  onDataReloaded?: (updatedItem: any) => void;
 }) => {
   const [confirmType, setConfirmType] = useState<null | "approve" | "reject">(
     null,
   );
+  const lecturerUpdateList = useSelector((state: any) =>
+    Array.isArray(state.lecturerPendingUpdate)
+      ? state.lecturerPendingUpdate
+      : [],
+  );
+
   const [adminNote, setAdminNote] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -91,12 +99,50 @@ const LecturerDetailUpdateDialog = ({
 
   if (!open) return null;
 
+  const reloadData = async () => {
+    try {
+      const updateResponse = await API.admin.getLecturerPendingUpdate();
+      dispatch(setLecturerPendingUpdate(updateResponse.data.data));
+
+      // Find the updated item and pass it back to parent
+      const updatedItem = updateResponse.data.data.find(
+        (item: any) => item.lecturerUpdate.id === lecturerUpdate.id,
+      );
+
+      if (updatedItem && onDataReloaded) {
+        onDataReloaded(updatedItem);
+      }
+    } catch (error) {
+      console.error("Error reloading data:", error);
+      toast.error("Có lỗi khi tải lại dữ liệu");
+    }
+  };
+
   const handleConfirm = async (type: "approve" | "reject") => {
     if (type === "reject" && !adminNote.trim()) {
       toast.error("Vui lòng nhập lý do từ chối");
       return;
     }
-    setIsProcessing(true);
+    const currentItem = lecturerUpdateList.find(
+      (item: any) => item.lecturerUpdate.id === lecturerUpdate.id,
+    );
+    console.log("current", currentItem.lecturerUpdate.updatedAt);
+    console.log("lecturerUpdate", lecturerUpdate.updatedAt);
+    if (!currentItem) {
+      toast.error("⚠️ Không tìm thấy thông tin cập nhật");
+      return;
+    }
+    if (
+      currentItem &&
+      lecturerUpdate.updatedAt !== currentItem.lecturerUpdate.updatedAt
+    ) {
+      toast.warning("Dữ liệu đã thay đổi, đang tải lại dữ liệu mới...");
+      await reloadData();
+      setConfirmType(null);
+      setAdminNote("");
+      return;
+    }
+
     try {
       if (type === "approve") {
         await API.admin.approveLecturerUpdate({
@@ -116,7 +162,6 @@ const LecturerDetailUpdateDialog = ({
         dispatch(setLecturers(res.data.data));
         const updateResponse = await API.admin.getLecturerPendingUpdate();
         dispatch(setLecturerPendingUpdate(updateResponse.data.data));
-        toast.success("Duyệt thông tin cập nhật thành công!");
         toast.success("Từ chối thông tin cập nhật thành công!");
       }
       setConfirmType(null);

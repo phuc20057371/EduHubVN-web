@@ -33,7 +33,10 @@ import { toast } from "react-toastify";
 import { API } from "../utils/Fetch";
 import { validateLecturerInfo } from "../utils/Validate";
 import { setLecturerProfile } from "../redux/slice/LecturerProfileSlice";
-import { jobFieldAutoComplete, specializationAutoComplete } from "../utils/AutoComplete";
+import {
+  jobFieldAutoComplete,
+  specializationAutoComplete,
+} from "../utils/AutoComplete";
 
 interface LecturerUpdateDialogProps {
   open: boolean;
@@ -50,7 +53,7 @@ const LecturerUpdateInfoDialog = ({
   const dispatch = useDispatch();
   const [fullName, setFullName] = useState(lecturer.fullName || "");
   const [citizenId, setCitizenId] = useState(lecturer.citizenId || "");
-  const [email] = useState((lecturer as any).email || "");
+  const [email] = useState((lecturer as Lecturer).email || "");
   const [academicRank, setAcademicRank] = useState(lecturer.academicRank || "");
   const [specialization, setSpecialization] = useState(
     lecturer.specialization || "",
@@ -135,7 +138,6 @@ const LecturerUpdateInfoDialog = ({
         status,
         adminNote,
       };
-
       const res = await API.lecturer.updateProfile(updatedLecturer);
       if (res.data.success === false) {
         toast.error(res.data.error);

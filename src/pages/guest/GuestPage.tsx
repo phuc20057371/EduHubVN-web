@@ -140,7 +140,7 @@ const GuestPage = () => {
             <Typography
               variant="h1"
               sx={{
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Inter'",
                 fontWeight: 800,
                 mb: 4,
                 fontSize: { xs: "2.8rem", md: "4.2rem", lg: "4.8rem" },
@@ -158,7 +158,7 @@ const GuestPage = () => {
             <Typography
               variant="h5"
               sx={{
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Inter'",
                 mb: 6,
                 opacity: 0.92,
                 lineHeight: 1.65,
@@ -185,7 +185,7 @@ const GuestPage = () => {
                 size="large"
                 onClick={() => navigate("/register")}
                 sx={{
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: "'Inter'",
                   background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)",
                   px: { xs: 4, md: 6 },
                   py: { xs: 1.8, md: 2.2 },
@@ -209,7 +209,7 @@ const GuestPage = () => {
                 size="large"
                 onClick={() => navigate("/login")}
                 sx={{
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: "'Inter'",
                   borderColor: "rgba(255,255,255,0.7)",
                   color: "white",
                   borderWidth: 2,
@@ -242,7 +242,7 @@ const GuestPage = () => {
             <Typography 
               variant="h2" 
               sx={{ 
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Inter'",
                 fontWeight: 700, 
                 mb: 3, 
                 color: "#134e4a",
@@ -255,7 +255,7 @@ const GuestPage = () => {
             <Typography 
               variant="h6" 
               sx={{ 
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Inter'",
                 color: "#0f766e", 
                 maxWidth: "700px", 
                 mx: "auto",
@@ -327,7 +327,7 @@ const GuestPage = () => {
                     <Typography 
                       variant="h5" 
                       sx={{ 
-                        fontFamily: "'Inter', sans-serif",
+                        fontFamily: "'Inter'",
                         fontWeight: 600, 
                         mb: 3,
                         color: "#134e4a",
@@ -339,7 +339,7 @@ const GuestPage = () => {
                     <Typography 
                       variant="body1" 
                       sx={{ 
-                        fontFamily: "'Inter', sans-serif",
+                        fontFamily: "'Inter'",
                         color: "#0f766e", 
                         lineHeight: 1.65,
                         fontSize: "1.05rem",
@@ -363,7 +363,7 @@ const GuestPage = () => {
             <Typography 
               variant="h2" 
               sx={{ 
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Inter'",
                 fontWeight: 700, 
                 mb: 3, 
                 color: "#134e4a",
@@ -376,7 +376,7 @@ const GuestPage = () => {
             <Typography 
               variant="h6" 
               sx={{ 
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Inter'",
                 color: "#0f766e", 
                 maxWidth: "700px", 
                 mx: "auto",
@@ -442,7 +442,7 @@ const GuestPage = () => {
                       justifyContent: "center",
                       fontSize: "1rem",
                       fontWeight: 700,
-                      fontFamily: "'Inter', sans-serif",
+                      fontFamily: "'Inter'",
                       color: "white",
                       boxShadow: "0 4px 12px rgba(6, 182, 212, 0.3)"
                     }}
@@ -453,7 +453,7 @@ const GuestPage = () => {
                 <Typography 
                   variant="h5" 
                   sx={{ 
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: "'Inter'",
                     fontWeight: 600, 
                     mb: 3,
                     color: "#134e4a",
@@ -465,7 +465,7 @@ const GuestPage = () => {
                 <Typography 
                   variant="body1" 
                   sx={{ 
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: "'Inter'",
                     color: "#0f766e",
                     fontSize: "1.05rem",
                     lineHeight: 1.65,
@@ -487,7 +487,7 @@ const GuestPage = () => {
             <Typography 
               variant="h2" 
               sx={{ 
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Inter'",
                 fontWeight: 700, 
                 mb: 3,
                 fontSize: { xs: "2.5rem", md: "3.5rem" },
@@ -499,7 +499,7 @@ const GuestPage = () => {
             <Typography 
               variant="h6" 
               sx={{ 
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Inter'",
                 opacity: 0.9,
                 fontSize: { xs: "1.1rem", md: "1.3rem" },
                 fontWeight: 400
@@ -543,7 +543,7 @@ const GuestPage = () => {
                 <Typography
                   variant="h2"
                   sx={{ 
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: "'Inter'",
                     fontWeight: 800, 
                     mb: 2, 
                     color: "#06b6d4",
@@ -556,7 +556,7 @@ const GuestPage = () => {
                 <Typography 
                   variant="h6" 
                   sx={{ 
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: "'Inter'",
                     opacity: 0.95,
                     fontWeight: 500,
                     fontSize: { xs: "1rem", md: "1.2rem" }
@@ -577,7 +577,7 @@ const GuestPage = () => {
             <Typography 
               variant="h2" 
               sx={{ 
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Inter'",
                 fontWeight: 700, 
                 mb: 3, 
                 color: "#134e4a",
@@ -590,7 +590,7 @@ const GuestPage = () => {
             <Typography 
               variant="h6" 
               sx={{ 
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Inter'",
                 color: "#0f766e",
                 fontSize: { xs: "1.1rem", md: "1.3rem" },
                 fontWeight: 400
@@ -642,7 +642,7 @@ const GuestPage = () => {
                     <Typography
                       variant="body1"
                       sx={{ 
-                        fontFamily: "'Inter', sans-serif",
+                        fontFamily: "'Inter'",
                         mb: 4, 
                         fontStyle: "italic", 
                         lineHeight: 1.7,
@@ -670,7 +670,7 @@ const GuestPage = () => {
                         <Typography 
                           variant="h6" 
                           sx={{ 
-                            fontFamily: "'Inter', sans-serif",
+                            fontFamily: "'Inter'",
                             fontWeight: 600,
                             color: "#134e4a",
                             fontSize: "1.1rem"
@@ -681,7 +681,7 @@ const GuestPage = () => {
                         <Typography 
                           variant="body2" 
                           sx={{ 
-                            fontFamily: "'Inter', sans-serif",
+                            fontFamily: "'Inter'",
                             color: "#0f766e",
                             fontSize: "0.95rem",
                             fontWeight: 400
@@ -722,7 +722,7 @@ const GuestPage = () => {
             <Typography
               variant="h2"
               sx={{ 
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Inter'",
                 fontWeight: 700, 
                 mb: 4, 
                 fontSize: { xs: "2.5rem", md: "4rem" },
@@ -735,7 +735,7 @@ const GuestPage = () => {
             <Typography
               variant="h6"
               sx={{ 
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Inter'",
                 mb: 6, 
                 opacity: 0.92, 
                 maxWidth: "700px", 
@@ -762,7 +762,7 @@ const GuestPage = () => {
                 size="large"
                 onClick={() => navigate("/register")}
                 sx={{
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: "'Inter'",
                   background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)",
                   px: { xs: 6, md: 8 },
                   py: { xs: 2.2, md: 2.8 },
@@ -785,7 +785,7 @@ const GuestPage = () => {
                 variant="outlined"
                 size="large"
                 sx={{
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: "'Inter'",
                   borderColor: "rgba(255,255,255,0.7)",
                   color: "white",
                   borderWidth: 2,

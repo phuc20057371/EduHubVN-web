@@ -24,6 +24,9 @@ import {
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import LecturerUpdateInfoDialog from "../../components/LecturerUpdateInfoDialog";
+import CreateOwnedCourseDialog from "../../components/CreateOwnedCourseDialog";
+import CreateAttendedCourseDialog from "../../components/CreateAttendedCourseDialog";
+import CreateResearchProjectDialog from "../../components/CreateResearchProjectDialog";
 import { setLecturerProfile } from "../../redux/slice/LecturerProfileSlice";
 import { colors } from "../../theme/colors";
 import { API } from "../../utils/Fetch";
@@ -34,6 +37,17 @@ import {
   CoursesTab,
   ResearchTab,
 } from "./tab";
+import { toast } from "react-toastify";
+import type { OwnedCourse } from "../../types/OwnedCourse";
+import type {
+  AttendedCourse,
+  AttendedCourseRequest,
+} from "../../types/AttendedCourse";
+import {
+  formatDate,
+  getAcademicRank,
+  getStatusColor,
+} from "../../utils/ChangeText";
 
 const LecturerProfilePage = () => {
   const dispatch = useDispatch();
@@ -41,6 +55,19 @@ const LecturerProfilePage = () => {
   const userProfile = useSelector((state: any) => state.userProfile);
   const [activeSection, setActiveSection] = useState("overview");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [createOwnedCourseDialogOpen, setCreateOwnedCourseDialogOpen] =
+    useState(false);
+  const [createAttendedCourseDialogOpen, setCreateAttendedCourseDialogOpen] =
+    useState(false);
+  const [createResearchProjectDialogOpen, setCreateResearchProjectDialogOpen] =
+    useState(false);
+  const [editOwnedCourseData, setEditOwnedCourseData] = useState<any>(null);
+  const [editAttendedCourseData, setEditAttendedCourseData] =
+    useState<any>(null);
+  const [editResearchProjectData, setEditResearchProjectData] =
+    useState<any>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
 
   useEffect(() => {
     const fetchLecturerProfile = async () => {
@@ -55,59 +82,183 @@ const LecturerProfilePage = () => {
     fetchLecturerProfile();
   }, [dispatch]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "APPROVED":
-        return "success";
-      case "PENDING":
-        return "warning";
-      case "REJECTED":
-        return "error";
-      default:
-        return "default";
-    }
-  };
-
-  const getAcademicRankDisplay = (rank: string) => {
-    const ranks: { [key: string]: string } = {
-      TS: "Tiến sĩ",
-      THS: "Thạc sĩ",
-      CN: "Cử nhân",
-      KS: "Kỹ sư",
-      PGS: "Phó Giáo sư",
-      GS: "Giáo sư",
-    };
-    return ranks[rank] || rank;
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN");
-  };
-
-
   const handleAddAttendedCourse = () => {
-    console.log("Add attended course clicked");
-    // TODO: Implement add attended course logic
+    setIsEditMode(false);
+    setEditAttendedCourseData(null);
+    setEditingItem(null);
+    setCreateAttendedCourseDialogOpen(true);
   };
 
   const handleAddOwnedCourse = () => {
-    console.log("Add owned course clicked");
-    // TODO: Implement add owned course logic
+    setIsEditMode(false);
+    setEditOwnedCourseData(null);
+    setEditingItem(null);
+    setCreateOwnedCourseDialogOpen(true);
+  };
+
+  const handleSubmitAttendedCourse = async (
+    courseData: AttendedCourseRequest,
+  ) => {
+    try {
+      console.log("Submitting attended course:", courseData);
+
+      if (isEditMode && editingItem) {
+        if (editingItem.status === "APPROVED") {
+          await API.lecturer.editAttendedCourse(courseData as AttendedCourse);
+          toast.success("Đã gửi yêu cầu cập nhật!");
+        } else if (
+          editAttendedCourseData.status === "PENDING" ||
+          editAttendedCourseData.status === "REJECTED"
+        ) {
+          await API.lecturer.updateAttendedCourse(courseData as AttendedCourse);
+          toast.success("Cập nhật khóa học thành công!");
+        }
+      } else {
+        // Create mode
+        await API.lecturer.createAttendedCourse(courseData);
+        toast.success("Đã gửi yêu cầu tạo mới!");
+      }
+
+      // Refresh lecturer profile data
+      const response = await API.lecturer.getLecturerProfile();
+      dispatch(setLecturerProfile(response.data.data));
+    } catch (error) {
+      console.error("Error submitting attended course:", error);
+      const errorMessage = isEditMode
+        ? "Có lỗi xảy ra khi cập nhật khóa học"
+        : "Có lỗi xảy ra khi tạo khóa học";
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleSubmitOwnedCourse = async (courseData: OwnedCourse) => {
+    try {
+      console.log("Submitting owned course:", courseData);
+
+      if (isEditMode && editingItem) {
+        if (editingItem.status === "APPROVED") {
+          console.log("Edit:", courseData);
+          console.log("Item:", editingItem);
+          await API.lecturer.editOwnedCourse(courseData);
+          toast.success("Đã gửi yêu cầu cập nhật!");
+        } else if (
+          editOwnedCourseData.status === "PENDING" ||
+          editOwnedCourseData.status === "REJECTED"
+        ) {
+          await API.lecturer.updateOwnedCourse(courseData);
+          toast.success("Cập nhật khóa học thành công!");
+        }
+      } else {
+        // Create mode
+        await API.lecturer.createOwnedCourse(courseData);
+        toast.success("Đã gửi yêu cầu tạo mới!");
+      }
+
+      // Refresh lecturer profile data
+      const response = await API.lecturer.getLecturerProfile();
+      dispatch(setLecturerProfile(response.data.data));
+    } catch (error) {
+      console.error("Error submitting owned course:", error);
+      const errorMessage = isEditMode
+        ? "Có lỗi xảy ra khi cập nhật khóa học"
+        : "Có lỗi xảy ra khi tạo khóa học";
+      toast.error(errorMessage);
+    }
   };
 
   const handleAddResearchProject = () => {
-    console.log("Add research project clicked");
-    // TODO: Implement add research project logic
+    setIsEditMode(false);
+    setEditResearchProjectData(null);
+    setEditingItem(null);
+    setCreateResearchProjectDialogOpen(true);
+  };
+  const handleSubmitResearchProject = async (projectData: any) => {
+    try {
+      console.log("Submitting research project:", projectData);
+
+      if (isEditMode && editingItem) {
+        if (editingItem.status === "APPROVED") {
+          await API.lecturer.editResearchProject(projectData);
+          toast.success("Đã gửi yêu cầu cập nhật!");
+        } else if (
+          editResearchProjectData.status === "PENDING" ||
+          editResearchProjectData.status === "REJECTED"
+        ) {
+          await API.lecturer.updateResearchProject(projectData);
+          toast.success("Cập nhật dự án nghiên cứu thành công!");
+        }
+      } else {
+        // Create mode
+        await API.lecturer.createResearchProject(projectData);
+        toast.success("Đã gửi yêu cầu tạo mới!");
+      }
+
+      // Refresh lecturer profile data
+      const response = await API.lecturer.getLecturerProfile();
+      dispatch(setLecturerProfile(response.data.data));
+    } catch (error) {
+      console.error("Error submitting research project:", error);
+      const errorMessage = isEditMode
+        ? "Có lỗi xảy ra khi cập nhật dự án nghiên cứu"
+        : "Có lỗi xảy ra khi tạo dự án nghiên cứu";
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleCloseCreateAttendedCourseDialog = () => {
+    setCreateAttendedCourseDialogOpen(false);
+    setIsEditMode(false);
+    setEditAttendedCourseData(null);
+    setEditingItem(null);
+  };
+
+  const handleCloseCreateOwnedCourseDialog = () => {
+    setCreateOwnedCourseDialogOpen(false);
+    setIsEditMode(false);
+    setEditOwnedCourseData(null);
+    setEditingItem(null);
+  };
+
+  const handleCloseCreateResearchProjectDialog = () => {
+    setCreateResearchProjectDialogOpen(false);
+    setIsEditMode(false);
+    setEditResearchProjectData(null);
+    setEditingItem(null);
   };
 
   const handleEdit = (item: any) => {
     console.log("Edit item:", item);
-    // TODO: Implement edit logic
-  };
-
-  const handleDelete = (item: any) => {
-    console.log("Delete item:", item);
-    // TODO: Implement delete logic with confirmation
+    if (item) {
+      // Check if item has organizer field to identify it as AttendedCourse
+      if (item.organizer) {
+        // This is an AttendedCourse
+        const editData: AttendedCourse = item as AttendedCourse;
+        setEditAttendedCourseData(editData);
+        setEditingItem(item);
+        setIsEditMode(true);
+        setCreateAttendedCourseDialogOpen(true);
+      } else if (item.price !== undefined || item.thumbnailUrl !== undefined) {
+        // This is an OwnedCourse
+        const editData: OwnedCourse = item as OwnedCourse;
+        setEditOwnedCourseData(editData);
+        setEditingItem(item);
+        setIsEditMode(true);
+        setCreateOwnedCourseDialogOpen(true);
+      } else if (
+        item.researchArea ||
+        item.foundingSource ||
+        item.foundingAmount
+      ) {
+        // This is a ResearchProject
+        setEditResearchProjectData(item);
+        setEditingItem(item);
+        setIsEditMode(true);
+        setCreateResearchProjectDialogOpen(true);
+      } else {
+        // Handle other types of edits (degrees, certificates, etc.)
+        // TODO: Implement other edit logic
+      }
+    }
   };
 
   const handleEditProfile = () => {
@@ -132,7 +283,7 @@ const LecturerProfilePage = () => {
 
   const {
     lecturer,
-    lecturerUpdate,
+    // lecturerUpdate,
     degrees,
     certificates,
     ownedTrainingCourses,
@@ -145,14 +296,14 @@ const LecturerProfilePage = () => {
       id: "overview",
       label: "Tổng quan",
       icon: <Person />,
-      description: "Thông tin chung và thống kê",
+      description: "Thông tin chung",
     },
     {
       id: "degrees",
       label: "Bằng cấp",
       icon: <School />,
       count: degrees?.length || 0,
-      description: "Học vị và bằng cấp",
+      description: "Bằng cấp và học vị",
     },
     {
       id: "certificates",
@@ -194,10 +345,6 @@ const LecturerProfilePage = () => {
         return (
           <DegreesTab
             degrees={items}
-            getStatusColor={getStatusColor}
-            formatDate={formatDate}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
           />
         );
       case "certificates":
@@ -206,8 +353,6 @@ const LecturerProfilePage = () => {
             certificates={items}
             getStatusColor={getStatusColor}
             formatDate={formatDate}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
           />
         );
       case "courses":
@@ -220,7 +365,6 @@ const LecturerProfilePage = () => {
             onAddAttended={handleAddAttendedCourse}
             onAddOwned={handleAddOwnedCourse}
             onEdit={handleEdit}
-            onDelete={handleDelete}
           />
         );
       case "research":
@@ -231,7 +375,6 @@ const LecturerProfilePage = () => {
             formatDate={formatDate}
             onAdd={handleAddResearchProject}
             onEdit={handleEdit}
-            onDelete={handleDelete}
           />
         );
       default:
@@ -296,7 +439,7 @@ const LecturerProfilePage = () => {
               >
                 {lecturer.fullName?.charAt(0)}
               </Avatar>
-              {lecturerUpdate?.status === "PENDING" && (
+              {/* {lecturerUpdate?.status === "PENDING" && (
                 <Chip
                   label="Chờ duyệt"
                   color="warning"
@@ -308,7 +451,7 @@ const LecturerProfilePage = () => {
                     fontWeight: 600,
                   }}
                 />
-              )}
+              )} */}
             </Box>
 
             {/* Info */}
@@ -347,7 +490,7 @@ const LecturerProfilePage = () => {
                     }}
                   >
                     <Chip
-                      label={getAcademicRankDisplay(lecturer.academicRank)}
+                      label={getAcademicRank(lecturer.academicRank)}
                       size="medium"
                       sx={{
                         background: "linear-gradient(135deg, #FF9800, #FFC107)", // Gradient cam-vàng nổi bật
@@ -583,7 +726,34 @@ const LecturerProfilePage = () => {
         <LecturerUpdateInfoDialog
           open={editDialogOpen}
           onClose={handleCloseEditDialog}
-          lecturer={lecturerUpdate}
+          lecturer={lecturer}
+        />
+
+        {/* Create Owned Course Dialog */}
+        <CreateOwnedCourseDialog
+          open={createOwnedCourseDialogOpen}
+          onClose={handleCloseCreateOwnedCourseDialog}
+          onSubmit={handleSubmitOwnedCourse}
+          editMode={isEditMode}
+          editData={editOwnedCourseData}
+        />
+
+        {/* Create Attended Course Dialog */}
+        <CreateAttendedCourseDialog
+          open={createAttendedCourseDialogOpen}
+          onClose={handleCloseCreateAttendedCourseDialog}
+          onSubmit={handleSubmitAttendedCourse}
+          editMode={isEditMode}
+          editData={editAttendedCourseData}
+        />
+
+        {/* Create Research Project Dialog */}
+        <CreateResearchProjectDialog
+          open={createResearchProjectDialogOpen}
+          onClose={handleCloseCreateResearchProjectDialog}
+          onSubmit={handleSubmitResearchProject}
+          editMode={isEditMode}
+          editData={editResearchProjectData}
         />
       </Container>
     </div>

@@ -44,11 +44,12 @@ import {
   Clear,
 } from "@mui/icons-material";
 import { API } from "../utils/Fetch";
-import type { OwnedCourse } from "../types/OwnedCourseInfo";
+
 import { getCourseType } from "../utils/CourseChangeText";
 import { toast } from "react-toastify";
 import { validateCourseForm } from "../utils/Validate";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import type { OwnedCourseInfo } from "../types/OwnedCourse";
 
 interface CreateCourseDialogProps {
   open: boolean;
@@ -61,11 +62,11 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const [ownedCourses, setOwnedCourses] = useState<OwnedCourse[]>([]);
-  const [filteredCourses, setFilteredCourses] = useState<OwnedCourse[]>([]);
+  const [ownedCourses, setOwnedCourses] = useState<OwnedCourseInfo[]>([]);
+  const [filteredCourses, setFilteredCourses] = useState<OwnedCourseInfo[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOwnedCourse, setSelectedOwnedCourse] =
-    useState<OwnedCourse | null>(null);
+    useState<OwnedCourseInfo | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Add new state for course creation mode
@@ -183,7 +184,7 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
     }
   };
 
-  const handleOwnedCourseSelect = useCallback((ownedCourse: OwnedCourse) => {
+  const handleOwnedCourseSelect = useCallback((ownedCourse: OwnedCourseInfo) => {
     setSelectedOwnedCourse(ownedCourse);
 
     // Auto-fill form with owned course data

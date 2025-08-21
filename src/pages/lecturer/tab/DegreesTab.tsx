@@ -19,6 +19,11 @@ import {
   Button,
   Chip,
   Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
 } from "@mui/material";
 import { colors } from "../../../theme/colors";
 import { getStatusText } from "../../../utils/ChangeText";
@@ -27,19 +32,18 @@ import { API } from "../../../utils/Fetch";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { setLecturerProfile } from "../../../redux/slice/LecturerProfileSlice";
+import type { Degree } from "../../../types/Degree";
 
 interface DegreesTabProps {
-  degrees: any[];
-  getStatusColor: (status: string) => string;
-  formatDate: (dateString: string) => string;
-  onEdit?: (item: any) => void;
-  onDelete?: (item: any) => void;
+  degrees: Degree[];
 }
 
-const DegreesTab = ({ degrees, onEdit, onDelete }: DegreesTabProps) => {
+const DegreesTab = ({ degrees }: DegreesTabProps) => {
   const dispatch = useDispatch();
   const [openModal, setOpenModal] = useState(false);
   const [editDegree, setEditDegree] = useState<any>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
 
   const handleOpenModal = () => {
     setEditDegree(null);
@@ -60,11 +64,25 @@ const DegreesTab = ({ degrees, onEdit, onDelete }: DegreesTabProps) => {
     try {
       if (editDegree) {
         // Edit mode
-        const response = await API.lecturer.updateDegree(degree);
-        if (response.data.success) {
-          const response = await API.lecturer.getLecturerProfile();
-          dispatch(setLecturerProfile(response.data.data));
-          toast.success("Đã gửi thông tin đến admin");
+        if (degree.status === "APPROVED") {
+          const response = await API.user.editDegree(degree);
+          if (response.data.success) {
+            const response = await API.lecturer.getLecturerProfile();
+            dispatch(setLecturerProfile(response.data.data));
+            toast.success("Đã gửi thông tin đến admin");
+          }
+          console.log("Đã duyệt", editDegree);
+        } else if (
+          degree.status === "REJECTED" ||
+          degree.status === "PENDING"
+        ) {
+          console.log("chưa duyệt", editDegree);
+          const response = await API.user.updateDegree(degree);
+          if (response.data.success) {
+            const response = await API.lecturer.getLecturerProfile();
+            dispatch(setLecturerProfile(response.data.data));
+            toast.success("Đã gửi thông tin đến admin");
+          }
         }
       } else {
         // Add mode
@@ -81,6 +99,35 @@ const DegreesTab = ({ degrees, onEdit, onDelete }: DegreesTabProps) => {
     }
     setOpenModal(false);
     setEditDegree(null);
+  };
+
+  const handleDelete = (item: any) => {
+    setItemToDelete(item);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      const response = await API.user.deleteDegree(itemToDelete.id);
+      if (response.data.success) {
+        const response = await API.lecturer.getLecturerProfile();
+        dispatch(setLecturerProfile(response.data.data));
+        toast.success("Xóa thành công");
+      }
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      toast.error("Có lỗi xảy ra khi xóa");
+    } finally {
+      setDeleteConfirmOpen(false);
+      setItemToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirmOpen(false);
+    setItemToDelete(null);
   };
 
   return (
@@ -144,7 +191,7 @@ const DegreesTab = ({ degrees, onEdit, onDelete }: DegreesTabProps) => {
               sx={{
                 background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
                 color: "white",
-                borderRadius: "12px 12px 0 0",
+                borderRadius: "12px",
                 "& .MuiAccordionSummary-expandIconWrapper": {
                   color: "white",
                 },
@@ -183,7 +230,7 @@ const DegreesTab = ({ degrees, onEdit, onDelete }: DegreesTabProps) => {
                         variant="caption"
                         sx={{ color: "rgba(255,255,255,0.7)" }}
                       >
-                        ID: {item.referenceId}
+                        Reference ID: {item.referenceId}
                       </Typography>
                     )}
                   </div>
@@ -364,51 +411,47 @@ const DegreesTab = ({ degrees, onEdit, onDelete }: DegreesTabProps) => {
                     </Button>
                   )}
 
-                  {onEdit && (
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<Edit />}
-                      onClick={() => handleEdit(item)}
-                      sx={{
-                        borderColor: colors.primary[500],
-                        color: colors.primary[500],
-                        fontWeight: 600,
-                        textTransform: "none",
-                        borderRadius: 2,
-                        "&:hover": {
-                          borderColor: colors.primary[600],
-                          backgroundColor: colors.primary[50],
-                          transform: "translateY(-1px)",
-                        },
-                      }}
-                    >
-                      Chỉnh sửa
-                    </Button>
-                  )}
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<Edit />}
+                    onClick={() => handleEdit(item)}
+                    sx={{
+                      borderColor: colors.primary[500],
+                      color: colors.primary[500],
+                      fontWeight: 600,
+                      textTransform: "none",
+                      borderRadius: 2,
+                      "&:hover": {
+                        borderColor: colors.primary[600],
+                        backgroundColor: colors.primary[50],
+                        transform: "translateY(-1px)",
+                      },
+                    }}
+                  >
+                    Chỉnh sửa
+                  </Button>
 
-                  {onDelete && (
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<Delete />}
-                      onClick={() => onDelete(item)}
-                      sx={{
-                        borderColor: "#EF4444",
-                        color: "#EF4444",
-                        fontWeight: 600,
-                        textTransform: "none",
-                        borderRadius: 2,
-                        "&:hover": {
-                          borderColor: "#DC2626",
-                          backgroundColor: "#FEF2F2",
-                          transform: "translateY(-1px)",
-                        },
-                      }}
-                    >
-                      Xóa
-                    </Button>
-                  )}
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<Delete />}
+                    onClick={() => handleDelete(item)}
+                    sx={{
+                      borderColor: "#EF4444",
+                      color: "#EF4444",
+                      fontWeight: 600,
+                      textTransform: "none",
+                      borderRadius: 2,
+                      "&:hover": {
+                        borderColor: "#DC2626",
+                        backgroundColor: "#FEF2F2",
+                        transform: "translateY(-1px)",
+                      },
+                    }}
+                  >
+                    Xóa
+                  </Button>
                 </div>
               </Box>
             </AccordionDetails>
@@ -419,6 +462,62 @@ const DegreesTab = ({ degrees, onEdit, onDelete }: DegreesTabProps) => {
           Chưa có thông tin trong mục này
         </Alert>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={handleCancelDelete}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            minWidth: 400,
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 600, color: colors.primary[700] }}>
+          Xác nhận xóa
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: colors.text.secondary, mb: 2 }}>
+            Bạn có chắc chắn muốn xóa bằng cấp này không? Hành động này không
+            thể hoàn tác.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, gap: 1 }}>
+          <Button
+            onClick={handleCancelDelete}
+            variant="outlined"
+            sx={{
+              borderColor: colors.primary[300],
+              color: colors.primary[600],
+              fontWeight: 600,
+              borderRadius: 2,
+              textTransform: "none",
+              "&:hover": {
+                borderColor: colors.primary[400],
+                backgroundColor: colors.primary[50],
+              },
+            }}
+          >
+            Hủy
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            color="error"
+            sx={{
+              fontWeight: 600,
+              borderRadius: 2,
+              textTransform: "none",
+              "&:hover": {
+                backgroundColor: "#d32f2f",
+              },
+            }}
+          >
+            Xác nhận xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

@@ -43,7 +43,7 @@ const Register = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    let interval: number;
+    let interval: ReturnType<typeof setInterval>;
     if (secondsLeft > 0) {
       interval = setInterval(() => {
         setSecondsLeft((prev) => prev - 1);

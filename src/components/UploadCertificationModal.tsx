@@ -701,7 +701,58 @@ const UploadCertificationModal: React.FC<UploadCertificationModalProps> = ({
                     adapterLocale={vi}
                   >
                     <DatePicker
-                      label="Ngày hết hạn (không bắt buộc)"
+                      label="Ngày cấp "
+                      value={form.issueDate}
+                      onChange={(newValue) =>
+                        handleChange("issueDate", newValue)
+                      }
+                      slotProps={{
+                        field: { clearable: true }, // Cho phép nút xóa
+                        textField: {
+                          fullWidth: true,
+                          variant: "outlined",
+                          size: "medium",
+                          sx: {
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: "12px",
+                              backgroundColor: "#f8fafc",
+                              border: "2px solid transparent",
+                              transition: "all 0.2s ease-in-out",
+                              "&:hover": {
+                                backgroundColor: "#ecfeff",
+                                borderColor: "#67e8f9",
+                              },
+                              "&.Mui-focused": {
+                                backgroundColor: "#ffffff",
+                                borderColor: "#06b6d4",
+                                boxShadow: "0 0 0 3px rgba(6, 182, 212, 0.1)",
+                              },
+                            },
+                            "& .MuiInputLabel-root": {
+                              color: "#64748b",
+                              fontWeight: 500,
+                              "&.Mui-focused": {
+                                color: "#06b6d4",
+                              },
+                            },
+                          },
+                          InputProps: {
+                            startAdornment: (
+                              <CalendarToday sx={{ mr: 1, color: "#64748b" }} />
+                            ),
+                          },
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+
+                  {/* Ngày hết hạn - cho phép null */}
+                  <LocalizationProvider
+                    dateAdapter={AdapterDateFns}
+                    adapterLocale={vi}
+                  >
+                    <DatePicker
+                      label="Ngày hết hạn (Không bắt buộc)"
                       value={form.expiryDate}
                       onChange={(newValue) =>
                         handleChange("expiryDate", newValue)
@@ -745,50 +796,6 @@ const UploadCertificationModal: React.FC<UploadCertificationModalProps> = ({
                       }}
                     />
                   </LocalizationProvider>
-
-                  {/* Ngày hết hạn - cho phép null */}
-                  <TextField
-                    fullWidth
-                    type="date"
-                    label="Ngày hết hạn (không bắt buộc)"
-                    InputLabelProps={{ shrink: true }}
-                    value={form.expiryDate ? form.expiryDate : ""}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      handleChange("expiryDate", val ? new Date(val) : null);
-                    }}
-                    variant="outlined"
-                    size="medium"
-                    InputProps={{
-                      startAdornment: (
-                        <CalendarToday sx={{ mr: 1, color: "#64748b" }} />
-                      ),
-                    }}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "12px",
-                        backgroundColor: "#f8fafc",
-                        border: "2px solid transparent",
-                        transition: "all 0.2s ease-in-out",
-                        "&:hover": {
-                          backgroundColor: "#ecfeff",
-                          borderColor: "#67e8f9",
-                        },
-                        "&.Mui-focused": {
-                          backgroundColor: "#ffffff",
-                          borderColor: "#06b6d4",
-                          boxShadow: "0 0 0 3px rgba(6, 182, 212, 0.1)",
-                        },
-                      },
-                      "& .MuiInputLabel-root": {
-                        color: "#64748b",
-                        fontWeight: 500,
-                        "&.Mui-focused": {
-                          color: "#06b6d4",
-                        },
-                      },
-                    }}
-                  />
                 </Box>
               </Box>
 

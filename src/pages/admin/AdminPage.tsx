@@ -28,6 +28,7 @@ import { API } from "../../utils/Fetch";
 import { setLecturers } from "../../redux/slice/LecturerSlice";
 import { setInstitutions } from "../../redux/slice/InstitutionSlice";
 import { setPartner } from "../../redux/slice/PartnerSlice";
+import WebSocketService from "../../services/WebSocketService";
 
 interface StatCard {
   title: string;
@@ -72,19 +73,14 @@ const AdminPage = () => {
         dispatch(setInstitutions(res2.data.data));
         const res3 = await API.admin.getAllPartners();
         dispatch(setPartner(res3.data.data));
-        // const response = await API.admin.getLecturerPendingCreate();
-        // dispatch(setLecturerPendingCreate(response.data.data));
-        // const updateResponse = await API.admin.getLecturerPendingUpdate();
-        // dispatch(setLecturerPendingUpdate(updateResponse.data.data));
-        // const responseData = await API.admin.getLecturerRequests();
-        // dispatch(setLecturerRequests(responseData.data.data));
       } catch (error) {
         console.error("Error initializing AdminLecturerPage:", error);
       }
     };
-
     fetchData();
+
     setLoading(false);
+    return () => WebSocketService.disconnect();
   }, []);
 
   const statsData: StatCard[] = useMemo(() => {

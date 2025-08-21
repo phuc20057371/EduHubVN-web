@@ -48,6 +48,9 @@ import {
 import { setLecturerProfile } from "../redux/slice/LecturerProfileSlice";
 import { colors } from "../theme/colors";
 import Logoweb from "../assets/eduhub-02.png";
+import WebSocketService from "../services/WebSocketService";
+import { useGlobalWebSocket } from "../hooks/useGlobalWebSocket";
+import { LecturerMessageHandler } from "../services/LecturerMessageHandler";
 
 const LecturerLayout = () => {
   const dispatch = useDispatch();
@@ -58,6 +61,9 @@ const LecturerLayout = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Sử dụng global WebSocket manager
+  const { disconnect: disconnectWebSocket } = useGlobalWebSocket();
 
   // Function to check if current path matches button path
   const isActivePath = (path: string) => {
@@ -77,8 +83,11 @@ const LecturerLayout = () => {
         if (response.data.data) {
           // Chỉ thực hiện navigation khi đang ở trang root hoặc chưa có path cụ thể
           const currentPath = location.pathname;
-          const isAtRootOrLogin = currentPath === "/" || currentPath === "/login" || currentPath === "/lecturer";
-          
+          const isAtRootOrLogin =
+            currentPath === "/" ||
+            currentPath === "/login" ||
+            currentPath === "/lecturer";
+
           if (isAtRootOrLogin) {
             navigateToRole(response.data.data, navigate);
           }
@@ -107,6 +116,23 @@ const LecturerLayout = () => {
     fetchData();
   }, [dispatch, navigate]);
 
+  useEffect(() => {
+    if (userProfile && userProfile.role === "LECTURER") {
+      WebSocketService.connect(
+        userProfile,
+        () => console.log("✅ Lecturer WebSocket connected"),
+        (message) => {
+          LecturerMessageHandler.handleIncomingMessage(message, dispatch);
+        },
+      );
+    }
+
+    // Cleanup khi component unmount
+    return () => {
+      WebSocketService.disconnect();
+    };
+  }, [userProfile]);
+
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -116,6 +142,8 @@ const LecturerLayout = () => {
   };
 
   const handleLogout = () => {
+    console.log("🚪 Logging out - disconnecting WebSocket");
+    disconnectWebSocket();
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     navigate("/login");
@@ -123,8 +151,16 @@ const LecturerLayout = () => {
   };
 
   const handleProfile = () => {
+    console.log(
+      "🔍 Before navigate to profile - WebSocket connected:",
+      WebSocketService.isConnected(),
+    );
     navigate("/lecturer/profile");
     handleMenuClose();
+    console.log(
+      "🔍 After navigate to profile - WebSocket connected:",
+      WebSocketService.isConnected(),
+    );
   };
 
   const handleDrawerToggle = () => {
@@ -667,13 +703,13 @@ const LecturerLayout = () => {
           minHeight: 0, // Important for flex children to scroll properly
         }}
       >
-        <Container 
-          maxWidth="xl" 
-          sx={{ 
-            py: 4, 
+        <Container
+          maxWidth="xl"
+          sx={{
+            py: 4,
             position: "relative",
             height: "100%",
-            overflow: "auto"
+            overflow: "auto",
           }}
         >
           <Outlet />
