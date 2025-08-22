@@ -114,7 +114,6 @@ const RegisterInstitution = () => {
       description,
       establishedYear,
     };
-    console.log(validateInstitutionInfo(institutionData));
 
     if (validateInstitutionInfo(institutionData).success === false) {
       toast.error(validateInstitutionInfo(institutionData).error);
@@ -122,8 +121,7 @@ const RegisterInstitution = () => {
     }
 
     try {
-      const response = await API.user.registerInstitution(institutionData);
-      console.log("✅ Đăng ký thành công:", response.data.data);
+      await API.user.registerInstitution(institutionData);
 
       // Clear localStorage on successful registration
       localStorage.removeItem("institutionRegisterForm");
@@ -134,7 +132,7 @@ const RegisterInstitution = () => {
       if (user && user.role) {
         dispatch(setUserProfile(user));
         navigate("/pending-institution", { replace: true });
-        const res = await API.other.sendEmail({
+        await API.other.sendEmail({
           to: userProfile.email,
           subject: "Xác nhận đăng ký Cơ sở Giáo dục thành công",
           body: `
@@ -169,7 +167,6 @@ const RegisterInstitution = () => {
     </div>
   `,
         });
-        console.log("✅ Email xác nhận đã gửi thành công:", res.data);
       } else {
         console.warn("User profile không hợp lệ:", user);
       }

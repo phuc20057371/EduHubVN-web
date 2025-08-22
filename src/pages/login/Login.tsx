@@ -48,7 +48,6 @@ const Login = () => {
       const response = await API.auth.login({ email, password });
       localStorage.setItem("accessToken", response.data.data.accessToken);
       localStorage.setItem("refreshToken", response.data.data.refreshToken);
-      console.log(response.data);
       toast.success("Đăng nhập thành công!");
       navigate("/");
     } catch (error: any) {

@@ -194,8 +194,6 @@ const CreateOwnedCourseDialog: React.FC<CreateOwnedCourseDialogProps> = ({
   }, [selectedFile]);
 
   const handleSubmit = () => {
-    console.log(form);
-
     const isValid = validateCourseForm(form);
     if (!isValid.success) {
       toast.error(isValid.error);

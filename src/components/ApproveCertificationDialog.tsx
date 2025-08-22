@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -38,14 +38,12 @@ interface ApproveCertificationDialogProps {
   open: boolean;
   onClose: () => void;
   data: any;
-  onSuccess?: () => void;
 }
 
 const ApproveCertificationDialog: React.FC<ApproveCertificationDialogProps> = ({
   open,
   onClose,
   data,
-  onSuccess,
 }) => {
   const dispatch = useDispatch();
   const [adminNote, setAdminNote] = useState("");
@@ -53,12 +51,6 @@ const ApproveCertificationDialog: React.FC<ApproveCertificationDialogProps> = ({
     "approve" | "reject" | null
   >(null);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (open && data) {
-      console.log("ApproveCertificationDialog opened with data:", data);
-    }
-  }, [open, data]);
 
   // Always define these variables, but handle null safely
   const contentData = data?.content;
@@ -75,7 +67,6 @@ const ApproveCertificationDialog: React.FC<ApproveCertificationDialogProps> = ({
       toast.success("Đã duyệt chứng chỉ thành công!");
       setShowConfirmDialog(null);
       setAdminNote(""); // Reset admin note
-      onSuccess?.();
       onClose();
     } catch (error) {
       toast.error("Có lỗi xảy ra khi duyệt chứng chỉ!");
@@ -83,7 +74,7 @@ const ApproveCertificationDialog: React.FC<ApproveCertificationDialogProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [contentData?.id, dispatch, onClose, onSuccess]);
+  }, [contentData?.id, dispatch, onClose]);
 
   const handleReject = useCallback(async () => {
     if (!adminNote.trim()) {

@@ -46,7 +46,6 @@ const DegreeUpdateDialog = ({
   const handleConfirm = async () => {
     setOpenConfirmDialog(true);
   };
-  console.log("Degree data:", degree);
   const handleSave = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {

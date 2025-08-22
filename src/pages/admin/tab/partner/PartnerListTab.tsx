@@ -395,7 +395,6 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({ partners, onEdit }) => 
       return;
     }
     setSelected(selectedIndex);
-    console.log(row);
   };
 
   // Filtered partners with comprehensive search

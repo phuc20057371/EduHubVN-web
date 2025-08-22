@@ -45,13 +45,11 @@ const DegreeDetailUpdateDialog = ({ open, onClose, data }: DegreeDetailUpdateDia
             await API.admin.approveDegreeUpdate({ id: updatedDegree?.id });
             const filtered = degreePendingUpdate.filter((item: any) => item.updatedDegree?.id !== updatedDegree?.id);
             dispatch(setDegreePendingUpdate(filtered));
-            console.log('APPROVE DEGREE UPDATE ID:', updatedDegree?.id);
             toast.success('Đã duyệt thông tin cập nhật bằng cấp thành công');
         } else if (confirmType === 'reject') {
             await API.admin.rejectDegreeUpdate({ id: updatedDegree?.id, adminNote });
             const filtered = degreePendingUpdate.filter((item: any) => item.updatedDegree?.id !== updatedDegree?.id);
             dispatch(setDegreePendingUpdate(filtered));
-            console.log('REJECT DEGREE UPDATE ID:', updatedDegree?.id, 'ADMIN NOTE:', adminNote);
             toast.success('Đã từ chối thông tin cập nhật bằng cấp thành công');
         }
         setConfirmType(null);

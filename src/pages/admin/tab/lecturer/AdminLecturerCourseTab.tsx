@@ -59,8 +59,6 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
 
   const handleCourseItemClick = (item: any) => {
     setSelectedCourse(item);
-    console.log("Course item clicked:", item);
-
     switch (item.type) {
       case "OC":
         item.label === "Create"

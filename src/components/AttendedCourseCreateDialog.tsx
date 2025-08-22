@@ -83,7 +83,6 @@ const AttendedCourseCreateDialog: React.FC<AttendedCourseCreateDialogProps> = ({
       const responseData = await API.admin.getLecturerRequests();
       dispatch(setLecturerRequests(responseData.data.data));
 
-      console.log("Rejected with note:", adminNote);
       setShowConfirmDialog(null);
       setAdminNote("");
       onClose();

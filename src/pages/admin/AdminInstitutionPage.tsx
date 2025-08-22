@@ -52,16 +52,10 @@ const AdminInstitutionPage = () => {
       try {
         const res = await API.admin.getAllInstitutions();
         dispatch(setInstitutions(res.data.data));
-        console.log("Institutions:", res.data.data);
         const response = await API.admin.getInstitutionPendingCreate();
         dispatch(setInstitutionPendingCreate(response.data.data));
-        console.log("Institution pending create requests:", response.data.data);
         const updateResponse = await API.admin.getInstitutionPendingUpdate();
         dispatch(setInstitutionPendingUpdate(updateResponse.data.data));
-        console.log(
-          "Institution pending update requests:",
-          updateResponse.data.data,
-        );
       } catch (error) {
         console.error("Error initializing AdminInstitutionPage:", error);
       }

@@ -47,10 +47,8 @@ const AdminDegree = () => {
       try {
         const responseCreate = await API.admin.getDegreePendingCreate();
         dispatch(setDegreePendingCreate(responseCreate.data.data));
-        console.log("Degree pending create requests:", responseCreate.data.data);
         const responseUpdate = await API.admin.getDegreePendingUpdate();
         dispatch(setDegreePendingUpdate(responseUpdate.data.data));
-        console.log("Degree pending update requests:", responseUpdate.data.data);
       } catch (error) {
         console.error("Error fetching degree data:", error);
       }

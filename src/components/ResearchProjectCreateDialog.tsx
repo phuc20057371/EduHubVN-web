@@ -49,8 +49,6 @@ const ResearchProjectCreateDialog: React.FC<
       toast.success("Khóa học đã được duyệt thành công!");
       const responseData = await API.admin.getLecturerRequests();
       dispatch(setLecturerRequests(responseData.data.data));
-
-      console.log("Approved");
       setShowConfirmDialog(null);
       onClose();
     } catch (error) {
@@ -78,8 +76,6 @@ const ResearchProjectCreateDialog: React.FC<
       toast.success("Dự án đã bị từ chối thành công!");
       const responseData = await API.admin.getLecturerRequests();
       dispatch(setLecturerRequests(responseData.data.data));
-
-      console.log("Rejected with note:", adminNote);
       setShowConfirmDialog(null);
       setAdminNote("");
       onClose();

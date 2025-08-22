@@ -72,10 +72,7 @@ const InstitutionPendingPage = () => {
       try {
         const response = await API.user.getPendingInstitution();
         dispatch(setPendingInstitution(response.data.data));
-        console.log("Pending institutions:", response.data.data);
-      } catch (error) {
-        console.error("Error fetching pending institutions:", error);
-      }
+      } catch (error) {}
     };
     fetchPendingInstitution();
   }, [dispatch]);

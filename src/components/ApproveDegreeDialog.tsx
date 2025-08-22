@@ -56,11 +56,6 @@ const ApproveDegreeDialog: React.FC<ApproveDegreeDialogProps> = ({
   >(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (open && data) {
-      console.log("ApproveDegreeDialog opened with data:", data);
-    }
-  }, [open, data]);
   // Always define these variables, but handle null safely
   const contentData = data?.content;
   const lecturerInfo = data?.lecturerInfo;

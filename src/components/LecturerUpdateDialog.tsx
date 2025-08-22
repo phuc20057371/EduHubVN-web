@@ -45,6 +45,7 @@ import { toast } from "react-toastify";
 import { setLecturers } from "../redux/slice/LecturerSlice";
 import { API } from "../utils/Fetch";
 import { validateLecturerInfo } from "../utils/Validate";
+import { formatDate, getAcademicRank, getStatusColor, getStatusText } from "../utils/ChangeText";
 
 interface LecturerUpdateDialogProps {
   open: boolean;
@@ -126,9 +127,9 @@ const LecturerUpdateDialog = ({
   const fetchLecturerData = async () => {
     try {
       setLoading(true);
-      const response = await API.other.getLecturerProfile(lecturer.id);
-      if (response.data) {
-        setLecturerData(response.data);
+      const response = await API.admin.getLecturerAllProfile({ id: lecturer.id });
+      if (response.data.success) {
+        setLecturerData(response.data.data);
       }
     } catch (error) {
       console.error("Error fetching lecturer data:", error);
@@ -142,54 +143,6 @@ const LecturerUpdateDialog = ({
     setTabValue(newValue);
   };
 
-  // Helper function to convert academic rank abbreviations to full names
-  const getAcademicRankLabel = (rank: string) => {
-    switch (rank) {
-      case "CN":
-        return "Cử nhân";
-      case "THS":
-        return "Thạc sĩ";
-      case "TS":
-        return "Tiến sĩ";
-      case "PGS":
-        return "Phố giáo sư";
-      case "GS":
-        return "Giáo sư";
-      default:
-        return rank || "Chưa có học hàm";
-    }
-  };
-
-  // Helper functions for status and formatting
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "APPROVED":
-        return "success";
-      case "REJECTED":
-        return "error";
-      case "PENDING":
-        return "warning";
-      default:
-        return "default";
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "APPROVED":
-        return "Đã duyệt";
-      case "REJECTED":
-        return "Đã từ chối";
-      case "PENDING":
-        return "Chờ duyệt";
-      default:
-        return status;
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN");
-  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -241,7 +194,7 @@ const LecturerUpdateDialog = ({
 
               <Box display="flex" alignItems="center" gap={2} mb={1}>
                 <Chip
-                  label={getAcademicRankLabel(lecturer.academicRank)}
+                  label={getAcademicRank(lecturer.academicRank)}
                   sx={{
                     background: "linear-gradient(45deg, #FFD700, #FFA500)",
                     color: "#1a1a1a",
@@ -1037,7 +990,6 @@ const LecturerUpdateDialog = ({
       }
       const response = await API.admin.getAllLecturers();
       dispatch(setLecturers(response.data.data));
-      console.log("Update response:", res.data);
       toast.success("Cập nhật thông tin giảng viên thành công");
       onClose();
     } catch (error: any) {
@@ -1057,7 +1009,7 @@ const LecturerUpdateDialog = ({
 
   return (
     <>
-      <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth>
+      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
         <DialogTitle>
           <Box display="flex" alignItems="center" gap={2}>
             <Avatar sx={{ bgcolor: "primary.main" }}>

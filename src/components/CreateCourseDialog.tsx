@@ -174,8 +174,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
       setLoading(true);
       const response = await API.admin.getOwnedCourses();
       setOwnedCourses(response.data.data || []);
-      console.log("✅ Owned courses fetched successfully:", response.data.data);
-
       setFilteredCourses(response.data.data || []);
     } catch (error) {
       console.error("Error fetching owned courses:", error);
@@ -227,7 +225,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
       ownedCourseId: selectedOwnedCourse?.ownedCourse.id,
       authorId: selectedOwnedCourse?.lecturer.id,
     };
-    console.log("Submitting course data:", courseData);
 
     onSubmit(courseData);
     fetchOwnedCourses();
@@ -240,24 +237,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
     }
   };
 
-  // const handleFileUpload = async (
-  //   event: React.ChangeEvent<HTMLInputElement>,
-  // ) => {
-  //   const file = event.target.files?.[0];
-  //   if (!file) return;
-
-  //   try {
-  //     const response = await API.user.uploadFileToServer(file);
-  //     console.log("✅ File uploaded successfully:", response.data);
-  //     setFormData((prev) => ({ ...prev, thumbnailUrl: response.data }));
-  //     toast.success("Tải lên tài liệu thành công");
-  //   } catch (error) {
-  //     console.error("❌ Error uploading file:", error);
-  //     toast.error("Tải lên tài liệu không thành công. (.pdf, .jpg, .png)");
-  //   } finally {
-  //     setSelectedFile(null);
-  //   }
-  // };
   const handleFileUpload = async (file: File) => {
     try {
       const response = await API.user.uploadFileToServer(file);

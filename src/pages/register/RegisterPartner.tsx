@@ -111,9 +111,7 @@ const RegisterPartner = () => {
       description,
       establishedYear,
     };
-    console.log("🚀 Đang xử lý đăng ký đối tác:", partnerData);
     const validationErrors = validatePartnerInfo(partnerData);
-    console.log("lỗi:", validationErrors);
 
     if (validationErrors && !validationErrors.success) {
       toast.error(
@@ -124,8 +122,7 @@ const RegisterPartner = () => {
     }
 
     try {
-      const response = await API.user.registerPartner(partnerData);
-      console.log("✅ Đăng ký tổ chức thành công:", response.data.data);
+     await API.user.registerPartner(partnerData);
 
       // Clear localStorage on successful registration
       localStorage.removeItem("partnerRegisterForm");

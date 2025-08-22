@@ -174,8 +174,6 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
     if (onMemberRoleChange) {
       onMemberRoleChange(updatedMembers);
     }
-
-    console.log("Role changed for member:", memberId, "to:", newRole);
   };
 
   const handleDeleteMember = (memberId: string) => {
@@ -190,8 +188,6 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
     if (onMemberRoleChange) {
       onMemberRoleChange(updatedMembers);
     }
-
-    console.log("Deleted member with ID:", memberId);
   };
 
   const handleSaveMembers = async () => {

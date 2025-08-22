@@ -61,13 +61,10 @@ const AdminPartnerPage = () => {
       try {
         const res = await API.admin.getAllPartners();
         dispatch(setPartner(res.data.data));
-        console.log("All partners:", res.data.data);
         const response = await API.admin.getPartnerPendingCreate();
         dispatch(setPartnerPendingCreate(response.data.data));
-        console.log("Partner create requests:", response.data.data);
         const updateResponse = await API.admin.getPartnerPendingUpdate();
         dispatch(setPartnerPendingUpdate(updateResponse.data.data));
-        console.log("Partner update requests:", updateResponse.data.data);
       } catch (error) {
         console.error("Error initializing AdminPartnerPage:", error);
       }

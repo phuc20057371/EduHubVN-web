@@ -126,8 +126,6 @@ const LecturerDetailUpdateDialog = ({
     const currentItem = lecturerUpdateList.find(
       (item: any) => item.lecturerUpdate.id === lecturerUpdate.id,
     );
-    console.log("current", currentItem.lecturerUpdate.updatedAt);
-    console.log("lecturerUpdate", lecturerUpdate.updatedAt);
     if (!currentItem) {
       toast.error("⚠️ Không tìm thấy thông tin cập nhật");
       return;

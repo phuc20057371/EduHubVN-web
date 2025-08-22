@@ -225,7 +225,6 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
       return;
     }
     setSelected(selectedIndex);
-    console.log(row);
   };
 
   const visibleRows = React.useMemo(

@@ -71,12 +71,10 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
             dispatch(setLecturerProfile(response.data.data));
             toast.success("Đã gửi thông tin đến admin");
           }
-          console.log("Đã duyệt", editDegree);
         } else if (
           degree.status === "REJECTED" ||
           degree.status === "PENDING"
         ) {
-          console.log("chưa duyệt", editDegree);
           const response = await API.user.updateDegree(degree);
           if (response.data.success) {
             const response = await API.lecturer.getLecturerProfile();

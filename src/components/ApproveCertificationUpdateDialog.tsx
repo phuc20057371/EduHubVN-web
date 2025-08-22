@@ -52,12 +52,6 @@ const ApproveCertificationUpdateDialog: React.FC<ApproveCertificationUpdateDialo
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
 
-  // Always call useEffect first - this must always run
-  useEffect(() => {
-    if (open && data) {
-      console.log("Dialog opened with data:", data);
-    }
-  }, [open, data]);
 
   // Always call these function definitions - they don't contain hooks
   const formatDate = (dateString: string) => {

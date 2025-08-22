@@ -147,8 +147,6 @@ const CreateResearchProjectDialog: React.FC<
   };
 
   const handleSubmit = () => {
-    console.log(form);
-
     const isValid = validateResearchProjectForm(form);
     if (!isValid.success) {
       toast.error(isValid.error);

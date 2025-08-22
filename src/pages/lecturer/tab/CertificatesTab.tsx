@@ -54,8 +54,6 @@ const CertificatesTab = ({
   };
 
   const handleEdit = (certificate: any) => {
-    console.log(certificate);
-
     setEditCertificate(certificate);
     setOpenModal(true);
   };
@@ -76,12 +74,10 @@ const CertificatesTab = ({
             dispatch(setLecturerProfile(response.data.data));
             toast.success("Đã gửi thông tin đến admin");
           }
-          console.log("Đã duyệt", editCertificate);
         } else if (
           certificate.status === "REJECTED" ||
           certificate.status === "PENDING"
         ) {
-          console.log("chưa duyệt", editCertificate);
           const response = await API.user.updateCertification(certificate);
           if (response.data.success) {
             const response = await API.lecturer.getLecturerProfile();

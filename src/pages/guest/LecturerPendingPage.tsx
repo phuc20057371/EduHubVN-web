@@ -59,7 +59,10 @@ import type { DegreeRequest } from "../../types/DegreeRequest";
 import type { CertificationRequest } from "../../types/CertificationRequest";
 import { validateLecturerInfo } from "../../utils/Validate";
 import { colors } from "../../theme/colors";
-import { jobFieldsAutoComplete, majorAutoComplete } from "../../utils/ValidateRegisterLecturer";
+import {
+  jobFieldsAutoComplete,
+  majorAutoComplete,
+} from "../../utils/ValidateRegisterLecturer";
 
 const LecturerPendingPage = () => {
   const dispatch = useDispatch();
@@ -107,7 +110,6 @@ const LecturerPendingPage = () => {
       try {
         const response = await API.user.getPendingLecturer();
         dispatch(setPendingLecturer(response.data.data));
-        console.log("Pending lecturers:", response.data.data);
       } catch (error: any) {
         if (
           error.response?.data?.message?.includes("Không có quyền truy cập")
@@ -269,20 +271,13 @@ const LecturerPendingPage = () => {
 
       if (validateLecturerInfo(updatedLecturer).success === false) {
         toast.error(validateLecturerInfo(updatedLecturer).error);
-        console.log(
-          "Validation failed:",
-          validateLecturerInfo(updatedLecturer).error,
-        );
-
         return;
       }
-      console.log("Updated lecturer:", updatedLecturer);
       const updatedPendingLecturer = {
         ...pendingLecturer,
         lecturer: updatedLecturer,
       };
       setOpenConfirmDialog(false);
-      console.log("pendingLecturer sau khi cập nhật:", updatedPendingLecturer);
       const response = await API.user.updatePendingLecturer(
         updatedPendingLecturer,
       );

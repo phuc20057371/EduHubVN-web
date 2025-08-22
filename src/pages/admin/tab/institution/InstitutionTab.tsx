@@ -454,7 +454,6 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
       return;
     }
     setSelected(selectedIndex);
-    console.log(row);
   };
 
   // Filtered institutions for main list with comprehensive search

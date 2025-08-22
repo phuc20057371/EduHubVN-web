@@ -134,7 +134,6 @@ const UploadCertificationModal: React.FC<UploadCertificationModalProps> = ({
     await API.user
       .uploadFileToServer(selectedFile)
       .then((res: any) => {
-        console.log("✅ File uploaded successfully:", res.data);
         setForm((prev) => ({ ...prev, certificateUrl: res.data }));
         toast.success("Tải lên tài liệu thành công");
       })

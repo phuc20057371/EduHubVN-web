@@ -356,7 +356,6 @@ const AdminCourse = () => {
     const fetchCourses = async () => {
       try {
         const response = await API.admin.getAllCourses();
-        console.log("Courses fetched successfully:", response.data.data);
         dispatch(setCourse(response.data.data));
       } catch (error) {
         console.error("Error fetching courses:", error);
@@ -578,10 +577,7 @@ const AdminCourse = () => {
   const handleCreateCourse = useCallback(
     async (courseData: any) => {
       try {
-        console.log("Creating course:", courseData);
-
         const response = await API.admin.createCourse(courseData);
-        console.log("Course created successfully:", response.data);
 
         const coursesResponse = await API.admin.getAllCourses();
         dispatch(setCourse(coursesResponse.data.data));
@@ -612,10 +608,7 @@ const AdminCourse = () => {
   const handleUpdateCourse = useCallback(
     async (courseData: any) => {
       try {
-        console.log("Updating course:", courseData);
-
-        const response = await API.admin.updateCourse(courseData);
-        console.log("Course updated successfully:", response.data.data);
+        await API.admin.updateCourse(courseData);
         // Refresh courses list
         const coursesResponse = await API.admin.getAllCourses();
         dispatch(setCourse(coursesResponse.data.data));

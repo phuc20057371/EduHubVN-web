@@ -34,13 +34,11 @@ const DegreeDetailDialog = ({ open, onClose, data }: DegreeDetailDialogProps) =>
             await API.admin.approveDegree({ id: degree?.id });
             const filtered = degreePendingCreate.filter((item: any) => item.degree?.id !== degree?.id);
             dispatch(setDegreePendingCreate(filtered));
-            console.log('APPROVE DEGREE ID:', degree?.id);
             toast.success('Đã duyệt bằng cấp thành công');
         } else if (confirmType === 'reject') {
             await API.admin.rejectDegree({ id: degree?.id, adminNote });
             const filtered = degreePendingCreate.filter((item: any) => item.degree?.id !== degree?.id);
             dispatch(setDegreePendingCreate(filtered));
-            console.log('REJECT DEGREE ID:', degree?.id, 'ADMIN NOTE:', adminNote);
             toast.success('Đã từ chối bằng cấp thành công');
         }
         setConfirmType(null);

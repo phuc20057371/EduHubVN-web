@@ -245,8 +245,6 @@ const RegisterLecturer = () => {
         bio: bio || "",
       };
 
-      console.log("Form data before validation:", formData);
-
       if (!validateLecturerInfo(formData).success) {
         toast.error(validateLecturerInfo(formData).error);
         return;
@@ -270,10 +268,7 @@ const RegisterLecturer = () => {
         jobField: jobField || "",
       };
       try {
-        console.log("📤 Gửi dữ liệu giảng viên:", lecturerData);
-
-        const response = await API.user.registerLecturer(lecturerData);
-        console.log("✅ Dữ liệu giảng viên đã gửi thành công:", response.data);
+        await API.user.registerLecturer(lecturerData);
         if (degrees.length > 0) {
           await API.user.createDegree(degrees);
         }
@@ -283,7 +278,7 @@ const RegisterLecturer = () => {
 
         localStorage.removeItem("registerLecturerForm");
         navigate("/pending-lecturer", { replace: true });
-        const res = await API.other.sendEmail({
+        await API.other.sendEmail({
           to: userProfile.email,
           subject: "Xác nhận đăng ký tài khoản Giảng Viên thành công",
           body: `
@@ -311,8 +306,6 @@ const RegisterLecturer = () => {
             </div>
           `,
         });
-        console.log("✅ Email xác nhận đã gửi thành công:", res.data);
-
       } catch (error: any) {
         if (error.response?.data?.message?.includes("đã tồn tại")) {
           toast.error("Số CCCD/CMND đã được đăng ký trước đó.");
@@ -433,7 +426,8 @@ const RegisterLecturer = () => {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: "linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%)",
+                background:
+                  "linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%)",
                 zIndex: 1,
               },
               "&::after": {
@@ -501,7 +495,7 @@ const RegisterLecturer = () => {
                   }}
                 />
               </Box>
-              
+
               <Typography
                 variant="h3"
                 sx={{
@@ -509,7 +503,8 @@ const RegisterLecturer = () => {
                   fontWeight: 700,
                   mb: 2,
                   textShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                  background: "linear-gradient(45deg, #fff 30%, rgba(255,255,255,0.8) 100%)",
+                  background:
+                    "linear-gradient(45deg, #fff 30%, rgba(255,255,255,0.8) 100%)",
                   backgroundClip: "text",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
@@ -527,7 +522,8 @@ const RegisterLecturer = () => {
                   lineHeight: 1.6,
                 }}
               >
-                Vui lòng điền đầy đủ thông tin để hoàn tất quá trình đăng ký giảng viên
+                Vui lòng điền đầy đủ thông tin để hoàn tất quá trình đăng ký
+                giảng viên
               </Typography>
             </Box>
           </Box>
@@ -536,10 +532,10 @@ const RegisterLecturer = () => {
           <Box sx={{ p: 6, position: "relative", zIndex: 1 }}>
             {/* Basic Information Section */}
             <Box sx={{ mb: 8 }}>
-              <Box 
-                sx={{ 
-                  display: "flex", 
-                  alignItems: "center", 
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
                   mb: 4,
                   position: "relative",
                   "&::before": {
@@ -572,7 +568,9 @@ const RegisterLecturer = () => {
                     boxShadow: `0 4px 12px ${alpha(colors.primary[500], 0.1)}`,
                   }}
                 >
-                  <AccountCircle sx={{ fontSize: 28, color: colors.primary[600] }} />
+                  <AccountCircle
+                    sx={{ fontSize: 28, color: colors.primary[600] }}
+                  />
                 </Box>
                 <Box>
                   <Typography
@@ -633,7 +631,13 @@ const RegisterLecturer = () => {
                   }}
                 />
 
-                <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 4 }}>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                    gap: 4,
+                  }}
+                >
                   <TextField
                     fullWidth
                     label="Số CCCD/CMND"
@@ -676,7 +680,13 @@ const RegisterLecturer = () => {
                   />
                 </Box>
 
-                <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 4 }}>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                    gap: 4,
+                  }}
+                >
                   <TextField
                     fullWidth
                     label="Ngày sinh"
@@ -779,7 +789,13 @@ const RegisterLecturer = () => {
               </Box>
 
               <Box sx={{ display: "grid", gap: 4 }}>
-                <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 4 }}>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                    gap: 4,
+                  }}
+                >
                   <TextField
                     select
                     fullWidth
@@ -808,8 +824,12 @@ const RegisterLecturer = () => {
                     freeSolo
                     options={majorAutoComplete}
                     value={specialization}
-                    onChange={(_event, newValue) => setSpecialization(newValue || "")}
-                    onInputChange={(_event, newInputValue) => setSpecialization(newInputValue)}
+                    onChange={(_event, newValue) =>
+                      setSpecialization(newValue || "")
+                    }
+                    onInputChange={(_event, newInputValue) =>
+                      setSpecialization(newInputValue)
+                    }
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -828,13 +848,21 @@ const RegisterLecturer = () => {
                   />
                 </Box>
 
-                <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 4 }}>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                    gap: 4,
+                  }}
+                >
                   <Autocomplete
                     freeSolo
                     options={jobFieldsAutoComplete}
                     value={jobField || ""}
                     onChange={(_e, newValue) => setJobField(newValue || "")}
-                    onInputChange={(_e, newInputValue) => setJobField(newInputValue || "")}
+                    onInputChange={(_e, newInputValue) =>
+                      setJobField(newInputValue || "")
+                    }
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -886,7 +914,9 @@ const RegisterLecturer = () => {
                     mr: 3,
                   }}
                 >
-                  <Description sx={{ fontSize: 28, color: colors.accent.lightBlue }} />
+                  <Description
+                    sx={{ fontSize: 28, color: colors.accent.lightBlue }}
+                  />
                 </Box>
                 <Box>
                   <Typography
@@ -949,7 +979,13 @@ const RegisterLecturer = () => {
   const renderCredentialsStep = () => (
     <Fade in={activeStep === 1} timeout={500}>
       <Box sx={{ mx: "auto", mt: 4, maxWidth: "1400px", px: 2 }}>
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" }, gap: 4 }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+            gap: 4,
+          }}
+        >
           {/* Enhanced Degrees Section */}
           <Paper
             elevation={0}
@@ -1000,7 +1036,13 @@ const RegisterLecturer = () => {
                 },
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Avatar
                     sx={{
@@ -1048,7 +1090,9 @@ const RegisterLecturer = () => {
               <Box sx={{ maxHeight: 400, overflow: "auto", mb: 4 }}>
                 {degrees.length === 0 ? (
                   <Box sx={{ py: 8, textAlign: "center" }}>
-                    <School sx={{ fontSize: 80, color: colors.neutral[300], mb: 3 }} />
+                    <School
+                      sx={{ fontSize: 80, color: colors.neutral[300], mb: 3 }}
+                    />
                     <Typography
                       variant="h6"
                       sx={{
@@ -1059,7 +1103,10 @@ const RegisterLecturer = () => {
                     >
                       Chưa có bằng cấp nào
                     </Typography>
-                    <Typography variant="body2" sx={{ color: colors.text.tertiary }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: colors.text.tertiary }}
+                    >
                       Thêm bằng cấp để nâng cao uy tín và chứng minh trình độ
                     </Typography>
                   </Box>
@@ -1197,7 +1244,8 @@ const RegisterLecturer = () => {
                     left: "-100%",
                     width: "100%",
                     height: "100%",
-                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
+                    background:
+                      "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
                     transition: "left 0.6s",
                   },
                   "&:hover": {
@@ -1265,7 +1313,13 @@ const RegisterLecturer = () => {
                 },
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Avatar
                     sx={{
@@ -1313,7 +1367,9 @@ const RegisterLecturer = () => {
               <Box sx={{ maxHeight: 400, overflow: "auto", mb: 4 }}>
                 {certifications.length === 0 ? (
                   <Box sx={{ py: 8, textAlign: "center" }}>
-                    <Badge sx={{ fontSize: 80, color: colors.neutral[300], mb: 3 }} />
+                    <Badge
+                      sx={{ fontSize: 80, color: colors.neutral[300], mb: 3 }}
+                    />
                     <Typography
                       variant="h6"
                       sx={{
@@ -1324,8 +1380,12 @@ const RegisterLecturer = () => {
                     >
                       Chưa có chứng chỉ nào
                     </Typography>
-                    <Typography variant="body2" sx={{ color: colors.text.tertiary }}>
-                      Thêm chứng chỉ để chứng minh năng lực chuyên môn và kinh nghiệm thực tế
+                    <Typography
+                      variant="body2"
+                      sx={{ color: colors.text.tertiary }}
+                    >
+                      Thêm chứng chỉ để chứng minh năng lực chuyên môn và kinh
+                      nghiệm thực tế
                     </Typography>
                   </Box>
                 ) : (
@@ -1468,7 +1528,8 @@ const RegisterLecturer = () => {
                     left: "-100%",
                     width: "100%",
                     height: "100%",
-                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
+                    background:
+                      "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
                     transition: "left 0.6s",
                   },
                   "&:hover": {
@@ -1632,7 +1693,9 @@ const RegisterLecturer = () => {
                 backgroundColor: colors.info[50],
               }}
             >
-              <AlertTitle sx={{ fontWeight: 700 }}>Thông tin quan trọng</AlertTitle>
+              <AlertTitle sx={{ fontWeight: 700 }}>
+                Thông tin quan trọng
+              </AlertTitle>
               Vui lòng kiểm tra kỹ thông tin trước khi gửi yêu cầu. Sau khi gửi,
               tài khoản của bạn sẽ chờ được quản trị viên phê duyệt.
             </Alert>
@@ -1829,9 +1892,9 @@ const RegisterLecturer = () => {
   );
 
   return (
-    <Box 
-      sx={{ 
-        minHeight: "100vh", 
+    <Box
+      sx={{
+        minHeight: "100vh",
         background: `
           linear-gradient(135deg, ${colors.background.secondary} 0%, ${alpha(colors.primary[50], 0.3)} 100%),
           url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${colors.primary[100].slice(1)}' fill-opacity='0.02'%3E%3Cpath d='M100 100c55.228 0 100-44.772 100-100H100z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
@@ -1883,17 +1946,30 @@ const RegisterLecturer = () => {
               left: "-50%",
               width: "200%",
               height: "200%",
-              background: "linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%)",
+              background:
+                "linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%)",
               animation: "shine 8s ease-in-out infinite",
               "@keyframes shine": {
-                "0%": { transform: "translateX(-100%) translateY(-100%) rotate(45deg)" },
-                "100%": { transform: "translateX(100%) translateY(100%) rotate(45deg)" },
+                "0%": {
+                  transform:
+                    "translateX(-100%) translateY(-100%) rotate(45deg)",
+                },
+                "100%": {
+                  transform: "translateX(100%) translateY(100%) rotate(45deg)",
+                },
               },
             },
           }}
         >
           <Box sx={{ p: 6, position: "relative", zIndex: 1 }}>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 4 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 4,
+              }}
+            >
               <IconButton
                 onClick={handleBackToHome}
                 sx={{
@@ -1947,13 +2023,23 @@ const RegisterLecturer = () => {
                     icon={
                       <Avatar
                         sx={{
-                          bgcolor: index <= activeStep ? "#fff" : "rgba(255,255,255,0.3)",
-                          color: index <= activeStep ? colors.primary[600] : "#fff",
+                          bgcolor:
+                            index <= activeStep
+                              ? "#fff"
+                              : "rgba(255,255,255,0.3)",
+                          color:
+                            index <= activeStep ? colors.primary[600] : "#fff",
                           width: 48,
                           height: 48,
                           fontSize: "1.2rem",
-                          border: index <= activeStep ? "none" : "2px solid rgba(255,255,255,0.3)",
-                          boxShadow: index <= activeStep ? `0 4px 12px ${alpha(colors.primary[500], 0.3)}` : "none",
+                          border:
+                            index <= activeStep
+                              ? "none"
+                              : "2px solid rgba(255,255,255,0.3)",
+                          boxShadow:
+                            index <= activeStep
+                              ? `0 4px 12px ${alpha(colors.primary[500], 0.3)}`
+                              : "none",
                         }}
                       >
                         {step.icon}
@@ -1966,7 +2052,10 @@ const RegisterLecturer = () => {
                         sx={{
                           fontFamily: "'Inter', sans-serif",
                           fontWeight: 600,
-                          color: index === activeStep ? "white" : "rgba(255,255,255,0.8)",
+                          color:
+                            index === activeStep
+                              ? "white"
+                              : "rgba(255,255,255,0.8)",
                         }}
                       >
                         {step.label}
@@ -1974,7 +2063,10 @@ const RegisterLecturer = () => {
                       <Typography
                         variant="body2"
                         sx={{
-                          color: index === activeStep ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.6)",
+                          color:
+                            index === activeStep
+                              ? "rgba(255,255,255,0.9)"
+                              : "rgba(255,255,255,0.6)",
                         }}
                       >
                         {step.description}
@@ -1998,7 +2090,10 @@ const RegisterLecturer = () => {
                     },
                   }}
                 />
-                <Typography variant="body1" sx={{ mt: 2, textAlign: "center", opacity: 0.9 }}>
+                <Typography
+                  variant="body1"
+                  sx={{ mt: 2, textAlign: "center", opacity: 0.9 }}
+                >
                   Đang xử lý đăng ký của bạn...
                 </Typography>
               </Box>
@@ -2036,7 +2131,13 @@ const RegisterLecturer = () => {
             },
           }}
         >
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             <Button
               disabled={activeStep === 0}
               onClick={handleBack}
@@ -2093,19 +2194,30 @@ const RegisterLecturer = () => {
                   transition: "all 0.3s ease",
                 }}
               >
-                {activeStep === steps.length - 1 ? "Hoàn tất đăng ký" : "Tiếp tục"}
+                {activeStep === steps.length - 1
+                  ? "Hoàn tất đăng ký"
+                  : "Tiếp tục"}
               </Button>
             </Box>
           </Box>
 
           {/* Progress */}
           <Box sx={{ mt: 4 }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: colors.text.secondary }}>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}
+            >
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 600, color: colors.text.secondary }}
+              >
                 Bước {activeStep + 1} / {steps.length}
               </Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: colors.text.secondary }}>
-                {Math.round(((activeStep + 1 ) / steps.length) * 100)}% hoàn thành
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 600, color: colors.text.secondary }}
+              >
+                {Math.round(((activeStep + 1) / steps.length) * 100)}% hoàn
+                thành
               </Typography>
             </Box>
             <LinearProgress

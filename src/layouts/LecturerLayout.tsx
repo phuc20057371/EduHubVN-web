@@ -107,7 +107,6 @@ const LecturerLayout = () => {
           throw new Error("Failed to fetch lecturer profile");
         }
         dispatch(setLecturerProfile(response.data.data));
-        console.log("Lecturer Profile:", response.data.data);
       } catch (error) {
         console.error("Error fetching lecturer profile:", error);
         navigate("/error");
@@ -151,16 +150,8 @@ const LecturerLayout = () => {
   };
 
   const handleProfile = () => {
-    console.log(
-      "🔍 Before navigate to profile - WebSocket connected:",
-      WebSocketService.isConnected(),
-    );
     navigate("/lecturer/profile");
     handleMenuClose();
-    console.log(
-      "🔍 After navigate to profile - WebSocket connected:",
-      WebSocketService.isConnected(),
-    );
   };
 
   const handleDrawerToggle = () => {

@@ -49,8 +49,6 @@ const AdminLecturerResearchTab: React.FC<AdminLecturerResearchTabProps> = ({
 
   const handleResearchItemClick = (item: any) => {
     setSelectedResearch(item);
-    console.log("Research project item clicked:", item);
-
     if (item.label === "Create") {
       setOpenResearchProjectCreateDialog(true);
     } else {

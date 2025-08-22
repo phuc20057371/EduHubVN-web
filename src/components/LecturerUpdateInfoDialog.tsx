@@ -145,7 +145,6 @@ const LecturerUpdateInfoDialog = ({
       }
       const response = await API.lecturer.getLecturerProfile();
       dispatch(setLecturerProfile(response.data.data));
-      console.log("Update response:", res.data);
       toast.success("Hồ sơ cập nhật đã được gửi cho admin");
       onClose();
     } catch (error: any) {

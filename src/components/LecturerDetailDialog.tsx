@@ -112,9 +112,6 @@ const LecturerDetailDialog: React.FC<LecturerDetailDialogProps> = ({
   useEffect(() => {
     if (!open) return;
     // Lecturer
-    console.log(lecturer);
-    console.log(degrees);
-    console.log(certificates);
 
     const lecKey = `Lecturer${lecturer.id}`;
     const lecStr = localStorage.getItem(lecKey);

@@ -30,10 +30,7 @@ const LecturerInfoPage = () => {
       try {
         setLoading(true);
 
-        console.log("Lecturer ID từ URL:", id);
-
         const response = await API.other.getLecturerProfile(id);
-        console.log("Kết quả API:", response.data.data);
 
         dispatch(setLecturerProfile(response.data.data));
         setError(null);

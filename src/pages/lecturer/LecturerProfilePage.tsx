@@ -100,8 +100,6 @@ const LecturerProfilePage = () => {
     courseData: AttendedCourseRequest,
   ) => {
     try {
-      console.log("Submitting attended course:", courseData);
-
       if (isEditMode && editingItem) {
         if (editingItem.status === "APPROVED") {
           await API.lecturer.editAttendedCourse(courseData as AttendedCourse);
@@ -133,12 +131,8 @@ const LecturerProfilePage = () => {
 
   const handleSubmitOwnedCourse = async (courseData: OwnedCourse) => {
     try {
-      console.log("Submitting owned course:", courseData);
-
       if (isEditMode && editingItem) {
         if (editingItem.status === "APPROVED") {
-          console.log("Edit:", courseData);
-          console.log("Item:", editingItem);
           await API.lecturer.editOwnedCourse(courseData);
           toast.success("Đã gửi yêu cầu cập nhật!");
         } else if (
@@ -174,7 +168,6 @@ const LecturerProfilePage = () => {
   };
   const handleSubmitResearchProject = async (projectData: any) => {
     try {
-      console.log("Submitting research project:", projectData);
 
       if (isEditMode && editingItem) {
         if (editingItem.status === "APPROVED") {
@@ -227,7 +220,6 @@ const LecturerProfilePage = () => {
   };
 
   const handleEdit = (item: any) => {
-    console.log("Edit item:", item);
     if (item) {
       // Check if item has organizer field to identify it as AttendedCourse
       if (item.organizer) {

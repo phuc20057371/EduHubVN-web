@@ -132,7 +132,7 @@ export const getStatusColor = (status: string) => {
     case "PENDING":
       return "warning";
     case "APPROVED":
-      return "info";
+      return "success";
     case "REJECTED":
       return "error";
     default:
