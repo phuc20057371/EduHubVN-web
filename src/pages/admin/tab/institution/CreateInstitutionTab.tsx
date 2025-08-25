@@ -19,19 +19,8 @@ import {
 import { Business, Add } from "@mui/icons-material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
-import InstitutionDetailDialog from "../../../../components/InstitutionDetailDialog";
-
-// Helper function để hiển thị tên loại cơ sở giáo dục
-const getInstitutionTypeDisplay = (type: string) => {
-  switch (type) {
-    case "UNIVERSITY":
-      return "ĐH";
-    case "TRAINING_CENTER":
-      return "TTDT";
-    default:
-      return type;
-  }
-};
+import ApproveInstitutionCreateDialog from "../../../../components/admin-dialog/admin-institution-dialog/ApproveInstitutionCreateDialog";
+import { getInstitutionType } from "../../../../utils/ChangeText";
 
 interface CreateInstitutionTabProps {
   institutionPendingCreate: any[];
@@ -125,7 +114,7 @@ const CreateInstitutionTab: React.FC<CreateInstitutionTabProps> = ({
               Yêu cầu đăng ký cơ sở giáo dục mới
             </Typography>
             <Typography variant="body2" sx={{ color: "#6c757d" }}>
-              {(createSearchTerm || createDateSort !== "oldest")
+              {createSearchTerm || createDateSort !== "oldest"
                 ? `Đã lọc ${filteredCreateList.length} yêu cầu`
                 : `Tổng cộng ${filteredCreateList.length} yêu cầu chờ phê duyệt`}
             </Typography>
@@ -277,7 +266,8 @@ const CreateInstitutionTab: React.FC<CreateInstitutionTabProps> = ({
                     src={item.logoUrl || ""}
                     sx={{
                       bgcolor: "success.main",
-                      background: "linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)",
+                      background:
+                        "linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)",
                       mr: 2,
                       width: 48,
                       height: 48,
@@ -306,9 +296,7 @@ const CreateInstitutionTab: React.FC<CreateInstitutionTabProps> = ({
                     </Typography>
                     <Box sx={{ display: "flex", gap: 1 }}>
                       <Chip
-                        label={getInstitutionTypeDisplay(
-                          item.institutionType,
-                        )}
+                        label={getInstitutionType(item.institutionType)}
                         size="small"
                         sx={{
                           bgcolor: "#e3f2fd",
@@ -456,7 +444,7 @@ const CreateInstitutionTab: React.FC<CreateInstitutionTabProps> = ({
       )}
 
       {/* Dialog */}
-      <InstitutionDetailDialog
+      <ApproveInstitutionCreateDialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
         institution={selectedInstitution || {}}

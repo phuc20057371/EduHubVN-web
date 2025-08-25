@@ -25,8 +25,8 @@ import {
   DialogContentText,
 } from "@mui/material";
 import { colors } from "../../../theme/colors";
-import { getStatusText } from "../../../utils/ChangeText";
-import UploadCertificationModal from "../../../components/UploadCertificationModal";
+import { getStatus } from "../../../utils/ChangeText";
+import UploadCertificationModal from "../../../components/lecturer-dialog/CreateCertificationDialog";
 import { API } from "../../../utils/Fetch";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
@@ -236,7 +236,7 @@ const CertificatesTab = ({
                   </div>
                 </div>
                 <Chip
-                  label={getStatusText(item.status)}
+                  label={getStatus(item.status)}
                   size="small"
                   sx={{
                     fontWeight: 600,

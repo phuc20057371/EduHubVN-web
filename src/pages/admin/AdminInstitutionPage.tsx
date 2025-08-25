@@ -20,7 +20,6 @@ import CreateInstitutionTab from "./tab/institution/CreateInstitutionTab";
 import UpdateInstitutionTab from "./tab/institution/UpdateInstitutionTab";
 import TabList from "@mui/lab/TabList";
 
-// Memoized selectors
 const selectInstitutionPendingCreate = createSelector(
   (state: any) => state.institutionPendingCreate,
   (institutionPendingCreate) =>

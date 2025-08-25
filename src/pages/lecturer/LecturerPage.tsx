@@ -11,7 +11,7 @@ import {
   Schedule,
   School,
   Timeline,
-  VideocamOutlined
+  VideocamOutlined,
 } from "@mui/icons-material";
 import {
   Alert,
@@ -36,7 +36,7 @@ import {
 import React from "react";
 import { useSelector } from "react-redux";
 import { colors } from "../../theme/colors";
-import { getAcademicRankLabel } from "../../utils/ChangeText";
+import { getAcademicRank } from "../../utils/ChangeText";
 
 const LecturerPage = () => {
   const lecturerProfile = useSelector((state: any) => state.lecturerProfile);
@@ -225,9 +225,8 @@ const LecturerPage = () => {
               <Chip
                 size="small"
                 label={
-                  getAcademicRankLabel(
-                    lecturerProfile?.lecturer?.academicRank,
-                  ) || "CN"
+                  getAcademicRank(lecturerProfile?.lecturer?.academicRank) ||
+                  "CN"
                 }
                 sx={{
                   bgcolor: alpha("#fff", 0.2),

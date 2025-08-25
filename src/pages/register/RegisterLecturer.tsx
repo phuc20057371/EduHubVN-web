@@ -25,9 +25,9 @@ import {
   alpha,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import UploadDegreeModal from "../../components/UploadDegreeModal";
+import UploadDegreeModal from "../../components/lecturer-dialog/CreateDegreeModal";
 import type { DegreeRequest } from "../../types/DegreeRequest";
-import UploadCertificationModal from "../../components/UploadCertificationModal";
+import UploadCertificationModal from "../../components/lecturer-dialog/CreateCertificationDialog";
 import type { CertificationRequest } from "../../types/CertificationRequest";
 import { API } from "../../utils/Fetch";
 import { useNavigate } from "react-router-dom";
@@ -45,14 +45,11 @@ import {
   ArrowBack,
 } from "@mui/icons-material";
 import { toast } from "react-toastify";
-import {
-  getAcademicRankLabel,
-  jobFieldsAutoComplete,
-  majorAutoComplete,
-} from "../../utils/ValidateRegisterLecturer";
 import { validateLecturerInfo } from "../../utils/Validate";
 import { useSelector } from "react-redux";
 import { colors } from "../../theme/colors";
+import { getAcademicRank } from "../../utils/ChangeText";
+import { jobFieldAutoComplete, majorsAutoComplete } from "../../utils/AutoComplete";
 
 const RegisterLecturer = () => {
   const steps = [
@@ -144,7 +141,7 @@ const RegisterLecturer = () => {
     },
     {
       label: "Học hàm",
-      value: getAcademicRankLabel(academicRank),
+      value: getAcademicRank(academicRank),
     },
     {
       label: "Chuyên ngành",
@@ -822,7 +819,7 @@ const RegisterLecturer = () => {
 
                   <Autocomplete
                     freeSolo
-                    options={majorAutoComplete}
+                    options={majorsAutoComplete}
                     value={specialization}
                     onChange={(_event, newValue) =>
                       setSpecialization(newValue || "")
@@ -857,7 +854,7 @@ const RegisterLecturer = () => {
                 >
                   <Autocomplete
                     freeSolo
-                    options={jobFieldsAutoComplete}
+                    options={jobFieldAutoComplete}
                     value={jobField || ""}
                     onChange={(_e, newValue) => setJobField(newValue || "")}
                     onInputChange={(_e, newInputValue) =>

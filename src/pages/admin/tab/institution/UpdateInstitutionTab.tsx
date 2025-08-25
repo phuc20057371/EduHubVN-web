@@ -19,19 +19,8 @@ import {
 import { Business, Update } from "@mui/icons-material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
-import InstitutionDetailUpdateDialog from "../../../../components/InstitutionDetailUpdateDialog";
-
-// Helper function để hiển thị tên loại cơ sở giáo dục
-const getInstitutionTypeDisplay = (type: string) => {
-  switch (type) {
-    case "UNIVERSITY":
-      return "ĐH";
-    case "TRAINING_CENTER":
-      return "TTDT";
-    default:
-      return type;
-  }
-};
+import ApproveInstitutionUpdateDialog from "../../../../components/admin-dialog/admin-institution-dialog/ApproveInstitutionUpdateDialog";
+import { getInstitutionType } from "../../../../utils/ChangeText";
 
 interface UpdateInstitutionTabProps {
   institutionPendingUpdate: any[];
@@ -136,7 +125,7 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
               Yêu cầu cập nhật thông tin cơ sở giáo dục
             </Typography>
             <Typography variant="body2" sx={{ color: "#6c757d" }}>
-              {(updateSearchTerm || updateDateSort !== "oldest")
+              {updateSearchTerm || updateDateSort !== "oldest"
                 ? `Đã lọc ${filteredUpdateList.length} yêu cầu`
                 : `Tổng cộng ${filteredUpdateList.length} yêu cầu chờ phê duyệt`}
             </Typography>
@@ -279,7 +268,8 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
                     border: "2px solid",
                     borderColor: "warning.light",
                     borderRadius: 3,
-                    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+                    background:
+                      "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
                     "&:hover": {
                       transform: "translateY(-8px)",
                       boxShadow: "0 12px 40px rgba(255, 152, 0, 0.2)",
@@ -288,14 +278,13 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
                   }}
                 >
                   <CardContent sx={{ p: 3 }}>
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", mb: 2 }}
-                    >
+                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                       <Avatar
                         src={edu.logoUrl || ""}
                         sx={{
                           bgcolor: "warning.main",
-                          background: "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)",
+                          background:
+                            "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)",
                           mr: 2,
                           width: 48,
                           height: 48,
@@ -324,9 +313,7 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
                         </Typography>
                         <Box sx={{ display: "flex", gap: 1 }}>
                           <Chip
-                            label={getInstitutionTypeDisplay(
-                              edu.institutionType,
-                            )}
+                            label={getInstitutionType(edu.institutionType)}
                             size="small"
                             sx={{
                               bgcolor: "#e3f2fd",
@@ -353,8 +340,8 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
                         color="text.secondary"
                         sx={{ mb: 1 }}
                       >
-                        <strong>Đại diện:</strong> {edu.representativeName}{" "}
-                        ({edu.position})
+                        <strong>Đại diện:</strong> {edu.representativeName} (
+                        {edu.position})
                       </Typography>
                       <Typography
                         variant="body2"
@@ -451,7 +438,7 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
       )}
 
       {/* Dialog */}
-      <InstitutionDetailUpdateDialog
+      <ApproveInstitutionUpdateDialog
         open={openUpdateDialog}
         onClose={() => setOpenUpdateDialog(false)}
         oldData={selectedUpdate?.oldData}

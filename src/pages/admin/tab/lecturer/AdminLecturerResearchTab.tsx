@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Avatar,
   Box,
@@ -18,29 +18,85 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
-import { DateRange } from "@mui/icons-material";
-import ResearchProjectCreateDialog from "../../../../components/ResearchProjectCreateDialog";
-import ResearchProjectUpdateDialog from "../../../../components/ResearchProjectUpdateDialog";
+import DateRange from "@mui/icons-material/DateRange";
+import ApproveResearchProjectCreateDialog from "../../../../components/admin-dialog/admin-lecturer-dialog/ApproveResearchProjectCreateDialog";
+import ApproveResearchProjectUpdateDialog from "../../../../components/admin-dialog/admin-lecturer-dialog/ApproveResearchProjectUpdateDialog";
+import { getAcademicRank, getProjectType, getScale } from "../../../../utils/ChangeText";
 
 interface AdminLecturerResearchTabProps {
-  filteredResearchList: any[];
-  researchSearchTerm: string;
-  setResearchSearchTerm: (value: string) => void;
-  researchActionFilter: string;
-  setResearchActionFilter: (value: string) => void;
-  researchDateSort: string;
-  setResearchDateSort: (value: string) => void;
+  lecturerRequestsResearch: any[];
 }
 
 const AdminLecturerResearchTab: React.FC<AdminLecturerResearchTabProps> = ({
-  filteredResearchList,
-  researchSearchTerm,
-  setResearchSearchTerm,
-  researchActionFilter,
-  setResearchActionFilter,
-  researchDateSort,
-  setResearchDateSort,
+  lecturerRequestsResearch,
 }) => {
+  // Filter state management
+  const [researchSearchTerm, setResearchSearchTerm] = useState("");
+  const [researchActionFilter, setResearchActionFilter] = useState("");
+  const [researchDateSort, setResearchDateSort] = useState("oldest");
+
+  // Filtered data using useMemo
+  const filteredResearchList = useMemo(() => {
+    if (!Array.isArray(lecturerRequestsResearch)) {
+      return [];
+    }
+    let filtered = lecturerRequestsResearch;
+    if (researchSearchTerm) {
+      filtered = filtered.filter((item: any) => {
+        const searchTerm = researchSearchTerm.toLowerCase();
+        const lecturerMatch = item.lecturerInfo?.fullName
+          ?.toLowerCase()
+          .includes(searchTerm);
+        const idMatch =
+          item.content?.id?.toString().includes(researchSearchTerm) ||
+          item.content?.original?.id?.toString().includes(researchSearchTerm);
+        let contentMatch = false;
+        if (item.content && !item.content.original) {
+          contentMatch =
+            item.content.name?.toLowerCase().includes(searchTerm) ||
+            item.content.title?.toLowerCase().includes(searchTerm) ||
+            item.content.category?.toLowerCase().includes(searchTerm) ||
+            item.content.level?.toLowerCase().includes(searchTerm);
+        }
+        if (item.content?.original) {
+          contentMatch =
+            contentMatch ||
+            item.content.original.name?.toLowerCase().includes(searchTerm) ||
+            item.content.original.title?.toLowerCase().includes(searchTerm) ||
+            item.content.original.category
+              ?.toLowerCase()
+              .includes(searchTerm) ||
+            item.content.original.level?.toLowerCase().includes(searchTerm);
+        }
+        return lecturerMatch || idMatch || contentMatch;
+      });
+    }
+    if (researchActionFilter) {
+      filtered = filtered.filter(
+        (item: any) => item.label === researchActionFilter,
+      );
+    }
+    filtered = [...filtered].sort((a: any, b: any) => {
+      const dateA = new Date(
+        a.date || a.content?.updatedAt || a.content?.createdAt || 0,
+      );
+      const dateB = new Date(
+        b.date || b.content?.updatedAt || b.content?.createdAt || 0,
+      );
+
+      if (researchDateSort === "oldest") {
+        return dateA.getTime() - dateB.getTime();
+      } else {
+        return dateB.getTime() - dateA.getTime();
+      }
+    });
+    return filtered;
+  }, [
+    lecturerRequestsResearch,
+    researchSearchTerm,
+    researchActionFilter,
+    researchDateSort,
+  ]);
   const [selectedResearch, setSelectedResearch] = useState<any>(null);
   const [openResearchProjectCreateDialog, setOpenResearchProjectCreateDialog] =
     useState(false);
@@ -312,135 +368,215 @@ const AdminLecturerResearchTab: React.FC<AdminLecturerResearchTabProps> = ({
                     sx={{
                       display: "flex",
                       flexDirection: "column",
-                      gap: 2,
+                      gap: 2.5,
                     }}
                   >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                      <Avatar
-                        src={item.lecturerInfo?.avatarUrl || ""}
+                    {/* RESEARCH INFORMATION - TOP */}
+                    <Box sx={{ pb: 1.5, borderBottom: "1px solid #e0e0e0" }}>
+                      <Box sx={{ display: "flex", gap: 0.5, mb: 1.5 }}>
+                        <Chip
+                          label={getProjectType(contentData?.projectType) || "Không xác định"}
+                          size="small"
+                          variant="filled"
+                          color="primary"
+                          sx={{ fontSize: "0.7rem", height: 22 }}
+                        />
+                        <Chip
+                          label={item.label === "Create" ? "Tạo mới" : "Cập nhật"}
+                          size="small"
+                          color={
+                            item.label === "Create" ? "success" : "warning"
+                          }
+                          sx={{ fontSize: "0.7rem", height: 22 }}
+                        />
+                      </Box>
+
+                      <Typography
+                        variant="h6"
                         sx={{
-                          bgcolor:
-                            item.label === "Create"
-                              ? "success.main"
-                              : "warning.main",
-                          width: 50,
-                          height: 50,
-                          fontSize: "1.2rem",
                           fontWeight: 700,
+                          color: "text.primary",
+                          mb: 1.5,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          lineHeight: 1.2,
+                          minHeight: "2.4em",
                         }}
                       >
-                        {item.lecturerInfo?.fullName?.charAt(0)}
-                      </Avatar>
+                        {contentData?.name || contentData?.title || "Không có tên"}
+                      </Typography>
 
-                      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                        <Typography
-                          variant="h6"
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 1,
+                        }}
+                      >
+                        <Box
                           sx={{
-                            fontWeight: 700,
-                            color: "text.primary",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
+                            display: "flex",
+                            justifyContent: "space-between",
                           }}
                         >
-                          {item.lecturerInfo?.fullName}
-                        </Typography>
-                        <Box sx={{ display: "flex", gap: 0.5, mt: 0.5 }}>
-                          <Chip
-                            label="Nghiên cứu"
-                            size="small"
-                            variant="outlined"
-                            sx={{ fontSize: "0.7rem", height: 20 }}
-                          />
-                          <Chip
-                            label={item.label}
-                            size="small"
-                            color={
-                              item.label === "Create" ? "success" : "warning"
-                            }
-                            sx={{ fontSize: "0.7rem", height: 20 }}
-                          />
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontWeight: 600, minWidth: "80px" }}
+                          >
+                            Lĩnh vực:
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 500,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              flex: 1,
+                              textAlign: "right",
+                            }}
+                          >
+                            {contentData?.researchArea || "Không có thông tin"}
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontWeight: 600, minWidth: "80px" }}
+                          >
+                            Quy mô:
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 500,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              flex: 1,
+                              textAlign: "right",
+                            }}
+                          >
+                            {getScale(contentData?.scale) || "Không có thông tin"}
+                          </Typography>
                         </Box>
                       </Box>
                     </Box>
 
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 1.5,
-                      }}
-                    >
-                      <Box>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ fontWeight: 600, mb: 0.5 }}
-                        >
-                          Tên nghiên cứu
-                        </Typography>
-                        <Typography
-                          variant="body2"
+                    {/* LECTURER INFORMATION - MIDDLE */}
+                    <Box sx={{ pb: 1.5, borderBottom: "1px solid #e0e0e0" }}>
+                     
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                      >
+                        <Avatar
+                          src={item.lecturerInfo?.avatarUrl || ""}
                           sx={{
-                            fontWeight: 500,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
+                            bgcolor:
+                              item.label === "Create"
+                                ? "success.main"
+                                : "warning.main",
+                            width: 48,
+                            height: 48,
+                            fontSize: "1.1rem",
+                            fontWeight: 700,
                           }}
                         >
-                          {contentData?.name || contentData?.title || "Không có tên"}
-                        </Typography>
-                      </Box>
+                          {item.lecturerInfo?.fullName?.charAt(0)}
+                        </Avatar>
 
-                      <Box>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ fontWeight: 600, mb: 0.5 }}
-                        >
-                          Mô tả
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                          }}
-                        >
-                          {contentData?.description || "Không có mô tả"}
-                        </Typography>
+                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              fontWeight: 600,
+                              color: "text.primary",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {item.lecturerInfo?.fullName || "Không có tên"}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {getAcademicRank(item.lecturerInfo?.academicRank) || "Không có"}
+                          </Typography>
+                        </Box>
                       </Box>
+                    </Box>
 
-                      <Box>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ fontWeight: 600, mb: 0.5 }}
-                        >
-                          Ngày tạo
-                        </Typography>
-                        <Typography variant="body2">
-                          {contentData?.createdAt
-                            ? new Date(contentData.createdAt).toLocaleDateString("vi-VN")
-                            : "Không có"}
-                        </Typography>
-                      </Box>
+                    {/* TIME INFORMATION - BOTTOM */}
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ fontWeight: 600 }}
+                      >
+                        Thời gian cập nhật
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          fontSize: "0.8rem",
+                          color: "text.secondary",
+                          fontStyle: "italic",
+                        }}
+                      >
+                        {(() => {
+                          const updateTime = new Date(
+                            item.date ||
+                              contentData?.updatedAt ||
+                              contentData?.createdAt ||
+                              Date.now(),
+                          );
+                          const now = new Date();
+                          const diffInHours = Math.floor(
+                            (now.getTime() - updateTime.getTime()) /
+                              (1000 * 60 * 60),
+                          );
+
+                          if (diffInHours < 1) {
+                            return "Vừa cập nhật";
+                          } else if (diffInHours < 48) {
+                            return `${diffInHours} giờ trước`;
+                          } else {
+                            const diffInDays = Math.floor(diffInHours / 24);
+                            return `${diffInDays} ngày trước`;
+                          }
+                        })()}
+                      </Typography>
 
                       <Button
                         variant="contained"
                         color={item.label === "Create" ? "success" : "warning"}
-                        size="small"
+                        size="medium"
                         fullWidth
                         sx={{
-                          mt: 1,
-                          py: 1,
+                          mt: 1.5,
+                          py: 1.2,
                           fontWeight: 600,
                           textTransform: "none",
                           borderRadius: 2,
-                          fontSize: "0.8rem",
+                          fontSize: "0.85rem",
                         }}
                         onClick={() => handleResearchItemClick(item)}
                       >
@@ -476,14 +612,14 @@ const AdminLecturerResearchTab: React.FC<AdminLecturerResearchTabProps> = ({
       )}
 
       {openResearchProjectCreateDialog && (
-        <ResearchProjectCreateDialog
+        <ApproveResearchProjectCreateDialog
           open={openResearchProjectCreateDialog}
           data={selectedResearch}
           onClose={() => handleDialogClose("ResearchProjectCreate")}
         />
       )}
       {openResearchProjectUpdateDialog && (
-        <ResearchProjectUpdateDialog
+        <ApproveResearchProjectUpdateDialog
           open={openResearchProjectUpdateDialog}
           data={selectedResearch}
           onClose={() => handleDialogClose("ResearchProjectUpdate")}

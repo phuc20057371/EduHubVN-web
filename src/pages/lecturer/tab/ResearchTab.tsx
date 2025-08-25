@@ -32,7 +32,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { colors } from "../../../theme/colors";
-import { getProjectType, getStatusText, getVietnameseScale } from "../../../utils/ChangeText";
+import { getProjectType, getStatus, getScale } from "../../../utils/ChangeText";
 import { API } from "../../../utils/Fetch";
 import { setLecturerProfile } from "../../../redux/slice/LecturerProfileSlice";
 
@@ -157,7 +157,7 @@ const ResearchTab = ({
           </div>
           <div className="flex items-center gap-2">
             <Chip
-              label={getStatusText(item.status)}
+              label={getStatus(item.status)}
               size="small"
               sx={{
                 background: "rgba(255,255,255,0.9)",
@@ -332,7 +332,7 @@ const ResearchTab = ({
                       Quy mô
                     </Typography>
                     <Typography variant="body2" sx={{ color: colors.text.secondary }}>
-                      {getVietnameseScale ? getVietnameseScale(item.scale) : item.scale}
+                      {getScale ? getScale(item.scale) : item.scale}
                     </Typography>
                   </div>
                 </div>

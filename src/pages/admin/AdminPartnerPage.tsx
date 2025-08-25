@@ -9,9 +9,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { createSelector } from "@reduxjs/toolkit";
 import { setPartnerPendingCreate } from "../../redux/slice/PartnerPendingCreateSlice";
 import { setPartnerPendingUpdate } from "../../redux/slice/PartnerPendingUpdateSlice";
-import PartnerDetailDialog from "../../components/PartnerDetailDialog";
-import PartnerDetailUpdateDialog from "../../components/PartnerDetailUpdateDialog";
-import PartnerEditDialog from "../../components/PartnerEditDialog";
+import ApprovePartnerCreateDialog from "../../components/admin-dialog/admin-partner-dialog/ApprovePartnerCreateDialog";
+import ApprovePartnerUpdateDialog from "../../components/admin-dialog/admin-partner-dialog/ApprovePartnerUpdateDialog";
+import PartnerProfileUpdateDialog from "../../components/admin-dialog/admin-partner-dialog/PartnerProfileUpdateDialog";
 import {
   PartnerListTab,
   PartnerCreateTab,
@@ -207,18 +207,18 @@ const AdminPartnerPage = () => {
       </TabContext>
 
       {/* Dialogs */}
-      <PartnerDetailDialog
+      <ApprovePartnerCreateDialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
         partner={selectedPartner || {}}
       />
-      <PartnerDetailUpdateDialog
+      <ApprovePartnerUpdateDialog
         open={openUpdateDialog}
         onClose={() => setOpenUpdateDialog(false)}
         oldData={selectedUpdate?.oldData}
         newData={selectedUpdate?.newData}
       />
-      <PartnerEditDialog
+      <PartnerProfileUpdateDialog
         open={openEditDialog}
         onClose={() => setOpenEditDialog(false)}
         partner={selectedPartner?.partner}

@@ -30,7 +30,6 @@ import RegisterInstitution from "../pages/register/RegisterInstitution";
 import RegisterLecturer from "../pages/register/RegisterLecturer";
 import RegisterPartner from "../pages/register/RegisterPartner";
 import ProtectedRoute from "../utils/ProtectedRoute";
-import AdminDegree from "../pages/admin/AdminDegree";
 import AdminCourse from "../pages/admin/AdminCourse";
 import LecturerProfilePage from "../pages/lecturer/LecturerProfilePage";
 import LecturerInfoPage from "../pages/other/LecturerInfoPage";
@@ -69,7 +68,6 @@ export const router = createBrowserRouter(
             element={<AdminInstitutionPage />}
           />
           <Route path="/admin/partners" element={<AdminPartner />} />
-          <Route path="/admin/degree" element={<AdminDegree />} />
           <Route path="/admin/courses" element={<AdminCourse />} />
         </Route>
       </Route>

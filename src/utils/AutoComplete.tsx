@@ -1,4 +1,5 @@
-export const industries = [
+
+export const industriesAutoComplete = [
   "Công nghệ thông tin",
   "Giáo dục",
   "Y tế",
@@ -173,9 +174,7 @@ export const jobFieldAutoComplete = [
   "Vận tải",
 ];
 
-//====================
-
-export const majors = [
+export const majorsAutoComplete = [
   "Công nghệ thông tin",
   "Kỹ thuật phần mềm",
   "Quản trị kinh doanh",
@@ -188,7 +187,7 @@ export const majors = [
   "Luật",
 ];
 
-export const degreeLevels = [
+export const degreeLevelsAutoComplete = [
   "Kĩ sư",
   "Cử nhân",
   "Thạc sĩ",
@@ -197,5 +196,17 @@ export const degreeLevels = [
   "Giáo sư",
 ];
 
-// Research Project Types
-export const researchProjectStatus = ["Đang thực hiện", "Hoàn thành", "Tạm dừng"];
+export const researchProjectStatusAutoComplete = ["Đang thực hiện", "Hoàn thành", "Tạm dừng"];
+
+export const certificationLevelsAutoComplete = [
+  "Sơ cấp",
+  "Trung cấp",
+  "Nâng cao",
+  "Chuyên gia",
+  "Quốc tế",
+  "Hành nghề",
+  "Chứng chỉ khóa học",
+  "Chứng chỉ nội bộ",
+  "Chứng chỉ kỹ thuật",
+  "Khác",
+];

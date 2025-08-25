@@ -23,10 +23,10 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import LecturerUpdateInfoDialog from "../../components/LecturerUpdateInfoDialog";
-import CreateOwnedCourseDialog from "../../components/CreateOwnedCourseDialog";
-import CreateAttendedCourseDialog from "../../components/CreateAttendedCourseDialog";
-import CreateResearchProjectDialog from "../../components/CreateResearchProjectDialog";
+import LecturerUpdateInfoDialog from "../../components/lecturer-dialog/LecturerUpdateInfoDialog";
+import CreateOwnedCourseDialog from "../../components/lecturer-dialog/CreateOwnedCourseDialog";
+import CreateAttendedCourseDialog from "../../components/lecturer-dialog/CreateAttendedCourseDialog";
+import CreateResearchProjectDialog from "../../components/lecturer-dialog/CreateResearchProjectDialog";
 import { setLecturerProfile } from "../../redux/slice/LecturerProfileSlice";
 import { colors } from "../../theme/colors";
 import { API } from "../../utils/Fetch";

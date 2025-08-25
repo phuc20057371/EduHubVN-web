@@ -21,27 +21,50 @@ import {
   Search as SearchIcon,
   DateRange,
 } from "@mui/icons-material";
-import LecturerDetailDialog from "../../../../components/LecturerDetailDialog";
+import ApproveLecturerCreateDialog from "../../../../components/admin-dialog/admin-lecturer-dialog/ApproveLecturerCreateDialog";
+import { getAcademicRank } from "../../../../utils/ChangeText";
 
 interface AdminLecturerCreateTabProps {
-  filteredCreateList: any[];
-  createSearchTerm: string;
-  setCreateSearchTerm: (value: string) => void;
-  createDateSort: string;
-  setCreateDateSort: (value: string) => void;
-  getAcademicRankLabel: (rank: string) => string;
+  lecturerCreateList: any[];
 }
 
 const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
-  filteredCreateList,
-  createSearchTerm,
-  setCreateSearchTerm,
-  createDateSort,
-  setCreateDateSort,
-  getAcademicRankLabel,
+  lecturerCreateList,
 }) => {
+  // Local state for filters
+  const [createSearchTerm, setCreateSearchTerm] = useState("");
+  const [createDateSort, setCreateDateSort] = useState("oldest");
+  
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [selectedLecturerCreate, setSelectedLecturerCreate] = useState<any>(null);
+
+  // Filtered data logic
+  const filteredCreateList = React.useMemo(() => {
+    let filtered = lecturerCreateList;
+
+    if (createSearchTerm) {
+      filtered = filtered.filter(
+        (item: any) =>
+          item.lecturer.id?.toString().includes(createSearchTerm) ||
+          item.lecturer.fullName
+            ?.toLowerCase()
+            .includes(createSearchTerm.toLowerCase()),
+      );
+    }
+
+    filtered = [...filtered].sort((a: any, b: any) => {
+      const dateA = new Date(a.lecturer.updatedAt || a.lecturer.createdAt || 0);
+      const dateB = new Date(b.lecturer.updatedAt || b.lecturer.createdAt || 0);
+
+      if (createDateSort === "oldest") {
+        return dateA.getTime() - dateB.getTime();
+      } else {
+        return dateB.getTime() - dateA.getTime();
+      }
+    });
+
+    return filtered;
+  }, [lecturerCreateList, createSearchTerm, createDateSort]);
 
   return (
     <>
@@ -279,7 +302,7 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
                       </Typography>
                       <Box sx={{ display: "flex", gap: 0.5, mt: 0.5 }}>
                         <Chip
-                          label={getAcademicRankLabel(
+                          label={getAcademicRank(
                             item.lecturer.academicRank,
                           )}
                           size="small"
@@ -435,7 +458,7 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
         </Paper>
       )}
 
-      <LecturerDetailDialog
+      <ApproveLecturerCreateDialog
         open={openCreateDialog}
         onClose={() => setOpenCreateDialog(false)}
         lecturer={selectedLecturerCreate?.lecturer || {}}

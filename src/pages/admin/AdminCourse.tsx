@@ -39,9 +39,9 @@ import {
   Add, // Add this import
 } from "@mui/icons-material";
 import { visuallyHidden } from "@mui/utils";
-import CourseMemberDialog from "../../components/CourseMemberDialog";
-import CreateCourseDialog from "../../components/CreateCourseDialog"; // Uncomment this import
-import EditCourseDialog from "../../components/EditCourseDialog";
+import CourseMemberDialog from "../../components/admin-dialog/admin-course-dialog/CourseMemberDialog";
+import CreateCourseDialog from "../../components/admin-dialog/admin-course-dialog/CreateCourseDialog";
+import EditCourseDialog from "../../components/admin-dialog/admin-course-dialog/EditCourseDialog";
 import { toast } from "react-toastify";
 
 type Order = "asc" | "desc";
@@ -634,8 +634,6 @@ const AdminCourse = () => {
     setEndDateFilter("");
   };
 
-  // ...existing useEffect for fetching courses...
-
   const hasDateFilters = startDateFilter || endDateFilter;
 
   return (
@@ -1035,7 +1033,6 @@ const AdminCourse = () => {
         </TableContainer>
       </Paper>
 
-      {/* Course Member Dialog */}
       <CourseMemberDialog
         open={membersDialogOpen}
         onClose={() => {
@@ -1046,14 +1043,12 @@ const AdminCourse = () => {
         course={selectedCourse || undefined}
       />
 
-      {/* Create Course Dialog */}
       <CreateCourseDialog
         open={createCourseDialogOpen}
         onClose={() => setCreateCourseDialogOpen(false)}
         onSubmit={handleCreateCourse}
       />
 
-      {/* Edit Course Dialog */}
       <EditCourseDialog
         open={editCourseDialogOpen}
         onClose={() => {

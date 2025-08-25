@@ -21,27 +21,50 @@ import {
   Search as SearchIcon,
   DateRange,
 } from "@mui/icons-material";
-import LecturerDetailUpdateDialog from "../../../../components/LecturerDetailUpdateDialog";
+import ApproveLecturerUpdateDialog from "../../../../components/admin-dialog/admin-lecturer-dialog/ApproveLecturerUpdateDialog";
+import { getAcademicRank } from "../../../../utils/ChangeText";
 
 interface AdminLecturerUpdateTabProps {
-  filteredUpdateList: any[];
-  updateSearchTerm: string;
-  setUpdateSearchTerm: (value: string) => void;
-  updateDateSort: string;
-  setUpdateDateSort: (value: string) => void;
-  getAcademicRankLabel: (rank: string) => string;
+  lecturerUpdateList: any[];
 }
 
 const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
-  filteredUpdateList,
-  updateSearchTerm,
-  setUpdateSearchTerm,
-  updateDateSort,
-  setUpdateDateSort,
-  getAcademicRankLabel,
+  lecturerUpdateList,
 }) => {
+  // Local state for filters
+  const [updateSearchTerm, setUpdateSearchTerm] = useState("");
+  const [updateDateSort, setUpdateDateSort] = useState("oldest");
+  
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [selectedLecturerUpdate, setSelectedLecturerUpdate] = useState<any>(null);
+
+  // Filtered data logic
+  const filteredUpdateList = React.useMemo(() => {
+    let filtered = lecturerUpdateList;
+
+    if (updateSearchTerm) {
+      filtered = filtered.filter(
+        (item: any) =>
+          item.lecturer.id?.toString().includes(updateSearchTerm) ||
+          item.lecturer.fullName
+            ?.toLowerCase()
+            .includes(updateSearchTerm.toLowerCase()),
+      );
+    }
+
+    filtered = [...filtered].sort((a: any, b: any) => {
+      const dateA = new Date(a.lecturer.updatedAt || a.lecturer.createdAt || 0);
+      const dateB = new Date(b.lecturer.updatedAt || b.lecturer.createdAt || 0);
+
+      if (updateDateSort === "oldest") {
+        return dateA.getTime() - dateB.getTime();
+      } else {
+        return dateB.getTime() - dateA.getTime();
+      }
+    });
+
+    return filtered;
+  }, [lecturerUpdateList, updateSearchTerm, updateDateSort]);
 
   const handleDataReloaded = (updatedItem: any) => {
     // Update the selected lecturer with the latest data
@@ -284,7 +307,7 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
                       </Typography>
                       <Box sx={{ display: "flex", gap: 0.5, mt: 0.5 }}>
                         <Chip
-                          label={getAcademicRankLabel(
+                          label={getAcademicRank(
                             item.lecturer.academicRank,
                           )}
                           size="small"
@@ -441,7 +464,7 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
         </Paper>
       )}
 
-      <LecturerDetailUpdateDialog
+      <ApproveLecturerUpdateDialog
         open={openUpdateDialog}
         onClose={() => setOpenUpdateDialog(false)}
         lecturer={selectedLecturerUpdate?.lecturer || {}}

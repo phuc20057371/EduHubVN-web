@@ -1,45 +1,3 @@
-export const getAcademicRankLabel = (rank: string) => {
-  switch (rank) {
-    case "CN":
-      return "Cử nhân";
-    case "THS":
-      return "Thạc sĩ";
-    case "TS":
-      return "Tiến sĩ";
-    case "PGS":
-      return "Phó giáo sư";
-    case "GS":
-      return "Giáo sư";
-    default:
-      return rank;
-  }
-};
-
-export const getStatusLabel = (status: string) => {
-  switch (status?.toUpperCase()) {
-    case "PENDING":
-      return "Chờ duyệt";
-    case "APPROVED":
-      return "Đã duyệt";
-    case "REJECTED":
-      return "Đã từ chối";
-    default:
-      return status || "Không xác định";
-  }
-};
-
-export const getStatusText = (status: string) => {
-  switch (status?.toUpperCase()) {
-    case "APPROVED":
-      return "Đã duyệt";
-    case "REJECTED":
-      return "Từ chối";
-    case "PENDING":
-      return "Chờ duyệt";
-    default:
-      return status || "Không xác định";
-  }
-};
 
 export function formatDateToVietnamTime(dateString: string): string {
   if (!dateString) return "Không có mô tả";
@@ -60,7 +18,7 @@ export function formatDateToVietnamTime(dateString: string): string {
   return new Intl.DateTimeFormat("vi-VN", options).format(date);
 }
 
-export const getVietnameseScale = (scale: string) => {
+export const getScale = (scale: string) => {
   switch (scale) {
     case "INSTITUTIONAL":
       return "Cấp đơn vị";
@@ -80,7 +38,7 @@ export const getVietnameseScale = (scale: string) => {
       return scale;
   }
 };
-export const getVietnameseCourseType = (type?: string): string => {
+export const getCourseType = (type?: string): string => {
   switch (type) {
     case "FORMAL":
       return "Chính quy";
@@ -124,8 +82,19 @@ export const getAcademicRank = (rank: string) => {
   }
 };
 // Institution
+export const getInstitutionType = (type: string) => {
+  switch (type) {
+    case "UNIVERSITY":
+      return "ĐH";
+    case "TRAINING_CENTER":
+      return "TTDT";
+    default:
+      return type;
+  }
+};
 // Partner
 // Admin
+// Course
 // General
 export const getStatusColor = (status: string) => {
   switch (status?.toUpperCase()) {
@@ -141,4 +110,16 @@ export const getStatusColor = (status: string) => {
 };
 export const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString("vi-VN");
+};
+export const getStatus = (status: string) => {
+  switch (status?.toUpperCase()) {
+    case "PENDING":
+      return "Chờ duyệt";
+    case "APPROVED":
+      return "Đã duyệt";
+    case "REJECTED":
+      return "Đã từ chối";
+    default:
+      return status || "Không xác định";
+  }
 };

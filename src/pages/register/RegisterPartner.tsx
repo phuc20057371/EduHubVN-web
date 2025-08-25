@@ -22,7 +22,7 @@ import { API } from "../../utils/Fetch";
 import type { PartnerRequest } from "../../types/PartnerRequest";
 import { validatePartnerInfo } from "../../utils/Validate";
 import { toast } from "react-toastify";
-import { industries } from "../../utils/AutoComplete";
+import { industriesAutoComplete } from "../../utils/AutoComplete";
 
 const RegisterPartner = () => {
   const [businessRegistrationNumber, setBusinessRegistrationNumber] =
@@ -335,7 +335,7 @@ const RegisterPartner = () => {
                 />
                 <Autocomplete
                   fullWidth
-                  options={industries}
+                  options={industriesAutoComplete}
                   value={industry}
                   onChange={(_event, newValue) => {
                     setIndustry(newValue || "");

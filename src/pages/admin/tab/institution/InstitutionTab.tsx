@@ -29,7 +29,12 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import { Business } from "@mui/icons-material";
 import type { Institution } from "../../../../types/Institution";
-import InstitutionEditDialog from "../../../../components/InstitutionEditDialog";
+import InstitutionProfileUpdateDialog from "../../../../components/admin-dialog/admin-institution-dialog/InstitutionProfileUpdateDialog";
+import {
+  getInstitutionType,
+  getStatus,
+  getStatusColor,
+} from "../../../../utils/ChangeText";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   const aValue = a[orderBy];
@@ -374,45 +379,6 @@ function EnhancedTableToolbar({
     </Box>
   );
 }
-
-// Helper function để hiển thị tên loại cơ sở giáo dục
-const getInstitutionTypeDisplay = (type: string) => {
-  switch (type) {
-    case "UNIVERSITY":
-      return "ĐH";
-    case "TRAINING_CENTER":
-      return "TTDT";
-    default:
-      return type;
-  }
-};
-
-const getStatusColor = (status: string) => {
-  switch (status?.toUpperCase()) {
-    case "PENDING":
-      return "warning";
-    case "APPROVED":
-      return "info";
-    case "REJECTED":
-      return "error";
-    default:
-      return "default";
-  }
-};
-
-const getStatusLabel = (status: string) => {
-  switch (status?.toUpperCase()) {
-    case "PENDING":
-      return "Chờ duyệt";
-    case "APPROVED":
-      return "Đã duyệt";
-    case "REJECTED":
-      return "Đã từ chối";
-    default:
-      return status || "Không xác định";
-  }
-};
-
 interface InstitutionTabProps {
   institutions: Institution[];
 }
@@ -724,7 +690,7 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
                       </TableCell>
                       <TableCell sx={{ py: 2 }}>
                         <Chip
-                          label={getInstitutionTypeDisplay(row.institutionType)}
+                          label={getInstitutionType(row.institutionType)}
                           size="small"
                           sx={{
                             bgcolor:
@@ -786,7 +752,7 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
                       </TableCell>
                       <TableCell sx={{ py: 2 }}>
                         <Chip
-                          label={getStatusLabel(row.status)}
+                          label={getStatus(row.status)}
                           size="small"
                           color={getStatusColor(row.status) as any}
                           variant="filled"
@@ -835,7 +801,7 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
       </Paper>
 
       {/* Edit Dialog */}
-      <InstitutionEditDialog
+      <InstitutionProfileUpdateDialog
         open={openEditDialog}
         onClose={() => setOpenEditDialog(false)}
         institution={selectedInstitution?.institution}

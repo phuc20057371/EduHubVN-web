@@ -9,7 +9,6 @@ import {
   Avatar,
   Chip,
   LinearProgress,
-  Alert,
 } from "@mui/material";
 import {
   Dashboard,
@@ -473,7 +472,7 @@ const AdminPage = () => {
       </Box>
 
       {/* System Alerts */}
-      <Box sx={{ mt: 4 }}>
+      {/* <Box sx={{ mt: 4 }}>
         <Typography
           variant="h6"
           gutterBottom
@@ -505,7 +504,7 @@ const AdminPage = () => {
             duyệt
           </Alert>
         </Box>
-      </Box>
+      </Box> */}
     </Box>
   );
 };

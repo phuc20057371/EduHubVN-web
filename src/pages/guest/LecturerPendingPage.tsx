@@ -43,8 +43,8 @@ import {
 } from "@mui/icons-material";
 import DegreeUpdateDialog from "../../components/DegreeUpdateDialog";
 import CertificationUpdateDialog from "../../components/CertificationUpdateDialog";
-import UploadDegreeModal from "../../components/UploadDegreeModal";
-import UploadCertificationModal from "../../components/UploadCertificationModal";
+import UploadDegreeModal from "../../components/lecturer-dialog/CreateDegreeModal";
+import UploadCertificationModal from "../../components/lecturer-dialog/CreateCertificationDialog";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -59,10 +59,8 @@ import type { DegreeRequest } from "../../types/DegreeRequest";
 import type { CertificationRequest } from "../../types/CertificationRequest";
 import { validateLecturerInfo } from "../../utils/Validate";
 import { colors } from "../../theme/colors";
-import {
-  jobFieldsAutoComplete,
-  majorAutoComplete,
-} from "../../utils/ValidateRegisterLecturer";
+import { getStatus, getStatusColor } from "../../utils/ChangeText";
+import { jobFieldAutoComplete, majorsAutoComplete } from "../../utils/AutoComplete";
 
 const LecturerPendingPage = () => {
   const dispatch = useDispatch();
@@ -205,31 +203,6 @@ const LecturerPendingPage = () => {
     pendingLecturer,
   ]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "APPROVED":
-        return "success";
-      case "REJECTED":
-        return "error";
-      case "PENDING":
-        return "warning";
-      default:
-        return "default";
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "APPROVED":
-        return "Đã duyệt";
-      case "REJECTED":
-        return "Từ chối";
-      case "PENDING":
-        return "Chờ duyệt";
-      default:
-        return status;
-    }
-  };
 
   if (!pendingLecturer || !pendingLecturer.lecturer) {
     return (
@@ -535,7 +508,7 @@ const LecturerPendingPage = () => {
                     subheader={
                       <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
                         <Chip
-                          label={getStatusText(status)}
+                          label={getStatus(status)}
                           color={getStatusColor(status)}
                           size="small"
                           sx={{
@@ -924,7 +897,7 @@ const LecturerPendingPage = () => {
 
                       <Autocomplete
                         freeSolo // cho phép nhập giá trị không nằm trong danh sách
-                        options={majorAutoComplete}
+                        options={majorsAutoComplete}
                         value={specialization}
                         onChange={(_, newValue) =>
                           setSpecialization(newValue || "")
@@ -947,7 +920,7 @@ const LecturerPendingPage = () => {
 
                       <Autocomplete
                         freeSolo // cho phép nhập ngoài danh sách
-                        options={jobFieldsAutoComplete}
+                        options={jobFieldAutoComplete}
                         value={jobField}
                         onChange={(_, newValue) => setJobField(newValue || "")}
                         renderInput={(params) => (
@@ -1333,7 +1306,7 @@ const LecturerPendingPage = () => {
                                     }}
                                   >
                                     <Chip
-                                      label={getStatusText(deg.status)}
+                                      label={getStatus(deg.status)}
                                       color={getStatusColor(deg.status)}
                                       size="small"
                                     />
@@ -1707,7 +1680,7 @@ const LecturerPendingPage = () => {
                                     }}
                                   >
                                     <Chip
-                                      label={getStatusText(cert.status)}
+                                      label={getStatus(cert.status)}
                                       color={getStatusColor(cert.status)}
                                       size="small"
                                     />

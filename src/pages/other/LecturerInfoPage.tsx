@@ -5,8 +5,8 @@ import { Box, Paper, CircularProgress, Alert } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { setLecturerProfile } from "../../redux/slice/LecturerProfileSlice";
 import {
-  getVietnameseCourseType,
-  getVietnameseScale,
+  getCourseType,
+  getScale,
 } from "../../utils/ChangeText";
 
 const LecturerInfoPage = () => {
@@ -293,7 +293,7 @@ const LecturerInfoPage = () => {
                             <span className="font-semibold italic">
                               Quy mô:
                             </span>{" "}
-                            {getVietnameseScale(proj.scale)}
+                            {getScale(proj.scale)}
                           </p>
                           <p>
                             <span className="font-semibold italic">
@@ -409,11 +409,11 @@ const LecturerInfoPage = () => {
                           </p>
                           <p>
                             <strong>Loại hình:</strong>{" "}
-                            {getVietnameseCourseType(course.courseType)}
+                            {getCourseType(course.courseType)}
                           </p>
                           <p>
                             <strong>Quy mô:</strong>{" "}
-                            {getVietnameseScale(course.scale)}
+                            {getScale(course.scale)}
                           </p>
                           {course.courseUrl && (
                             <p>

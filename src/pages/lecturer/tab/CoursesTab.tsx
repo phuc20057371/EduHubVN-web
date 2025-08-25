@@ -36,7 +36,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { colors } from "../../../theme/colors";
-import { getStatusText, getVietnameseScale, getVietnameseCourseType } from "../../../utils/ChangeText";
+import { getStatus, getScale, getCourseType } from "../../../utils/ChangeText";
 import { API } from "../../../utils/Fetch";
 import { setLecturerProfile } from "../../../redux/slice/LecturerProfileSlice";
 
@@ -185,7 +185,7 @@ const CoursesTab = ({
           </div>
           <div className="flex items-center gap-2">
             <Chip
-              label={getStatusText(item.status)}
+              label={getStatus(item.status)}
               size="small"
               sx={{
                 fontWeight: 600,
@@ -443,7 +443,7 @@ const CoursesTab = ({
                       Loại khóa học
                     </Typography>
                     <Typography variant="body2" className="font-medium">
-                      {getVietnameseCourseType(item.courseType)}
+                      {getCourseType(item.courseType)}
                     </Typography>
                   </div>
                 </div>
@@ -471,7 +471,7 @@ const CoursesTab = ({
                       Quy mô
                     </Typography>
                     <Typography variant="body2" className="font-medium">
-                      {getVietnameseScale(item.scale)}
+                      {getScale(item.scale)}
                     </Typography>
                   </div>
                 </div>

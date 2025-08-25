@@ -27,8 +27,13 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import LecturerUpdateDialog from "../../../../components/LecturerUpdateDialog";
+import LecturerProfileUpdateDialog from "../../../../components/admin-dialog/admin-lecturer-dialog/LecturerProfileUpdateDialog";
 import type { Lecturer } from "../../../../types/Lecturer";
+import {
+  getAcademicRank,
+  getStatus,
+  getStatusColor,
+} from "../../../../utils/ChangeText";
 
 type Order = "asc" | "desc";
 
@@ -158,47 +163,55 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 interface AdminLecturerMainTabProps {
-  filteredLecturers: Lecturer[];
-  searchTerm: string;
-  setSearchTerm: (value: string) => void;
-  academicRankFilter: string;
-  setAcademicRankFilter: (value: string) => void;
-  statusFilter: string;
-  setStatusFilter: (value: string) => void;
-  order: Order;
-  setOrder: (order: Order) => void;
-  orderBy: keyof Lecturer;
-  setOrderBy: (orderBy: keyof Lecturer) => void;
-  selected: string | null;
-  setSelected: (selected: string | null) => void;
   lecturers: Lecturer[];
-  getStatusColor: (status: string) => string;
-  getStatusLabel: (status: string) => string;
-  getAcademicRankLabel: (rank: string) => string;
 }
 
 const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
-  filteredLecturers,
-  searchTerm,
-  setSearchTerm,
-  academicRankFilter,
-  setAcademicRankFilter,
-  statusFilter,
-  setStatusFilter,
-  order,
-  setOrder,
-  orderBy,
-  setOrderBy,
-  selected,
-  setSelected,
   lecturers,
-  getStatusColor,
-  getStatusLabel,
-  getAcademicRankLabel,
 }) => {
+  // Local state for filters and table
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [academicRankFilter, setAcademicRankFilter] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState("APPROVED");
+  const [order, setOrder] = React.useState<Order>("asc");
+  const [orderBy, setOrderBy] = React.useState<keyof Lecturer>("id");
+  const [selected, setSelected] = React.useState<string | null>(null);
+
   const [openUpdateDialog, setOpenUpdateDialog] = React.useState(false);
   const [selectedLecturerUpdate, setSelectedLecturerUpdate] =
     React.useState<any>(null);
+
+  // Filtered data logic
+  const filteredLecturers = React.useMemo(() => {
+    let filtered = lecturers;
+
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (lecturer: Lecturer) =>
+          lecturer.id?.toString().includes(searchTerm) ||
+          lecturer.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          lecturer.specialization
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          lecturer.jobField?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          lecturer.phoneNumber?.includes(searchTerm),
+      );
+    }
+
+    if (academicRankFilter) {
+      filtered = filtered.filter(
+        (lecturer: Lecturer) => lecturer.academicRank === academicRankFilter,
+      );
+    }
+
+    if (statusFilter) {
+      filtered = filtered.filter(
+        (lecturer: Lecturer) => lecturer.status === statusFilter,
+      );
+    }
+
+    return filtered;
+  }, [lecturers, searchTerm, academicRankFilter, statusFilter]);
 
   const handleRequestSort = (
     _event: React.MouseEvent<unknown>,
@@ -439,7 +452,7 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
 
             {academicRankFilter && (
               <Chip
-                label={`Học hàm: ${getAcademicRankLabel(academicRankFilter)}`}
+                label={`Học hàm: ${getAcademicRank(academicRankFilter)}`}
                 size="small"
                 onDelete={() => setAcademicRankFilter("")}
                 color="secondary"
@@ -449,7 +462,7 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
 
             {statusFilter !== "APPROVED" && statusFilter && (
               <Chip
-                label={`Trạng thái: ${getStatusLabel(statusFilter)}`}
+                label={`Trạng thái: ${getStatus(statusFilter)}`}
                 size="small"
                 onDelete={() => setStatusFilter("APPROVED")}
                 color="success"
@@ -515,12 +528,12 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                     sx={{
                       cursor: "pointer",
                       "&:hover": {
-                        backgroundColor: "#bbdefb !important", // hover nhẹ khi chưa chọn
+                        backgroundColor: "#bbdefb !important",
                       },
                       "&.Mui-selected": {
                         backgroundColor: "#64b5f6 !important",
                         "&:hover": {
-                          backgroundColor: "#42a5f5 !important", // hover khi selected đậm hơn chút
+                          backgroundColor: "#42a5f5 !important",
                         },
                       },
                     }}
@@ -528,7 +541,7 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                     <TableCell>{row.fullName}</TableCell>
                     <TableCell>
                       <Chip
-                        label={getAcademicRankLabel(row.academicRank)}
+                        label={getAcademicRank(row.academicRank)}
                         size="small"
                         variant="outlined"
                         color="primary"
@@ -552,7 +565,7 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                     <TableCell>{row.phoneNumber}</TableCell>
                     <TableCell>
                       <Chip
-                        label={getStatusLabel(row.status)}
+                        label={getStatus(row.status)}
                         size="small"
                         color={
                           row.status === "APPROVED"
@@ -572,7 +585,7 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                         }
                         sx={{ minWidth: 100 }}
                       >
-                        Xem chi tiết
+                        Xem CV
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -590,7 +603,7 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
             </TableBody>
           </Table>
         </TableContainer>
-        <LecturerUpdateDialog
+        <LecturerProfileUpdateDialog
           open={openUpdateDialog}
           onClose={() => setOpenUpdateDialog(false)}
           lecturer={selectedLecturerUpdate?.lecturer}
