@@ -28,7 +28,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { setLecturerPendingUpdate } from "../../../redux/slice/LecturerPendingUpdateSlice";
 import type { Lecturer } from "../../../types/Lecturer";
 import { setLecturers } from "../../../redux/slice/LecturerSlice";
-import { formatDateToVietnamTime, getAcademicRank } from "../../../utils/ChangeText";
+import {
+  formatDateToVietnamTime,
+  getAcademicRank,
+} from "../../../utils/ChangeText";
+import { setLecturerProfileUpdate } from "../../../redux/slice/LecturerProfileUpdateSlice";
 
 const fieldGroups = [
   {
@@ -161,6 +165,12 @@ const ApproveLecturerUpdateDialog = ({
         const updateResponse = await API.admin.getLecturerPendingUpdate();
         dispatch(setLecturerPendingUpdate(updateResponse.data.data));
         toast.success("Từ chối thông tin cập nhật thành công!");
+      }
+      const response = await API.admin.getLecturerAllProfile({
+        id: lecturer.id,
+      });
+      if (response.data.success) {
+        dispatch(setLecturerProfileUpdate(response.data.data));
       }
       setConfirmType(null);
       setAdminNote("");
@@ -426,7 +436,8 @@ const ApproveLecturerUpdateDialog = ({
                   sx={{ bgcolor: "#f5f5f5" }}
                 >
                   <Typography variant="caption" color="text.secondary">
-                    Cập nhật lúc: {formatDateToVietnamTime(lecturerUpdate?.updatedAt)}
+                    Cập nhật lúc:{" "}
+                    {formatDateToVietnamTime(lecturerUpdate?.updatedAt)}
                   </Typography>
                 </Box>
               </Box>
