@@ -1,35 +1,38 @@
-import React, { useState } from "react";
+import { Close, SchoolOutlined } from "@mui/icons-material";
+import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Box,
-  Typography,
   Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Divider,
-  Tooltip,
-  Card,
-  CardContent,
-  IconButton,
   TextField,
+  Tooltip,
+  Typography,
 } from "@mui/material";
-import { SchoolOutlined, Close } from "@mui/icons-material";
-import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
-import { toast } from "react-toastify";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { API } from "../../../utils/Fetch";
+import { toast } from "react-toastify";
 import { setLecturerRequests } from "../../../redux/slice/LecturerRquestSlice";
-import { getAcademicRank } from "../../../utils/ChangeText";
+import {
+  formatDateToVietnamTime,
+  getAcademicRank,
+} from "../../../utils/ChangeText";
+import { API } from "../../../utils/Fetch";
 
 interface ApproveDegreeUpdateDialogProps {
   open: boolean;
@@ -51,12 +54,6 @@ const ApproveDegreeUpdateDialog: React.FC<ApproveDegreeUpdateDialogProps> = ({
   const [adminNote, setAdminNote] = useState("");
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-
-  // Always call these function definitions - they don't contain hooks
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "Không có dữ liệu";
-    return new Date(dateString).toLocaleDateString("vi-VN");
-  };
 
   const isValueChanged = (originalValue: any, updateValue: any) => {
     return originalValue !== updateValue;
@@ -137,9 +134,9 @@ const ApproveDegreeUpdateDialog: React.FC<ApproveDegreeUpdateDialogProps> = ({
       // Update Redux store after successful action
       const responseData = await API.admin.getLecturerRequests();
       dispatch(setLecturerRequests(responseData.data.data));
-
       setConfirmDialog({ open: false, type: null });
       onSuccess?.();
+
       onClose();
     } catch (error: any) {
       console.error("Error processing request:", error);
@@ -370,7 +367,7 @@ const ApproveDegreeUpdateDialog: React.FC<ApproveDegreeUpdateDialogProps> = ({
           >
             <Box sx={{ textAlign: "right" }}>
               <Typography variant="body2" color="text.secondary">
-                Ngày tạo: {formatDate(update?.createdAt)}
+                Cập nhật vào lúc: {formatDateToVietnamTime(update?.updatedAt)}
               </Typography>
             </Box>
           </Box>

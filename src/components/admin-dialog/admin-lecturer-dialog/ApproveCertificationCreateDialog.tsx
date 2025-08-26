@@ -33,6 +33,7 @@ import { toast } from "react-toastify";
 import { setLecturerRequests } from "../../../redux/slice/LecturerRquestSlice";
 import { useDispatch } from "react-redux";
 import { getAcademicRank } from "../../../utils/ChangeText";
+import { setLecturerProfileUpdate } from "../../../redux/slice/LecturerProfileUpdateSlice";
 
 interface ApproveCertificationCreateDialogProps {
   open: boolean;
@@ -40,11 +41,9 @@ interface ApproveCertificationCreateDialogProps {
   data: any;
 }
 
-const ApproveCertificationCreateDialog: React.FC<ApproveCertificationCreateDialogProps> = ({
-  open,
-  onClose,
-  data,
-}) => {
+const ApproveCertificationCreateDialog: React.FC<
+  ApproveCertificationCreateDialogProps
+> = ({ open, onClose, data }) => {
   const dispatch = useDispatch();
   const [adminNote, setAdminNote] = useState("");
   const [showConfirmDialog, setShowConfirmDialog] = useState<
@@ -68,6 +67,12 @@ const ApproveCertificationCreateDialog: React.FC<ApproveCertificationCreateDialo
       setShowConfirmDialog(null);
       setAdminNote(""); // Reset admin note
       onClose();
+      const response = await API.admin.getLecturerAllProfile({
+        id: lecturerInfo.id,
+      });
+      if (response.data.success) {
+        dispatch(setLecturerProfileUpdate(response.data.data));
+      }
     } catch (error) {
       toast.error("Có lỗi xảy ra khi duyệt chứng chỉ!");
       console.error(error);
@@ -96,6 +101,12 @@ const ApproveCertificationCreateDialog: React.FC<ApproveCertificationCreateDialo
       setShowConfirmDialog(null);
       setAdminNote(""); // Reset admin note
       onClose();
+      const response = await API.admin.getLecturerAllProfile({
+        id: lecturerInfo.id,
+      });
+      if (response.data.success) {
+        dispatch(setLecturerProfileUpdate(response.data.data));
+      }
     } catch (error) {
       toast.error("Có lỗi xảy ra khi từ chối chứng chỉ!");
       console.error(error);

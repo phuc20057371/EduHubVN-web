@@ -31,6 +31,7 @@ import { API } from "../../../utils/Fetch";
 import { setLecturerRequests } from "../../../redux/slice/LecturerRquestSlice";
 import { getAcademicRank } from "../../../utils/ChangeText";
 import ConfirmDialog from "../../general-dialog/ConfirmDialog";
+import { setLecturerProfileUpdate } from "../../../redux/slice/LecturerProfileUpdateSlice";
 
 interface ApproveDegreeCreateDialogProps {
   open: boolean;
@@ -69,6 +70,12 @@ const ApproveDegreeCreateDialog: React.FC<ApproveDegreeCreateDialogProps> = ({
       setAdminNote(""); // Reset admin note
       onSuccess?.();
       onClose();
+      const response = await API.admin.getLecturerAllProfile({
+        id: lecturerInfo.id,
+      });
+      if (response.data.success) {
+        dispatch(setLecturerProfileUpdate(response.data.data));
+      }
     } catch (error) {
       toast.error("Có lỗi xảy ra khi duyệt bằng cấp!");
       console.error(error);
@@ -97,6 +104,12 @@ const ApproveDegreeCreateDialog: React.FC<ApproveDegreeCreateDialogProps> = ({
       setShowConfirmDialog(null);
       setAdminNote(""); // Reset admin note
       onClose();
+      const response = await API.admin.getLecturerAllProfile({
+        id: lecturerInfo.id,
+      });
+      if (response.data.success) {
+        dispatch(setLecturerProfileUpdate(response.data.data));
+      }
     } catch (error) {
       toast.error("Có lỗi xảy ra khi từ chối bằng cấp!");
       console.error(error);
@@ -135,7 +148,7 @@ const ApproveDegreeCreateDialog: React.FC<ApproveDegreeCreateDialogProps> = ({
             </Avatar>
             <Box flex={1}>
               <Typography variant="h5" component="div">
-                Thông tin bằng cấp 
+                Thông tin bằng cấp
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {contentData?.fullName}
@@ -373,7 +386,9 @@ const ApproveDegreeCreateDialog: React.FC<ApproveDegreeCreateDialogProps> = ({
           onRejectNoteChange={setAdminNote}
           rejectNoteRequired={showConfirmDialog === "reject"}
           onClose={handleCloseConfirmDialog}
-          onConfirm={showConfirmDialog === "approve" ? handleApprove : handleReject}
+          onConfirm={
+            showConfirmDialog === "approve" ? handleApprove : handleReject
+          }
         />
       )}
     </>

@@ -83,8 +83,6 @@ const LecturerProfileUpdateDialog = ({
       });
       if (response.data.success) {
         dispatch(setLecturerProfileUpdate(response.data.data));
-        
-        
       }
     } catch (error) {
       console.error("Error fetching lecturer data:", error);
@@ -116,14 +114,6 @@ const LecturerProfileUpdateDialog = ({
     console.log("Delete degree:", degree);
   };
 
-  const handleApproveDegreeUpdate = (degreeData: any) => {
-    console.log("Approve degree update:", degreeData);
-  };
-
-  const handleRejectDegreeUpdate = (degreeData: any) => {
-    console.log("Reject degree update:", degreeData);
-  };
-
   const handleAddCertification = () => {
     console.log("Add certification");
   };
@@ -134,14 +124,6 @@ const LecturerProfileUpdateDialog = ({
 
   const handleDeleteCertification = (certification: any) => {
     console.log("Delete certification:", certification);
-  };
-
-  const handleApproveCertificationUpdate = (certificationData: any) => {
-    console.log("Approve certification update:", certificationData);
-  };
-
-  const handleRejectCertificationUpdate = (certificationData: any) => {
-    console.log("Reject certification update:", certificationData);
   };
 
   const handleAddOwnedCourse = () => {
@@ -226,9 +208,15 @@ const LecturerProfileUpdateDialog = ({
           borderColor: "divider",
         }}
       >
-        <Typography variant="h5" fontWeight="bold">
-          Quản lý hồ sơ giảng viên: {lecturer?.fullName}
-        </Typography>
+        <Box>
+          <Typography variant="h5" fontWeight="bold">
+            Quản lý hồ sơ giảng viên
+          </Typography>
+          <Typography variant="body2">
+            ID: {lecturer?.id}
+          </Typography>
+        </Box>
+
         <IconButton onClick={onClose}>
           <Close />
         </IconButton>
@@ -287,17 +275,13 @@ const LecturerProfileUpdateDialog = ({
         ) : (
           <>
             <TabPanel value={tabValue} index={0}>
-              <LecturerProfileBasicInfoTab
-                onRefreshData={handleRefreshData}
-              />
+              <LecturerProfileBasicInfoTab onRefreshData={handleRefreshData} />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
               <LecturerProfileDegreesTab
                 onAddDegree={handleAddDegree}
                 onEditDegree={handleEditDegree}
                 onDeleteDegree={handleDeleteDegree}
-                onApproveDegreeUpdate={handleApproveDegreeUpdate}
-                onRejectDegreeUpdate={handleRejectDegreeUpdate}
               />
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
@@ -305,8 +289,6 @@ const LecturerProfileUpdateDialog = ({
                 onAddCertification={handleAddCertification}
                 onEditCertification={handleEditCertification}
                 onDeleteCertification={handleDeleteCertification}
-                onApproveCertificationUpdate={handleApproveCertificationUpdate}
-                onRejectCertificationUpdate={handleRejectCertificationUpdate}
               />
             </TabPanel>
             <TabPanel value={tabValue} index={3}>
@@ -319,7 +301,9 @@ const LecturerProfileUpdateDialog = ({
                 onDeleteAttendedCourse={handleDeleteAttendedCourse}
                 onApproveOwnedCourseUpdate={handleApproveOwnedCourseUpdate}
                 onRejectOwnedCourseUpdate={handleRejectOwnedCourseUpdate}
-                onApproveAttendedCourseUpdate={handleApproveAttendedCourseUpdate}
+                onApproveAttendedCourseUpdate={
+                  handleApproveAttendedCourseUpdate
+                }
                 onRejectAttendedCourseUpdate={handleRejectAttendedCourseUpdate}
               />
             </TabPanel>
@@ -328,8 +312,12 @@ const LecturerProfileUpdateDialog = ({
                 onAddResearchProject={handleAddResearchProject}
                 onEditResearchProject={handleEditResearchProject}
                 onDeleteResearchProject={handleDeleteResearchProject}
-                onApproveResearchProjectUpdate={handleApproveResearchProjectUpdate}
-                onRejectResearchProjectUpdate={handleRejectResearchProjectUpdate}
+                onApproveResearchProjectUpdate={
+                  handleApproveResearchProjectUpdate
+                }
+                onRejectResearchProjectUpdate={
+                  handleRejectResearchProjectUpdate
+                }
               />
             </TabPanel>
           </>

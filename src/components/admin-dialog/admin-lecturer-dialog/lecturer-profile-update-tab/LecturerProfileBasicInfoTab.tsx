@@ -17,6 +17,7 @@ import {
   RadioGroup,
   Select,
   Typography,
+  Autocomplete,
 } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import React, { useEffect, useState } from "react";
@@ -34,6 +35,7 @@ import { validateLecturerInfo } from "../../../../utils/Validate";
 import { GeneralConfirmDialog } from "../../../general-dialog";
 import ApproveLecturerUpdateDialog from "../ApproveLecturerUpdateDialog";
 import { setLecturerProfileUpdate } from "../../../../redux/slice/LecturerProfileUpdateSlice";
+import { specializationAutoComplete, jobFieldAutoComplete } from "../../../../utils/AutoComplete";
 
 interface LecturerProfileBasicInfoTabProps {
   onRefreshData: () => Promise<void>;
@@ -87,7 +89,6 @@ const LecturerProfileBasicInfoTab: React.FC<
       setGender(lecturer.gender ? "true" : "false");
       setAddress(lecturer.address || "");
       setBio(lecturer.bio || "");
-      console.log(lecturerProfileUpdate);
     }
   }, [lecturer]);
 
@@ -440,26 +441,40 @@ const LecturerProfileBasicInfoTab: React.FC<
                       <MenuItem value="GS">Giáo sư</MenuItem>
                     </Select>
                   </FormControl>
-                  <TextField
-                    label="Chuyên ngành"
+                  <Autocomplete
+                    options={specializationAutoComplete}
                     value={specialization}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSpecialization(e.target.value)
-                    }
+                    onChange={(_, newValue) => {
+                      setSpecialization(newValue || "");
+                    }}
+                    freeSolo
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Chuyên ngành"
+                        variant="outlined"
+                      />
+                    )}
                     sx={{ flex: "1 1 auto" }}
-                    variant="outlined"
                   />
                 </Box>
 
                 <Box display="flex" gap={2}>
-                  <TextField
-                    label="Lĩnh vực"
+                  <Autocomplete
+                    options={jobFieldAutoComplete}
                     value={jobField}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setJobField(e.target.value)
-                    }
+                    onChange={(_, newValue) => {
+                      setJobField(newValue || "");
+                    }}
+                    freeSolo
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Lĩnh vực"
+                        variant="outlined"
+                      />
+                    )}
                     sx={{ flex: "1 1 auto" }}
-                    variant="outlined"
                   />
                   <TextField
                     label="Năm KN"
