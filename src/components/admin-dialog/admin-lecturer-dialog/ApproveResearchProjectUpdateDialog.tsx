@@ -1,21 +1,40 @@
-import React, { useState } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-  Avatar,
-  TextField,
-  IconButton,
-} from "@mui/material";
+import { School } from "@mui/icons-material";
 import CloseIcon from "@mui/icons-material/Close";
-import { toast } from "react-toastify";
-import { API } from "../../../utils/Fetch";
+import {
+  Avatar,
+  Backdrop,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { setLecturerRequests } from "../../../redux/slice/LecturerRquestSlice";
+import { toast } from "react-toastify";
+import { setLecturerProfileUpdate } from "../../../redux/slice/LecturerProfileUpdateSlice";
+import { setResearchProjectRequests } from "../../../redux/slice/RequestResearchProjectSlice";
+import {
+  formatDate,
+  getProjectType,
+  getScale,
+} from "../../../utils/ChangeText";
+import { API } from "../../../utils/Fetch";
+import ConfirmDialog from "../../general-dialog/ConfirmDialog";
 
 interface ResearchProjectUpdateDialogProps {
   open: boolean;
@@ -23,13 +42,15 @@ interface ResearchProjectUpdateDialogProps {
   onClose: () => void;
 }
 
-const highlightStyle = { background: "#fffde7" };
-
 const fields = [
   { label: "Tên đề tài", key: "title" },
   { label: "Lĩnh vực nghiên cứu", key: "researchArea" },
-  { label: "Loại đề tài", key: "projectType" },
-  { label: "Quy mô", key: "scale" },
+  {
+    label: "Loại đề tài",
+    key: "projectType",
+    render: (v: any) => getProjectType(v),
+  },
+  { label: "Quy mô", key: "scale", render: (v: any) => getScale(v) },
   { label: "Vai trò trong đề tài", key: "roleInProject" },
   { label: "Nguồn tài trợ", key: "foundingSource" },
   {
@@ -37,8 +58,12 @@ const fields = [
     key: "foundingAmount",
     render: (v: any) => `${v?.toLocaleString?.() ?? v} VND`,
   },
-  { label: "Ngày bắt đầu", key: "startDate" },
-  { label: "Ngày kết thúc", key: "endDate" },
+  {
+    label: "Ngày bắt đầu",
+    key: "startDate",
+    render: (v: any) => formatDate(v),
+  },
+  { label: "Ngày kết thúc", key: "endDate", render: (v: any) => formatDate(v) },
   { label: "Mô tả", key: "description" },
   { label: "Trạng thái", key: "courseStatus" },
   {
@@ -79,14 +104,26 @@ const ApproveResearchProjectUpdateDialog: React.FC<
     );
   }
 
-  const [confirmType, setConfirmType] = useState<null | "approve" | "reject">(
-    null,
-  );
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    type: "approve" | "reject" | null;
+  }>({ open: false, type: null });
   const [adminNote, setAdminNote] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleApprove = () => {
+    setConfirmDialog({ open: true, type: "approve" });
+  };
+
+  const handleReject = () => {
+    setConfirmDialog({ open: true, type: "reject" });
+    setAdminNote("");
+  };
 
   const handleConfirm = async () => {
-    if (confirmType === "approve") {
-      try {
+    setLoading(true);
+    try {
+      if (confirmDialog.type === "approve") {
         const res = await API.admin.approveResearchProjectUpdate({
           id: update?.id,
         });
@@ -96,22 +133,15 @@ const ApproveResearchProjectUpdateDialog: React.FC<
           );
           return;
         }
-        const responseData = await API.admin.getLecturerRequests();
-        dispatch(setLecturerRequests(responseData.data.data));
+        const responseData = await API.admin.getResearchProjectRequests();
+        dispatch(setResearchProjectRequests(responseData.data.data));
         toast.success("Duyệt thông tin cập nhật dự án nghiên cứu thành công");
-      } catch (error) {
-        console.error("Error approving project update:", error);
-        toast.error(
-          "Có lỗi xảy ra khi duyệt thông tin cập nhật dự án nghiên cứu",
-        );
-        return;
-      }
-    } else if (confirmType === "reject") {
-      if (!adminNote.trim()) {
-        toast.error("Vui lòng nhập lý do từ chối");
-        return;
-      }
-      try {
+      } else if (confirmDialog.type === "reject") {
+        if (!adminNote.trim()) {
+          toast.error("Vui lòng nhập lý do từ chối");
+          setLoading(false);
+          return;
+        }
         const res = await API.admin.rejectResearchProjectUpdate({
           id: update?.id,
           adminNote,
@@ -122,18 +152,29 @@ const ApproveResearchProjectUpdateDialog: React.FC<
           );
           return;
         }
-        const responseData = await API.admin.getLecturerRequests();
-        dispatch(setLecturerRequests(responseData.data.data));
+        const responseData = await API.admin.getResearchProjectRequests();
+        dispatch(setResearchProjectRequests(responseData.data.data));
         toast.success("Từ chối thông tin cập nhật dự án nghiên cứu thành công");
-      } catch (error) {
-        console.error("Error rejecting project update:", error);
-        toast.error(
-          "Có lỗi xảy ra khi từ chối thông tin cập nhật dự án nghiên cứu",
-        );
-        return;
       }
+
+      // Refresh lecturer profile data
+      const response = await API.admin.getLecturerAllProfile({
+        id: lecturerInfo.id,
+      });
+      if (response.data.success) {
+        dispatch(setLecturerProfileUpdate(response.data.data));
+      }
+    } catch (error) {
+      console.error(`Error ${confirmDialog.type}ing project update:`, error);
+      toast.error(
+        `Có lỗi xảy ra khi ${confirmDialog.type === "approve" ? "duyệt" : "từ chối"} thông tin cập nhật dự án nghiên cứu`,
+      );
+      return;
+    } finally {
+      setLoading(false);
     }
-    setConfirmType(null);
+
+    setConfirmDialog({ open: false, type: null });
     setAdminNote("");
     if (typeof onClose === "function") onClose();
   };
@@ -141,6 +182,31 @@ const ApproveResearchProjectUpdateDialog: React.FC<
   return (
     <>
       <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+        {/* Loading Backdrop */}
+        <Backdrop
+          sx={{
+            position: "absolute",
+            color: "#fff",
+            zIndex: (theme) => theme.zIndex.drawer + 1,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          }}
+          open={loading}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            <CircularProgress color="inherit" size={40} />
+            <Typography variant="body1" sx={{ color: "white" }}>
+              Đang xử lý yêu cầu...
+            </Typography>
+          </Box>
+        </Backdrop>
+
         <DialogTitle
           sx={{
             m: 0,
@@ -150,198 +216,205 @@ const ApproveResearchProjectUpdateDialog: React.FC<
             alignItems: "center",
           }}
         >
-          So sánh thông tin cập nhật dự án nghiên cứu - ID: {original?.id}
-          <IconButton onClick={onClose} size="small">
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Avatar sx={{ bgcolor: "primary.main", width: 48, height: 48 }}>
+              <School />
+            </Avatar>
+            <Box>
+              <Typography variant="h6">
+                Yêu cầu cập nhật dự án nghiên cứu
+              </Typography>
+              <Typography variant="body2">ID: {original?.id}</Typography>
+            </Box>
+          </Box>
+          <IconButton onClick={onClose} size="small" disabled={loading}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent dividers>
-          {/* Thông tin giảng viên */}
-          <Box
-            bgcolor="#fafbfc"
-            borderRadius={2}
-            p={2}
-            border="1px solid #eee"
-            display="flex"
-            alignItems="center"
-            gap={2}
-            mb={3}
+        <DialogContent>
+          {/* Lecturer Info Banner */}
+          <Card
+            variant="outlined"
+            sx={{ borderRadius: 2, bgcolor: "primary.50", mb: 2 }}
           >
-            <Avatar
-              src={lecturerInfo?.avatarUrl || undefined}
-              alt={lecturerInfo?.fullName}
-              sx={{ width: 60, height: 60, border: "1px solid #ddd" }}
-            >
-              {lecturerInfo?.fullName ? lecturerInfo.fullName[0] : ""}
-            </Avatar>
-            <Box flex={1}>
-              <Typography fontWeight={600}>{lecturerInfo?.fullName}</Typography>
+            <CardContent sx={{ py: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Avatar
+                  src={lecturerInfo?.avatarUrl || ""}
+                  sx={{ width: 60, height: 60 }}
+                >
+                  {lecturerInfo?.fullName?.charAt(0) || ""}
+                </Avatar>
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {lecturerInfo?.fullName}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "text.secondary", mb: 0.5 }}
+                  >
+                    {lecturerInfo?.academicRank} • Chuyên ngành:{" "}
+                    {lecturerInfo?.specialization}
+                  </Typography>
+                  <Typography variant="body2">
+                    Số năm KN: {lecturerInfo?.experienceYears} • SĐT:{" "}
+                    {lecturerInfo?.phoneNumber}
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+          <Divider sx={{ my: 2 }} />
+          <Box
+            sx={{
+              mb: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              justifyContent: "space-between",
+            }}
+          >
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+              So sánh thông tin dự án nghiên cứu
+            </Typography>
+          </Box>
+          <TableContainer
+            component={Paper}
+            elevation={3}
+            sx={{ borderRadius: 2, overflow: "hidden" }}
+          >
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: "#e3f2fd" }}>
+                  <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+                    Trường thông tin
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "32.5%" }}>
+                    Thông tin gốc
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "32.5%" }}>
+                    Thông tin cập nhật
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {fields.map((row) => {
+                  let originalVal = row.render
+                    ? row.render(original[row.key])
+                    : original[row.key];
+                  let updateVal = row.render
+                    ? row.render(update[row.key])
+                    : update[row.key];
+                  const changed = originalVal !== updateVal;
+
+                  return (
+                    <TableRow
+                      key={row.key}
+                      sx={{
+                        backgroundColor: changed ? "#fffde7" : "#ffffff",
+                        "&:hover": {
+                          backgroundColor: changed ? "#fff9c4" : "#f9f9f9",
+                        },
+                      }}
+                    >
+                      <TableCell sx={{ fontWeight: 500 }}>
+                        {row.label}
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: changed ? "text.secondary" : "text.primary",
+                            textDecoration: changed ? "line-through" : "none",
+                          }}
+                        >
+                          {originalVal ?? "-"}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: changed ? "primary.main" : "text.primary",
+                            fontWeight: changed ? "bold" : "normal",
+                          }}
+                        >
+                          {updateVal ?? "-"}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          {/* Status Info */}
+          <Box
+            sx={{
+              mt: 3,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Box sx={{ textAlign: "right", width: "100%" }}>
               <Typography variant="body2" color="text.secondary">
-                {lecturerInfo?.academicRank} • Chuyên ngành:{" "}
-                {lecturerInfo?.specialization}
+                Được tạo lúc:{" "}
+                {update?.createdAt
+                  ? new Date(update.createdAt).toLocaleString("vi-VN")
+                  : "Chưa cập nhật"}
               </Typography>
-              <Typography variant="body2">
-                Số năm KN: {lecturerInfo?.experienceYears} • SĐT:{" "}
-                {lecturerInfo?.phoneNumber}
+              <Typography variant="body2" color="text.secondary">
+                Cập nhật lần cuối:{" "}
+                {update?.updatedAt
+                  ? new Date(update.updatedAt).toLocaleString("vi-VN")
+                  : "Chưa cập nhật"}
               </Typography>
             </Box>
           </Box>
-
-          {/* So sánh dự án nghiên cứu */}
-          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-            📘 So sánh thông tin dự án nghiên cứu
-          </Typography>
-          <Box
-            component="table"
-            width="100%"
-            sx={{ borderCollapse: "collapse" }}
-          >
-            <thead>
-              <tr>
-                <th
-                  style={{
-                    borderBottom: "2px solid #ddd",
-                    fontWeight: 600,
-                    width: "25%",
-                    padding: "8px",
-                  }}
-                >
-                  Thông tin
-                </th>
-                <th
-                  style={{
-                    borderBottom: "2px solid #ddd",
-                    fontWeight: 600,
-                    width: "37.5%",
-                    padding: "8px",
-                  }}
-                >
-                  Hiện tại
-                </th>
-                <th
-                  style={{
-                    borderBottom: "2px solid #ddd",
-                    fontWeight: 600,
-                    width: "37.5%",
-                    padding: "8px",
-                  }}
-                >
-                  Cập nhật
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {fields.map((row) => {
-                let originalVal = row.render
-                  ? row.render(original[row.key])
-                  : original[row.key];
-                let updateVal = row.render
-                  ? row.render(update[row.key])
-                  : update[row.key];
-                const changed = originalVal !== updateVal;
-
-                return (
-                  <tr key={row.key}>
-                    <td
-                      style={{
-                        borderBottom: "1px solid #eee",
-                        fontWeight: 500,
-                        padding: "8px",
-                      }}
-                    >
-                      {row.label}
-                    </td>
-                    <td
-                      style={{ borderBottom: "1px solid #eee", padding: "8px" }}
-                    >
-                      {originalVal ?? "-"}
-                    </td>
-                    <td
-                      style={{
-                        borderBottom: "1px solid #eee",
-                        padding: "8px",
-                        ...(changed ? highlightStyle : {}),
-                      }}
-                    >
-                      {updateVal ?? "-"}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </Box>
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={() => setConfirmType("approve")}
-            color="success"
-            variant="contained"
-          >
-            Duyệt
-          </Button>
-          <Button
-            onClick={() => setConfirmType("reject")}
+            onClick={handleReject}
             color="error"
             variant="contained"
+            disabled={loading}
           >
             Từ chối
           </Button>
-        </DialogActions>
-      </Dialog>
-      {/* Dialog xác nhận */}
-      <Dialog
-        open={!!confirmType}
-        onClose={() => {
-          setConfirmType(null);
-          setAdminNote("");
-        }}
-        maxWidth="xs"
-      >
-        <DialogTitle>
-          Xác nhận {confirmType === "approve" ? "duyệt" : "từ chối"}
-        </DialogTitle>
-        <DialogContent>
-          {confirmType === "approve" ? (
-            <Typography>
-              Bạn có chắc chắn muốn duyệt thông tin cập nhật này?
-            </Typography>
-          ) : (
-            <>
-              <Typography>
-                Bạn có chắc chắn muốn từ chối thông tin cập nhật này?
-              </Typography>
-              <TextField
-                label="Lý do từ chối (admin note)"
-                size="small"
-                value={adminNote}
-                onChange={(e) => setAdminNote(e.target.value)}
-                fullWidth
-                sx={{ mt: 2 }}
-              />
-            </>
-          )}
-        </DialogContent>
-        <DialogActions>
           <Button
-            onClick={() => {
-              setConfirmType(null);
-              setAdminNote("");
-            }}
-          >
-            Hủy
-          </Button>
-          <Button
-            onClick={handleConfirm}
-            color="primary"
+            onClick={handleApprove}
+            color="success"
             variant="contained"
-            disabled={confirmType === "reject" && !adminNote.trim()}
+            disabled={loading}
           >
-            Xác nhận
+            Duyệt
           </Button>
         </DialogActions>
       </Dialog>
+      {/* ConfirmDialog */}
+      <ConfirmDialog
+        open={confirmDialog.open}
+        type={confirmDialog.type === "approve" ? "approve" : "reject"}
+        title={
+          confirmDialog.type === "approve"
+            ? "Xác nhận phê duyệt"
+            : "Xác nhận từ chối"
+        }
+        message={
+          confirmDialog.type === "approve"
+            ? "Bạn có chắc chắn muốn phê duyệt yêu cầu cập nhật dự án nghiên cứu này không?"
+            : "Bạn có chắc chắn muốn từ chối yêu cầu cập nhật dự án nghiên cứu này không?"
+        }
+        loading={loading}
+        rejectNote={adminNote}
+        onRejectNoteChange={setAdminNote}
+        rejectNoteRequired={confirmDialog.type === "reject"}
+        onClose={() => setConfirmDialog({ open: false, type: null })}
+        onConfirm={handleConfirm}
+      />
     </>
   );
 };
 
-export default ApproveResearchProjectUpdateDialog
+export default ApproveResearchProjectUpdateDialog;

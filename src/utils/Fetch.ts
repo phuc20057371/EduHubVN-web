@@ -26,7 +26,7 @@ import type {
 } from "../types/ResearchProject";
 
 const domain = window.location.hostname;
-const BASE_URL = `http://${domain}:8080`;
+const BASE_URL = `http://${domain}:8880`;
 
 const fetch = axios.create({
   baseURL: BASE_URL,
@@ -243,9 +243,19 @@ export const API = {
     getAllInstitutions: () => fetch.get("/api/v1/admin/get-all-institutions"),
     getAllPartners: () => fetch.get("/api/v1/admin/get-all-partners"),
 
-    getLecturerRequests: () => fetch.get("/api/v1/admin/get-lecturer-requests"),
+    // getLecturerRequests: () => fetch.get("/api/v1/admin/get-lecturer-requests"),
     getLecturerAllProfile: (data: IdRequest) =>
       fetch.get("/api/v1/admin/get-lecturer-all-profile/" + data.id),
+
+    getDegreeRequests: () => fetch.get("/api/v1/admin/get-degree-requests"),
+    getCertificationRequests: () =>
+      fetch.get("/api/v1/admin/get-certification-requests"),
+    getAttendedCourseRequests: () =>
+      fetch.get("/api/v1/admin/get-attended-course-requests"),
+    getOwnedCourseRequests: () =>
+      fetch.get("/api/v1/admin/get-owned-course-requests"),
+    getResearchProjectRequests: () =>
+      fetch.get("/api/v1/admin/get-research-project-requests"),
     //Lecturer
     approveLecturer: (data: IdRequest) =>
       fetch.post("/api/v1/admin/approve-lecturer", data),

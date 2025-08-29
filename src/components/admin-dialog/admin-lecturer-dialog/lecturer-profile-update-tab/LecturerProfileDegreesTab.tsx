@@ -1,9 +1,6 @@
 import {
-  Add,
   Business,
   CalendarToday,
-  Delete,
-  Edit,
   ExpandMore,
   Grade,
   Link as LinkIcon,
@@ -21,12 +18,12 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { setLecturerProfileUpdate } from "../../../../redux/slice/LecturerProfileUpdateSlice";
 import { colors } from "../../../../theme/colors";
-import { getStatus } from "../../../../utils/ChangeText";
+import { formatDateToVietnamTime, getStatus } from "../../../../utils/ChangeText";
+import { API } from "../../../../utils/Fetch";
 import ApproveDegreeCreateDialog from "../ApproveDegreeCreateDialog";
 import ApproveDegreeUpdateDialog from "../ApproveDegreeUpdateDialog";
-import { API } from "../../../../utils/Fetch";
-import { setLecturerProfileUpdate } from "../../../../redux/slice/LecturerProfileUpdateSlice";
 
 interface LecturerProfileDegreesTabProps {
   onAddDegree?: () => void;
@@ -34,11 +31,13 @@ interface LecturerProfileDegreesTabProps {
   onDeleteDegree?: (degree: any) => void;
 }
 
-const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = ({
-  onAddDegree,
-  onEditDegree,
-  onDeleteDegree,
-}) => {
+const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
+  {
+    // onAddDegree,
+    // onEditDegree,
+    // onDeleteDegree,
+  },
+) => {
   // Get lecturer data from Redux
   const lecturerProfileUpdate = useSelector(
     (state: any) => state.lecturerProfileUpdate,
@@ -122,7 +121,7 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = ({
           Danh sách bằng cấp ({degrees?.length || 0})
         </Typography>
 
-        <Button
+        {/* <Button
           variant="contained"
           startIcon={<Add />}
           onClick={onAddDegree}
@@ -139,7 +138,7 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = ({
           }}
         >
           Thêm bằng cấp
-        </Button>
+        </Button> */}
       </div>
 
       {degrees && degrees.length > 0 ? (
@@ -148,7 +147,7 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = ({
             key={degreeData.original?.id || index}
             className="transition-all duration-300"
             sx={{
-              borderRadius: 3,
+              borderRadius: "12px",
               border: `1px solid ${colors.primary[100]}`,
               boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
               "&:before": {
@@ -165,7 +164,7 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = ({
               sx={{
                 background: getBannerColor(degreeData.original?.status),
                 color: "#111827", // text-black
-                borderRadius: "12px",
+                borderRadius: "12px 12px 0 0",
                 "& .MuiAccordionSummary-expandIconWrapper": {
                   color: "#111827",
                 },
@@ -193,17 +192,11 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = ({
                     >
                       {degreeData.original?.name}
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{ color: "#111827" }}
-                    >
+                    <Typography variant="body2" sx={{ color: "#111827" }}>
                       {degreeData.original?.major}
                     </Typography>
                     {degreeData.original?.referenceId && (
-                      <Typography
-                        variant="caption"
-                        sx={{ color: "#374151" }}
-                      >
+                      <Typography variant="caption" sx={{ color: "#374151" }}>
                         Reference ID: {degreeData.original?.referenceId}
                       </Typography>
                     )}
@@ -249,7 +242,8 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = ({
                     </Button>
                   ) : (
                     degreeData.original?.status === "APPROVED" &&
-                    degreeData.update && degreeData.update.status === "PENDING" && (
+                    degreeData.update &&
+                    degreeData.update.status === "PENDING" && (
                       <Button
                         variant="contained"
                         size="small"
@@ -272,7 +266,7 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = ({
                           },
                         }}
                       >
-                        Có yêu cầu cập nhật
+                        Xem yêu cầu cập nhật
                       </Button>
                     )
                   )}
@@ -442,6 +436,7 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = ({
                       </Button>
                     )}
 
+                    {/* 
                     <Button
                       variant="outlined"
                       size="small"
@@ -483,7 +478,18 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = ({
                     >
                       Xóa
                     </Button>
+                    */}
                   </div>
+                </div>
+                {/* Thông tin thời gian tạo/cập nhật */}
+                <div style={{ marginTop: 24, textAlign: "right" }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Được tạo lúc: {formatDateToVietnamTime(degreeData.original?.createdAt)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Cập nhật lần cuối:{" "}
+                    {formatDateToVietnamTime(degreeData.original?.updatedAt)}
+                  </Typography>
                 </div>
               </Box>
             </AccordionDetails>

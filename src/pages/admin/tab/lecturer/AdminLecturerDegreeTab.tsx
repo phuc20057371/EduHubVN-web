@@ -26,9 +26,10 @@ import ApproveDegreeUpdateDialog from "../../../../components/admin-dialog/admin
 import ApproveCertificationUpdateDialog from "../../../../components/admin-dialog/admin-lecturer-dialog/ApproveCertificationUpdateDialog";
 import ApproveCertificationCreateDialog from "../../../../components/admin-dialog/admin-lecturer-dialog/ApproveCertificationCreateDialog";
 import { getAcademicRank } from "../../../../utils/ChangeText";
+import type { LecturerRequest } from "../../../../types/LecturerRequest";
 
 interface AdminLecturerDegreeTabProps {
-  lecturerRequestsDGCC: any[];
+  lecturerRequestsDGCC: LecturerRequest[];
 }
 
 const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> =

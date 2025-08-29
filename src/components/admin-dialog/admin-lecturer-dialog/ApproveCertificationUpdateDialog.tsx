@@ -1,35 +1,38 @@
-import React, { useState } from "react";
+import { Assignment as AssignmentIcon, Close } from "@mui/icons-material";
+import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Box,
-  Typography,
   Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Divider,
   Tooltip,
-  Card,
-  CardContent,
-  IconButton,
-  TextField,
+  Typography,
 } from "@mui/material";
-import { Assignment as AssignmentIcon, Close } from "@mui/icons-material";
-import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
-import { toast } from "react-toastify";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { setCertificationRequests } from "../../../redux/slice/RequestCertificationSlice";
+import {
+  formatDateToVietnamTime,
+  getAcademicRank,
+} from "../../../utils/ChangeText";
 import { API } from "../../../utils/Fetch";
-import { setLecturerRequests } from "../../../redux/slice/LecturerRquestSlice";
-import { getAcademicRank } from "../../../utils/ChangeText";
+import ConfirmDialog from "../../general-dialog/ConfirmDialog";
 
 interface ApproveCertificationUpdateDialogProps {
   open: boolean;
@@ -49,12 +52,6 @@ const ApproveCertificationUpdateDialog: React.FC<
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
 
-  // Always call these function definitions - they don't contain hooks
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "Không có dữ liệu";
-    return new Date(dateString).toLocaleDateString("vi-VN");
-  };
-
   const isValueChanged = (originalValue: any, updateValue: any) => {
     return originalValue !== updateValue;
   };
@@ -62,7 +59,7 @@ const ApproveCertificationUpdateDialog: React.FC<
   // Always define these constants
   const comparisonRows = [
     {
-      label: "Mã tham chiếu",
+      label: "Reference ID",
       originalKey: "referenceId",
       updateKey: "referenceId",
     },
@@ -133,8 +130,8 @@ const ApproveCertificationUpdateDialog: React.FC<
       }
 
       // Update Redux store after successful action
-      const responseData = await API.admin.getLecturerRequests();
-      dispatch(setLecturerRequests(responseData.data.data));
+      const responseData = await API.admin.getCertificationRequests();
+      dispatch(setCertificationRequests(responseData.data.data));
 
       setConfirmDialog({ open: false, type: null });
       onSuccess?.();
@@ -161,12 +158,17 @@ const ApproveCertificationUpdateDialog: React.FC<
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <AssignmentIcon sx={{ fontSize: 40 }} color="primary" />
+              <Avatar
+                src={""}
+                sx={{ bgcolor: "primary.main", width: 48, height: 48 }}
+              >
+                <AssignmentIcon />
+              </Avatar>
               <Box>
                 <Typography variant="h6" fontWeight={600}>
-                  Phê duyệt cập nhật Chứng chỉ
+                  Yêu cầu cập nhật chứng chỉ
                 </Typography>
-                <Typography variant="h6">
+                <Typography variant="body2">
                   ID: {data?.content?.original?.id}
                 </Typography>
               </Box>
@@ -283,7 +285,7 @@ const ApproveCertificationUpdateDialog: React.FC<
                   const isChanged = isValueChanged(originalValue, updateValue);
 
                   const renderValue = (value: any, key: string) => {
-                    if (!value) return "—";
+                    if (!value) return "Không thời hạn";
 
                     if (key === "certificateUrl") {
                       return (
@@ -373,9 +375,12 @@ const ApproveCertificationUpdateDialog: React.FC<
               alignItems: "center",
             }}
           >
-            <Box sx={{ textAlign: "right" }}>
+            <Box sx={{ textAlign: "right", width: "100%" }}>
               <Typography variant="body2" color="text.secondary">
-                Ngày tạo: {formatDate(update?.createdAt)}
+                Được tạo lúc: {formatDateToVietnamTime(update?.createdAt)}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Cập nhật lần cuối: {formatDateToVietnamTime(update?.updatedAt)}
               </Typography>
             </Box>
           </Box>
@@ -396,68 +401,32 @@ const ApproveCertificationUpdateDialog: React.FC<
             onClick={handleApprove}
             disabled={loading}
           >
-            Phê duyệt
+            Duyệt
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Confirmation Dialog */}
-      <Dialog
+      <ConfirmDialog
         open={confirmDialog.open}
+        type={confirmDialog.type === "approve" ? "approve" : "reject"}
+        title={
+          confirmDialog.type === "approve"
+            ? "Xác nhận phê duyệt"
+            : "Xác nhận từ chối"
+        }
+        message={
+          confirmDialog.type === "approve"
+            ? "Bạn có chắc chắn muốn phê duyệt yêu cầu cập nhật chứng chỉ này không?"
+            : "Bạn có chắc chắn muốn từ chối yêu cầu cập nhật chứng chỉ này không?"
+        }
+        loading={loading}
+        rejectNote={adminNote}
+        onRejectNoteChange={setAdminNote}
+        rejectNoteRequired={confirmDialog.type === "reject"}
         onClose={() => setConfirmDialog({ open: false, type: null })}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          <Typography variant="h6">
-            {confirmDialog.type === "approve"
-              ? "Xác nhận phê duyệt"
-              : "Xác nhận từ chối"}
-          </Typography>
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            {confirmDialog.type === "approve"
-              ? "Bạn có chắc chắn muốn phê duyệt yêu cầu cập nhật chứng chỉ này không?"
-              : "Bạn có chắc chắn muốn từ chối yêu cầu cập nhật chứng chỉ này không?"}
-          </Typography>
-
-          {confirmDialog.type === "reject" && (
-            <TextField
-              label="Lý do từ chối *"
-              multiline
-              rows={3}
-              fullWidth
-              value={adminNote}
-              onChange={(e) => setAdminNote(e.target.value)}
-              placeholder="Nhập lý do từ chối yêu cầu cập nhật..."
-              required
-            />
-          )}
-        </DialogContent>
-        <DialogActions sx={{ p: 2, gap: 1 }}>
-          <Button
-            onClick={() => setConfirmDialog({ open: false, type: null })}
-            disabled={loading}
-          >
-            Hủy
-          </Button>
-          <Button
-            variant="contained"
-            color={confirmDialog.type === "approve" ? "success" : "error"}
-            onClick={handleConfirmAction}
-            disabled={
-              loading || (confirmDialog.type === "reject" && !adminNote.trim())
-            }
-          >
-            {loading
-              ? "Đang xử lý..."
-              : confirmDialog.type === "approve"
-                ? "Phê duyệt"
-                : "Từ chối"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onConfirm={handleConfirmAction}
+      />
     </>
   );
 };

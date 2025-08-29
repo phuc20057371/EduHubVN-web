@@ -65,15 +65,17 @@ const AdminPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const res = await API.admin.getAllLecturers();
-        dispatch(setLecturers(res.data.data));
-        const res2 = await API.admin.getAllInstitutions();
-        dispatch(setInstitutions(res2.data.data));
-        const res3 = await API.admin.getAllPartners();
-        dispatch(setPartner(res3.data.data));
-      } catch (error) {
-        console.error("Error initializing AdminLecturerPage:", error);
+      if (lecturers.length === 0 || institutions.length === 0 || partners.length === 0) {
+        try {
+          const res = await API.admin.getAllLecturers();
+          dispatch(setLecturers(res.data.data));
+          const res2 = await API.admin.getAllInstitutions();
+          dispatch(setInstitutions(res2.data.data));
+          const res3 = await API.admin.getAllPartners();
+          dispatch(setPartner(res3.data.data));
+        } catch (error) {
+          console.error("Error initializing AdminLecturerPage:", error);
+        }
       }
     };
     fetchData();

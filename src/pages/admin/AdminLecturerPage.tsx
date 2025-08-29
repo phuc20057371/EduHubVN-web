@@ -9,67 +9,129 @@ import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import * as React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import AdminLecturerMainTab from "./tab/lecturer/AdminLecturerMainTab";
-import AdminLecturerCreateTab from "./tab/lecturer/AdminLecturerCreateTab";
-import AdminLecturerUpdateTab from "./tab/lecturer/AdminLecturerUpdateTab";
-import AdminLecturerDegreeTab from "./tab/lecturer/AdminLecturerDegreeTab";
-import AdminLecturerCourseTab from "./tab/lecturer/AdminLecturerCourseTab";
-import AdminLecturerResearchTab from "./tab/lecturer/AdminLecturerResearchTab";
+const AdminLecturerMainTab = React.lazy(
+  () => import("./tab/lecturer/AdminLecturerMainTab"),
+);
+const AdminLecturerCreateTab = React.lazy(
+  () => import("./tab/lecturer/AdminLecturerCreateTab"),
+);
+const AdminLecturerUpdateTab = React.lazy(
+  () => import("./tab/lecturer/AdminLecturerUpdateTab"),
+);
+const AdminLecturerDegreeTab = React.lazy(
+  () => import("./tab/lecturer/AdminLecturerDegreeTab"),
+);
+const AdminLecturerCourseTab = React.lazy(
+  () => import("./tab/lecturer/AdminLecturerCourseTab"),
+);
+const AdminLecturerResearchTab = React.lazy(
+  () => import("./tab/lecturer/AdminLecturerResearchTab"),
+);
 import { setLecturerPendingCreate } from "../../redux/slice/LecturerPendingCreateSlice";
 import { setLecturerPendingUpdate } from "../../redux/slice/LecturerPendingUpdateSlice";
-import { setLecturerRequests } from "../../redux/slice/LecturerRquestSlice";
 import { setLecturers } from "../../redux/slice/LecturerSlice";
 import { API } from "../../utils/Fetch";
+import { setDegreeRequests } from "../../redux/slice/RequestDegreeSlice";
+import { setCertificationRequests } from "../../redux/slice/RequestCertificationSlice";
+import { setAttendedCourseRequests } from "../../redux/slice/RequestAttendedCourseSlice";
+import { setOwnedCourseRequests } from "../../redux/slice/RequestOwnedCourseSlice";
+import { setResearchProjectRequests } from "../../redux/slice/RequestResearchProjectSlice";
+import { LinearProgress, Typography } from "@mui/material";
 
 const AdminLecturerPage = () => {
   // TAB STATE & GENERAL FILTERS
   const [value, setValue] = useState("1");
 
   // REDUX SELECTORS
-  const lecturerCreateList = useSelector((state: any) =>
-    Array.isArray(state.lecturerPendingCreate)
-      ? state.lecturerPendingCreate
-      : [],
+  const lecturerPendingCreate = useSelector(
+    (state: any) => state.lecturerPendingCreate,
   );
-  const lecturerUpdateList = useSelector((state: any) =>
-    Array.isArray(state.lecturerPendingUpdate)
-      ? state.lecturerPendingUpdate
-      : [],
-  );
-  const lecturerRequests = useSelector((state: any) =>
-    Array.isArray(state.lecturerRequests) ? state.lecturerRequests : [],
+  const lecturerCreateList = React.useMemo(
+    () => (Array.isArray(lecturerPendingCreate) ? lecturerPendingCreate : []),
+    [lecturerPendingCreate],
   );
 
-  // TAB 4 - DEGREE/CERTIFICATE REQUEST DATA
-  const lecturerRequestsDGCC = React.useMemo(
-    () =>
-      Array.isArray(lecturerRequests)
-        ? lecturerRequests.filter(
-            (req: any) => req.type === "BC" || req.type === "CC",
-          )
-        : [],
-    [lecturerRequests],
+  const lecturerPendingUpdate = useSelector(
+    (state: any) => state.lecturerPendingUpdate,
+  );
+  const lecturerUpdateList = React.useMemo(
+    () => (Array.isArray(lecturerPendingUpdate) ? lecturerPendingUpdate : []),
+    [lecturerPendingUpdate],
   );
 
-  // TAB 5 - COURSE REQUEST DATA (AC và OC only)
-  const lecturerRequestsCourse = React.useMemo(
-    () =>
-      Array.isArray(lecturerRequests)
-        ? lecturerRequests.filter(
-            (req: any) => req.type === "AC" || req.type === "OC",
-          )
-        : [],
-    [lecturerRequests],
+  // const lecturerRequests = useSelector((state: any) =>
+  //   Array.isArray(state.lecturerRequests) ? state.lecturerRequests : [],
+  // );
+
+  const stateRequestDegree = useSelector((state: any) => state.requestDegree);
+  const requestDegree = React.useMemo(
+    () => (Array.isArray(stateRequestDegree) ? stateRequestDegree : []),
+    [stateRequestDegree],
   );
 
-  // TAB 6 - RESEARCH PROJECT REQUEST DATA (RP only)
-  const lecturerRequestsResearch = React.useMemo(
-    () =>
-      Array.isArray(lecturerRequests)
-        ? lecturerRequests.filter((req: any) => req.type === "RP")
-        : [],
-    [lecturerRequests],
+  const stateRequestCertification = useSelector(
+    (state: any) => state.requestCertification,
   );
+  const requestCertification = React.useMemo(
+    () =>
+      Array.isArray(stateRequestCertification) ? stateRequestCertification : [],
+    [stateRequestCertification],
+  );
+
+  const stateRequestAttendedCourse = useSelector(
+    (state: any) => state.requestAttendedCourse,
+  );
+  const requestAttendedCourse = React.useMemo(
+    () =>
+      Array.isArray(stateRequestAttendedCourse)
+        ? stateRequestAttendedCourse
+        : [],
+    [stateRequestAttendedCourse],
+  );
+
+  const stateRequestOwnedCourse = useSelector(
+    (state: any) => state.requestOwnedCourse,
+  );
+  const requestOwnedCourse = React.useMemo(
+    () =>
+      Array.isArray(stateRequestOwnedCourse) ? stateRequestOwnedCourse : [],
+    [stateRequestOwnedCourse],
+  );
+
+  const stateRequestResearchProject = useSelector(
+    (state: any) => state.requestResearchProject,
+  );
+  const requestResearchProject = React.useMemo(
+    () =>
+      Array.isArray(stateRequestResearchProject)
+        ? stateRequestResearchProject
+        : [],
+    [stateRequestResearchProject],
+  );
+
+  // TAB 4 - DEGREE/CERTIFICATE REQUEST DATA (requestDegree + requestCertification, sort by date)
+  const lecturerRequestsDGCC = React.useMemo(() => {
+    const all = [
+      ...(Array.isArray(requestDegree) ? requestDegree : []),
+      ...(Array.isArray(requestCertification) ? requestCertification : []),
+    ];
+    return all.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+  }, [requestDegree, requestCertification]);
+
+  // TAB 5 - COURSE REQUEST DATA (requestAttendedCourse + requestOwnedCourse)
+  const lecturerRequestsCourse = React.useMemo(() => {
+    return [
+      ...(Array.isArray(requestAttendedCourse) ? requestAttendedCourse : []),
+      ...(Array.isArray(requestOwnedCourse) ? requestOwnedCourse : []),
+    ];
+  }, [requestAttendedCourse, requestOwnedCourse]);
+
+  // TAB 6 - RESEARCH PROJECT REQUEST DATA (requestResearchProject)
+  const lecturerRequestsResearch = React.useMemo(() => {
+    return Array.isArray(requestResearchProject) ? requestResearchProject : [];
+  }, [requestResearchProject]);
 
   const lecturers = useSelector((state: any) => state.lecturer || []);
   const dispatch = useDispatch();
@@ -79,12 +141,27 @@ const AdminLecturerPage = () => {
       try {
         const res = await API.admin.getAllLecturers();
         dispatch(setLecturers(res.data.data));
-        const response = await API.admin.getLecturerPendingCreate();
-        dispatch(setLecturerPendingCreate(response.data.data));
-        const updateResponse = await API.admin.getLecturerPendingUpdate();
-        dispatch(setLecturerPendingUpdate(updateResponse.data.data));
-        const responseData = await API.admin.getLecturerRequests();
-        dispatch(setLecturerRequests(responseData.data.data));
+
+        const resCreate = await API.admin.getLecturerPendingCreate();
+        dispatch(setLecturerPendingCreate(resCreate.data.data));
+
+        const resUpdate = await API.admin.getLecturerPendingUpdate();
+        dispatch(setLecturerPendingUpdate(resUpdate.data.data));
+
+        const resDegree = await API.admin.getDegreeRequests();
+        dispatch(setDegreeRequests(resDegree.data.data));
+
+        const resCertification = await API.admin.getCertificationRequests();
+        dispatch(setCertificationRequests(resCertification.data.data));
+
+        const resAttendedCourse = await API.admin.getAttendedCourseRequests();
+        dispatch(setAttendedCourseRequests(resAttendedCourse.data.data));
+
+        const resOwnedCourse = await API.admin.getOwnedCourseRequests();
+        dispatch(setOwnedCourseRequests(resOwnedCourse.data.data));
+
+        const resResearchProject = await API.admin.getResearchProjectRequests();
+        dispatch(setResearchProjectRequests(resResearchProject.data.data));
       } catch (error) {
         console.error("Error initializing AdminLecturerPage:", error);
       }
@@ -343,44 +420,104 @@ const AdminLecturerPage = () => {
 
         {/* TAB 1 - MAIN LECTURER MANAGEMENT */}
         <TabPanel value="1" sx={{ p: 0 }}>
-          <AdminLecturerMainTab
-            lecturers={lecturers}
-          />
+          <React.Suspense
+            fallback={
+              <Box sx={{ width: "100%" }}>
+                <LinearProgress />
+                <Box sx={{ p: 4, textAlign: "center" }}>
+                  <Typography variant="h6">Đang tải dữ liệu...</Typography>
+                </Box>
+              </Box>
+            }
+          >
+            <AdminLecturerMainTab lecturers={lecturers} />
+          </React.Suspense>
         </TabPanel>
 
         {/* TAB 2 - CREATE LECTURER REQUESTS */}
         <TabPanel value="2" sx={{ p: 0 }}>
-          <AdminLecturerCreateTab
-            lecturerCreateList={lecturerCreateList}
-          />
+          <React.Suspense
+            fallback={
+              <Box sx={{ width: "100%" }}>
+                <LinearProgress />
+                <Box sx={{ p: 4, textAlign: "center" }}>
+                  <Typography variant="h6">Đang tải dữ liệu...</Typography>
+                </Box>
+              </Box>
+            }
+          >
+            <AdminLecturerCreateTab lecturerCreateList={lecturerCreateList} />
+          </React.Suspense>
         </TabPanel>
 
         {/* TAB 3 - UPDATE LECTURER REQUESTS */}
         <TabPanel value="3" sx={{ p: 0 }}>
-          <AdminLecturerUpdateTab
-            lecturerUpdateList={lecturerUpdateList}
-          />
+          <React.Suspense
+            fallback={
+              <Box sx={{ width: "100%" }}>
+                <LinearProgress />
+                <Box sx={{ p: 4, textAlign: "center" }}>
+                  <Typography variant="h6">Đang tải dữ liệu...</Typography>
+                </Box>
+              </Box>
+            }
+          >
+            <AdminLecturerUpdateTab lecturerUpdateList={lecturerUpdateList} />
+          </React.Suspense>
         </TabPanel>
 
         {/* TAB 4 - DEGREE/CERTIFICATE REQUESTS */}
         <TabPanel value="4" sx={{ p: 0 }}>
-          <AdminLecturerDegreeTab
-            lecturerRequestsDGCC={lecturerRequestsDGCC}
-          />
+          <React.Suspense
+            fallback={
+              <Box sx={{ width: "100%" }}>
+                <LinearProgress />
+                <Box sx={{ p: 4, textAlign: "center" }}>
+                  <Typography variant="h6">Đang tải dữ liệu...</Typography>
+                </Box>
+              </Box>
+            }
+          >
+            <AdminLecturerDegreeTab
+              lecturerRequestsDGCC={lecturerRequestsDGCC}
+            />
+          </React.Suspense>
         </TabPanel>
 
         {/* TAB 5 - COURSE REQUESTS */}
         <TabPanel value="5" sx={{ p: 0 }}>
-          <AdminLecturerCourseTab
-            lecturerRequestsCourse={lecturerRequestsCourse}
-          />
+          <React.Suspense
+            fallback={
+              <Box sx={{ width: "100%" }}>
+                <LinearProgress />
+                <Box sx={{ p: 4, textAlign: "center" }}>
+                  <Typography variant="h6">Đang tải dữ liệu...</Typography>
+                </Box>
+              </Box>
+            }
+          >
+            <AdminLecturerCourseTab
+              lecturerRequestsCourse={lecturerRequestsCourse}
+            />
+          </React.Suspense>
         </TabPanel>
 
         {/* TAB 6 - RESEARCH PROJECT REQUESTS */}
         <TabPanel value="6" sx={{ p: 0 }}>
-          <AdminLecturerResearchTab
-            lecturerRequestsResearch={lecturerRequestsResearch}
-          />
+          <React.Suspense
+            fallback={
+              <Box sx={{ width: "100%" }}>
+                <LinearProgress />
+                <Box sx={{ p: 4, textAlign: "center" }}>
+                  <Typography variant="h6">Đang tải dữ liệu...</Typography>
+                </Box>
+              </Box>
+            }
+          >
+            <AdminLecturerResearchTab
+              lecturerRequestsResearch={lecturerRequestsResearch}
+            />
+          </React.Suspense>
         </TabPanel>
       </TabContext>
     </Box>

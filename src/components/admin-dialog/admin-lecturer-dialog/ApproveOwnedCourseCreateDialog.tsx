@@ -1,34 +1,36 @@
-import React, { useState, useCallback } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-  TextField,
-  Chip,
-  Stack,
-  Card,
-  CardContent,
-  IconButton,
-  Avatar,
-  Alert,
-} from "@mui/material";
 import {
   Close as CloseIcon,
   School as SchoolIcon,
   Visibility as VisibilityIcon,
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
 } from "@mui/icons-material";
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Stack,
+  Typography,
+} from "@mui/material";
+import React, { useCallback, useState } from "react";
 
-import { toast } from "react-toastify";
-import { getAcademicRank, getCourseType, getScale } from "../../../utils/ChangeText";
-import { API } from "../../../utils/Fetch";
-import { setLecturerRequests } from "../../../redux/slice/LecturerRquestSlice";
 import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { setLecturerProfileUpdate } from "../../../redux/slice/LecturerProfileUpdateSlice";
+import { setOwnedCourseRequests } from "../../../redux/slice/RequestOwnedCourseSlice";
+import {
+  getAcademicRank,
+  getCourseType,
+  getScale,
+} from "../../../utils/ChangeText";
+import { API } from "../../../utils/Fetch";
+import ConfirmDialog from "../../general-dialog/ConfirmDialog";
 
 interface OwnedCourseCreateDialogProps {
   open: boolean;
@@ -36,11 +38,9 @@ interface OwnedCourseCreateDialogProps {
   data: any;
 }
 
-const ApproveOwnedCourseCreateDialog: React.FC<OwnedCourseCreateDialogProps> = ({
-  open,
-  onClose,
-  data,
-}) => {
+const ApproveOwnedCourseCreateDialog: React.FC<
+  OwnedCourseCreateDialogProps
+> = ({ open, onClose, data }) => {
   const dispatch = useDispatch();
   const [adminNote, setAdminNote] = useState("");
   const [showConfirmDialog, setShowConfirmDialog] = useState<
@@ -57,11 +57,17 @@ const ApproveOwnedCourseCreateDialog: React.FC<OwnedCourseCreateDialogProps> = (
         return;
       }
       toast.success("Khóa học đã được duyệt thành công!");
-      const responseData = await API.admin.getLecturerRequests();
-      dispatch(setLecturerRequests(responseData.data.data));
+      const responseData = await API.admin.getOwnedCourseRequests();
+      dispatch(setOwnedCourseRequests(responseData.data.data));
       setShowConfirmDialog(null);
       setAdminNote("");
       onClose();
+      const response = await API.admin.getLecturerAllProfile({
+        id: lecturerInfo.id,
+      });
+      if (response.data.success) {
+        dispatch(setLecturerProfileUpdate(response.data.data));
+      }
     } catch (error) {
       toast.error("Có lỗi xảy ra khi duyệt khóa học!");
       console.error(error);
@@ -86,13 +92,19 @@ const ApproveOwnedCourseCreateDialog: React.FC<OwnedCourseCreateDialogProps> = (
         toast.error("Từ chối khóa học không thành công!");
         return;
       }
-      const responseData = await API.admin.getLecturerRequests();
-      dispatch(setLecturerRequests(responseData.data.data));
+      const responseData = await API.admin.getOwnedCourseRequests();
+      dispatch(setOwnedCourseRequests(responseData.data.data));
 
       toast.success("Khóa học đã bị từ chối thành công!");
       setShowConfirmDialog(null);
       setAdminNote(""); // Reset admin note
       onClose();
+      const response = await API.admin.getLecturerAllProfile({
+        id: lecturerInfo.id,
+      });
+      if (response.data.success) {
+        dispatch(setLecturerProfileUpdate(response.data.data));
+      }
     } catch (error) {
       toast.error("Có lỗi xảy ra khi từ chối khóa học!");
       console.error(error);
@@ -117,43 +129,38 @@ const ApproveOwnedCourseCreateDialog: React.FC<OwnedCourseCreateDialogProps> = (
       <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
         <DialogTitle
           sx={{
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            color: "white",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Avatar
-              sx={{
-                bgcolor: "rgba(255,255,255,0.2)",
-                color: "white",
-                width: 48,
-                height: 48,
-              }}
-            >
-              <SchoolIcon fontSize="large" />
+            <Avatar sx={{ bgcolor: "primary.main", width: 48, height: 48 }}>
+              <SchoolIcon />
             </Avatar>
             <Box>
-              <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                Chi tiết khóa học
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Yêu cầu tạo mới khóa học
+              <Typography variant="h6" fontWeight="bold">
+                Yêu cầu tạo mới khóa học đã sở hữu
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
                 ID: {content.id}
               </Typography>
             </Box>
           </Box>
-          <IconButton onClick={onClose} size="large" sx={{ color: "white" }}>
+          <IconButton onClick={onClose} size="large">
             <CloseIcon />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{px: 4, py: 4, backgroundColor: "#f8fafc" }}>
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
+        <DialogContent sx={{ px: 4, py: 4, backgroundColor: "#f8fafc" }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 4,
+              paddingTop: 2,
+            }}
+          >
             {/* Left Column */}
             <Stack spacing={3}>
               {/* Course Image */}
@@ -223,9 +230,7 @@ const ApproveOwnedCourseCreateDialog: React.FC<OwnedCourseCreateDialogProps> = (
                       }}
                     />
                     <Chip
-                      label={
-                        getScale(content.scale) || "Chưa xác định"
-                      }
+                      label={getScale(content.scale) || "Chưa xác định"}
                       size="small"
                       sx={{
                         backgroundColor: "#e8f5e8",
@@ -331,9 +336,7 @@ const ApproveOwnedCourseCreateDialog: React.FC<OwnedCourseCreateDialogProps> = (
                         </Typography>
                         <Chip
                           size="small"
-                          label={getAcademicRank(
-                            lecturerInfo?.academicRank,
-                          )}
+                          label={getAcademicRank(lecturerInfo?.academicRank)}
                           sx={{
                             backgroundColor: "#4f46e5",
                             color: "white",
@@ -590,7 +593,22 @@ const ApproveOwnedCourseCreateDialog: React.FC<OwnedCourseCreateDialogProps> = (
                     </Box>
                   </Box>
                 </CardContent>
+                {/* Thông tin thời gian tạo/cập nhật */}
               </Card>
+              <div style={{ marginTop: 24, textAlign: "right" }}>
+                <Typography variant="body2" color="text.secondary">
+                  Được tạo lúc:{" "}
+                  {content.createdAt
+                    ? new Date(content.createdAt).toLocaleString("vi-VN")
+                    : "Chưa cập nhật"}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Cập nhật lần cuối:{" "}
+                  {content.updatedAt
+                    ? new Date(content.updatedAt).toLocaleString("vi-VN")
+                    : "Chưa cập nhật"}
+                </Typography>
+              </div>
             </Stack>
           </Box>
         </DialogContent>
@@ -648,76 +666,28 @@ const ApproveOwnedCourseCreateDialog: React.FC<OwnedCourseCreateDialogProps> = (
       </Dialog>
 
       {showConfirmDialog && (
-        <Dialog
+        <ConfirmDialog
           open={true}
+          type={showConfirmDialog}
+          title={
+            showConfirmDialog === "approve"
+              ? "Xác nhận duyệt khóa học"
+              : "Xác nhận từ chối khóa học"
+          }
+          message={
+            showConfirmDialog === "approve"
+              ? `Bạn có chắc chắn muốn duyệt khóa học "${content.title}" của giảng viên ${lecturerInfo.fullName}?`
+              : `Bạn có chắc chắn muốn từ chối khóa học "${content.title}" của giảng viên ${lecturerInfo.fullName}?`
+          }
+          loading={loading}
+          rejectNote={adminNote}
+          onRejectNoteChange={setAdminNote}
+          rejectNoteRequired={showConfirmDialog === "reject"}
           onClose={handleCloseConfirmDialog}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {showConfirmDialog === "approve" ? (
-              <>
-                <CheckCircleIcon color="success" />
-                <Typography variant="h6">Xác nhận duyệt khóa học</Typography>
-              </>
-            ) : (
-              <>
-                <CancelIcon color="error" />
-                <Typography variant="h6">Xác nhận từ chối khóa học</Typography>
-              </>
-            )}
-          </DialogTitle>
-          <DialogContent>
-            {showConfirmDialog === "approve" ? (
-              <Alert severity="info">
-                Bạn có chắc chắn muốn duyệt khóa học "{content.title}" của giảng
-                viên {lecturerInfo.fullName}?
-              </Alert>
-            ) : (
-              <Stack spacing={2}>
-                <Alert severity="warning">
-                  Bạn có chắc chắn muốn từ chối khóa học "{content.title}" của
-                  giảng viên {lecturerInfo.fullName}?
-                </Alert>
-                <TextField
-                  label="Lý do từ chối *"
-                  value={adminNote}
-                  onChange={(e) => setAdminNote(e.target.value)}
-                  fullWidth
-                  multiline
-                  rows={3}
-                  variant="outlined"
-                  placeholder="Nhập lý do từ chối khóa học này..."
-                  required
-                />
-              </Stack>
-            )}
-          </DialogContent>
-          <DialogActions sx={{ p: 3, gap: 1 }}>
-            <Button
-              onClick={handleCloseConfirmDialog}
-              variant="outlined"
-              disabled={loading}
-            >
-              Hủy
-            </Button>
-            <Button
-              onClick={
-                showConfirmDialog === "approve" ? handleApprove : handleReject
-              }
-              variant="contained"
-              color={showConfirmDialog === "approve" ? "success" : "error"}
-              disabled={loading}
-              sx={{ minWidth: 100 }}
-            >
-              {loading
-                ? "Đang xử lý..."
-                : showConfirmDialog === "approve"
-                  ? "Duyệt"
-                  : "Từ chối"}
-            </Button>
-          </DialogActions>
-        </Dialog>
+          onConfirm={
+            showConfirmDialog === "approve" ? handleApprove : handleReject
+          }
+        />
       )}
     </>
   );

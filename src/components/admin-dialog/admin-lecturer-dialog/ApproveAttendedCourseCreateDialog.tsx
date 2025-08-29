@@ -12,7 +12,6 @@ import {
   CardContent,
   Chip,
   Stack,
-  TextField,
   IconButton,
 } from "@mui/material";
 import { School as SchoolIcon, Close as CloseIcon } from "@mui/icons-material";
@@ -20,8 +19,10 @@ import { School as SchoolIcon, Close as CloseIcon } from "@mui/icons-material";
 import { formatDate, getScale } from "../../../utils/ChangeText";
 import { API } from "../../../utils/Fetch";
 import { toast } from "react-toastify";
-import { setLecturerRequests } from "../../../redux/slice/LecturerRquestSlice";
 import { useDispatch } from "react-redux";
+import { setLecturerProfileUpdate } from "../../../redux/slice/LecturerProfileUpdateSlice";
+import { setAttendedCourseRequests } from "../../../redux/slice/RequestAttendedCourseSlice";
+import ConfirmDialog from "../../general-dialog/ConfirmDialog";
 
 interface AttendedCourseCreateDialogProps {
   open: boolean;
@@ -29,11 +30,9 @@ interface AttendedCourseCreateDialogProps {
   onClose: () => void;
 }
 
-const ApproveAttendedCourseCreateDialog: React.FC<AttendedCourseCreateDialogProps> = ({
-  open,
-  data,
-  onClose,
-}) => {
+const ApproveAttendedCourseCreateDialog: React.FC<
+  AttendedCourseCreateDialogProps
+> = ({ open, data, onClose }) => {
   const dispatch = useDispatch();
   const [adminNote, setAdminNote] = useState("");
   const [showConfirmDialog, setShowConfirmDialog] = useState<
@@ -52,11 +51,17 @@ const ApproveAttendedCourseCreateDialog: React.FC<AttendedCourseCreateDialogProp
         return;
       }
       toast.success("Khóa học đã được duyệt thành công!");
-      const responseData = await API.admin.getLecturerRequests();
-      dispatch(setLecturerRequests(responseData.data.data));
+      const responseData = await API.admin.getAttendedCourseRequests();
+      dispatch(setAttendedCourseRequests(responseData.data.data));
 
       setShowConfirmDialog(null);
       onClose();
+      const response = await API.admin.getLecturerAllProfile({
+        id: lecturerInfo.id,
+      });
+      if (response.data.success) {
+        dispatch(setLecturerProfileUpdate(response.data.data));
+      }
     } catch (error) {
       console.error("Error approving:", error);
     } finally {
@@ -80,12 +85,18 @@ const ApproveAttendedCourseCreateDialog: React.FC<AttendedCourseCreateDialogProp
         return;
       }
       toast.success("Khóa học đã bị từ chối thành công!");
-      const responseData = await API.admin.getLecturerRequests();
-      dispatch(setLecturerRequests(responseData.data.data));
+      const responseData = await API.admin.getAttendedCourseRequests();
+      dispatch(setAttendedCourseRequests(responseData.data.data));
 
       setShowConfirmDialog(null);
       setAdminNote("");
       onClose();
+      const response = await API.admin.getLecturerAllProfile({
+        id: lecturerInfo.id,
+      });
+      if (response.data.success) {
+        dispatch(setLecturerProfileUpdate(response.data.data));
+      }
     } catch (error) {
       console.error("Error rejecting:", error);
     } finally {
@@ -109,45 +120,39 @@ const ApproveAttendedCourseCreateDialog: React.FC<AttendedCourseCreateDialogProp
       <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
         <DialogTitle
           sx={{
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            color: "white",
+            borderBottom: "1px solid #e2e8f0",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            pb: 2,
-            pt: 3,
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Avatar
-              sx={{
-                bgcolor: "rgba(255,255,255,0.2)",
-                color: "white",
-                width: 48,
-                height: 48,
-              }}
-            >
-              <SchoolIcon fontSize="large" />
+            <Avatar src={""} sx={{ bgcolor: "primary.main" }}>
+              <SchoolIcon />
             </Avatar>
             <Box>
-              <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                Chi tiết khóa học đã tham gia
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                {content.title}
+              <Typography variant="h6" fontWeight="bold">
+                Yêu cầu tạo mới khóa học đã tham gia
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
                 ID: {content.id}
               </Typography>
             </Box>
           </Box>
-          <IconButton onClick={onClose} size="large" sx={{ color: "white" }}>
+          <IconButton onClick={onClose} size="large">
             <CloseIcon />
           </IconButton>
         </DialogTitle>
 
         <DialogContent sx={{ px: 4, py: 4, backgroundColor: "#f8fafc" }}>
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 4,
+              paddingTop: 2,
+            }}
+          >
             {/* Left Column */}
             <Stack spacing={3}>
               {/* Course Details */}
@@ -470,6 +475,21 @@ const ApproveAttendedCourseCreateDialog: React.FC<AttendedCourseCreateDialogProp
                   </Box>
                 </CardContent>
               </Card>
+              {/* Thông tin thời gian tạo/cập nhật */}
+              <div style={{ marginTop: 24, textAlign: "right" }}>
+                <Typography variant="body2" color="text.secondary">
+                  Được tạo lúc:{" "}
+                  {content.createdAt
+                    ? new Date(content.createdAt).toLocaleString("vi-VN")
+                    : "Chưa cập nhật"}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Cập nhật lần cuối:{" "}
+                  {content.updatedAt
+                    ? new Date(content.updatedAt).toLocaleString("vi-VN")
+                    : "Chưa cập nhật"}
+                </Typography>
+              </div>
             </Stack>
           </Box>
         </DialogContent>
@@ -527,66 +547,28 @@ const ApproveAttendedCourseCreateDialog: React.FC<AttendedCourseCreateDialogProp
       </Dialog>
 
       {showConfirmDialog && (
-        <Dialog
+        <ConfirmDialog
           open={true}
-          onClose={handleCloseConfirmDialog}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle>
-            {showConfirmDialog === "approve"
+          type={showConfirmDialog}
+          title={
+            showConfirmDialog === "approve"
               ? "Xác nhận duyệt khóa học"
-              : "Xác nhận từ chối khóa học"}
-          </DialogTitle>
-          <DialogContent>
-            {showConfirmDialog === "approve" ? (
-              <Typography>
-                Bạn có chắc chắn muốn duyệt khóa học "{content.title}"?
-              </Typography>
-            ) : (
-              <>
-                <Typography>
-                  Bạn có chắc chắn muốn từ chối khóa học "{content.title}"?
-                </Typography>
-                <TextField
-                  label="Lý do từ chối *"
-                  value={adminNote}
-                  onChange={(e) => setAdminNote(e.target.value)}
-                  fullWidth
-                  multiline
-                  rows={3}
-                  variant="outlined"
-                  placeholder="Nhập lý do từ chối khóa học này..."
-                  required
-                  sx={{ mt: 2 }}
-                />
-              </>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={handleCloseConfirmDialog}
-              variant="outlined"
-              disabled={loading}
-            >
-              Hủy
-            </Button>
-            <Button
-              onClick={
-                showConfirmDialog === "approve" ? handleApprove : handleReject
-              }
-              variant="contained"
-              color={showConfirmDialog === "approve" ? "success" : "error"}
-              disabled={loading}
-            >
-              {loading
-                ? "Đang xử lý..."
-                : showConfirmDialog === "approve"
-                  ? "Duyệt"
-                  : "Từ chối"}
-            </Button>
-          </DialogActions>
-        </Dialog>
+              : "Xác nhận từ chối khóa học"
+          }
+          message={
+            showConfirmDialog === "approve"
+              ? `Bạn có chắc chắn muốn duyệt khóa học "${content.title}"?`
+              : `Bạn có chắc chắn muốn từ chối khóa học "${content.title}"?`
+          }
+          loading={loading}
+          rejectNote={adminNote}
+          onRejectNoteChange={setAdminNote}
+          rejectNoteRequired={showConfirmDialog === "reject"}
+          onClose={handleCloseConfirmDialog}
+          onConfirm={
+            showConfirmDialog === "approve" ? handleApprove : handleReject
+          }
+        />
       )}
     </>
   );

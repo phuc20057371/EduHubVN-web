@@ -1,4 +1,10 @@
-import React, { useState } from "react";
+import {
+  Assignment,
+  CalendarToday,
+  ExpandMore,
+  Grade,
+  Link as LinkIcon,
+} from "@mui/icons-material";
 import {
   Accordion,
   AccordionDetails,
@@ -9,21 +15,16 @@ import {
   Chip,
   Typography,
 } from "@mui/material";
-import {
-  Add,
-  Assignment,
-  CalendarToday,
-  Delete,
-  Edit,
-  ExpandMore,
-  Grade,
-  Link as LinkIcon,
-} from "@mui/icons-material";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getStatus, formatDate } from "../../../../utils/ChangeText";
-import { colors } from "../../../../theme/colors";
-import { API } from "../../../../utils/Fetch";
 import { setLecturerProfileUpdate } from "../../../../redux/slice/LecturerProfileUpdateSlice";
+import { colors } from "../../../../theme/colors";
+import {
+  formatDate,
+  formatDateToVietnamTime,
+  getStatus,
+} from "../../../../utils/ChangeText";
+import { API } from "../../../../utils/Fetch";
 import ApproveCertificationCreateDialog from "../ApproveCertificationCreateDialog";
 import ApproveCertificationUpdateDialog from "../ApproveCertificationUpdateDialog";
 
@@ -35,7 +36,12 @@ interface LecturerProfileCertificationsTabProps {
 
 const LecturerProfileCertificationsTab: React.FC<
   LecturerProfileCertificationsTabProps
-> = ({ onAddCertification, onEditCertification, onDeleteCertification }) => {
+> = (
+  {
+    // onAddCertification,
+    // onEditCertification, onDeleteCertification
+  },
+) => {
   // Get lecturer data from Redux
   const lecturerProfileUpdate = useSelector(
     (state: any) => state.lecturerProfileUpdate,
@@ -126,7 +132,7 @@ const LecturerProfileCertificationsTab: React.FC<
         >
           Danh sách chứng chỉ ({certifications?.length || 0})
         </Typography>
-        <Button
+        {/* <Button
           variant="contained"
           startIcon={<Add />}
           onClick={onAddCertification}
@@ -143,7 +149,7 @@ const LecturerProfileCertificationsTab: React.FC<
           }}
         >
           Thêm chứng chỉ
-        </Button>
+        </Button> */}
       </div>
       {certifications && certifications.length > 0 ? (
         certifications.map((item: any) => (
@@ -275,7 +281,7 @@ const LecturerProfileCertificationsTab: React.FC<
                           },
                         }}
                       >
-                        Có yêu cầu cập nhật
+                        Xem yêu cầu cập nhật
                       </Button>
                     )
                   )}
@@ -421,7 +427,7 @@ const LecturerProfileCertificationsTab: React.FC<
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3 w-full">
                   {(item.original?.certificateUrl || item.certificateUrl) && (
                     <Button
                       variant="contained"
@@ -446,50 +452,17 @@ const LecturerProfileCertificationsTab: React.FC<
                       Xem tài liệu
                     </Button>
                   )}
-
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<Edit />}
-                    onClick={() => onEditCertification?.(item.original || item)}
-                    sx={{
-                      borderColor: colors.primary[500],
-                      color: colors.primary[500],
-                      fontWeight: 600,
-                      textTransform: "none",
-                      borderRadius: 2,
-                      "&:hover": {
-                        borderColor: colors.primary[600],
-                        backgroundColor: colors.primary[50],
-                        transform: "translateY(-1px)",
-                      },
-                    }}
-                  >
-                    Chỉnh sửa
-                  </Button>
-
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<Delete />}
-                    onClick={() =>
-                      onDeleteCertification?.(item.original || item)
-                    }
-                    sx={{
-                      borderColor: "#EF4444",
-                      color: "#EF4444",
-                      fontWeight: 600,
-                      textTransform: "none",
-                      borderRadius: 2,
-                      "&:hover": {
-                        borderColor: "#DC2626",
-                        backgroundColor: "#FEF2F2",
-                        transform: "translateY(-1px)",
-                      },
-                    }}
-                  >
-                    Xóa
-                  </Button>
+                </div>
+                {/* Thông tin thời gian tạo/cập nhật */}
+                <div style={{ marginTop: 24, textAlign: "right" }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Được tạo lúc:{" "}
+                    {formatDateToVietnamTime(item.original?.createdAt)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Cập nhật lần cuối:{" "}
+                    {formatDateToVietnamTime(item.original?.updatedAt)}
+                  </Typography>
                 </div>
               </Box>
             </AccordionDetails>

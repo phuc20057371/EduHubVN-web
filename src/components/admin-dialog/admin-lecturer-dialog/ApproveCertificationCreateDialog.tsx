@@ -1,39 +1,43 @@
-import React, { useState, useCallback } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-  TextField,
-  Chip,
-  Stack,
-  Card,
-  CardContent,
-  IconButton,
-  Avatar,
-  Alert,
-} from "@mui/material";
-import {
-  Close as CloseIcon,
   Assignment as AssignmentIcon,
-  Visibility as VisibilityIcon,
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
   Business as BusinessIcon,
   CalendarToday as CalendarIcon,
-  MilitaryTech as MilitaryTechIcon,
+  Cancel as CancelIcon,
+  CheckCircle as CheckCircleIcon,
+  Close as CloseIcon,
   Fingerprint as FingerprintIcon,
+  MilitaryTech as MilitaryTechIcon,
+  Visibility as VisibilityIcon,
 } from "@mui/icons-material";
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import React, { useCallback, useState } from "react";
 
-import { API } from "../../../utils/Fetch";
-import { toast } from "react-toastify";
-import { setLecturerRequests } from "../../../redux/slice/LecturerRquestSlice";
 import { useDispatch } from "react-redux";
-import { getAcademicRank } from "../../../utils/ChangeText";
+import { toast } from "react-toastify";
 import { setLecturerProfileUpdate } from "../../../redux/slice/LecturerProfileUpdateSlice";
+import { setCertificationRequests } from "../../../redux/slice/RequestCertificationSlice";
+import {
+  formatDate,
+  formatDateToVietnamTime,
+  getAcademicRank,
+} from "../../../utils/ChangeText";
+import { API } from "../../../utils/Fetch";
 
 interface ApproveCertificationCreateDialogProps {
   open: boolean;
@@ -61,8 +65,8 @@ const ApproveCertificationCreateDialog: React.FC<
     setLoading(true);
     try {
       await API.admin.approveCertification({ id: contentData.id });
-      const responseData = await API.admin.getLecturerRequests();
-      dispatch(setLecturerRequests(responseData.data.data));
+      const responseData = await API.admin.getCertificationRequests();
+      dispatch(setCertificationRequests(responseData.data.data));
       toast.success("Đã duyệt chứng chỉ thành công!");
       setShowConfirmDialog(null);
       setAdminNote(""); // Reset admin note
@@ -95,8 +99,8 @@ const ApproveCertificationCreateDialog: React.FC<
         id: contentData.id,
         adminNote: adminNote.trim(),
       });
-      const responseData = await API.admin.getLecturerRequests();
-      dispatch(setLecturerRequests(responseData.data.data));
+      const responseData = await API.admin.getCertificationRequests();
+      dispatch(setCertificationRequests(responseData.data.data));
       toast.success("Đã từ chối chứng chỉ thành công!");
       setShowConfirmDialog(null);
       setAdminNote(""); // Reset admin note
@@ -137,11 +141,18 @@ const ApproveCertificationCreateDialog: React.FC<
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <AssignmentIcon color="primary" />
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              Chi tiết chứng chỉ
-            </Typography>
-            {contentData.id}
+            <Avatar
+              src={""}
+              sx={{ bgcolor: "primary.main", width: 48, height: 48 }}
+            >
+              <AssignmentIcon />
+            </Avatar>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Yêu cầu tạo mới chứng chỉ
+              </Typography>
+              <Typography variant="body2">ID: {contentData.id}</Typography>
+            </Box>
           </Box>
           <IconButton onClick={onClose} size="small">
             <CloseIcon />
@@ -247,24 +258,26 @@ const ApproveCertificationCreateDialog: React.FC<
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <CalendarIcon color="primary" fontSize="small" />
                     <Typography variant="body1">
-                      <strong>Ngày cấp:</strong> {contentData.issueDate}
+                      <strong>Thời gian:</strong>{" "}
+                      {formatDate(contentData.issueDate)}
                     </Typography>
                     <Typography variant="body1">
-                      - {contentData.expiryDate || "Không thời hạn"}
+                      - {formatDate(contentData.expiryDate) || "Không thời hạn"}
                     </Typography>
                   </Box>
                   {contentData.expiryDate && (
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <CalendarIcon color="primary" fontSize="small" />
                       <Typography variant="body1">
-                        <strong>Ngày hết hạn:</strong> {contentData.expiryDate}
+                        <strong>Ngày hết hạn:</strong>{" "}
+                        {formatDate(contentData.expiryDate)}
                       </Typography>
                     </Box>
                   )}
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <FingerprintIcon color="primary" fontSize="small" />
                     <Typography variant="body1">
-                      <strong>Mã tham chiếu:</strong> {contentData.referenceId}
+                      <strong>Reference ID:</strong> {contentData.referenceId}
                     </Typography>
                   </Box>
                 </Stack>
@@ -305,10 +318,25 @@ const ApproveCertificationCreateDialog: React.FC<
 
             {/* Timestamps */}
 
-            <Typography variant="body2">
-              <strong>Cập nhật lần cuối:</strong>{" "}
-              {new Date(contentData.updatedAt).toLocaleString("vi-VN")}
-            </Typography>
+            <Box
+              sx={{
+                mt: 3,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Box sx={{ textAlign: "right", width: "100%" }}>
+                <Typography variant="body2" color="text.secondary">
+                  Được tạo lúc:{" "}
+                  {formatDateToVietnamTime(contentData?.createdAt)}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Cập nhật lần cuối:{" "}
+                  {formatDateToVietnamTime(contentData?.updatedAt)}
+                </Typography>
+              </Box>
+            </Box>
           </Stack>
         </DialogContent>
 

@@ -27,11 +27,14 @@ import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { API } from "../../../utils/Fetch";
-import { setLecturerRequests } from "../../../redux/slice/LecturerRquestSlice";
-import { getAcademicRank } from "../../../utils/ChangeText";
-import ConfirmDialog from "../../general-dialog/ConfirmDialog";
 import { setLecturerProfileUpdate } from "../../../redux/slice/LecturerProfileUpdateSlice";
+import { setDegreeRequests } from "../../../redux/slice/RequestDegreeSlice";
+import {
+  formatDateToVietnamTime,
+  getAcademicRank,
+} from "../../../utils/ChangeText";
+import { API } from "../../../utils/Fetch";
+import ConfirmDialog from "../../general-dialog/ConfirmDialog";
 
 interface ApproveDegreeCreateDialogProps {
   open: boolean;
@@ -63,8 +66,8 @@ const ApproveDegreeCreateDialog: React.FC<ApproveDegreeCreateDialogProps> = ({
     setLoading(true);
     try {
       await API.admin.approveDegree({ id: contentData.id });
-      const responseData = await API.admin.getLecturerRequests();
-      dispatch(setLecturerRequests(responseData.data.data));
+      const responseData = await API.admin.getDegreeRequests();
+      dispatch(setDegreeRequests(responseData.data.data));
       toast.success("Đã duyệt bằng cấp thành công!");
       setShowConfirmDialog(null);
       setAdminNote(""); // Reset admin note
@@ -98,8 +101,8 @@ const ApproveDegreeCreateDialog: React.FC<ApproveDegreeCreateDialogProps> = ({
         id: contentData.id,
         adminNote: adminNote.trim(),
       });
-      const responseData = await API.admin.getLecturerRequests();
-      dispatch(setLecturerRequests(responseData.data.data));
+      const responseData = await API.admin.getDegreeRequests();
+      dispatch(setDegreeRequests(responseData.data.data));
       toast.success("Đã từ chối bằng cấp thành công!");
       setShowConfirmDialog(null);
       setAdminNote(""); // Reset admin note
@@ -148,7 +151,7 @@ const ApproveDegreeCreateDialog: React.FC<ApproveDegreeCreateDialogProps> = ({
             </Avatar>
             <Box flex={1}>
               <Typography variant="h5" component="div">
-                Thông tin bằng cấp
+                Yêu cầu tạo mới bằng cấp
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {contentData?.fullName}
@@ -165,11 +168,6 @@ const ApproveDegreeCreateDialog: React.FC<ApproveDegreeCreateDialogProps> = ({
                 right: 8,
                 top: 8,
                 color: "primary.main",
-                background: "rgba(240,240,240,0.8)",
-                "&:hover": {
-                  bgcolor: "primary.light",
-                  color: "white",
-                },
                 transition: "all 0.2s",
               }}
               size="small"
@@ -291,7 +289,7 @@ const ApproveDegreeCreateDialog: React.FC<ApproveDegreeCreateDialogProps> = ({
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <FingerprintIcon color="primary" fontSize="small" />
                     <Typography variant="body1">
-                      <strong>Mã tham chiếu:</strong> {contentData.referenceId}
+                      <strong>Reference ID:</strong> {contentData.referenceId}
                     </Typography>
                   </Box>
                 </Stack>
@@ -330,20 +328,15 @@ const ApproveDegreeCreateDialog: React.FC<ApproveDegreeCreateDialogProps> = ({
               </CardContent>
             </Card>
 
-            {/* Timestamps */}
-            <Card variant="outlined" sx={{ borderRadius: 2 }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                  Thông tin thời gian
-                </Typography>
-                <Stack spacing={1}>
-                  <Typography variant="body2">
-                    <strong>Cập nhật lần cuối:</strong>{" "}
-                    {new Date(contentData.updatedAt).toLocaleString("vi-VN")}
-                  </Typography>
-                </Stack>
-              </CardContent>
-            </Card>
+            <Stack spacing={1} mt={2} alignItems="flex-end">
+              <Typography variant="body2">
+                Được tạo lúc: {formatDateToVietnamTime(contentData.createdAt)}
+              </Typography>
+              <Typography variant="body2">
+                Cập nhật lần cuối:{" "}
+                {formatDateToVietnamTime(contentData.updatedAt)}
+              </Typography>
+            </Stack>
           </Stack>
         </DialogContent>
 

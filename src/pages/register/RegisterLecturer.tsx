@@ -48,7 +48,7 @@ import { toast } from "react-toastify";
 import { validateLecturerInfo } from "../../utils/Validate";
 import { useSelector } from "react-redux";
 import { colors } from "../../theme/colors";
-import { getAcademicRank } from "../../utils/ChangeText";
+import { formatDate, getAcademicRank } from "../../utils/ChangeText";
 import { jobFieldAutoComplete, majorsAutoComplete } from "../../utils/AutoComplete";
 
 const RegisterLecturer = () => {
@@ -129,7 +129,7 @@ const RegisterLecturer = () => {
     },
     {
       label: "Ngày sinh",
-      value: new Date(dateOfBirth).toLocaleDateString("vi-VN"),
+      value: formatDate(dateOfBirth),
     },
     {
       label: "Giới tính",

@@ -81,13 +81,9 @@ export interface ApproveLecturerCreateDialogProps {
   certificates: Certificate[];
 }
 
-const ApproveLecturerCreateDialog: React.FC<ApproveLecturerCreateDialogProps> = ({
-  open,
-  onClose,
-  lecturer,
-  degrees,
-  certificates,
-}) => {
+const ApproveLecturerCreateDialog: React.FC<
+  ApproveLecturerCreateDialogProps
+> = ({ open, onClose, lecturer, degrees, certificates }) => {
   // State for admin notes and status
   const dispatch = useDispatch();
   const [lecturerStatus, setLecturerStatus] = useState<
@@ -480,11 +476,9 @@ const ApproveLecturerCreateDialog: React.FC<ApproveLecturerCreateDialogProps> = 
             </Avatar>
             <Box>
               <Typography variant="h5" component="div">
-                Chi tiết hồ sơ giảng viên
+                Yêu cầu tạo mới hồ sơ giảng viên
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {lecturer.fullName}
-              </Typography>
+
               <Box display="flex" justifyContent="space-between">
                 <Typography variant="body2" color="text.secondary">
                   ID: {lecturer.id}
@@ -526,7 +520,7 @@ const ApproveLecturerCreateDialog: React.FC<ApproveLecturerCreateDialogProps> = 
               >
                 <Box display="flex" alignItems="center" gap={2}>
                   <Avatar
-                    src={lecturer.avatarUrl || ""}
+                    src={""}
                     sx={{
                       bgcolor: "rgba(255,255,255,0.2)",
                       width: 48,
@@ -1137,16 +1131,6 @@ const ApproveLecturerCreateDialog: React.FC<ApproveLecturerCreateDialogProps> = 
                                 <>
                                   <Button
                                     variant="contained"
-                                    color="success"
-                                    size="small"
-                                    onClick={() =>
-                                      handleApprove(deg.id, "Degree")
-                                    }
-                                  >
-                                    Duyệt
-                                  </Button>
-                                  <Button
-                                    variant="contained"
                                     color="error"
                                     size="small"
                                     onClick={() =>
@@ -1154,6 +1138,16 @@ const ApproveLecturerCreateDialog: React.FC<ApproveLecturerCreateDialogProps> = 
                                     }
                                   >
                                     Từ chối
+                                  </Button>
+                                  <Button
+                                    variant="contained"
+                                    color="success"
+                                    size="small"
+                                    onClick={() =>
+                                      handleApprove(deg.id, "Degree")
+                                    }
+                                  >
+                                    Duyệt
                                   </Button>
                                 </>
                               ) : (

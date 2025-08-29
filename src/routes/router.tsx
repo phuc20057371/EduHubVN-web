@@ -12,6 +12,7 @@ import InstitutionLayout from "../layouts/InstitutionLayout";
 import LecturerLayout from "../layouts/LecturerLayout";
 import PartnerLayout from "../layouts/PartnerLayout";
 import PendingLayout from "../layouts/PendingLayout";
+import AdminCourse from "../pages/admin/AdminCourse";
 import AdminInstitutionPage from "../pages/admin/AdminInstitutionPage";
 import AdminLecturerPage from "../pages/admin/AdminLecturerPage";
 import AdminPage from "../pages/admin/AdminPage";
@@ -22,17 +23,30 @@ import LecturerPendingPage from "../pages/guest/LecturerPendingPage";
 import PartnerPendingPage from "../pages/guest/PartnerPendingPage";
 import HomePage from "../pages/home/HomePage";
 import InstitutionPage from "../pages/institution/InstitutionPage";
+import InstitutionProfilePage from "../pages/institution/InstitutionProfilePage";
+import LecturerContractPage from "../pages/lecturer/LecturerContractPage";
+import LecturerCoursePage from "../pages/lecturer/LecturerCoursePage";
 import LecturerPage from "../pages/lecturer/LecturerPage";
+import LecturerProfilePage from "../pages/lecturer/LecturerProfilePage";
+import LecturerProjectPage from "../pages/lecturer/LecturerProjectPage";
+import LecturerStatisticPage from "../pages/lecturer/LecturerStatisticPage";
 import Login from "../pages/login/Login";
+import LecturerInfoPage from "../pages/other/LecturerInfoPage";
 import PartnerPage from "../pages/partner/PartnerPage";
 import Register from "../pages/register/Register";
 import RegisterInstitution from "../pages/register/RegisterInstitution";
 import RegisterLecturer from "../pages/register/RegisterLecturer";
 import RegisterPartner from "../pages/register/RegisterPartner";
 import ProtectedRoute from "../utils/ProtectedRoute";
-import AdminCourse from "../pages/admin/AdminCourse";
-import LecturerProfilePage from "../pages/lecturer/LecturerProfilePage";
-import LecturerInfoPage from "../pages/other/LecturerInfoPage";
+import InstitutionContractPage from "../pages/institution/InstitutionContractPage";
+import InstitutionCourse from "../pages/institution/InstitutionCourse";
+import InstitutionLecturerPage from "../pages/institution/InstitutionLecturerPage";
+import InstitutionProjectPage from "../pages/institution/InstitutionProjectPage";
+import PartnerProfilePage from "../pages/partner/PartnerProfilePage";
+import PartnerContractPage from "../pages/partner/PartnerContractPage";
+import PartnerCoursePage from "../pages/partner/PartnerCoursePage";
+import PartnerLecturerPage from "../pages/partner/PartnerLecturerPage";
+import PartnerProjectPage from "../pages/partner/PartnerProjectPage";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -76,18 +90,50 @@ export const router = createBrowserRouter(
         <Route element={<LecturerLayout />}>
           <Route path="/lecturer" element={<LecturerPage />} />
           <Route path="/lecturer/profile" element={<LecturerProfilePage />} />
+          <Route
+            path="/lecturer/contracts"
+            element={<LecturerContractPage />}
+          />
+          <Route path="/lecturer/courses" element={<LecturerCoursePage />} />
+          <Route
+            path="/lecturer/statistics"
+            element={<LecturerStatisticPage />}
+          />
+          <Route path="/lecturer/projects" element={<LecturerProjectPage />} />
         </Route>
       </Route>
 
       <Route element={<ProtectedRoute />}>
         <Route element={<InstitutionLayout />}>
           <Route path="/institution" element={<InstitutionPage />} />
+          <Route
+            path="/institution/profile"
+            element={<InstitutionProfilePage />}
+          />
+          <Route
+            path="/institution/contracts"
+            element={<InstitutionContractPage />}
+          />
+          <Route path="/institution/courses" element={<InstitutionCourse />} />
+          <Route
+            path="/institution/lecturers"
+            element={<InstitutionLecturerPage />}
+          />
+          <Route
+            path="/institution/projects"
+            element={<InstitutionProjectPage />}
+          />
         </Route>
       </Route>
 
       <Route element={<ProtectedRoute />}>
         <Route element={<PartnerLayout />}>
           <Route path="/partner" element={<PartnerPage />} />
+          <Route path="/partner/profile" element={<PartnerProfilePage />} />
+          <Route path="/partner/contracts" element={<PartnerContractPage />} />
+          <Route path="/partner/courses" element={<PartnerCoursePage />} />
+          <Route path="/partner/lecturers" element={<PartnerLecturerPage />} />
+          <Route path="/partner/projects" element={<PartnerProjectPage />} />
         </Route>
       </Route>
 

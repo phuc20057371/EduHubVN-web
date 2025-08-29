@@ -165,9 +165,15 @@ const LecturerLayout = () => {
   // Enhanced menu items with new icons and descriptions
   const menuItems = [
     {
-      text: "Dashboard",
+      text: "Trang chủ",
       icon: <Dashboard />,
       path: "/lecturer",
+      description: "Tổng quan và thống kê",
+    },
+    {
+      text: "Đề tài",
+      icon: <Dashboard />,
+      path: "/lecturer/projects",
       description: "Tổng quan và thống kê",
     },
     {
@@ -179,13 +185,13 @@ const LecturerLayout = () => {
     {
       text: "Hợp đồng",
       icon: <Assignment />,
-      path: "/lecturer/schedule",
+      path: "/lecturer/contracts",
       description: "Quản lý hợp đồng giảng dạy",
     },
     {
       text: "Thống kê",
       icon: <TrendingUp />,
-      path: "/lecturer/analytics",
+      path: "/lecturer/statistics",
       description: "Phân tích hiệu quả giảng dạy",
     },
     {

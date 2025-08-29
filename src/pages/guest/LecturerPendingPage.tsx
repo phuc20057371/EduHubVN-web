@@ -1,75 +1,75 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setPendingLecturer } from "../../redux/slice/PendingLectuererSlice";
-import { API } from "../../utils/Fetch";
+import {
+  Add,
+  Assignment as AssignmentIcon,
+  Business as BusinessIcon,
+  CalendarToday as CalendarIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  ExpandMore as ExpandMoreIcon,
+  Female as FemaleIcon,
+  Grade as GradeIcon,
+  Link as LinkIcon,
+  LocationOn as LocationIcon,
+  Male as MaleIcon,
+  Person as PersonIcon,
+  Phone as PhoneIcon,
+  Save as SaveIcon,
+  School as SchoolIcon,
+  Work as WorkIcon,
+} from "@mui/icons-material";
 import {
   Accordion,
-  AccordionSummary,
   AccordionDetails,
-  Typography,
-  TextField,
+  AccordionSummary,
+  Alert,
+  Autocomplete,
   Avatar,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
+  Button,
   CardContent,
   CardHeader,
   Chip,
-  Paper,
-  Container,
-  Stack,
   CircularProgress,
-  Button,
+  Container,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TextField,
+  Typography,
   alpha,
-  Alert,
-  Autocomplete,
 } from "@mui/material";
-import {
-  ExpandMore as ExpandMoreIcon,
-  Person as PersonIcon,
-  School as SchoolIcon,
-  Assignment as AssignmentIcon,
-  Save as SaveIcon,
-  Visibility as VisibilityIcon,
-  Male as MaleIcon,
-  Female as FemaleIcon,
-  Phone as PhoneIcon,
-  LocationOn as LocationIcon,
-  CalendarToday as CalendarIcon,
-  Work as WorkIcon,
-  Add,
-  Delete as DeleteIcon,
-} from "@mui/icons-material";
-import DegreeUpdateDialog from "../../components/DegreeUpdateDialog";
-import CertificationUpdateDialog from "../../components/CertificationUpdateDialog";
-import UploadDegreeModal from "../../components/lecturer-dialog/CreateDegreeModal";
-import UploadCertificationModal from "../../components/lecturer-dialog/CreateCertificationDialog";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import LinearProgress from "@mui/material/LinearProgress";
 import Box from "@mui/material/Box";
-import { clearUserProfile, setUserProfile } from "../../redux/slice/userSlice";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import LinearProgress from "@mui/material/LinearProgress";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { navigateToRole } from "../../utils/navigationRole";
 import { toast } from "react-toastify";
-import type { DegreeRequest } from "../../types/DegreeRequest";
-import type { CertificationRequest } from "../../types/CertificationRequest";
-import { validateLecturerInfo } from "../../utils/Validate";
+import UploadCertificationModal from "../../components/lecturer-dialog/CreateCertificationDialog";
+import CreateDegreeModal from "../../components/lecturer-dialog/CreateDegreeModal";
+import { setPendingLecturer } from "../../redux/slice/PendingLectuererSlice";
+import { clearUserProfile, setUserProfile } from "../../redux/slice/userSlice";
 import { colors } from "../../theme/colors";
+import type { CertificationRequest } from "../../types/CertificationRequest";
+import type { DegreeRequest } from "../../types/DegreeRequest";
+import {
+  jobFieldAutoComplete,
+  majorsAutoComplete,
+} from "../../utils/AutoComplete";
 import { getStatus, getStatusColor } from "../../utils/ChangeText";
-import { jobFieldAutoComplete, majorsAutoComplete } from "../../utils/AutoComplete";
+import { API } from "../../utils/Fetch";
+import { navigateToRole } from "../../utils/navigationRole";
+import { validateLecturerInfo } from "../../utils/Validate";
 
 const LecturerPendingPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const pendingLecturer = useSelector((state: any) => state.pendingLecturer);
-  const [openDegreeDialog, setOpenDegreeDialog] = useState(false);
-  const [selectedDegree, setSelectedDegree] = useState<any>(null);
-  const [openCertificationDialog, setOpenCertificationDialog] = useState(false);
-  const [selectedCertification, setSelectedCertification] = useState<any>(null);
 
   const [openAddDegreeModal, setOpenAddDegreeModal] = useState(false);
   const [openAddCertificationModal, setOpenAddCertificationModal] =
@@ -87,6 +87,19 @@ const LecturerPendingPage = () => {
     item: null,
     index: -1,
   });
+
+  // DegreeTab-like states
+  const [openDegreeModal, setOpenDegreeModal] = useState(false);
+  const [editDegree, setEditDegree] = useState<any>(null);
+  const [deleteDegreeDialogOpen, setDeleteDegreeDialogOpen] = useState(false);
+  const [degreeToDelete, setDegreeToDelete] = useState<any>(null);
+
+  // CertificatesTab-like states
+  const [openCertificateModal, setOpenCertificateModal] = useState(false);
+  const [editCertificate, setEditCertificate] = useState<any>(null);
+  const [deleteCertificateDialogOpen, setDeleteCertificateDialogOpen] =
+    useState(false);
+  const [certificateToDelete, setCertificateToDelete] = useState<any>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -203,7 +216,6 @@ const LecturerPendingPage = () => {
     pendingLecturer,
   ]);
 
-
   if (!pendingLecturer || !pendingLecturer.lecturer) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -303,25 +315,6 @@ const LecturerPendingPage = () => {
     }
   };
 
-  // Add delete handlers
-  const handleDeleteDegree = (degree: any, index: number) => {
-    setDeleteConfirmDialog({
-      open: true,
-      type: "degree",
-      item: degree,
-      index,
-    });
-  };
-
-  const handleDeleteCertification = (certification: any, index: number) => {
-    setDeleteConfirmDialog({
-      open: true,
-      type: "certification",
-      item: certification,
-      index,
-    });
-  };
-
   const handleConfirmDelete = async () => {
     const { type, item } = deleteConfirmDialog;
 
@@ -350,6 +343,168 @@ const LecturerPendingPage = () => {
         index: -1,
       });
     }
+  };
+
+  // DegreeTab-like handlers
+  const handleOpenDegreeModal = () => {
+    setEditDegree(null);
+    setOpenDegreeModal(true);
+  };
+
+  const handleEditDegreeModal = (degree: any) => {
+    setEditDegree(degree);
+    setOpenDegreeModal(true);
+  };
+
+  const handleCloseDegreeModal = () => {
+    setOpenDegreeModal(false);
+    setEditDegree(null);
+  };
+
+  const handleSubmitDegreeModal = async (degree: any) => {
+    try {
+      if (editDegree) {
+        // Edit mode
+        if (degree.status === "APPROVED") {
+          const response = await API.user.editDegree(degree);
+          if (response.data.success) {
+            const updatedResponse = await API.user.getPendingLecturer();
+            dispatch(setPendingLecturer(updatedResponse.data.data));
+            toast.success("Đã gửi thông tin đến admin");
+          }
+        } else if (
+          degree.status === "REJECTED" ||
+          degree.status === "PENDING"
+        ) {
+          const response = await API.user.updateDegree(degree);
+          if (response.data.success) {
+            const updatedResponse = await API.user.getPendingLecturer();
+            dispatch(setPendingLecturer(updatedResponse.data.data));
+            toast.success("Đã gửi thông tin đến admin");
+          }
+        }
+      } else {
+        // Add mode
+        const response = await API.user.createDegree([degree]);
+        if (response.data.success) {
+          const updatedResponse = await API.user.getPendingLecturer();
+          dispatch(setPendingLecturer(updatedResponse.data.data));
+          toast.success("Đã gửi thông tin đến admin");
+        }
+      }
+    } catch (error) {
+      console.error("Error saving degree:", error);
+      toast.error("Lỗi khi lưu bằng cấp");
+    }
+    setOpenDegreeModal(false);
+    setEditDegree(null);
+  };
+
+  const handleDeleteDegreeTab = (degree: any) => {
+    setDegreeToDelete(degree);
+    setDeleteDegreeDialogOpen(true);
+  };
+
+  const handleConfirmDeleteDegreeTab = async () => {
+    if (!degreeToDelete) return;
+    try {
+      await API.user.deleteDegree(degreeToDelete.id);
+      const updatedResponse = await API.user.getPendingLecturer();
+      dispatch(setPendingLecturer(updatedResponse.data.data));
+      toast.success("Xóa thành công");
+    } catch (error) {
+      console.error("Error deleting degree:", error);
+      toast.error("Có lỗi xảy ra khi xóa");
+    } finally {
+      setDeleteDegreeDialogOpen(false);
+      setDegreeToDelete(null);
+    }
+  };
+
+  const handleCancelDeleteDegreeTab = () => {
+    setDeleteDegreeDialogOpen(false);
+    setDegreeToDelete(null);
+  };
+
+  // CertificatesTab-like handlers
+  const handleOpenCertificateModal = () => {
+    setEditCertificate(null);
+    setOpenCertificateModal(true);
+  };
+
+  const handleEditCertificateModal = (certificate: any) => {
+    setEditCertificate(certificate);
+    setOpenCertificateModal(true);
+  };
+
+  const handleCloseCertificateModal = () => {
+    setOpenCertificateModal(false);
+    setEditCertificate(null);
+  };
+
+  const handleSubmitCertificateModal = async (certificate: any) => {
+    try {
+      if (editCertificate) {
+        // Edit mode
+        if (certificate.status === "APPROVED") {
+          const response = await API.user.editCertification(certificate);
+          if (response.data.success) {
+            const updatedResponse = await API.user.getPendingLecturer();
+            dispatch(setPendingLecturer(updatedResponse.data.data));
+            toast.success("Đã gửi thông tin đến admin");
+          }
+        } else if (
+          certificate.status === "REJECTED" ||
+          certificate.status === "PENDING"
+        ) {
+          const response = await API.user.updateCertification(certificate);
+          if (response.data.success) {
+            const updatedResponse = await API.user.getPendingLecturer();
+            dispatch(setPendingLecturer(updatedResponse.data.data));
+            toast.success("Đã gửi thông tin đến admin");
+          }
+        }
+      } else {
+        // Add mode
+        const response = await API.user.createCertification([certificate]);
+        if (response.data.success) {
+          const updatedResponse = await API.user.getPendingLecturer();
+          dispatch(setPendingLecturer(updatedResponse.data.data));
+          toast.success("Đã gửi thông tin đến admin");
+        }
+      }
+    } catch (error) {
+      console.error("Error saving certification:", error);
+      toast.error("Lỗi khi lưu chứng chỉ");
+    }
+    setOpenCertificateModal(false);
+    setEditCertificate(null);
+  };
+
+  const handleDeleteCertificateTab = (certificate: any) => {
+    setCertificateToDelete(certificate);
+    setDeleteCertificateDialogOpen(true);
+  };
+
+  const handleConfirmDeleteCertificateTab = async () => {
+    if (!certificateToDelete) return;
+    try {
+      await API.user.deleteCertification(certificateToDelete.id);
+      const updatedResponse = await API.user.getPendingLecturer();
+      dispatch(setPendingLecturer(updatedResponse.data.data));
+      toast.success("Xóa thành công");
+    } catch (error) {
+      console.error("Error deleting certification:", error);
+      toast.error("Có lỗi xảy ra khi xóa");
+    } finally {
+      setDeleteCertificateDialogOpen(false);
+      setCertificateToDelete(null);
+    }
+  };
+
+  const handleCancelDeleteCertificateTab = () => {
+    setDeleteCertificateDialogOpen(false);
+    setCertificateToDelete(null);
   };
 
   return (
@@ -459,7 +614,7 @@ const LecturerPendingPage = () => {
               {/* Left Side - Enhanced Personal Information */}
               <Box
                 sx={{
-                  flex: "0 0 60%",
+                  flex: "0 0 40%",
                   display: "flex",
                   flexDirection: "column",
                   gap: 4,
@@ -1165,240 +1320,282 @@ const LecturerPendingPage = () => {
                 </Paper>
               </Box>
 
-              {/* Right Side - Enhanced Degrees and Certifications */}
+              {/* Right Side - DegreesTab-like Degrees Section */}
               <Box
                 sx={{
-                  flex: "0 0 40%",
+                  flex: "0 0 60%",
                   display: "flex",
                   flexDirection: "column",
                   gap: 4,
                 }}
               >
-                {/* Enhanced Degrees Section */}
-                <Paper
-                  elevation={0}
-                  sx={{
-                    borderRadius: 3,
-                    border: `1px solid ${colors.border.light}`,
-                    background: colors.background.primary,
-                    flex: 1,
-                    position: "relative",
-                    overflow: "hidden",
-                    "&::before": {
-                      content: '""',
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: `
-                        radial-gradient(circle at 90% 10%, ${alpha(colors.primary[50], 0.3)} 0%, transparent 50%),
-                        url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23${colors.primary[100].slice(1)}' fill-opacity='0.02'%3E%3Cpath d='M20 20c11.046 0 20-8.954 20-20H20z'/%3E%3C/g%3E%3C/svg%3E")
-                      `,
-                      zIndex: 0,
-                    },
-                  }}
-                >
-                  <CardHeader
-                    avatar={
-                      <Box
-                        sx={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: 2,
-                          background: colors.background.gradient.primary,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          boxShadow: `0 4px 12px ${alpha(colors.primary[500], 0.2)}`,
-                        }}
-                      >
-                        <SchoolIcon sx={{ color: "white", fontSize: 24 }} />
-                      </Box>
-                    }
-                    title={
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontFamily: "'Inter', sans-serif",
-                          fontWeight: 700,
-                          color: colors.text.primary,
-                        }}
-                      >
-                        Bằng cấp
-                      </Typography>
-                    }
-                    subheader={`${degrees?.length || 0} bằng cấp`}
-                    action={
-                      <Button
-                        variant="contained"
-                        size="small"
-                        startIcon={<Add />}
-                        onClick={() => setOpenAddDegreeModal(true)}
-                        sx={{
-                          borderRadius: 2,
-                          background: colors.background.gradient.primary,
-                          boxShadow: `0 4px 12px ${alpha(colors.primary[500], 0.3)}`,
-                          fontFamily: "'Inter', sans-serif",
-                          fontWeight: 600,
-                          "&:hover": {
-                            transform: "translateY(-1px)",
-                            boxShadow: `0 6px 16px ${alpha(colors.primary[500], 0.4)}`,
-                          },
-                          transition: "all 0.3s ease",
-                        }}
-                      >
-                        Thêm mới
-                      </Button>
-                    }
-                    sx={{ position: "relative", zIndex: 1 }}
-                  />
-                  <CardContent
+                {
+                  /* DegreesTab-like Degrees Section */
+                  <Paper
+                    elevation={0}
                     sx={{
-                      pt: 0,
-                      maxHeight: "400px",
-                      overflow: "auto",
+                      borderRadius: 3,
+                      border: `1px solid ${colors.border.light}`,
+                      background: colors.background.primary,
+                      flex: 1,
                       position: "relative",
-                      zIndex: 1,
+                      overflow: "hidden",
                     }}
                   >
-                    {degrees && degrees.length > 0 ? (
-                      <Stack spacing={2}>
-                        {degrees.map((deg: any, index: number) => (
-                          <Paper
-                            key={deg.id}
-                            variant="outlined"
-                            sx={{ borderRadius: 2 }}
+                    <Box className="flex items-center justify-between px-6 pb-2 pt-6">
+                      <Typography
+                        variant="h6"
+                        sx={{ color: colors.text.primary, fontWeight: 600 }}
+                      >
+                        Danh sách bằng cấp ({degrees?.length || 0})
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={handleOpenDegreeModal}
+                        sx={{
+                          background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
+                          color: "white",
+                          fontWeight: 600,
+                          textTransform: "none",
+                          borderRadius: 2,
+                          "&:hover": {
+                            transform: "translateY(-1px)",
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                          },
+                        }}
+                      >
+                        Thêm bằng cấp
+                      </Button>
+                    </Box>
+                    <CardContent
+                      sx={{
+                        pt: 0,
+                        maxHeight: "400px",
+                        overflow: "auto",
+                        position: "relative",
+                        zIndex: 1,
+                      }}
+                    >
+                      {degrees && degrees.length > 0 ? (
+                        degrees.map((item: any) => (
+                          <Accordion
+                            key={item.id}
+                            sx={{
+                              borderRadius: 3,
+                              border: `1px solid ${colors.primary[100]}`,
+                              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                              "&:before": { display: "none" },
+                              "&.Mui-expanded": {
+                                boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                                transform: "translateY(-2px)",
+                              },
+                            }}
                           >
-                            <Accordion
+                            <AccordionSummary
+                              expandIcon={<ExpandMoreIcon />}
                               sx={{
-                                boxShadow: "none",
-                                "&:before": { display: "none" },
+                                background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
+                                color: "white",
+                                borderRadius: "12px",
+                                "& .MuiAccordionSummary-expandIconWrapper": {
+                                  color: "white",
+                                },
+                                "&.Mui-expanded": {
+                                  borderRadius: "12px 12px 0 0",
+                                },
                               }}
                             >
-                              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  width: "100%",
+                                  justifyContent: "space-between",
+                                }}
+                              >
                                 <Box
                                   sx={{
                                     display: "flex",
                                     alignItems: "center",
-                                    width: "100%",
+                                    gap: 2,
                                   }}
                                 >
-                                  <Box sx={{ flexGrow: 1 }}>
+                                  <Box
+                                    sx={{
+                                      background: "rgba(255,255,255,0.2)",
+                                      borderRadius: 2,
+                                      p: 1,
+                                    }}
+                                  >
+                                    <SchoolIcon sx={{ color: "white" }} />
+                                  </Box>
+                                  <Box>
                                     <Typography
-                                      variant="subtitle2"
-                                      sx={{ fontWeight: 600 }}
+                                      variant="h6"
+                                      sx={{ color: "white", fontWeight: 700 }}
                                     >
-                                      {deg.name}
+                                      {item.name}
                                     </Typography>
                                     <Typography
-                                      variant="caption"
-                                      color="text.secondary"
+                                      variant="body2"
+                                      sx={{ color: "rgba(255,255,255,0.9)" }}
                                     >
-                                      {deg.level} • {deg.institution}
+                                      {item.major}
                                     </Typography>
+                                    {item.referenceId && (
+                                      <Typography
+                                        variant="caption"
+                                        sx={{ color: "rgba(255,255,255,0.7)" }}
+                                      >
+                                        Reference ID: {item.referenceId}
+                                      </Typography>
+                                    )}
+                                  </Box>
+                                </Box>
+                                <Chip
+                                  label={getStatus(item.status)}
+                                  size="small"
+                                  sx={{
+                                    fontWeight: 600,
+                                    background: "rgba(255,255,255,0.9)",
+                                    color:
+                                      item.status === "APPROVED"
+                                        ? "#047857"
+                                        : item.status === "PENDING"
+                                          ? "#D97706"
+                                          : "#DC2626",
+                                  }}
+                                />
+                              </Box>
+                            </AccordionSummary>
+                            <AccordionDetails
+                              sx={{
+                                p: 0,
+                                background: "white",
+                                borderRadius: "0 0 12px 12px",
+                              }}
+                            >
+                              <Box sx={{ p: 3 }}>
+                                <Box
+                                  sx={{
+                                    display: "grid",
+                                    gridTemplateColumns: "1fr 1fr 1fr",
+                                    gap: 2,
+                                    mb: 2,
+                                  }}
+                                >
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 1,
+                                      background: colors.background.tertiary,
+                                      borderRadius: 2,
+                                      p: 2,
+                                    }}
+                                  >
+                                    <BusinessIcon
+                                      sx={{ color: "#2563EB" }}
+                                      fontSize="small"
+                                    />
+                                    <Box>
+                                      <Typography
+                                        variant="caption"
+                                        sx={{
+                                          color: colors.text.tertiary,
+                                          fontWeight: 600,
+                                        }}
+                                      >
+                                        Trường/Tổ chức
+                                      </Typography>
+                                      <Typography
+                                        variant="body2"
+                                        sx={{ fontWeight: 500 }}
+                                      >
+                                        {item.institution}
+                                      </Typography>
+                                    </Box>
                                   </Box>
                                   <Box
                                     sx={{
                                       display: "flex",
                                       alignItems: "center",
                                       gap: 1,
+                                      background: colors.background.tertiary,
+                                      borderRadius: 2,
+                                      p: 2,
                                     }}
                                   >
-                                    <Chip
-                                      label={getStatus(deg.status)}
-                                      color={getStatusColor(deg.status)}
-                                      size="small"
+                                    <CalendarIcon
+                                      sx={{ color: "#059669" }}
+                                      fontSize="small"
                                     />
-                                    <Button
-                                      variant="outlined"
-                                      color="error"
-                                      size="small"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDeleteDegree(deg, index);
-                                      }}
-                                      sx={{
-                                        minWidth: "auto",
-                                        width: 32,
-                                        height: 32,
-                                        p: 0,
-                                        borderRadius: 1,
-                                      }}
-                                    >
-                                      <DeleteIcon fontSize="small" />
-                                    </Button>
+                                    <Box>
+                                      <Typography
+                                        variant="caption"
+                                        sx={{
+                                          color: colors.text.tertiary,
+                                          fontWeight: 600,
+                                        }}
+                                      >
+                                        Thời gian
+                                      </Typography>
+                                      <Typography
+                                        variant="body2"
+                                        sx={{ fontWeight: 500 }}
+                                      >
+                                        {item.startYear} - {item.graduationYear}
+                                      </Typography>
+                                    </Box>
                                   </Box>
-                                </Box>
-                              </AccordionSummary>
-                              <AccordionDetails>
-                                <Stack spacing={2}>
                                   <Box
                                     sx={{
-                                      display: "grid",
-                                      gridTemplateColumns: "1fr 1fr",
-                                      gap: 2,
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 1,
+                                      background: colors.background.tertiary,
+                                      borderRadius: 2,
+                                      p: 2,
                                     }}
                                   >
+                                    <GradeIcon
+                                      sx={{ color: "#7C3AED" }}
+                                      fontSize="small"
+                                    />
                                     <Box>
                                       <Typography
                                         variant="caption"
                                         sx={{
                                           color: colors.text.tertiary,
                                           fontWeight: 600,
-                                          textTransform: "uppercase",
-                                          letterSpacing: "0.5px",
-                                          fontSize: "0.7rem",
                                         }}
                                       >
-                                        Chuyên ngành
+                                        Trình độ
                                       </Typography>
                                       <Typography
                                         variant="body2"
-                                        sx={{
-                                          color: colors.text.primary,
-                                          fontWeight: 500,
-                                          mt: 0.5,
-                                        }}
+                                        sx={{ fontWeight: 500 }}
                                       >
-                                        {deg.major}
-                                      </Typography>
-                                    </Box>
-                                    <Box>
-                                      <Typography
-                                        variant="caption"
-                                        sx={{
-                                          color: colors.text.tertiary,
-                                          fontWeight: 600,
-                                          textTransform: "uppercase",
-                                          letterSpacing: "0.5px",
-                                          fontSize: "0.7rem",
-                                        }}
-                                      >
-                                        Thời gian học
-                                      </Typography>
-                                      <Typography
-                                        variant="body2"
-                                        sx={{
-                                          color: colors.text.primary,
-                                          fontWeight: 500,
-                                          mt: 0.5,
-                                        }}
-                                      >
-                                        {deg.startYear} - {deg.graduationYear}
+                                        {item.level}
                                       </Typography>
                                     </Box>
                                   </Box>
-
-                                  <Box>
+                                </Box>
+                                {item.description && (
+                                  <Box
+                                    sx={{
+                                      mb: 2,
+                                      background: colors.primary[25],
+                                      borderRadius: 2,
+                                      p: 2,
+                                    }}
+                                  >
                                     <Typography
                                       variant="caption"
                                       sx={{
                                         color: colors.text.tertiary,
                                         fontWeight: 600,
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.5px",
-                                        fontSize: "0.7rem",
                                       }}
                                     >
                                       Mô tả
@@ -1406,148 +1603,124 @@ const LecturerPendingPage = () => {
                                     <Typography
                                       variant="body2"
                                       sx={{
-                                        color: colors.text.primary,
+                                        color: colors.text.secondary,
                                         lineHeight: 1.6,
-                                        mt: 0.5,
+                                        mt: 1,
                                       }}
                                     >
-                                      {deg.description}
+                                      {item.description}
                                     </Typography>
                                   </Box>
-
-                                  {/* Ghi chú admin với styling đặc biệt */}
+                                )}
+                                {item.adminNote && (
                                   <Box
                                     sx={{
-                                      padding: 2,
+                                      mb: 2,
+                                      background: "#FEF3C7",
+                                      border: "1px solid #F59E0B",
                                       borderRadius: 2,
-                                      backgroundColor: deg.adminNote
-                                        ? alpha(colors.info[50], 0.7)
-                                        : alpha(colors.neutral[50], 0.5),
-                                      border: `1px solid ${
-                                        deg.adminNote
-                                          ? alpha(colors.info[200], 0.5)
-                                          : alpha(colors.neutral[200], 0.3)
-                                      }`,
-                                      position: "relative",
+                                      p: 2,
                                     }}
                                   >
                                     <Typography
                                       variant="caption"
-                                      sx={{
-                                        color: deg.adminNote
-                                          ? colors.info[700]
-                                          : colors.text.tertiary,
-                                        fontWeight: 600,
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.5px",
-                                        fontSize: "0.7rem",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 0.5,
-                                      }}
+                                      sx={{ color: "#92400E", fontWeight: 600 }}
                                     >
-                                      📝 Ghi chú từ Admin
+                                      Ghi chú của quản trị viên
                                     </Typography>
                                     <Typography
                                       variant="body2"
-                                      sx={{
-                                        color: deg.adminNote
-                                          ? colors.text.primary
-                                          : colors.text.tertiary,
-                                        fontStyle: deg.adminNote
-                                          ? "normal"
-                                          : "italic",
-                                        lineHeight: 1.5,
-                                        mt: 1,
-                                      }}
+                                      sx={{ color: "#92400E", mt: 1 }}
                                     >
-                                      {deg.adminNote ||
-                                        "Chưa có ghi chú từ admin"}
+                                      {item.adminNote}
                                     </Typography>
                                   </Box>
-
-                                  <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
-                                    <Button
-                                      variant="outlined"
-                                      size="small"
-                                      startIcon={<VisibilityIcon />}
-                                      href={deg.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      Xem file
-                                    </Button>
+                                )}
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    gap: 2,
+                                    flexWrap: "wrap",
+                                  }}
+                                >
+                                  {item.url && (
                                     <Button
                                       variant="contained"
                                       size="small"
-                                      startIcon={<VisibilityIcon />}
-                                      onClick={() => {
-                                        setSelectedDegree(deg);
-                                        setOpenDegreeDialog(true);
-                                      }}
-                                    >
-                                      Chi tiết
-                                    </Button>
-                                    <Button
-                                      variant="outlined"
-                                      color="error"
-                                      size="small"
-                                      startIcon={<DeleteIcon />}
-                                      onClick={() =>
-                                        handleDeleteDegree(deg, index)
-                                      }
+                                      startIcon={<LinkIcon />}
+                                      href={item.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
                                       sx={{
+                                        background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
+                                        color: "white",
+                                        fontWeight: 600,
+                                        textTransform: "none",
+                                        borderRadius: 2,
                                         "&:hover": {
-                                          backgroundColor:
-                                            "rgba(211, 47, 47, 0.08)",
+                                          transform: "translateY(-1px)",
                                         },
                                       }}
                                     >
-                                      Xóa
+                                      Xem tài liệu
                                     </Button>
-                                  </Box>
-                                </Stack>
-                              </AccordionDetails>
-                            </Accordion>
-                          </Paper>
-                        ))}
-                      </Stack>
-                    ) : (
-                      <Box sx={{ textAlign: "center", py: 6 }}>
-                        <SchoolIcon
-                          sx={{ fontSize: 64, color: "text.disabled", mb: 2 }}
-                        />
-                        <Typography
-                          variant="h6"
-                          color="text.secondary"
-                          sx={{ mb: 1 }}
+                                  )}
+                                  <Button
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<EditIcon />}
+                                    onClick={() => handleEditDegreeModal(item)}
+                                    sx={{
+                                      borderColor: colors.primary[500],
+                                      color: colors.primary[500],
+                                      fontWeight: 600,
+                                      textTransform: "none",
+                                      borderRadius: 2,
+                                      "&:hover": {
+                                        borderColor: colors.primary[600],
+                                        backgroundColor: colors.primary[50],
+                                        transform: "translateY(-1px)",
+                                      },
+                                    }}
+                                  >
+                                    Chỉnh sửa
+                                  </Button>
+                                  <Button
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<DeleteIcon />}
+                                    onClick={() => handleDeleteDegreeTab(item)}
+                                    sx={{
+                                      borderColor: "#EF4444",
+                                      color: "#EF4444",
+                                      fontWeight: 600,
+                                      textTransform: "none",
+                                      borderRadius: 2,
+                                      "&:hover": {
+                                        borderColor: "#DC2626",
+                                        backgroundColor: "#FEF2F2",
+                                        transform: "translateY(-1px)",
+                                      },
+                                    }}
+                                  >
+                                    Xóa
+                                  </Button>
+                                </Box>
+                              </Box>
+                            </AccordionDetails>
+                          </Accordion>
+                        ))
+                      ) : (
+                        <Alert
+                          severity="info"
+                          sx={{ textAlign: "center", mt: 3 }}
                         >
-                          Chưa có bằng cấp nào
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color="text.disabled"
-                          sx={{ mb: 3 }}
-                        >
-                          Thêm bằng cấp để nâng cao uy tín chuyên môn
-                        </Typography>
-                        <Button
-                          variant="contained"
-                          startIcon={<Add />}
-                          onClick={() => setOpenAddDegreeModal(true)}
-                          sx={{
-                            borderRadius: 2,
-                            background:
-                              "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
-                          }}
-                        >
-                          Thêm bằng cấp đầu tiên
-                        </Button>
-                      </Box>
-                    )}
-                  </CardContent>
-                </Paper>
-
+                          Chưa có thông tin trong mục này
+                        </Alert>
+                      )}
+                    </CardContent>
+                  </Paper>
+                }
                 {/* Enhanced Certifications Section */}
                 <Paper
                   elevation={0}
@@ -1557,7 +1730,7 @@ const LecturerPendingPage = () => {
                     background: colors.background.primary,
                     flex: 1,
                     position: "relative",
-                    overflow: "hidden",
+                    overflow: "auto",
                     "&::before": {
                       content: '""',
                       position: "absolute",
@@ -1573,60 +1746,32 @@ const LecturerPendingPage = () => {
                     },
                   }}
                 >
-                  <CardHeader
-                    avatar={
-                      <Box
-                        sx={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: 2,
-                          background: `linear-gradient(135deg, ${colors.accent.lightBlue} 0%, #059669 100%)`,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          boxShadow: `0 4px 12px ${alpha(colors.accent.lightBlue, 0.2)}`,
-                        }}
-                      >
-                        <AssignmentIcon sx={{ color: "white", fontSize: 24 }} />
-                      </Box>
-                    }
-                    title={
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontFamily: "'Inter', sans-serif",
-                          fontWeight: 700,
-                          color: colors.text.primary,
-                        }}
-                      >
-                        Chứng chỉ
-                      </Typography>
-                    }
-                    subheader={`${certifications?.length || 0} chứng chỉ`}
-                    action={
-                      <Button
-                        variant="contained"
-                        size="small"
-                        startIcon={<Add />}
-                        onClick={() => setOpenAddCertificationModal(true)}
-                        sx={{
-                          borderRadius: 2,
-                          background: `linear-gradient(135deg, ${colors.accent.lightBlue} 0%, #059669 100%)`,
-                          boxShadow: `0 4px 12px ${alpha(colors.accent.lightBlue, 0.3)}`,
-                          fontFamily: "'Inter', sans-serif",
-                          fontWeight: 600,
-                          "&:hover": {
-                            transform: "translateY(-1px)",
-                            boxShadow: `0 6px 16px ${alpha(colors.accent.lightBlue, 0.4)}`,
-                          },
-                          transition: "all 0.3s ease",
-                        }}
-                      >
-                        Thêm mới
-                      </Button>
-                    }
-                    sx={{ position: "relative", zIndex: 1 }}
-                  />
+                  <Box className="flex items-center justify-between px-6 pb-2 pt-6">
+                    <Typography
+                      variant="h6"
+                      sx={{ color: colors.text.primary, fontWeight: 600 }}
+                    >
+                      Danh sách chứng chỉ ({certifications?.length || 0})
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      startIcon={<Add />}
+                      onClick={handleOpenCertificateModal}
+                      sx={{
+                        background: `linear-gradient(135deg, ${colors.accent.lightBlue} 0%, #059669 100%)`,
+                        color: "white",
+                        fontWeight: 600,
+                        textTransform: "none",
+                        borderRadius: 2,
+                        "&:hover": {
+                          transform: "translateY(-1px)",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                        },
+                      }}
+                    >
+                      Thêm chứng chỉ
+                    </Button>
+                  </Box>
                   <CardContent
                     sx={{
                       pt: 0,
@@ -1637,287 +1782,390 @@ const LecturerPendingPage = () => {
                     }}
                   >
                     {certifications && certifications.length > 0 ? (
-                      <Stack spacing={2}>
-                        {certifications.map((cert: any, index: number) => (
-                          <Paper
-                            key={cert.id}
-                            variant="outlined"
-                            sx={{ borderRadius: 2 }}
+                      certifications.map((item: any) => (
+                        <Accordion
+                          key={item.id}
+                          sx={{
+                            borderRadius: 3,
+                            border: `1px solid ${colors.primary[100]}`,
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                            "&:before": { display: "none" },
+                            "&.Mui-expanded": {
+                              boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                              transform: "translateY(-2px)",
+                            },
+                          }}
+                        >
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            sx={{
+                              background: `linear-gradient(135deg, ${colors.accent.lightBlue} 0%, #059669 100%)`,
+                              color: "white",
+                              borderRadius: "12px",
+                              "& .MuiAccordionSummary-expandIconWrapper": {
+                                color: "white",
+                              },
+                              "&.Mui-expanded": {
+                                borderRadius: "12px 12px 0 0",
+                              },
+                            }}
                           >
-                            <Accordion
+                            <Box
                               sx={{
-                                boxShadow: "none",
-                                "&:before": { display: "none" },
+                                display: "flex",
+                                alignItems: "center",
+                                width: "100%",
+                                justifyContent: "space-between",
                               }}
                             >
-                              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 2,
+                                }}
+                              >
+                                <Box
+                                  sx={{
+                                    background: "rgba(255,255,255,0.2)",
+                                    borderRadius: 2,
+                                    p: 1,
+                                  }}
+                                >
+                                  <AssignmentIcon sx={{ color: "white" }} />
+                                </Box>
+                                <Box>
+                                  <Typography
+                                    variant="h6"
+                                    sx={{ color: "white", fontWeight: 700 }}
+                                  >
+                                    {item.name}
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    sx={{ color: "rgba(255,255,255,0.9)" }}
+                                  >
+                                    {item.issuedBy}
+                                  </Typography>
+                                  {item.referenceId && (
+                                    <Typography
+                                      variant="caption"
+                                      sx={{ color: "rgba(255,255,255,0.7)" }}
+                                    >
+                                      Reference ID: {item.referenceId}
+                                    </Typography>
+                                  )}
+                                </Box>
+                              </Box>
+                              <Chip
+                                label={getStatus(item.status)}
+                                size="small"
+                                sx={{
+                                  fontWeight: 600,
+                                  background: "rgba(255,255,255,0.9)",
+                                  color:
+                                    item.status === "APPROVED"
+                                      ? "#047857"
+                                      : item.status === "PENDING"
+                                        ? "#D97706"
+                                        : "#DC2626",
+                                }}
+                              />
+                            </Box>
+                          </AccordionSummary>
+                          <AccordionDetails
+                            sx={{
+                              p: 0,
+                              background: "white",
+                              borderRadius: "0 0 12px 12px",
+                            }}
+                          >
+                            <Box sx={{ p: 3 }}>
+                              <Box
+                                sx={{
+                                  display: "grid",
+                                  gridTemplateColumns: "1fr 1fr",
+                                  gap: 2,
+                                  mb: 2,
+                                }}
+                              >
                                 <Box
                                   sx={{
                                     display: "flex",
                                     alignItems: "center",
-                                    width: "100%",
+                                    gap: 1,
+                                    background: colors.background.tertiary,
+                                    borderRadius: 2,
+                                    p: 2,
                                   }}
                                 >
-                                  <Box sx={{ flexGrow: 1 }}>
-                                    <Typography
-                                      variant="subtitle2"
-                                      sx={{ fontWeight: 600 }}
-                                    >
-                                      {cert.name}
-                                    </Typography>
-                                    <Typography
-                                      variant="caption"
-                                      color="text.secondary"
-                                    >
-                                      {cert.level} • {cert.issuedBy}
-                                    </Typography>
-                                  </Box>
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: 1,
-                                    }}
-                                  >
-                                    <Chip
-                                      label={getStatus(cert.status)}
-                                      color={getStatusColor(cert.status)}
-                                      size="small"
-                                    />
-                                    <Button
-                                      variant="outlined"
-                                      color="error"
-                                      size="small"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDeleteCertification(cert, index);
-                                      }}
-                                      sx={{
-                                        minWidth: "auto",
-                                        width: 32,
-                                        height: 32,
-                                        p: 0,
-                                        borderRadius: 1,
-                                      }}
-                                    >
-                                      <DeleteIcon fontSize="small" />
-                                    </Button>
-                                  </Box>
-                                </Box>
-                              </AccordionSummary>
-                              <AccordionDetails>
-                                <Stack spacing={2}>
-                                  <Box
-                                    sx={{
-                                      display: "grid",
-                                      gridTemplateColumns: "1fr 1fr",
-                                      gap: 2,
-                                    }}
-                                  >
-                                    <Box>
-                                      <Typography
-                                        variant="caption"
-                                        sx={{
-                                          color: colors.text.tertiary,
-                                          fontWeight: 600,
-                                          textTransform: "uppercase",
-                                          letterSpacing: "0.5px",
-                                          fontSize: "0.7rem",
-                                        }}
-                                      >
-                                        Ngày cấp
-                                      </Typography>
-                                      <Typography
-                                        variant="body2"
-                                        sx={{
-                                          color: colors.text.primary,
-                                          fontWeight: 500,
-                                          mt: 0.5,
-                                        }}
-                                      >
-                                        {cert.issueDate}
-                                      </Typography>
-                                    </Box>
-                                    <Box>
-                                      <Typography
-                                        variant="caption"
-                                        sx={{
-                                          color: colors.text.tertiary,
-                                          fontWeight: 600,
-                                          textTransform: "uppercase",
-                                          letterSpacing: "0.5px",
-                                          fontSize: "0.7rem",
-                                        }}
-                                      >
-                                        Ngày hết hạn
-                                      </Typography>
-                                      <Typography
-                                        variant="body2"
-                                        sx={{
-                                          color: colors.text.primary,
-                                          fontWeight: 500,
-                                          mt: 0.5,
-                                        }}
-                                      >
-                                        {cert.expiryDate}
-                                      </Typography>
-                                    </Box>
-                                  </Box>
-
+                                  <GradeIcon
+                                    sx={{ color: "#7C3AED" }}
+                                    fontSize="small"
+                                  />
                                   <Box>
                                     <Typography
                                       variant="caption"
                                       sx={{
                                         color: colors.text.tertiary,
                                         fontWeight: 600,
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.5px",
-                                        fontSize: "0.7rem",
                                       }}
                                     >
-                                      Mô tả
+                                      Cấp độ
                                     </Typography>
                                     <Typography
                                       variant="body2"
-                                      sx={{
-                                        color: colors.text.primary,
-                                        lineHeight: 1.6,
-                                        mt: 0.5,
-                                      }}
+                                      sx={{ fontWeight: 500 }}
                                     >
-                                      {cert.description}
+                                      {item.level}
                                     </Typography>
                                   </Box>
-
-                                  {/* Ghi chú admin với styling đặc biệt */}
-                                  <Box
-                                    sx={{
-                                      padding: 2,
-                                      borderRadius: 2,
-                                      backgroundColor: cert.adminNote
-                                        ? alpha(colors.info[50], 0.7)
-                                        : alpha(colors.neutral[50], 0.5),
-                                      border: `1px solid ${
-                                        cert.adminNote
-                                          ? alpha(colors.info[200], 0.5)
-                                          : alpha(colors.neutral[200], 0.3)
-                                      }`,
-                                      position: "relative",
-                                    }}
-                                  >
+                                </Box>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                    background: colors.background.tertiary,
+                                    borderRadius: 2,
+                                    p: 2,
+                                  }}
+                                >
+                                  <BusinessIcon
+                                    sx={{ color: "#059669" }}
+                                    fontSize="small"
+                                  />
+                                  <Box>
                                     <Typography
                                       variant="caption"
                                       sx={{
-                                        color: cert.adminNote
-                                          ? colors.info[700]
-                                          : colors.text.tertiary,
+                                        color: colors.text.tertiary,
                                         fontWeight: 600,
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.5px",
-                                        fontSize: "0.7rem",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 0.5,
                                       }}
                                     >
-                                      📝 Ghi chú từ Admin
+                                      Đơn vị cấp
                                     </Typography>
                                     <Typography
                                       variant="body2"
-                                      sx={{
-                                        color: cert.adminNote
-                                          ? colors.text.primary
-                                          : colors.text.tertiary,
-                                        fontStyle: cert.adminNote
-                                          ? "normal"
-                                          : "italic",
-                                        lineHeight: 1.5,
-                                        mt: 1,
-                                      }}
+                                      sx={{ fontWeight: 500 }}
                                     >
-                                      {cert.adminNote ||
-                                        "Chưa có ghi chú từ admin"}
+                                      {item.issuedBy}
                                     </Typography>
                                   </Box>
-
-                                  <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
-                                    <Button
-                                      variant="outlined"
-                                      size="small"
-                                      startIcon={<VisibilityIcon />}
-                                      href={cert.certificateUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      Xem file
-                                    </Button>
-                                    <Button
-                                      variant="contained"
-                                      size="small"
-                                      startIcon={<VisibilityIcon />}
-                                      onClick={() => {
-                                        setSelectedCertification(cert);
-                                        setOpenCertificationDialog(true);
-                                      }}
-                                    >
-                                      Chi tiết
-                                    </Button>
-                                    <Button
-                                      variant="outlined"
-                                      color="error"
-                                      size="small"
-                                      startIcon={<DeleteIcon />}
-                                      onClick={() =>
-                                        handleDeleteCertification(cert, index)
-                                      }
+                                </Box>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                    background: colors.background.tertiary,
+                                    borderRadius: 2,
+                                    p: 2,
+                                  }}
+                                >
+                                  <CalendarIcon
+                                    sx={{ color: "#2563EB" }}
+                                    fontSize="small"
+                                  />
+                                  <Box>
+                                    <Typography
+                                      variant="caption"
                                       sx={{
-                                        "&:hover": {
-                                          backgroundColor:
-                                            "rgba(211, 47, 47, 0.08)",
-                                        },
+                                        color: colors.text.tertiary,
+                                        fontWeight: 600,
                                       }}
                                     >
-                                      Xóa
-                                    </Button>
+                                      Ngày cấp
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
+                                      sx={{ fontWeight: 500 }}
+                                    >
+                                      {item.issueDate}
+                                    </Typography>
                                   </Box>
-                                </Stack>
-                              </AccordionDetails>
-                            </Accordion>
-                          </Paper>
-                        ))}
-                      </Stack>
+                                </Box>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                    background: colors.background.tertiary,
+                                    borderRadius: 2,
+                                    p: 2,
+                                  }}
+                                >
+                                  <CalendarIcon
+                                    sx={{ color: "#DC2626" }}
+                                    fontSize="small"
+                                  />
+                                  <Box>
+                                    <Typography
+                                      variant="caption"
+                                      sx={{
+                                        color: colors.text.tertiary,
+                                        fontWeight: 600,
+                                      }}
+                                    >
+                                      Ngày hết hạn
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
+                                      sx={{ fontWeight: 500 }}
+                                    >
+                                      {item.expiryDate || "Không có"}
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              </Box>
+                              {item.description && (
+                                <Box
+                                  sx={{
+                                    mb: 2,
+                                    background: colors.primary[25],
+                                    borderRadius: 2,
+                                    p: 2,
+                                  }}
+                                >
+                                  <Typography
+                                    variant="caption"
+                                    sx={{
+                                      color: colors.text.tertiary,
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    Mô tả
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
+                                      color: colors.text.secondary,
+                                      lineHeight: 1.6,
+                                      mt: 1,
+                                    }}
+                                  >
+                                    {item.description}
+                                  </Typography>
+                                </Box>
+                              )}
+                              {item.adminNote && (
+                                <Box
+                                  sx={{
+                                    mb: 2,
+                                    background: "#FEF3C7",
+                                    border: "1px solid #F59E0B",
+                                    borderRadius: 2,
+                                    p: 2,
+                                  }}
+                                >
+                                  <Typography
+                                    variant="caption"
+                                    sx={{ color: "#92400E", fontWeight: 600 }}
+                                  >
+                                    Ghi chú của quản trị viên
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    sx={{ color: "#92400E", mt: 1 }}
+                                  >
+                                    {item.adminNote}
+                                  </Typography>
+                                </Box>
+                              )}
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  gap: 2,
+                                  flexWrap: "wrap",
+                                  mb: 2,
+                                }}
+                              >
+                                {item.certificateUrl && (
+                                  <Button
+                                    variant="contained"
+                                    size="small"
+                                    startIcon={<LinkIcon />}
+                                    href={item.certificateUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    sx={{
+                                      background: `linear-gradient(135deg, ${colors.accent.lightBlue} 0%, #059669 100%)`,
+                                      color: "white",
+                                      fontWeight: 600,
+                                      textTransform: "none",
+                                      borderRadius: 2,
+                                      "&:hover": {
+                                        transform: "translateY(-1px)",
+                                      },
+                                    }}
+                                  >
+                                    Xem tài liệu
+                                  </Button>
+                                )}
+                              </Box>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  gap: 2,
+                                  flexWrap: "wrap",
+                                }}
+                              >
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  startIcon={<EditIcon />}
+                                  onClick={() =>
+                                    handleEditCertificateModal(item)
+                                  }
+                                  sx={{
+                                    borderColor: "#10B981",
+                                    color: "#10B981",
+                                    fontWeight: 600,
+                                    textTransform: "none",
+                                    borderRadius: 2,
+                                    "&:hover": {
+                                      borderColor: "#047857",
+                                      backgroundColor: "#ECFDF5",
+                                      transform: "translateY(-1px)",
+                                    },
+                                  }}
+                                >
+                                  Chỉnh sửa
+                                </Button>
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  startIcon={<DeleteIcon />}
+                                  onClick={() =>
+                                    handleDeleteCertificateTab(item)
+                                  }
+                                  sx={{
+                                    borderColor: "#EF4444",
+                                    color: "#EF4444",
+                                    fontWeight: 600,
+                                    textTransform: "none",
+                                    borderRadius: 2,
+                                    "&:hover": {
+                                      borderColor: "#DC2626",
+                                      backgroundColor: "#FEF2F2",
+                                      transform: "translateY(-1px)",
+                                    },
+                                  }}
+                                >
+                                  Xóa
+                                </Button>
+                              </Box>
+                            </Box>
+                          </AccordionDetails>
+                        </Accordion>
+                      ))
                     ) : (
-                      <Box sx={{ textAlign: "center", py: 6 }}>
-                        <AssignmentIcon
-                          sx={{ fontSize: 64, color: "text.disabled", mb: 2 }}
-                        />
-                        <Typography
-                          variant="h6"
-                          color="text.secondary"
-                          sx={{ mb: 1 }}
-                        >
-                          Chưa có chứng chỉ nào
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color="text.disabled"
-                          sx={{ mb: 3 }}
-                        >
-                          Thêm chứng chỉ để chứng minh năng lực chuyên môn
-                        </Typography>
-                        <Button
-                          variant="contained"
-                          startIcon={<Add />}
-                          onClick={() => setOpenAddCertificationModal(true)}
-                          sx={{
-                            borderRadius: 2,
-                            background:
-                              "linear-gradient(45deg, #9C27B0 30%, #E91E63 90%)",
-                          }}
-                        >
-                          Thêm chứng chỉ đầu tiên
-                        </Button>
-                      </Box>
+                      <Alert
+                        severity="info"
+                        sx={{ textAlign: "center", mt: 3 }}
+                      >
+                        Chưa có thông tin trong mục này
+                      </Alert>
                     )}
                   </CardContent>
                 </Paper>
@@ -2021,24 +2269,8 @@ const LecturerPendingPage = () => {
         />
       </Container>
 
-      {/* Dialogs */}
-      <DegreeUpdateDialog
-        open={openDegreeDialog}
-        onClose={() => {
-          setOpenDegreeDialog(false);
-          setSelectedDegree(null);
-        }}
-        data={selectedDegree}
-      />
-      <CertificationUpdateDialog
-        open={openCertificationDialog}
-        onClose={() => {
-          setOpenCertificationDialog(false);
-          setSelectedCertification(null);
-        }}
-        data={selectedCertification}
-      />
-      <UploadDegreeModal
+    
+      <CreateDegreeModal
         open={openAddDegreeModal}
         onClose={() => setOpenAddDegreeModal(false)}
         onSubmit={handleAddDegree}
@@ -2176,6 +2408,136 @@ const LecturerPendingPage = () => {
             }}
           >
             Xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* DegreesTab-like Modal */}
+      <CreateDegreeModal
+        open={openDegreeModal}
+        onClose={handleCloseDegreeModal}
+        onSubmit={handleSubmitDegreeModal}
+        editMode={!!editDegree}
+        editData={editDegree}
+      />
+
+      {/* DegreesTab-like Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDegreeDialogOpen}
+        onClose={handleCancelDeleteDegreeTab}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            minWidth: 400,
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 600, color: colors.primary[700] }}>
+          Xác nhận xóa
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: colors.text.secondary, mb: 2 }}>
+            Bạn có chắc chắn muốn xóa bằng cấp này không? Hành động này không
+            thể hoàn tác.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, gap: 1 }}>
+          <Button
+            onClick={handleCancelDeleteDegreeTab}
+            variant="outlined"
+            sx={{
+              borderColor: colors.primary[300],
+              color: colors.primary[600],
+              fontWeight: 600,
+              borderRadius: 2,
+              textTransform: "none",
+              "&:hover": {
+                borderColor: colors.primary[400],
+                backgroundColor: colors.primary[50],
+              },
+            }}
+          >
+            Hủy
+          </Button>
+          <Button
+            onClick={handleConfirmDeleteDegreeTab}
+            variant="contained"
+            color="error"
+            sx={{
+              fontWeight: 600,
+              borderRadius: 2,
+              textTransform: "none",
+              "&:hover": {
+                backgroundColor: "#d32f2f",
+              },
+            }}
+          >
+            Xác nhận xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* CertificatesTab-like Modal */}
+      <UploadCertificationModal
+        open={openCertificateModal}
+        onClose={handleCloseCertificateModal}
+        onSubmit={handleSubmitCertificateModal}
+        editMode={!!editCertificate}
+        editData={editCertificate}
+      />
+
+      {/* CertificatesTab-like Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteCertificateDialogOpen}
+        onClose={handleCancelDeleteCertificateTab}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            minWidth: 400,
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 600, color: colors.primary[700] }}>
+          Xác nhận xóa
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: colors.text.secondary, mb: 2 }}>
+            Bạn có chắc chắn muốn xóa chứng chỉ này không? Hành động này không
+            thể hoàn tác.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, gap: 1 }}>
+          <Button
+            onClick={handleCancelDeleteCertificateTab}
+            variant="outlined"
+            sx={{
+              borderColor: colors.primary[300],
+              color: colors.primary[600],
+              fontWeight: 600,
+              borderRadius: 2,
+              textTransform: "none",
+              "&:hover": {
+                borderColor: colors.primary[400],
+                backgroundColor: colors.primary[50],
+              },
+            }}
+          >
+            Hủy
+          </Button>
+          <Button
+            onClick={handleConfirmDeleteCertificateTab}
+            variant="contained"
+            color="error"
+            sx={{
+              fontWeight: 600,
+              borderRadius: 2,
+              textTransform: "none",
+              "&:hover": {
+                backgroundColor: "#d32f2f",
+              },
+            }}
+          >
+            Xác nhận xóa
           </Button>
         </DialogActions>
       </Dialog>

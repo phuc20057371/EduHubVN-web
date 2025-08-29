@@ -20,19 +20,19 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { setLecturerRequests } from "../../../redux/slice/LecturerRquestSlice";
+import { setDegreeRequests } from "../../../redux/slice/RequestDegreeSlice";
 import {
   formatDateToVietnamTime,
   getAcademicRank,
 } from "../../../utils/ChangeText";
 import { API } from "../../../utils/Fetch";
+import ConfirmDialog from "../../general-dialog/ConfirmDialog";
 
 interface ApproveDegreeUpdateDialogProps {
   open: boolean;
@@ -62,7 +62,7 @@ const ApproveDegreeUpdateDialog: React.FC<ApproveDegreeUpdateDialogProps> = ({
   // Always define these constants
   const comparisonRows = [
     {
-      label: "Mã tham chiếu",
+      label: "Reference ID",
       originalKey: "referenceId",
       updateKey: "referenceId",
     },
@@ -132,8 +132,8 @@ const ApproveDegreeUpdateDialog: React.FC<ApproveDegreeUpdateDialogProps> = ({
       }
 
       // Update Redux store after successful action
-      const responseData = await API.admin.getLecturerRequests();
-      dispatch(setLecturerRequests(responseData.data.data));
+      const responseData = await API.admin.getDegreeRequests();
+      dispatch(setDegreeRequests(responseData.data.data));
       setConfirmDialog({ open: false, type: null });
       onSuccess?.();
 
@@ -160,10 +160,18 @@ const ApproveDegreeUpdateDialog: React.FC<ApproveDegreeUpdateDialogProps> = ({
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <SchoolOutlined color="primary" />
-              <Typography variant="h6">
-                Phê duyệt cập nhật Bằng cấp {data?.content?.original?.id}
-              </Typography>
+              <Avatar
+                src={""}
+                sx={{ bgcolor: "primary.main", width: 48, height: 48 }}
+              >
+                <SchoolOutlined />
+              </Avatar>
+              <Box>
+                <Typography variant="h6">Yêu cầu cập nhật Bằng cấp</Typography>
+                <Typography variant="body2">
+                  ID: {data?.content?.original?.id}
+                </Typography>
+              </Box>
             </Box>
             <IconButton onClick={onClose} size="small">
               <Close />
@@ -365,9 +373,12 @@ const ApproveDegreeUpdateDialog: React.FC<ApproveDegreeUpdateDialogProps> = ({
               alignItems: "center",
             }}
           >
-            <Box sx={{ textAlign: "right" }}>
+            <Box sx={{ textAlign: "right", width: "100%" }}>
               <Typography variant="body2" color="text.secondary">
-                Cập nhật vào lúc: {formatDateToVietnamTime(update?.updatedAt)}
+                Được tạo lúc: {formatDateToVietnamTime(update?.createdAt)}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Cập nhật lần cuối: {formatDateToVietnamTime(update?.updatedAt)}
               </Typography>
             </Box>
           </Box>
@@ -388,68 +399,32 @@ const ApproveDegreeUpdateDialog: React.FC<ApproveDegreeUpdateDialogProps> = ({
             onClick={handleApprove}
             disabled={loading}
           >
-            Phê duyệt
+            Duyệt
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Confirmation Dialog */}
-      <Dialog
+      <ConfirmDialog
         open={confirmDialog.open}
+        type={confirmDialog.type === "approve" ? "approve" : "reject"}
+        title={
+          confirmDialog.type === "approve"
+            ? "Xác nhận phê duyệt"
+            : "Xác nhận từ chối"
+        }
+        message={
+          confirmDialog.type === "approve"
+            ? "Bạn có chắc chắn muốn phê duyệt yêu cầu cập nhật bằng cấp này không?"
+            : "Bạn có chắc chắn muốn từ chối yêu cầu cập nhật bằng cấp này không?"
+        }
+        loading={loading}
+        rejectNote={adminNote}
+        onRejectNoteChange={setAdminNote}
+        rejectNoteRequired={confirmDialog.type === "reject"}
         onClose={() => setConfirmDialog({ open: false, type: null })}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          <Typography variant="h6">
-            {confirmDialog.type === "approve"
-              ? "Xác nhận phê duyệt"
-              : "Xác nhận từ chối"}
-          </Typography>
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            {confirmDialog.type === "approve"
-              ? "Bạn có chắc chắn muốn phê duyệt yêu cầu cập nhật bằng cấp này không?"
-              : "Bạn có chắc chắn muốn từ chối yêu cầu cập nhật bằng cấp này không?"}
-          </Typography>
-
-          {confirmDialog.type === "reject" && (
-            <TextField
-              label="Lý do từ chối *"
-              multiline
-              rows={3}
-              fullWidth
-              value={adminNote}
-              onChange={(e) => setAdminNote(e.target.value)}
-              placeholder="Nhập lý do từ chối yêu cầu cập nhật..."
-              required
-            />
-          )}
-        </DialogContent>
-        <DialogActions sx={{ p: 2, gap: 1 }}>
-          <Button
-            onClick={() => setConfirmDialog({ open: false, type: null })}
-            disabled={loading}
-          >
-            Hủy
-          </Button>
-          <Button
-            variant="contained"
-            color={confirmDialog.type === "approve" ? "success" : "error"}
-            onClick={handleConfirmAction}
-            disabled={
-              loading || (confirmDialog.type === "reject" && !adminNote.trim())
-            }
-          >
-            {loading
-              ? "Đang xử lý..."
-              : confirmDialog.type === "approve"
-                ? "Phê duyệt"
-                : "Từ chối"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onConfirm={handleConfirmAction}
+      />
     </>
   );
 };

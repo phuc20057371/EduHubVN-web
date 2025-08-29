@@ -127,7 +127,7 @@ const AdminLayout = () => {
 
   const menuItems = [
     {
-      text: "Dashboard",
+      text: "Trang chủ",
       icon: <Dashboard />,
       path: "/admin",
       description: "Tổng quan hệ thống",

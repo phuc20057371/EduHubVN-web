@@ -76,6 +76,7 @@ const LecturerProfileBasicInfoTab: React.FC<
 
   // Initialize states from lecturer data
   useEffect(() => {
+    console.log("Lecturer data loaded:", lecturerData);
     if (lecturer) {
       setFullName(lecturer.fullName || "");
       setCitizenId(lecturer.citizenId || "");
@@ -89,6 +90,7 @@ const LecturerProfileBasicInfoTab: React.FC<
       setGender(lecturer.gender ? "true" : "false");
       setAddress(lecturer.address || "");
       setBio(lecturer.bio || "");
+      
     }
   }, [lecturer]);
 
@@ -371,7 +373,7 @@ const LecturerProfileBasicInfoTab: React.FC<
                     sx={{ flex: "0 0 150px" }}
                     variant="outlined"
                   />
-                  <FormControl sx={{ flex: "0 0 120px" }}>
+                  <FormControl sx={{  width: '100%' }}>
                     <Typography variant="body2" gutterBottom>
                       Giới tính
                     </Typography>
@@ -499,24 +501,32 @@ const LecturerProfileBasicInfoTab: React.FC<
                   rows={5}
                   variant="outlined"
                 />
-
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Được tạo lúc:{" "}
-                  {lecturer?.createdAt
-                    ? new Date(lecturer.createdAt).toLocaleString("vi-VN")
-                    : "Chưa cập nhật"}
-                </Typography>
-
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Cập nhật lúc:{" "}
-                  {lecturer?.updatedAt
-                    ? new Date(lecturer?.updatedAt).toLocaleString("vi-VN")
-                    : "Chưa cập nhật"}
-                </Typography>
               </Box>
             </CardContent>
           </Card>
         </Box>
+      </Box>
+
+      {/* Created/Updated At Box */}
+      <Box
+        mt={2}
+        display="flex"
+        flexDirection="column"
+        alignItems="flex-end"
+        gap={1}
+      >
+        <Typography variant="body2" color="text.secondary">
+          Được tạo lúc:{" "}
+          {lecturer?.createdAt
+            ? new Date(lecturer.createdAt).toLocaleString("vi-VN")
+            : "Chưa cập nhật"}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Cập nhật lần cuối:{" "}
+          {lecturer?.updatedAt
+            ? new Date(lecturer?.updatedAt).toLocaleString("vi-VN")
+            : "Chưa cập nhật"}
+        </Typography>
       </Box>
 
       {/* Save Button */}

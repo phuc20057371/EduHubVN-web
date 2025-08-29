@@ -1,30 +1,30 @@
+import { Close } from "@mui/icons-material";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import PersonIcon from "@mui/icons-material/Person";
+import SchoolIcon from "@mui/icons-material/School";
+import ScienceIcon from "@mui/icons-material/Science";
+import WorkIcon from "@mui/icons-material/Work";
 import {
   Box,
   Dialog,
   DialogContent,
   DialogTitle,
-  Typography,
+  IconButton,
   Tab,
   Tabs,
-  IconButton,
+  Typography,
 } from "@mui/material";
-import type { Lecturer } from "../../../types/Lecturer";
-import PersonIcon from "@mui/icons-material/Person";
-import SchoolIcon from "@mui/icons-material/School";
-import WorkIcon from "@mui/icons-material/Work";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import ScienceIcon from "@mui/icons-material/Science";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { API } from "../../../utils/Fetch";
-import { Close } from "@mui/icons-material";
 import { setLecturerProfileUpdate } from "../../../redux/slice/LecturerProfileUpdateSlice";
+import type { Lecturer } from "../../../types/Lecturer";
+import { API } from "../../../utils/Fetch";
 import {
   LecturerProfileBasicInfoTab,
-  LecturerProfileDegreesTab,
   LecturerProfileCertificationsTab,
   LecturerProfileCoursesTab,
+  LecturerProfileDegreesTab,
   LecturerProfileResearchProjectsTab,
 } from "./lecturer-profile-update-tab";
 
@@ -128,42 +128,54 @@ const LecturerProfileUpdateDialog = ({
 
   const handleAddOwnedCourse = () => {
     console.log("Add owned course");
+    // TODO: Implement add owned course dialog
   };
 
   const handleAddAttendedCourse = () => {
     console.log("Add attended course");
+    // TODO: Implement add attended course dialog
   };
 
   const handleEditOwnedCourse = (course: any) => {
     console.log("Edit owned course:", course);
+    // TODO: Implement edit owned course dialog
   };
 
   const handleEditAttendedCourse = (course: any) => {
     console.log("Edit attended course:", course);
+    // TODO: Implement edit attended course dialog
   };
 
-  const handleDeleteOwnedCourse = (course: any) => {
+  const handleDeleteOwnedCourse = async (course: any) => {
     console.log("Delete owned course:", course);
+    try {
+      // TODO: Implement API call to delete owned course
+      // const response = await API.admin.deleteOwnedCourse(course.id);
+      // if (response.data.success) {
+      //   await fetchLecturerData();
+      //   toast.success("Xóa khóa học sở hữu thành công");
+      // }
+      toast.info("Chức năng xóa khóa học sở hữu sẽ được triển khai sau");
+    } catch (error) {
+      console.error("Error deleting owned course:", error);
+      toast.error("Có lỗi xảy ra khi xóa khóa học sở hữu");
+    }
   };
 
-  const handleDeleteAttendedCourse = (course: any) => {
+  const handleDeleteAttendedCourse = async (course: any) => {
     console.log("Delete attended course:", course);
-  };
-
-  const handleApproveOwnedCourseUpdate = (courseData: any) => {
-    console.log("Approve owned course update:", courseData);
-  };
-
-  const handleRejectOwnedCourseUpdate = (courseData: any) => {
-    console.log("Reject owned course update:", courseData);
-  };
-
-  const handleApproveAttendedCourseUpdate = (courseData: any) => {
-    console.log("Approve attended course update:", courseData);
-  };
-
-  const handleRejectAttendedCourseUpdate = (courseData: any) => {
-    console.log("Reject attended course update:", courseData);
+    try {
+      // TODO: Implement API call to delete attended course
+      // const response = await API.admin.deleteAttendedCourse(course.id);
+      // if (response.data.success) {
+      //   await fetchLecturerData();
+      //   toast.success("Xóa khóa học đã tham gia thành công");
+      // }
+      toast.info("Chức năng xóa khóa học đã tham gia sẽ được triển khai sau");
+    } catch (error) {
+      console.error("Error deleting attended course:", error);
+      toast.error("Có lỗi xảy ra khi xóa khóa học đã tham gia");
+    }
   };
 
   const handleAddResearchProject = () => {
@@ -212,9 +224,7 @@ const LecturerProfileUpdateDialog = ({
           <Typography variant="h5" fontWeight="bold">
             Quản lý hồ sơ giảng viên
           </Typography>
-          <Typography variant="body2">
-            ID: {lecturer?.id}
-          </Typography>
+          <Typography variant="body2">ID: {lecturer?.id}</Typography>
         </Box>
 
         <IconButton onClick={onClose}>
@@ -299,12 +309,6 @@ const LecturerProfileUpdateDialog = ({
                 onEditAttendedCourse={handleEditAttendedCourse}
                 onDeleteOwnedCourse={handleDeleteOwnedCourse}
                 onDeleteAttendedCourse={handleDeleteAttendedCourse}
-                onApproveOwnedCourseUpdate={handleApproveOwnedCourseUpdate}
-                onRejectOwnedCourseUpdate={handleRejectOwnedCourseUpdate}
-                onApproveAttendedCourseUpdate={
-                  handleApproveAttendedCourseUpdate
-                }
-                onRejectAttendedCourseUpdate={handleRejectAttendedCourseUpdate}
               />
             </TabPanel>
             <TabPanel value={tabValue} index={4}>

@@ -148,7 +148,7 @@ const LecturerUpdateInfoDialog = ({
   return (
     <>
       <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-        <DialogTitle>
+        <DialogTitle sx={{ position: "relative", pr: 5 }}>
           <Box display="flex" alignItems="center" gap={2}>
             <Avatar sx={{ bgcolor: "primary.main" }}>
               <EditIcon />
@@ -162,6 +162,21 @@ const LecturerUpdateInfoDialog = ({
               </Typography>
             </Box>
           </Box>
+          {/* Nút đóng (dấu X) ở góc trên bên phải */}
+          <Button
+            aria-label="close"
+            onClick={onClose}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              minWidth: 0,
+              padding: 0.5,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </Button>
         </DialogTitle>
         <DialogContent dividers>
           {lecturer ? (

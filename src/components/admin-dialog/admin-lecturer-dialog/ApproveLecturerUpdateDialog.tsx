@@ -204,11 +204,9 @@ const ApproveLecturerUpdateDialog = ({
             </Avatar>
             <Box flex={1}>
               <Typography variant="h5" component="div">
-                So sánh thông tin cập nhật
+                Yêu cầu cập nhật thông tin giảng viên
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {lecturer?.fullName || lecturerUpdate?.fullName}
-              </Typography>
+
               <Typography variant="body2" color="text.secondary">
                 ID: {lecturer?.id || lecturerUpdate?.id}
               </Typography>
@@ -448,20 +446,6 @@ const ApproveLecturerUpdateDialog = ({
         <DialogActions sx={{ p: 3 }}>
           <Button
             variant="contained"
-            color="success"
-            onClick={() => setConfirmType("approve")}
-            startIcon={<CheckCircleIcon />}
-            sx={{
-              textTransform: "none",
-              fontWeight: "bold",
-              borderRadius: 2,
-              px: 3,
-            }}
-          >
-            Duyệt
-          </Button>
-          <Button
-            variant="contained"
             color="error"
             onClick={() => setConfirmType("reject")}
             startIcon={<CancelIcon />}
@@ -473,6 +457,20 @@ const ApproveLecturerUpdateDialog = ({
             }}
           >
             Từ chối
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={() => setConfirmType("approve")}
+            startIcon={<CheckCircleIcon />}
+            sx={{
+              textTransform: "none",
+              fontWeight: "bold",
+              borderRadius: 2,
+              px: 3,
+            }}
+          >
+            Duyệt
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,23 +1,40 @@
-import React from "react";
 import {
+  CalendarToday,
+  Category,
+  ExpandMore,
+  Group,
+  LocationOn,
+  Person,
+  School,
+} from "@mui/icons-material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
   Box,
-  Card,
-  CardContent,
-  Typography,
   Button,
   Chip,
-  IconButton,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Typography,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { getStatus, getStatusColor, formatDate } from "../../../../utils/ChangeText";
+import { colors } from "../../../../theme/colors";
+import {
+  formatDateToVietnamTime,
+  getCourseType,
+  getScale,
+  getStatus,
+} from "../../../../utils/ChangeText";
+import ApproveAttendedCourseCreateDialog from "../ApproveAttendedCourseCreateDialog";
+import ApproveAttendedCourseUpdateDialog from "../ApproveAttendedCourseUpdateDialog";
+import ApproveOwnedCourseCreateDialog from "../ApproveOwnedCourseCreateDialog";
+import ApproveOwnedCourseUpdateDialog from "../ApproveOwnedCourseUpdateDialog";
 
 interface LecturerProfileCoursesTabProps {
   onAddOwnedCourse?: () => void;
@@ -26,427 +43,1057 @@ interface LecturerProfileCoursesTabProps {
   onEditAttendedCourse?: (course: any) => void;
   onDeleteOwnedCourse?: (course: any) => void;
   onDeleteAttendedCourse?: (course: any) => void;
-  onApproveOwnedCourseUpdate?: (courseData: any) => void;
-  onRejectOwnedCourseUpdate?: (courseData: any) => void;
-  onApproveAttendedCourseUpdate?: (courseData: any) => void;
-  onRejectAttendedCourseUpdate?: (courseData: any) => void;
 }
 
 const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
-  onAddOwnedCourse,
-  onAddAttendedCourse,
-  onEditOwnedCourse,
-  onEditAttendedCourse,
+  // onAddOwnedCourse,
+  // onAddAttendedCourse,
+  // onEditOwnedCourse,
+  // onEditAttendedCourse,
   onDeleteOwnedCourse,
   onDeleteAttendedCourse,
-  onApproveOwnedCourseUpdate,
-  onRejectOwnedCourseUpdate,
-  onApproveAttendedCourseUpdate,
-  onRejectAttendedCourseUpdate,
 }) => {
   // Get lecturer data from Redux
-  const lecturerProfileUpdate = useSelector((state: any) => state.lecturerProfileUpdate);
+  const lecturerProfileUpdate = useSelector(
+    (state: any) => state.lecturerProfileUpdate,
+  );
   const ownedCourses = lecturerProfileUpdate?.ownedCourses || [];
   const attendedCourses = lecturerProfileUpdate?.attendedCourses || [];
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [deleteType, _setDeleteType] = useState<"owned" | "attended">("owned");
+
+  // State for ApproveOwnedCourseCreateDialog
+  const [approveOwnedCreateDialog, setApproveOwnedCreateDialog] = useState<{
+    open: boolean;
+    data: any;
+  }>({ open: false, data: null });
+
+  // State for ApproveAttendedCourseCreateDialog
+  const [approveAttendedCreateDialog, setApproveAttendedCreateDialog] =
+    useState<{
+      open: boolean;
+      data: any;
+    }>({ open: false, data: null });
+
+  // State for ApproveOwnedCourseUpdateDialog
+  const [approveOwnedUpdateDialog, setApproveOwnedUpdateDialog] = useState<{
+    open: boolean;
+    data: any;
+  }>({ open: false, data: null });
+
+  // State for ApproveAttendedCourseUpdateDialog
+  const [approveAttendedUpdateDialog, setApproveAttendedUpdateDialog] =
+    useState<{
+      open: boolean;
+      data: any;
+    }>({ open: false, data: null });
+
+  // Utility functions
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "Chưa xác định";
+    return new Date(dateString).toLocaleDateString("vi-VN");
+  };
+
+  // Function to get banner color based on status
+  const getBannerColor = (status: string) => {
+    switch (status) {
+      case "APPROVED":
+        return "linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%)"; // Pastel Green
+      case "PENDING":
+        return "linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)"; // Pastel Orange
+      case "REJECTED":
+        return "linear-gradient(135deg, #FEE2E2 0%, #FCA5A5 100%)"; // Pastel Red
+      default:
+        return `linear-gradient(135deg, ${colors.primary[100]} 0%, ${colors.secondary[100]} 100%)`; // Default pastel
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "APPROVED":
+        return "#047857";
+      case "PENDING":
+        return "#D97706";
+      case "REJECTED":
+        return "#DC2626";
+      default:
+        return "#6B7280";
+    }
+  };
+
+  const handleOpenApproveOwnedCreateDialog = (courseData: any) => {
+    const formattedData = {
+      content: courseData.original,
+      lecturerInfo: lecturerProfileUpdate.lecturer || {},
+    };
+    setApproveOwnedCreateDialog({ open: true, data: formattedData });
+  };
+
+  const handleCloseApproveOwnedCreateDialog = () => {
+    setApproveOwnedCreateDialog({ open: false, data: null });
+  };
+
+  const handleOpenApproveAttendedCreateDialog = (courseData: any) => {
+    const formattedData = {
+      content: courseData.original,
+      lecturerInfo: lecturerProfileUpdate.lecturer || {},
+    };
+    setApproveAttendedCreateDialog({ open: true, data: formattedData });
+  };
+
+  const handleCloseApproveAttendedCreateDialog = () => {
+    setApproveAttendedCreateDialog({ open: false, data: null });
+  };
+
+  const handleOpenApproveOwnedUpdateDialog = (courseData: any) => {
+    const formattedData = {
+      content: courseData,
+      lecturerInfo: lecturerProfileUpdate.lecturer || {},
+    };
+    setApproveOwnedUpdateDialog({ open: true, data: formattedData });
+  };
+
+  const handleCloseApproveOwnedUpdateDialog = () => {
+    setApproveOwnedUpdateDialog({ open: false, data: null });
+  };
+
+  const handleOpenApproveAttendedUpdateDialog = (courseData: any) => {
+    const formattedData = {
+      content: courseData,
+      lecturerInfo: lecturerProfileUpdate.lecturer || {},
+    };
+    setApproveAttendedUpdateDialog({ open: true, data: formattedData });
+  };
+
+  const handleCloseApproveAttendedUpdateDialog = () => {
+    setApproveAttendedUpdateDialog({ open: false, data: null });
+  };
+
+  // const handleDelete = (item: any, type: "owned" | "attended") => {
+  //   setItemToDelete(item);
+  //   setDeleteType(type);
+  //   setDeleteConfirmOpen(true);
+  // };
+
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      if (deleteType === "owned" && onDeleteOwnedCourse) {
+        onDeleteOwnedCourse(itemToDelete);
+      } else if (deleteType === "attended" && onDeleteAttendedCourse) {
+        onDeleteAttendedCourse(itemToDelete);
+      }
+    } catch (error) {
+      console.error("Error deleting course:", error);
+    } finally {
+      setDeleteConfirmOpen(false);
+      setItemToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirmOpen(false);
+    setItemToDelete(null);
+  };
+
+  const renderCourseCard = (item: any, isOwned: boolean = false) => {
+    // Always display original data
+    const currentData = item.original;
+    const hasUpdate = item.update && item.update.status === "PENDING";
+
+    return (
+      <Accordion
+        key={currentData.id}
+        className="transition-all duration-300"
+        sx={{
+          borderRadius: "12px",
+          overflow: "hidden", // quan trọng để bo góc đều
+          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+          "&.Mui-expanded": {
+            boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+            transform: "translateY(-2px)",
+          },
+          "&:before": { display: "none" },
+        }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMore />}
+          sx={{
+            background: getBannerColor(item.original?.status || item.status),
+            color: "#111827",
+            "& .MuiAccordionSummary-expandIconWrapper": {
+              color: "#111827",
+            },
+          }}
+        >
+          <div className="mr-4 flex w-full items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Box
+                className="rounded-lg p-2"
+                sx={{
+                  background: "rgba(255,255,255,0.2)",
+                  backdropFilter: "blur(10px)",
+                }}
+              >
+                {isOwned ? (
+                  <School sx={{ color: "#111827" }} />
+                ) : (
+                  <Group sx={{ color: "#111827" }} />
+                )}
+              </Box>
+              <div>
+                <Typography
+                  variant="h6"
+                  className="font-bold"
+                  sx={{ color: "#111827" }}
+                >
+                  {currentData.title || "Không có tiêu đề"}
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#111827" }}>
+                  {isOwned
+                    ? currentData.topic
+                    : currentData.organizer || "Không có thông tin tổ chức"}
+                </Typography>
+                {currentData.referenceId && (
+                  <Typography variant="caption" sx={{ color: "#374151" }}>
+                    Reference ID: {currentData.referenceId}
+                  </Typography>
+                )}
+              </div>
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              <Chip
+                label={getStatus(currentData.status)}
+                size="small"
+                sx={{
+                  fontWeight: 600,
+                  background: "rgba(255,255,255,0.9)",
+                  color: getStatusColor(currentData.status),
+                }}
+              />
+              {currentData.status === "PENDING" ? (
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() =>
+                    isOwned
+                      ? handleOpenApproveOwnedCreateDialog(item)
+                      : handleOpenApproveAttendedCreateDialog(item)
+                  }
+                  sx={{
+                    fontWeight: 600,
+                    background: "rgba(255,255,255,0.9)",
+                    color: "#1976d2",
+                    textTransform: "none",
+                    borderRadius: 2,
+                    fontSize: "0.75rem",
+                    px: 2,
+                    py: 0.5,
+                    "&:hover": {
+                      background: "rgba(255,255,255,1)",
+                      transform: "translateY(-1px)",
+                      boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                    },
+                  }}
+                >
+                  Xem chi tiết
+                </Button>
+              ) : (
+                currentData.status === "APPROVED" &&
+                hasUpdate && (
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => {
+                      if (isOwned) {
+                        handleOpenApproveOwnedUpdateDialog(item);
+                      } else {
+                        handleOpenApproveAttendedUpdateDialog(item);
+                      }
+                    }}
+                    sx={{
+                      fontWeight: 600,
+                      background: "rgba(255,255,255,0.9)",
+                      color: "#1976d2",
+                      textTransform: "none",
+                      borderRadius: 2,
+                      fontSize: "0.75rem",
+                      px: 2,
+                      py: 0.5,
+                      "&:hover": {
+                        background: "rgba(255,255,255,1)",
+                        transform: "translateY(-1px)",
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                      },
+                    }}
+                  >
+                    Xem yêu cầu cập nhật
+                  </Button>
+                )
+              )}
+            </div>
+          </div>
+        </AccordionSummary>
+
+        <AccordionDetails
+          sx={{
+            p: 0,
+            background: "white",
+            borderRadius: "0 0 12px 12px",
+          }}
+        >
+          <Box className="p-6">
+            {/* Course Information */}
+            <div className="mb-6">
+              {/* Thumbnail and Description Row (only for owned courses) */}
+              {isOwned && currentData.thumbnailUrl && (
+                <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {/* Thumbnail */}
+                  <Box>
+                    <img
+                      src={currentData.thumbnailUrl}
+                      alt={currentData.title}
+                      style={{
+                        width: "100%",
+                        maxWidth: "300px",
+                        height: "180px",
+                        objectFit: "cover",
+                        borderRadius: "8px",
+                        border: "1px solid #E5E7EB",
+                      }}
+                    />
+                  </Box>
+
+                  {/* Description */}
+                  {currentData.description && (
+                    <Box
+                      className="rounded-lg p-4"
+                      sx={{ background: `${colors.primary[25]}` }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: colors.text.tertiary,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Mô tả
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className="mt-1"
+                        sx={{
+                          color: colors.text.secondary,
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        {currentData.description}
+                      </Typography>
+                    </Box>
+                  )}
+                </div>
+              )}
+
+              <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                {/* Basic Info Items */}
+                {currentData.topic && (
+                  <div
+                    className="flex items-center gap-3 rounded-lg p-3"
+                    style={{
+                      background: colors.background.tertiary,
+                    }}
+                  >
+                    <Category className="text-blue-600" fontSize="small" />
+                    <div>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: colors.text.tertiary,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Chủ đề
+                      </Typography>
+                      <Typography variant="body2" className="font-medium">
+                        {currentData.topic}
+                      </Typography>
+                    </div>
+                  </div>
+                )}
+
+                {!isOwned && currentData.organizer && (
+                  <div
+                    className="flex items-center gap-3 rounded-lg p-3"
+                    style={{
+                      background: colors.background.tertiary,
+                    }}
+                  >
+                    <Person className="text-green-600" fontSize="small" />
+                    <div>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: colors.text.tertiary,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Tổ chức
+                      </Typography>
+                      <Typography variant="body2" className="font-medium">
+                        {currentData.organizer}
+                      </Typography>
+                    </div>
+                  </div>
+                )}
+
+                {currentData.courseType && (
+                  <div
+                    className="flex items-center gap-3 rounded-lg p-3"
+                    style={{
+                      background: colors.background.tertiary,
+                    }}
+                  >
+                    <School className="text-purple-600" fontSize="small" />
+                    <div>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: colors.text.tertiary,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Loại khóa học
+                      </Typography>
+                      <Typography variant="body2" className="font-medium">
+                        {getCourseType(currentData.courseType)}
+                      </Typography>
+                    </div>
+                  </div>
+                )}
+
+                {currentData.scale && (
+                  <div
+                    className="flex items-center gap-3 rounded-lg p-3"
+                    style={{
+                      background: colors.background.tertiary,
+                    }}
+                  >
+                    <School className="text-indigo-600" fontSize="small" />
+                    <div>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: colors.text.tertiary,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Quy mô
+                      </Typography>
+                      <Typography variant="body2" className="font-medium">
+                        {getScale(currentData.scale)}
+                      </Typography>
+                    </div>
+                  </div>
+                )}
+
+                {(currentData.startDate || currentData.endDate) && (
+                  <div
+                    className="flex items-center gap-3 rounded-lg p-3"
+                    style={{
+                      background: colors.background.tertiary,
+                    }}
+                  >
+                    <CalendarToday
+                      className="text-green-600"
+                      fontSize="small"
+                    />
+                    <div>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: colors.text.tertiary,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Thời gian
+                      </Typography>
+                      <Typography variant="body2" className="font-medium">
+                        {formatDate(currentData.startDate)} -{" "}
+                        {formatDate(currentData.endDate)}
+                      </Typography>
+                    </div>
+                  </div>
+                )}
+
+                {(currentData.location || currentData.address) && (
+                  <div
+                    className="flex items-center gap-3 rounded-lg p-3"
+                    style={{
+                      background: colors.background.tertiary,
+                    }}
+                  >
+                    <LocationOn className="text-red-600" fontSize="small" />
+                    <div>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: colors.text.tertiary,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Địa điểm
+                      </Typography>
+                      <Typography variant="body2" className="font-medium">
+                        {currentData.location || currentData.address}
+                      </Typography>
+                    </div>
+                  </div>
+                )}
+
+                {currentData.level && (
+                  <div
+                    className="flex items-center gap-3 rounded-lg p-3"
+                    style={{
+                      background: colors.background.tertiary,
+                    }}
+                  >
+                    <School className="text-orange-600" fontSize="small" />
+                    <div>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: colors.text.tertiary,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Cấp độ
+                      </Typography>
+                      <Typography variant="body2" className="font-medium">
+                        {currentData.level}
+                      </Typography>
+                    </div>
+                  </div>
+                )}
+
+                {currentData.language && (
+                  <div
+                    className="flex items-center gap-3 rounded-lg p-3"
+                    style={{
+                      background: colors.background.tertiary,
+                    }}
+                  >
+                    <School className="text-teal-600" fontSize="small" />
+                    <div>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: colors.text.tertiary,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Ngôn ngữ
+                      </Typography>
+                      <Typography variant="body2" className="font-medium">
+                        {currentData.language === "Vietnamese"
+                          ? "Tiếng Việt"
+                          : currentData.language}
+                      </Typography>
+                    </div>
+                  </div>
+                )}
+
+                {currentData.numberOfHour && (
+                  <div
+                    className="flex items-center gap-3 rounded-lg p-3"
+                    style={{
+                      background: colors.background.tertiary,
+                    }}
+                  >
+                    <CalendarToday className="text-blue-600" fontSize="small" />
+                    <div>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: colors.text.tertiary,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Số giờ
+                      </Typography>
+                      <Typography variant="body2" className="font-medium">
+                        {currentData.numberOfHour} giờ
+                      </Typography>
+                    </div>
+                  </div>
+                )}
+
+                {currentData.price && (
+                  <div
+                    className="flex items-center gap-3 rounded-lg p-3"
+                    style={{
+                      background: colors.background.tertiary,
+                    }}
+                  >
+                    <School className="text-green-600" fontSize="small" />
+                    <div>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: colors.text.tertiary,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Giá
+                      </Typography>
+                      <Typography variant="body2" className="font-medium">
+                        {currentData.price.toLocaleString("vi-VN")} VNĐ
+                      </Typography>
+                    </div>
+                  </div>
+                )}
+
+                {currentData.isOnline !== undefined && (
+                  <div
+                    className="flex items-center gap-3 rounded-lg p-3"
+                    style={{
+                      background: colors.background.tertiary,
+                    }}
+                  >
+                    <LocationOn className="text-purple-600" fontSize="small" />
+                    <div>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: colors.text.tertiary,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Hình thức
+                      </Typography>
+                      <Typography variant="body2" className="font-medium">
+                        {currentData.isOnline ? "Trực tuyến" : "Trực tiếp"}
+                      </Typography>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Description for attended courses (when no thumbnail) */}
+              {!isOwned && currentData.description && (
+                <Box
+                  className="mb-4 rounded-lg p-4"
+                  sx={{ background: `${colors.primary[25]}` }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: colors.text.tertiary,
+                      fontWeight: 600,
+                    }}
+                  >
+                    Mô tả
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    className="mt-1"
+                    sx={{
+                      color: colors.text.secondary,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {currentData.description}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Description for owned courses without thumbnail */}
+              {isOwned &&
+                !currentData.thumbnailUrl &&
+                currentData.description && (
+                  <Box
+                    className="mb-4 rounded-lg p-4"
+                    sx={{ background: `${colors.primary[25]}` }}
+                  >
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: colors.text.tertiary,
+                        fontWeight: 600,
+                      }}
+                    >
+                      Mô tả
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      className="mt-1"
+                      sx={{
+                        color: colors.text.secondary,
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      {currentData.description}
+                    </Typography>
+                  </Box>
+                )}
+
+              {/* Requirements (only for owned courses) */}
+              {isOwned && currentData.requirements && (
+                <Box
+                  className="mb-4 rounded-lg p-4"
+                  sx={{ background: `${colors.primary[25]}` }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: colors.text.tertiary,
+                      fontWeight: 600,
+                    }}
+                  >
+                    Yêu cầu tham gia
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    className="mt-1"
+                    sx={{
+                      color: colors.text.secondary,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {currentData.requirements}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Admin Note */}
+              {currentData.adminNote && (
+                <Box
+                  className="mb-4 rounded-lg p-3"
+                  sx={{
+                    background: "#FEF3C7",
+                    border: "1px solid #F59E0B",
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "#92400E",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Ghi chú của quản trị viên
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    className="mt-1"
+                    sx={{ color: "#92400E" }}
+                  >
+                    {currentData.adminNote}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-3">
+                {(currentData.courseUrl || currentData.contentUrl) && (
+                  <>
+                    {currentData.courseUrl && (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        href={currentData.courseUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{
+                          background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
+                          color: "white",
+                          fontWeight: 600,
+                          textTransform: "none",
+                          borderRadius: 2,
+                          "&:hover": {
+                            transform: "translateY(-1px)",
+                          },
+                        }}
+                      >
+                        Link khóa học
+                      </Button>
+                    )}
+                    {currentData.contentUrl && (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        href={currentData.contentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{
+                          background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
+                          color: "white",
+                          fontWeight: 600,
+                          textTransform: "none",
+                          borderRadius: 2,
+                          "&:hover": {
+                            transform: "translateY(-1px)",
+                          },
+                        }}
+                      >
+                        Nội dung khóa học
+                      </Button>
+                    )}
+                    
+                  </>
+                )}
+
+                {/* <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<Edit />}
+                  onClick={() => {
+                    if (isOwned && onEditOwnedCourse) {
+                      onEditOwnedCourse(item);
+                    } else if (!isOwned && onEditAttendedCourse) {
+                      onEditAttendedCourse(item);
+                    }
+                  }}
+                  sx={{
+                    borderColor: colors.primary[500],
+                    color: colors.primary[500],
+                    fontWeight: 600,
+                    textTransform: "none",
+                    borderRadius: 2,
+                    "&:hover": {
+                      borderColor: colors.primary[600],
+                      backgroundColor: colors.primary[50],
+                      transform: "translateY(-1px)",
+                    },
+                  }}
+                >
+                  Chỉnh sửa
+                </Button>
+
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<Delete />}
+                  onClick={() =>
+                    handleDelete(item, isOwned ? "owned" : "attended")
+                  }
+                  sx={{
+                    borderColor: "#EF4444",
+                    color: "#EF4444",
+                    fontWeight: 600,
+                    textTransform: "none",
+                    borderRadius: 2,
+                    "&:hover": {
+                      borderColor: "#DC2626",
+                      backgroundColor: "#FEF2F2",
+                      transform: "translateY(-1px)",
+                    },
+                  }}
+                >
+                  Xóa
+                </Button> */}
+              </div>
+            </div>
+            {/* Thông tin thời gian tạo/cập nhật */}
+            <div style={{ marginTop: 24, textAlign: "right" }}>
+              <Typography variant="body2" color="text.secondary">
+                Được tạo lúc: {formatDateToVietnamTime(item.original?.createdAt)}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Cập nhật lần cuối: {formatDateToVietnamTime(item.original?.updatedAt)}
+              </Typography>
+            </div>
+          </Box>
+        </AccordionDetails>
+      </Accordion>
+    );
   };
 
   return (
-    <Box>
-      {/* Owned Courses Section */}
-      <Accordion defaultExpanded>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">
-            Khóa học sở hữu ({ownedCourses.length})
+    <div className="space-y-4">
+      {/* Owned Training Courses Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Typography
+            variant="h6"
+            sx={{ color: colors.text.primary, fontWeight: 600 }}
+          >
+            Khóa học sở hữu ({ownedCourses?.length || 0})
           </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box display="flex" justifyContent="flex-end" mb={2}>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={onAddOwnedCourse}
-            >
-              Thêm khóa học sở hữu
-            </Button>
-          </Box>
 
-          {ownedCourses.map((courseData: any, index: number) => (
-            <Card key={courseData.original?.id || index} sx={{ mb: 2 }}>
-              <CardContent>
-                {/* Original Course */}
-                <Box sx={{ mb: courseData.update ? 2 : 0 }}>
-                  <Box display="flex" alignItems="center" gap={1} mb={1}>
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      Thông tin gốc
-                    </Typography>
-                    <Chip
-                      label={getStatus(courseData.original?.status)}
-                      color={getStatusColor(courseData.original?.status) as any}
-                      size="small"
-                    />
-                  </Box>
-                  
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="start"
-                  >
-                    <Box flex={1}>
-                      <Typography variant="h6" gutterBottom>
-                        {courseData.original?.name}
-                      </Typography>
-                      <Box display="flex" gap={2}>
-                        <Box flex={1}>
-                          <Typography variant="body2" color="text.secondary">
-                            Danh mục: {courseData.original?.category}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Thời lượng: {courseData.original?.duration} giờ
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Học phí: {formatCurrency(courseData.original?.tuitionFee || 0)}
-                          </Typography>
-                        </Box>
-                        <Box flex={1}>
-                          <Typography variant="body2" color="text.secondary">
-                            Ngôn ngữ: {courseData.original?.language}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Ngày tạo: {formatDate(courseData.original?.createDate)}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Trạng thái: {getStatus(courseData.original?.courseStatus)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                      <Typography variant="body2" sx={{ mt: 1 }}>
-                        {courseData.original?.description}
-                      </Typography>
-                    </Box>
-                    <Box display="flex" flexDirection="column" gap={1}>
-                      <IconButton
-                        size="small"
-                        onClick={() => window.open(courseData.original?.courseUrl, "_blank")}
-                      >
-                        <VisibilityIcon />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => onEditOwnedCourse?.(courseData.original)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => onDeleteOwnedCourse?.(courseData.original)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-                  </Box>
-                </Box>
+          {/* <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={onAddOwnedCourse}
+            sx={{
+              background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
+              color: "white",
+              fontWeight: 600,
+              textTransform: "none",
+              borderRadius: 2,
+              "&:hover": {
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              },
+            }}
+          >
+            Thêm khóa học sở hữu
+          </Button> */}
+        </div>
 
-                {/* Update Course (if exists) */}
-                {courseData.update && (
-                  <>
-                    <Box sx={{ borderTop: 1, borderColor: "divider", pt: 2 }}>
-                      <Box display="flex" alignItems="center" gap={1} mb={1}>
-                        <Typography variant="subtitle1" fontWeight="bold" color="warning.main">
-                          Yêu cầu cập nhật
-                        </Typography>
-                        <Chip
-                          label={getStatus(courseData.update?.status)}
-                          color={getStatusColor(courseData.update?.status) as any}
-                          size="small"
-                        />
-                      </Box>
-                      
-                      <Box
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="start"
-                      >
-                        <Box flex={1}>
-                          <Typography variant="h6" gutterBottom>
-                            {courseData.update?.name}
-                          </Typography>
-                          <Box display="flex" gap={2}>
-                            <Box flex={1}>
-                              <Typography variant="body2" color="text.secondary">
-                                Danh mục: {courseData.update?.category}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                Thời lượng: {courseData.update?.duration} giờ
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                Học phí: {formatCurrency(courseData.update?.tuitionFee || 0)}
-                              </Typography>
-                            </Box>
-                            <Box flex={1}>
-                              <Typography variant="body2" color="text.secondary">
-                                Ngôn ngữ: {courseData.update?.language}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                Trạng thái: {getStatus(courseData.update?.courseStatus)}
-                              </Typography>
-                            </Box>
-                          </Box>
-                          <Typography variant="body2" sx={{ mt: 1 }}>
-                            {courseData.update?.description}
-                          </Typography>
-                          {courseData.update?.adminNote && (
-                            <Typography variant="body2" color="warning.main" sx={{ mt: 1, fontStyle: 'italic' }}>
-                              Ghi chú: {courseData.update?.adminNote}
-                            </Typography>
-                          )}
-                        </Box>
-                        <Box display="flex" flexDirection="column" gap={1}>
-                          <IconButton
-                            size="small"
-                            onClick={() => window.open(courseData.update?.courseUrl, "_blank")}
-                          >
-                            <VisibilityIcon />
-                          </IconButton>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            color="success"
-                            onClick={() => onApproveOwnedCourseUpdate?.(courseData)}
-                          >
-                            Duyệt
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            color="error"
-                            onClick={() => onRejectOwnedCourseUpdate?.(courseData)}
-                          >
-                            Từ chối
-                          </Button>
-                        </Box>
-                      </Box>
-                    </Box>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+        {ownedCourses && ownedCourses.length > 0 ? (
+          ownedCourses.map((courseData: any, index: number) => (
+            <div key={courseData.original?.id || index}>
+              {renderCourseCard(courseData, true)}
+            </div>
+          ))
+        ) : (
+          <Alert severity="info" className="text-center">
+            Chưa có thông tin khóa học sở hữu
+          </Alert>
+        )}
+      </div>
 
-          {ownedCourses.length === 0 && (
-            <Card>
-              <CardContent>
-                <Typography variant="body2" color="text.secondary" textAlign="center">
-                  Chưa có khóa học sở hữu nào
-                </Typography>
-              </CardContent>
-            </Card>
-          )}
-        </AccordionDetails>
-      </Accordion>
-
-      {/* Attended Courses Section */}
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">
-            Khóa học đã tham gia ({attendedCourses.length})
+      {/* Attended Training Courses Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Typography
+            variant="h6"
+            sx={{ color: colors.text.primary, fontWeight: 600 }}
+          >
+            Khóa học đã tham gia ({attendedCourses?.length || 0})
           </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box display="flex" justifyContent="flex-end" mb={2}>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={onAddAttendedCourse}
-            >
-              Thêm khóa học đã tham gia
-            </Button>
-          </Box>
 
-          {attendedCourses.map((courseData: any, index: number) => (
-            <Card key={courseData.original?.id || index} sx={{ mb: 2 }}>
-              <CardContent>
-                {/* Original Course */}
-                <Box sx={{ mb: courseData.update ? 2 : 0 }}>
-                  <Box display="flex" alignItems="center" gap={1} mb={1}>
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      Thông tin gốc
-                    </Typography>
-                    <Chip
-                      label={getStatus(courseData.original?.status)}
-                      color={getStatusColor(courseData.original?.status) as any}
-                      size="small"
-                    />
-                  </Box>
-                  
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="start"
-                  >
-                    <Box flex={1}>
-                      <Typography variant="h6" gutterBottom>
-                        {courseData.original?.name}
-                      </Typography>
-                      <Box display="flex" gap={2}>
-                        <Box flex={1}>
-                          <Typography variant="body2" color="text.secondary">
-                            Nền tảng: {courseData.original?.platform}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Thời lượng: {courseData.original?.duration} giờ
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Hoàn thành: {courseData.original?.completionPercentage}%
-                          </Typography>
-                        </Box>
-                        <Box flex={1}>
-                          <Typography variant="body2" color="text.secondary">
-                            Ngày tham gia: {formatDate(courseData.original?.enrollmentDate)}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Ngày hoàn thành: {formatDate(courseData.original?.completionDate)}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Trạng thái: {getStatus(courseData.original?.courseStatus)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                      <Typography variant="body2" sx={{ mt: 1 }}>
-                        {courseData.original?.description}
-                      </Typography>
-                    </Box>
-                    <Box display="flex" flexDirection="column" gap={1}>
-                      <IconButton
-                        size="small"
-                        onClick={() => window.open(courseData.original?.courseUrl, "_blank")}
-                      >
-                        <VisibilityIcon />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => onEditAttendedCourse?.(courseData.original)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => onDeleteAttendedCourse?.(courseData.original)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-                  </Box>
-                </Box>
+          {/* <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={onAddAttendedCourse}
+            sx={{
+              background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
+              color: "white",
+              fontWeight: 600,
+              textTransform: "none",
+              borderRadius: 2,
+              "&:hover": {
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              },
+            }}
+          >
+            Thêm khóa học đã tham gia
+          </Button> */}
+        </div>
 
-                {/* Update Course (if exists) */}
-                {courseData.update && (
-                  <>
-                    <Box sx={{ borderTop: 1, borderColor: "divider", pt: 2 }}>
-                      <Box display="flex" alignItems="center" gap={1} mb={1}>
-                        <Typography variant="subtitle1" fontWeight="bold" color="warning.main">
-                          Yêu cầu cập nhật
-                        </Typography>
-                        <Chip
-                          label={getStatus(courseData.update?.status)}
-                          color={getStatusColor(courseData.update?.status) as any}
-                          size="small"
-                        />
-                      </Box>
-                      
-                      <Box
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="start"
-                      >
-                        <Box flex={1}>
-                          <Typography variant="h6" gutterBottom>
-                            {courseData.update?.name}
-                          </Typography>
-                          <Box display="flex" gap={2}>
-                            <Box flex={1}>
-                              <Typography variant="body2" color="text.secondary">
-                                Nền tảng: {courseData.update?.platform}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                Thời lượng: {courseData.update?.duration} giờ
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                Hoàn thành: {courseData.update?.completionPercentage}%
-                              </Typography>
-                            </Box>
-                            <Box flex={1}>
-                              <Typography variant="body2" color="text.secondary">
-                                Ngày tham gia: {formatDate(courseData.update?.enrollmentDate)}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                Ngày hoàn thành: {formatDate(courseData.update?.completionDate)}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                Trạng thái: {getStatus(courseData.update?.courseStatus)}
-                              </Typography>
-                            </Box>
-                          </Box>
-                          <Typography variant="body2" sx={{ mt: 1 }}>
-                            {courseData.update?.description}
-                          </Typography>
-                          {courseData.update?.adminNote && (
-                            <Typography variant="body2" color="warning.main" sx={{ mt: 1, fontStyle: 'italic' }}>
-                              Ghi chú: {courseData.update?.adminNote}
-                            </Typography>
-                          )}
-                        </Box>
-                        <Box display="flex" flexDirection="column" gap={1}>
-                          <IconButton
-                            size="small"
-                            onClick={() => window.open(courseData.update?.courseUrl, "_blank")}
-                          >
-                            <VisibilityIcon />
-                          </IconButton>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            color="success"
-                            onClick={() => onApproveAttendedCourseUpdate?.(courseData)}
-                          >
-                            Duyệt
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            color="error"
-                            onClick={() => onRejectAttendedCourseUpdate?.(courseData)}
-                          >
-                            Từ chối
-                          </Button>
-                        </Box>
-                      </Box>
-                    </Box>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+        {attendedCourses && attendedCourses.length > 0 ? (
+          attendedCourses.map((courseData: any, index: number) => (
+            <div key={courseData.original?.id || index}>
+              {renderCourseCard(courseData, false)}
+            </div>
+          ))
+        ) : (
+          <Alert severity="info" className="text-center">
+            Chưa có thông tin khóa học đã tham gia
+          </Alert>
+        )}
+      </div>
 
-          {attendedCourses.length === 0 && (
-            <Card>
-              <CardContent>
-                <Typography variant="body2" color="text.secondary" textAlign="center">
-                  Chưa có khóa học đã tham gia nào
-                </Typography>
-              </CardContent>
-            </Card>
-          )}
-        </AccordionDetails>
-      </Accordion>
-    </Box>
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={handleCancelDelete}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            minWidth: 400,
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 600, color: colors.primary[700] }}>
+          Xác nhận xóa
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: colors.text.secondary, mb: 2 }}>
+            Bạn có chắc chắn muốn xóa{" "}
+            {deleteType === "owned"
+              ? "khóa học sở hữu"
+              : "khóa học đã tham gia"}{" "}
+            này không? Hành động này không thể hoàn tác.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, gap: 1 }}>
+          <Button
+            onClick={handleCancelDelete}
+            variant="outlined"
+            sx={{
+              borderColor: colors.primary[300],
+              color: colors.primary[600],
+              fontWeight: 600,
+              borderRadius: 2,
+              textTransform: "none",
+              "&:hover": {
+                borderColor: colors.primary[400],
+                backgroundColor: colors.primary[50],
+              },
+            }}
+          >
+            Hủy
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            color="error"
+            sx={{
+              fontWeight: 600,
+              borderRadius: 2,
+              textTransform: "none",
+              "&:hover": {
+                backgroundColor: "#d32f2f",
+              },
+            }}
+          >
+            Xác nhận xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ApproveOwnedCourseCreateDialog */}
+      {approveOwnedCreateDialog.open && (
+        <ApproveOwnedCourseCreateDialog
+          open={approveOwnedCreateDialog.open}
+          data={approveOwnedCreateDialog.data}
+          onClose={handleCloseApproveOwnedCreateDialog}
+        />
+      )}
+
+      {/* ApproveAttendedCourseCreateDialog */}
+      {approveAttendedCreateDialog.open && (
+        <ApproveAttendedCourseCreateDialog
+          open={approveAttendedCreateDialog.open}
+          data={approveAttendedCreateDialog.data}
+          onClose={handleCloseApproveAttendedCreateDialog}
+        />
+      )}
+
+      {/* ApproveOwnedCourseUpdateDialog */}
+      {approveOwnedUpdateDialog.open && (
+        <ApproveOwnedCourseUpdateDialog
+          open={approveOwnedUpdateDialog.open}
+          data={approveOwnedUpdateDialog.data}
+          onClose={handleCloseApproveOwnedUpdateDialog}
+        />
+      )}
+
+      {/* ApproveAttendedCourseUpdateDialog */}
+      {approveAttendedUpdateDialog.open && (
+        <ApproveAttendedCourseUpdateDialog
+          open={approveAttendedUpdateDialog.open}
+          data={approveAttendedUpdateDialog.data}
+          onClose={handleCloseApproveAttendedUpdateDialog}
+        />
+      )}
+    </div>
   );
 };
 

@@ -1,24 +1,27 @@
-import React, { useState, useCallback } from "react";
+import { Close as CloseIcon, School as SchoolIcon } from "@mui/icons-material";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
   Avatar,
+  Box,
+  Button,
   Card,
   CardContent,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
   Stack,
-  TextField,
+  Typography,
 } from "@mui/material";
-import { School as SchoolIcon, Close as CloseIcon } from "@mui/icons-material";
-import { API } from "../../../utils/Fetch";
-import { toast } from "react-toastify";
+import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { setLecturerRequests } from "../../../redux/slice/LecturerRquestSlice";
+import { toast } from "react-toastify";
+import { setLecturerProfileUpdate } from "../../../redux/slice/LecturerProfileUpdateSlice";
+import { setResearchProjectRequests } from "../../../redux/slice/RequestResearchProjectSlice";
+import { API } from "../../../utils/Fetch";
+import ConfirmDialog from "../../general-dialog/ConfirmDialog";
+import { getProjectType, getScale } from "../../../utils/ChangeText";
 
 interface ResearchProjectCreateDialogProps {
   open: boolean;
@@ -47,10 +50,16 @@ const ApproveResearchProjectCreateDialog: React.FC<
         return;
       }
       toast.success("Khóa học đã được duyệt thành công!");
-      const responseData = await API.admin.getLecturerRequests();
-      dispatch(setLecturerRequests(responseData.data.data));
+      const responseData = await API.admin.getResearchProjectRequests();
+      dispatch(setResearchProjectRequests(responseData.data.data));
       setShowConfirmDialog(null);
       onClose();
+      const response = await API.admin.getLecturerAllProfile({
+        id: lecturerInfo.id,
+      });
+      if (response.data.success) {
+        dispatch(setLecturerProfileUpdate(response.data.data));
+      }
     } catch (error) {
       console.error("Error approving:", error);
     } finally {
@@ -74,11 +83,17 @@ const ApproveResearchProjectCreateDialog: React.FC<
         return;
       }
       toast.success("Dự án đã bị từ chối thành công!");
-      const responseData = await API.admin.getLecturerRequests();
-      dispatch(setLecturerRequests(responseData.data.data));
+      const responseData = await API.admin.getResearchProjectRequests();
+      dispatch(setResearchProjectRequests(responseData.data.data));
       setShowConfirmDialog(null);
       setAdminNote("");
       onClose();
+      const response = await API.admin.getLecturerAllProfile({
+        id: lecturerInfo.id,
+      });
+      if (response.data.success) {
+        dispatch(setLecturerProfileUpdate(response.data.data));
+      }
     } catch (error) {
       console.error("Error rejecting:", error);
     } finally {
@@ -102,42 +117,38 @@ const ApproveResearchProjectCreateDialog: React.FC<
       <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
         <DialogTitle
           sx={{
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            color: "white",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            pb: 2,
-            pt: 3,
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Avatar
-              sx={{
-                bgcolor: "rgba(255,255,255,0.2)",
-                color: "white",
-                width: 48,
-                height: 48,
-              }}
-            >
-              <SchoolIcon fontSize="large" />
+            <Avatar sx={{ bgcolor: "primary.main", width: 48, height: 48 }}>
+              <SchoolIcon />
             </Avatar>
             <Box>
-              <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                Chi tiết dự án nghiên cứu
+              <Typography variant="h6" fontWeight="bold">
+                Yêu cầu tạo mới dự án nghiên cứu
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                {content.title}
+                ID: {content.id}
               </Typography>
             </Box>
           </Box>
-          <Button onClick={onClose} size="large" sx={{ color: "white" }}>
+          <IconButton onClick={onClose} size="large">
             <CloseIcon />
-          </Button>
+          </IconButton>
         </DialogTitle>
 
         <DialogContent sx={{ px: 4, py: 4, backgroundColor: "#f8fafc" }}>
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 4,
+              paddingTop: 2,
+            }}
+          >
             {/* Left Column */}
             <Stack spacing={3}>
               {/* Project Details */}
@@ -169,7 +180,7 @@ const ApproveResearchProjectCreateDialog: React.FC<
                       }}
                     />
                     <Chip
-                      label={content.scale}
+                      label={getScale(content.scale)}
                       size="small"
                       sx={{
                         backgroundColor: "#e8f5e8",
@@ -187,7 +198,45 @@ const ApproveResearchProjectCreateDialog: React.FC<
                   </Typography>
                 </CardContent>
               </Card>
-
+              <Card
+                sx={{
+                  borderRadius: 3,
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                  border: "1px solid rgba(255,255,255,0.8)",
+                  mb: 2,
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 700, mb: 2, color: "#1e293b" }}
+                  >
+                    🔗 Liên kết dự án
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    href={content.publishedUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    fullWidth
+                    sx={{
+                      py: 1.5,
+                      background:
+                        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                      borderRadius: 2,
+                      fontWeight: 600,
+                      textTransform: "none",
+                      boxShadow: "0 4px 20px rgba(102, 126, 234, 0.4)",
+                      "&:hover": {
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 8px 25px rgba(102, 126, 234, 0.5)",
+                      },
+                    }}
+                  >
+                    Xem công bố dự án
+                  </Button>
+                </CardContent>
+              </Card>
               {/* Lecturer Info */}
               <Card
                 sx={{
@@ -257,141 +306,187 @@ const ApproveResearchProjectCreateDialog: React.FC<
                   >
                     📋 Thông tin chi tiết
                   </Typography>
-                  <Stack spacing={2.5}>
+                  <Stack spacing={3}>
+                    {/* Liên kết dự án */}
+
                     <Box
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: 2,
+                        p: 2,
+                        backgroundColor: "#f8fafc",
+                        borderRadius: 2,
+                        border: "1px solid #e2e8f0",
                       }}
                     >
                       <Typography
-                        variant="body2"
-                        sx={{ color: "#64748b", fontWeight: 600 }}
+                        variant="caption"
+                        sx={{
+                          color: "#64748b",
+                          fontWeight: 600,
+                          textTransform: "uppercase",
+                        }}
                       >
-                        Loại dự án:
+                        Loại
                       </Typography>
                       <Typography
                         variant="body2"
-                        sx={{ fontWeight: 600, color: "#1e293b" }}
+                        sx={{ fontWeight: 600, color: "#1e293b", mt: 0.5 }}
                       >
-                        {content.projectType}
+                        {getProjectType(content.projectType)}
                       </Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
+
                       <Typography
-                        variant="body2"
-                        sx={{ color: "#64748b", fontWeight: 600 }}
+                        variant="caption"
+                        sx={{
+                          color: "#64748b",
+                          fontWeight: 600,
+                          textTransform: "uppercase",
+                        }}
                       >
-                        Vai trò:
+                        Vai trò
                       </Typography>
                       <Typography
                         variant="body2"
-                        sx={{ fontWeight: 600, color: "#1e293b" }}
+                        sx={{ fontWeight: 600, color: "#1e293b", mt: 0.5 }}
                       >
                         {content.roleInProject}
                       </Typography>
                     </Box>
+
                     <Box
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: 2,
+                        p: 2,
+                        backgroundColor: "#f8fafc",
+                        borderRadius: 2,
+                        border: "1px solid #e2e8f0",
                       }}
                     >
                       <Typography
-                        variant="body2"
-                        sx={{ color: "#64748b", fontWeight: 600 }}
+                        variant="caption"
+                        sx={{
+                          color: "#64748b",
+                          fontWeight: 600,
+                          textTransform: "uppercase",
+                        }}
                       >
-                        Thời gian:
+                        Kinh phí
                       </Typography>
                       <Typography
                         variant="body2"
-                        sx={{ fontWeight: 600, color: "#1e293b" }}
+                        sx={{ fontWeight: 600, color: "#1e293b", mt: 0.5 }}
                       >
-                        {content.startDate} - {content.endDate}
-                      </Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Typography
-                        variant="body2"
-                        sx={{ color: "#64748b", fontWeight: 600 }}
-                      >
-                        Kinh phí:
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 600, color: "#1e293b" }}
-                      >
-                        {content.foundingAmount.toLocaleString("vi-VN", {
+                        {content.foundingAmount?.toLocaleString("vi-VN", {
                           style: "currency",
                           currency: "VND",
                         })}
                       </Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
                       <Typography
-                        variant="body2"
-                        sx={{ color: "#64748b", fontWeight: 600 }}
+                        variant="caption"
+                        sx={{
+                          color: "#64748b",
+                          fontWeight: 600,
+                          textTransform: "uppercase",
+                        }}
                       >
-                        Nguồn kinh phí:
+                        Nguồn kinh phí
                       </Typography>
                       <Typography
                         variant="body2"
-                        sx={{ fontWeight: 600, color: "#1e293b" }}
+                        sx={{ fontWeight: 600, color: "#1e293b", mt: 0.5 }}
                       >
                         {content.foundingSource}
                       </Typography>
                     </Box>
+
                     <Box
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
+                        borderRadius: 3,
+                        background:
+                          "linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%)",
+                        boxShadow: "0 8px 32px rgba(252, 211, 77, 0.3)",
+                        p: 3,
+                        mb: 2,
                       }}
                     >
                       <Typography
-                        variant="body2"
-                        sx={{ color: "#64748b", fontWeight: 600 }}
+                        variant="h6"
+                        sx={{ fontWeight: 700, mb: 2, color: "#92400e" }}
                       >
-                        Liên kết:
+                        📅 Thời gian dự án
                       </Typography>
-                      <Typography
-                        variant="body2"
+                      <Box
                         sx={{
-                          fontWeight: 600,
-                          color: "#1e293b",
-                          textDecoration: "underline",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
                         }}
-                        component="a"
-                        href={content.publishedUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
                       >
-                        Xem tại đây
-                      </Typography>
+                        <Box sx={{ textAlign: "center" }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: "#92400e", fontWeight: 600 }}
+                          >
+                            Bắt đầu
+                          </Typography>
+                          <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 700, color: "#92400e" }}
+                          >
+                            {content.startDate
+                              ? new Date(content.startDate).toLocaleDateString(
+                                  "vi-VN",
+                                  { timeZone: "UTC" },
+                                )
+                              : "Không xác định"}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ color: "#92400e", fontSize: "1.5rem" }}>
+                          →
+                        </Box>
+                        <Box sx={{ textAlign: "center" }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: "#92400e", fontWeight: 600 }}
+                          >
+                            Kết thúc
+                          </Typography>
+                          <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 700, color: "#92400e" }}
+                          >
+                            {content.endDate
+                              ? new Date(content.endDate).toLocaleDateString(
+                                  "vi-VN",
+                                  { timeZone: "UTC" },
+                                )
+                              : "Không xác định"}
+                          </Typography>
+                        </Box>
+                      </Box>
                     </Box>
                   </Stack>
                 </CardContent>
               </Card>
+              {/* Thông tin thời gian tạo/cập nhật */}
+              <div style={{ marginTop: 24, textAlign: "right" }}>
+                <Typography variant="body2" color="text.secondary">
+                  Được tạo lúc:{" "}
+                  {content.createdAt
+                    ? new Date(content.createdAt).toLocaleString("vi-VN")
+                    : "Chưa cập nhật"}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Cập nhật lần cuối:{" "}
+                  {content.updatedAt
+                    ? new Date(content.updatedAt).toLocaleString("vi-VN")
+                    : "Chưa cập nhật"}
+                </Typography>
+              </div>
             </Stack>
           </Box>
         </DialogContent>
@@ -449,66 +544,28 @@ const ApproveResearchProjectCreateDialog: React.FC<
       </Dialog>
 
       {showConfirmDialog && (
-        <Dialog
+        <ConfirmDialog
           open={true}
-          onClose={handleCloseConfirmDialog}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle>
-            {showConfirmDialog === "approve"
+          type={showConfirmDialog}
+          title={
+            showConfirmDialog === "approve"
               ? "Xác nhận duyệt dự án"
-              : "Xác nhận từ chối dự án"}
-          </DialogTitle>
-          <DialogContent>
-            {showConfirmDialog === "approve" ? (
-              <Typography>
-                Bạn có chắc chắn muốn duyệt dự án "{content.title}"?
-              </Typography>
-            ) : (
-              <>
-                <Typography>
-                  Bạn có chắc chắn muốn từ chối dự án "{content.title}"?
-                </Typography>
-                <TextField
-                  label="Lý do từ chối *"
-                  value={adminNote}
-                  onChange={(e) => setAdminNote(e.target.value)}
-                  fullWidth
-                  multiline
-                  rows={3}
-                  variant="outlined"
-                  placeholder="Nhập lý do từ chối dự án này..."
-                  required
-                  sx={{ mt: 2 }}
-                />
-              </>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={handleCloseConfirmDialog}
-              variant="outlined"
-              disabled={loading}
-            >
-              Hủy
-            </Button>
-            <Button
-              onClick={
-                showConfirmDialog === "approve" ? handleApprove : handleReject
-              }
-              variant="contained"
-              color={showConfirmDialog === "approve" ? "success" : "error"}
-              disabled={loading}
-            >
-              {loading
-                ? "Đang xử lý..."
-                : showConfirmDialog === "approve"
-                  ? "Duyệt"
-                  : "Từ chối"}
-            </Button>
-          </DialogActions>
-        </Dialog>
+              : "Xác nhận từ chối dự án"
+          }
+          message={
+            showConfirmDialog === "approve"
+              ? `Bạn có chắc chắn muốn duyệt dự án "${content.title}"?`
+              : `Bạn có chắc chắn muốn từ chối dự án "${content.title}"?`
+          }
+          loading={loading}
+          rejectNote={adminNote}
+          onRejectNoteChange={setAdminNote}
+          rejectNoteRequired={showConfirmDialog === "reject"}
+          onClose={handleCloseConfirmDialog}
+          onConfirm={
+            showConfirmDialog === "approve" ? handleApprove : handleReject
+          }
+        />
       )}
     </>
   );

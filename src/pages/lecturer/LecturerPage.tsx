@@ -29,18 +29,16 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  Paper,
   Stack,
-  Typography,
+  Typography
 } from "@mui/material";
 import React from "react";
 import { useSelector } from "react-redux";
 import { colors } from "../../theme/colors";
-import { getAcademicRank } from "../../utils/ChangeText";
 
 const LecturerPage = () => {
   const lecturerProfile = useSelector((state: any) => state.lecturerProfile);
-  const userProfile = useSelector((state: any) => state.userProfile);
+  // const userProfile = useSelector((state: any) => state.userProfile);
 
   // Mock data - in real app, this would come from API
   const dashboardStats = [
@@ -163,7 +161,7 @@ const LecturerPage = () => {
   return (
     <Box sx={{ p: 0 }}>
       {/* Compact Lecturer Profile Banner */}
-      <Paper
+      {/* <Paper
         elevation={3}
         sx={{
           background: `linear-gradient(135deg, ${colors.primary[700]} 0%, ${colors.primary[900]} 100%)`,
@@ -174,7 +172,6 @@ const LecturerPage = () => {
           color: "white",
         }}
       >
-        {/* Overlay pattern */}
         <Box
           sx={{
             position: "absolute",
@@ -193,7 +190,6 @@ const LecturerPage = () => {
             p: { xs: 3, md: 5 },
           }}
         >
-          {/* Avatar */}
           <Avatar
             src={lecturerProfile?.lecturer?.avatarUrl}
             sx={{
@@ -207,8 +203,6 @@ const LecturerPage = () => {
           >
             {lecturerProfile?.fullName?.charAt(0) || "L"}
           </Avatar>
-
-          {/* Info */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
               variant="h4"
@@ -246,7 +240,7 @@ const LecturerPage = () => {
               {lecturerProfile?.jobField || "Công nghệ thông tin"}
             </Typography>
 
-            {/* Contact / Extra info */}
+          
             <Box
               sx={{
                 display: "flex",
@@ -263,7 +257,7 @@ const LecturerPage = () => {
             </Box>
           </Box>
         </Box>
-      </Paper>
+      </Paper> */}
 
       {/* Dashboard Stats */}
       <Box
