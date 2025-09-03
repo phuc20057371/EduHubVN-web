@@ -487,7 +487,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                           md: "12px", // Desktop: larger radius
                         },
                         backgroundColor: "#f8fafc",
-                        border: "2px solid transparent",
+                        
                         transition: "all 0.2s ease-in-out",
                         fontSize: {
                           xs: "0.875rem", // Mobile: smaller font
@@ -499,7 +499,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                         },
                         "&.Mui-focused": {
                           backgroundColor: "#ffffff",
-                          borderColor: "#06b6d4",
+                          
                           boxShadow: "0 0 0 3px rgba(6, 182, 212, 0.1)",
                         },
                       },
@@ -532,7 +532,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                           md: "12px",
                         },
                         backgroundColor: "#f8fafc",
-                        border: "2px solid transparent",
+                        
                         transition: "all 0.2s ease-in-out",
                         fontSize: {
                           xs: "0.875rem",
@@ -544,7 +544,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                         },
                         "&.Mui-focused": {
                           backgroundColor: "#ffffff",
-                          borderColor: "#06b6d4",
+                          
                           boxShadow: "0 0 0 3px rgba(6, 182, 212, 0.1)",
                         },
                       },
@@ -589,7 +589,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                         "& .MuiOutlinedInput-root": {
                           borderRadius: "12px",
                           backgroundColor: "#f8fafc",
-                          border: "2px solid transparent",
+                          
                           transition: "all 0.2s ease-in-out",
                           "&:hover": {
                             backgroundColor: "#ecfeff",
@@ -597,7 +597,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                           },
                           "&.Mui-focused": {
                             backgroundColor: "#ffffff",
-                            borderColor: "#06b6d4",
+                            
                             boxShadow: "0 0 0 3px rgba(6, 182, 212, 0.1)",
                           },
                         },
@@ -627,7 +627,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                             "& .MuiOutlinedInput-root": {
                               borderRadius: "12px",
                               backgroundColor: "#f8fafc",
-                              border: "2px solid transparent",
+                              
                               transition: "all 0.2s ease-in-out",
                               "&:hover": {
                                 backgroundColor: "#ecfeff",
@@ -635,7 +635,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                               },
                               "&.Mui-focused": {
                                 backgroundColor: "#ffffff",
-                                borderColor: "#06b6d4",
+                                
                                 boxShadow: "0 0 0 3px rgba(6, 182, 212, 0.1)",
                               },
                             },
@@ -715,7 +715,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                             "& .MuiOutlinedInput-root": {
                               borderRadius: "12px",
                               backgroundColor: "#f8fafc",
-                              border: "2px solid transparent",
+                              
                               transition: "all 0.2s ease-in-out",
                               "&:hover": {
                                 backgroundColor: "#ecfeff",
@@ -723,7 +723,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                               },
                               "&.Mui-focused": {
                                 backgroundColor: "#ffffff",
-                                borderColor: "#06b6d4",
+                                
                                 boxShadow: "0 0 0 3px rgba(6, 182, 212, 0.1)",
                               },
                             },
@@ -766,7 +766,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                             "& .MuiOutlinedInput-root": {
                               borderRadius: "12px",
                               backgroundColor: "#f8fafc",
-                              border: "2px solid transparent",
+                              
                               transition: "all 0.2s ease-in-out",
                               "&:hover": {
                                 backgroundColor: "#ecfeff",
@@ -774,7 +774,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                               },
                               "&.Mui-focused": {
                                 backgroundColor: "#ffffff",
-                                borderColor: "#06b6d4",
+                                
                                 boxShadow: "0 0 0 3px rgba(6, 182, 212, 0.1)",
                               },
                             },
@@ -876,7 +876,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                       py: 2,
                       borderRadius: "12px",
                       borderWidth: "2px",
-                      borderColor: "#06b6d4",
+                      
                       color: "#0e7490",
                       fontWeight: 600,
                       fontSize: "0.95rem",
@@ -1004,7 +1004,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "12px",
                       backgroundColor: "#f8fafc",
-                      border: "2px solid transparent",
+                      
                       transition: "all 0.2s ease-in-out",
                       "&:hover": {
                         backgroundColor: "#ecfeff",
@@ -1012,7 +1012,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                       },
                       "&.Mui-focused": {
                         backgroundColor: "#ffffff",
-                        borderColor: "#06b6d4",
+                        
                         boxShadow: "0 0 0 3px rgba(6, 182, 212, 0.1)",
                       },
                     },

@@ -55,7 +55,7 @@ const ResearchTab = ({
   const [itemToDelete, setItemToDelete] = useState<any>(null);
 
   const handleDelete = (item: any) => {
-    setItemToDelete(item);
+    setItemToDelete(item.original);
     setDeleteConfirmOpen(true);
   };
 
@@ -85,7 +85,7 @@ const ResearchTab = ({
 
   const renderProjectCard = (item: any) => (
     <Accordion
-      key={item.id}
+      key={item.original.id}
       className="transition-all duration-300"
       sx={{
         borderRadius: 3,
@@ -143,7 +143,7 @@ const ResearchTab = ({
                   mb: 0.5,
                 }}
               >
-                {item.title}
+                {item.original.title}
               </Typography>
               <Typography
                 variant="body2"
@@ -151,21 +151,21 @@ const ResearchTab = ({
                   color: "rgba(255,255,255,0.9)",
                 }}
               >
-                Lĩnh vực: {item.researchArea || 'Không xác định'}
+                Lĩnh vực: {item.original.researchArea || 'Không xác định'}
               </Typography>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Chip
-              label={getStatus(item.status)}
+              label={getStatus(item.original.status)}
               size="small"
               sx={{
                 background: "rgba(255,255,255,0.9)",
                 height: "28px",
                 color:
-                  item.status === "APPROVED"
+                  item.original.status === "APPROVED"
                     ? "#047857"
-                    : item.status === "PENDING"
+                    : item.original.status === "PENDING"
                       ? "#D97706"
                       : "#DC2626",
               }}
@@ -203,7 +203,7 @@ const ResearchTab = ({
                 <Button
                   variant="outlined"
                   size="small"
-                  onClick={() => onEdit(item)}
+                  onClick={() => onEdit(item.original)}
                   sx={{
                     minWidth: "auto",
                     width: 32,
@@ -246,10 +246,10 @@ const ResearchTab = ({
           {/* Chips Section - Compact */}
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
             {/* Funding Amount as Chip */}
-            {item.foundingAmount && (
+            {item.original.foundingAmount && (
               <Chip
                 icon={<AttachMoney sx={{ fontSize: 16, color: "white !important" }} />}
-                label={`${item.foundingAmount.toLocaleString('vi-VN')} VNĐ`}
+                label={`${item.original.foundingAmount.toLocaleString('vi-VN')} VNĐ`}
                 size="small"
                 sx={{
                   background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
@@ -262,10 +262,10 @@ const ResearchTab = ({
             )}
 
             {/* Project Type as Chip */}
-            {item.projectType && (
+            {item.original.projectType && (
               <Chip
                 icon={<Assignment sx={{ fontSize: 16, color: "white !important" }} />}
-                label={getProjectType(item.projectType)}
+                label={getProjectType(item.original.projectType)}
                 size="small"
                 sx={{
                   background: "linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)",
@@ -282,12 +282,12 @@ const ResearchTab = ({
           <Box sx={{ mb: 2 }}>
             <div className="flex flex-wrap gap-2">
               {/* Published URL */}
-              {item.publishedUrl && (
+              {item.original.publishedUrl && (
                 <Button
                   variant="contained"
                   size="small"
                   startIcon={<LinkIcon />}
-                  href={item.publishedUrl}
+                  href={item.original.publishedUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   sx={{
@@ -312,7 +312,7 @@ const ResearchTab = ({
           <Box sx={{ mb: 2 }}>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
               {/* Quy mô */}
-              {item.scale && (
+              {item.original.scale && (
                 <div
                   className="flex items-center gap-3 rounded-lg p-3"
                   style={{
@@ -332,14 +332,14 @@ const ResearchTab = ({
                       Quy mô
                     </Typography>
                     <Typography variant="body2" sx={{ color: colors.text.secondary }}>
-                      {getScale ? getScale(item.scale) : item.scale}
+                      {getScale(item.original.scale)}
                     </Typography>
                   </div>
                 </div>
               )}
 
               {/* Trạng thái khóa học */}
-              {item.courseStatus && (
+              {item.original.courseStatus && (
                 <div
                   className="flex items-center gap-3 rounded-lg p-3"
                   style={{
@@ -359,14 +359,14 @@ const ResearchTab = ({
                       Trạng thái
                     </Typography>
                     <Typography variant="body2" sx={{ color: colors.text.secondary }}>
-                      {item.courseStatus}
+                      {item.original.courseStatus}
                     </Typography>
                   </div>
                 </div>
               )}
 
               {/* Vai trò trong dự án */}
-              {item.roleInProject && (
+              {item.original.roleInProject && (
                 <div
                   className="flex items-center gap-3 rounded-lg p-3"
                   style={{
@@ -386,7 +386,7 @@ const ResearchTab = ({
                       Vai trò
                     </Typography>
                     <Typography variant="body2" sx={{ color: colors.text.secondary }}>
-                      {item.roleInProject}
+                      {item.original.roleInProject}
                     </Typography>
                   </div>
                 </div>
@@ -430,7 +430,7 @@ const ResearchTab = ({
                     Thời gian thực hiện
                   </Typography>
                   <Typography variant="body2" sx={{ color: colors.text.secondary }}>
-                    {formatDate(item.startDate)} - {formatDate(item.endDate)}
+                    {formatDate(item.original.startDate)} - {formatDate(item.original.endDate)}
                   </Typography>
                 </div>
               </div>
@@ -455,7 +455,7 @@ const ResearchTab = ({
                     Nguồn tài trợ
                   </Typography>
                   <Typography variant="body2" sx={{ color: colors.text.secondary }}>
-                    {item.foundingSource || 'Không xác định'}
+                    {item.original.foundingSource || 'Không xác định'}
                   </Typography>
                 </div>
               </div>
@@ -463,7 +463,7 @@ const ResearchTab = ({
           </Box>
 
           {/* Mô tả - Compact */}
-          {item.description && (
+          {item.original.description && (
             <Box
               sx={{ 
                 mb: 2,
@@ -490,13 +490,13 @@ const ResearchTab = ({
                   lineHeight: 1.6,
                 }}
               >
-                {item.description}
+                {item.original.description}
               </Typography>
             </Box>
           )}
 
           {/* Admin Note - Compact */}
-          {item.adminNote && (
+          {item.original.adminNote && (
             <Box
               sx={{
                 p: 3,
@@ -519,7 +519,7 @@ const ResearchTab = ({
                 variant="body2"
                 sx={{ color: colors.warning[700] }}
               >
-                {item.adminNote}
+                {item.original.adminNote}
               </Typography>
             </Box>
           )}

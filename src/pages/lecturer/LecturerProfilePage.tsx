@@ -278,8 +278,8 @@ const LecturerProfilePage = () => {
     // lecturerUpdate,
     degrees,
     certificates,
-    ownedTrainingCourses,
-    attendedTrainingCourses,
+    ownedCourses,
+    attendedCourses,
     researchProjects,
   } = lecturerProfile;
 
@@ -309,8 +309,8 @@ const LecturerProfilePage = () => {
       label: "Kinh nghiệm Đào tạo",
       icon: <WorkHistory />,
       count:
-        (attendedTrainingCourses?.length || 0) +
-        (ownedTrainingCourses?.length || 0),
+        (ownedCourses?.length || 0) +
+        (attendedCourses?.length || 0),
       description: "Khóa học và đào tạo",
     },
     {
@@ -350,8 +350,8 @@ const LecturerProfilePage = () => {
       case "courses":
         return (
           <CoursesTab
-            attendedTrainingCourses={attendedTrainingCourses || []}
-            ownedTrainingCourses={ownedTrainingCourses || []}
+            attendedTrainingCourses={attendedCourses || []}
+            ownedTrainingCourses={ownedCourses || []}
             getStatusColor={getStatusColor}
             formatDate={formatDate}
             onAddAttended={handleAddAttendedCourse}

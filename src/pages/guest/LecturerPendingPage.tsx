@@ -2269,7 +2269,6 @@ const LecturerPendingPage = () => {
         />
       </Container>
 
-    
       <CreateDegreeModal
         open={openAddDegreeModal}
         onClose={() => setOpenAddDegreeModal(false)}

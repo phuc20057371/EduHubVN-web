@@ -234,11 +234,6 @@ export const validateLecturerInfo = (formData: any) => {
     errors.success = false;
     errors.error = "Vui lòng nhập số CCCD/CMND hợp lệ (11 ký tự)";
     errors.errorField = "citizenId";
-    // if (await checkCitizenId(formData.citizenId)) {
-    //   errors.success = false;
-    //   errors.error = "Số CCCD/CMND đã tồn tại";
-    //   errors.errorField = "citizenId";
-    // }
     return errors;
   }
   if (formData.gender === "") {

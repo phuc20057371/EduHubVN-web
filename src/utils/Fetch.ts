@@ -126,7 +126,7 @@ export const API = {
     //Leccturer
     registerLecturer: (data: LecturerRequest) =>
       fetch.post("/api/v1/user/register-lecturer", data),
-    updateLeccturer: (data: LecturerRequest) =>
+    updateLecturer: (data: LecturerRequest) =>
       fetch.post("/api/v1/user/update-lecturer", data),
     getPendingLecturer: () =>
       fetch.get("/api/v1/user/pending-lecturer-profile"),

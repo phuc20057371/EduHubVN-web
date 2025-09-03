@@ -1,43 +1,45 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link, Outlet, useNavigate } from "react-router-dom";
-import { API } from "../utils/Fetch";
-import { setUserProfile } from "../redux/slice/userSlice";
-import { navigateToRole } from "../utils/navigationRole";
+import {
+  AccountCircle,
+  Email,
+  Facebook,
+  Help,
+  KeyboardArrowDown,
+  LinkedIn,
+  LocationOn,
+  Logout,
+  Notifications,
+  Phone,
+  Settings,
+  Support,
+  Twitter,
+} from "@mui/icons-material";
 import {
   AppBar,
-  Toolbar,
-  Typography,
-  Box,
-  Container,
   Avatar,
+  Box,
+  Chip,
+  Container,
+  Divider,
   IconButton,
   Menu,
   MenuItem,
-  Divider,
-  Chip,
   Paper,
+  Toolbar,
+  Typography,
   alpha,
 } from "@mui/material";
-import {
-  AccountCircle,
-  Settings,
-  Logout,
-  HourglassEmpty,
-  Notifications,
-  Help,
-  Support,
-  KeyboardArrowDown,
-  Facebook,
-  Twitter,
-  LinkedIn,
-  Email,
-  LocationOn,
-  Phone,
-} from "@mui/icons-material";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { colors } from "../theme/colors";
 import Logoweb from "../assets/eduhub-02.png";
+import { setUserProfile } from "../redux/slice/userSlice";
+import { UserMessageHandler } from "../services/UserMessageHandler";
+import WebSocketService from "../services/WebSocketService";
+import { colors } from "../theme/colors";
+import { getStatus, getStatusColor } from "../utils/ChangeText";
+import { API } from "../utils/Fetch";
+import { navigateToRole } from "../utils/navigationRole";
 
 const PendingLayout = () => {
   const dispatch = useDispatch();
@@ -59,6 +61,22 @@ const PendingLayout = () => {
     };
     fetchUserData();
   }, []);
+  useEffect(() => {
+    if (userProfile && userProfile.role === "USER") {
+      WebSocketService.connect(
+        userProfile,
+        () => console.log("✅ User WebSocket connected"),
+        (message) => {
+          UserMessageHandler.handleIncomingMessage(message, dispatch);
+        },
+      );
+    }
+
+    // Cleanup khi component unmount
+    return () => {
+      WebSocketService.disconnect();
+    };
+  }, [userProfile]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -170,7 +188,7 @@ const PendingLayout = () => {
           {/* Right Section */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             {/* Status Badge with Enhanced Styling */}
-            <Paper
+            {/* <Paper
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -209,7 +227,7 @@ const PendingLayout = () => {
               >
                 Đang chờ phê duyệt
               </Typography>
-            </Paper>
+            </Paper> */}
 
             {/* Notifications */}
             <IconButton
@@ -268,15 +286,24 @@ const PendingLayout = () => {
                   {userProfile?.lecturer?.fullName || "User"}
                 </Typography>
                 <Chip
-                  label="Chờ duyệt"
+                  label={getStatus(
+                    userProfile?.lecturer?.status ||
+                      userProfile?.educationInstitution?.status ||
+                      userProfile?.partnerOrganization?.status ||
+                      "Chờ duyệt",
+                  )}
                   size="small"
+                  color={getStatusColor(
+                    userProfile?.lecturer?.status ||
+                      userProfile?.educationInstitution?.status ||
+                      userProfile?.partnerOrganization?.status ||
+                      "Chờ duyệt",
+                  )}
                   sx={{
                     height: 18,
                     fontSize: "0.7rem",
                     fontFamily: "'Inter', sans-serif",
                     fontWeight: 500,
-                    backgroundColor: colors.warning[500],
-                    color: "white",
                     mt: 0.5,
                   }}
                 />
@@ -340,17 +367,6 @@ const PendingLayout = () => {
                   >
                     {userProfile?.email}
                   </Typography>
-                  <Chip
-                    label="Đang chờ phê duyệt"
-                    size="small"
-                    sx={{
-                      mt: 1,
-                      backgroundColor: colors.warning[500],
-                      color: "white",
-                      fontFamily: "'Inter', sans-serif",
-                      fontWeight: 500,
-                    }}
-                  />
                 </Box>
               </Box>
             </Box>
@@ -538,7 +554,6 @@ const PendingLayout = () => {
                 <Link
                   key={item}
                   to="#"
-                  
                   style={{
                     display: "block",
                     color: "#a0aec0",

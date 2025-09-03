@@ -24,7 +24,7 @@ import { toast } from "react-toastify";
 import { API } from "../../../utils/Fetch";
 import TextField from "@mui/material/TextField";
 import { setInstitutionPendingCreate } from "../../../redux/slice/InstitutionPendingCreateSlice";
-import { formatDateToVietnamTime } from "../../../utils/ChangeText";
+import { formatDateToVietnamTime, getInstitutionType } from "../../../utils/ChangeText";
 import { setInstitutions } from "../../../redux/slice/InstitutionSlice";
 
 interface InstitutionDetailDialogProps {
@@ -217,10 +217,7 @@ const ApproveInstitutionCreateDialog = ({
             </Avatar>
             <Box>
               <Typography variant="h5" component="div">
-                {institution.institutionName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Chi tiết cơ sở
+               Yêu cầu tạo mới
               </Typography>
               <Box display="flex" justifyContent="space-between">
                 <Typography variant="body2" color="text.secondary">
@@ -378,7 +375,7 @@ const ApproveInstitutionCreateDialog = ({
                         Loại:
                       </Typography>
                       <Typography variant="body2" fontWeight={500}>
-                        {institution.institutionType}
+                        {getInstitutionType(institution.institutionType)}
                       </Typography>
                     </Box>
                     <Divider />

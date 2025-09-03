@@ -1,5 +1,11 @@
+import { setInstitutionPendingCreate } from "../redux/slice/InstitutionPendingCreateSlice";
+import { setInstitutions } from "../redux/slice/InstitutionSlice";
+import { setLecturerPendingCreate } from "../redux/slice/LecturerPendingCreateSlice";
 import { setLecturerPendingUpdate } from "../redux/slice/LecturerPendingUpdateSlice";
 import { setLecturerProfileUpdate } from "../redux/slice/LecturerProfileUpdateSlice";
+import { setLecturers } from "../redux/slice/LecturerSlice";
+import { setPartnerPendingCreate } from "../redux/slice/PartnerPendingCreateSlice";
+import { setPartner } from "../redux/slice/PartnerSlice";
 import { setAttendedCourseRequests } from "../redux/slice/RequestAttendedCourseSlice";
 import { setCertificationRequests } from "../redux/slice/RequestCertificationSlice";
 import { setDegreeRequests } from "../redux/slice/RequestDegreeSlice";
@@ -16,6 +22,20 @@ export const AdminMessageHandler = {
       console.log("🔍 Message type:", parsedMessage.type);
 
       switch (parsedMessage.type) {
+        ///LECTURER
+        case "EDIT_LECTURER":
+          console.log("👨‍🏫 Handling lecturer editing:", parsedMessage.content);
+          const resEL = await API.admin.getLecturerPendingUpdate();
+          dispatch(setLecturerPendingUpdate(resEL.data.data));
+          await handleLecturerProfileUpdate(dispatch, parsedMessage.content.id);
+          break;
+        case "CREATE_LECTURER":
+          console.log("👨‍🏫 Handling lecturer creation:", parsedMessage.content);
+          await handleLecturerCreate(dispatch);
+          break;
+        case "UPDATE_LECTURER":
+          await handleLecturerCreate(dispatch);
+          break;
         /// DEGREE
         case "UPDATE_DEGREE":
           console.log("🎓 Handling degree update:", parsedMessage.content);
@@ -172,14 +192,59 @@ export const AdminMessageHandler = {
           await handleLecturerProfileUpdate(dispatch, parsedMessage.content.id);
           break;
 
-        case "EDIT_LECTURER":
-          console.log("👨‍🏫 Handling lecturer editing:", parsedMessage.content);
-          const resEL = await API.admin.getLecturerPendingUpdate();
-          dispatch(setLecturerPendingUpdate(resEL.data.data));
-          await handleLecturerProfileUpdate(dispatch, parsedMessage.content.id);
-          break;
         default:
           console.log("⚠️ Unknown message type:", parsedMessage.type);
+          break;
+        /// INSTITUTION
+        case "UPDATE_INSTITUTION":
+          console.log("🏢 Handling institution update:", parsedMessage.content);
+          await handleInstitutionCreate(dispatch);
+          break;
+
+        case "CREATE_INSTITUTION":
+          console.log(
+            "🏢 Handling institution creation:",
+            parsedMessage.content,
+          );
+          await handleInstitutionCreate(dispatch);
+
+          break;
+
+        case "EDIT_INSTITUTION":
+          console.log(
+            "🏢 Handling institution editing:",
+            parsedMessage.content,
+          );
+
+          break;
+
+        case "DELETE_INSTITUTION":
+          console.log(
+            "🏢 Handling institution deletion:",
+            parsedMessage.content,
+          );
+
+          break;
+
+        /// PARTNER
+        case "UPDATE_PARTNER":
+          console.log("🤝 Handling partner update:", parsedMessage.content);
+          await handlePartnerCreate(dispatch);
+          break;
+
+        case "CREATE_PARTNER":
+          console.log("🤝 Handling partner creation:", parsedMessage.content);
+          await handlePartnerCreate(dispatch);
+          break;
+
+        case "EDIT_PARTNER":
+          console.log("🤝 Handling partner editing:", parsedMessage.content);
+
+          break;
+
+        case "DELETE_PARTNER":
+          console.log("🤝 Handling partner deletion:", parsedMessage.content);
+
           break;
       }
     } catch (error) {
@@ -217,6 +282,29 @@ const handleLecturerProfileUpdate = async (
   dispatch: any,
   lecturerId: string,
 ) => {
+  const res = await API.admin.getLecturerPendingUpdate();
+  dispatch(setLecturerPendingUpdate(res.data.data));
   const response = await API.admin.getLecturerAllProfile({ id: lecturerId });
   dispatch(setLecturerProfileUpdate(response.data.data));
+};
+
+const handleLecturerCreate = async (dispatch: any) => {
+  const res = await API.admin.getLecturerPendingCreate();
+  dispatch(setLecturerPendingCreate(res.data.data));
+  const response = await API.admin.getAllLecturers();
+  dispatch(setLecturers(response.data.data));
+};
+
+const handleInstitutionCreate = async (dispatch: any) => {
+  const res = await API.admin.getInstitutionPendingCreate();
+  dispatch(setInstitutionPendingCreate(res.data.data));
+  const response = await API.admin.getAllInstitutions();
+  dispatch(setInstitutions(response.data.data));
+};
+
+const handlePartnerCreate = async (dispatch: any) => {
+  const res = await API.admin.getPartnerPendingCreate();
+  dispatch(setPartnerPendingCreate(res.data.data));
+  const response = await API.admin.getAllPartners();
+  dispatch(setPartner(response.data.data));
 };

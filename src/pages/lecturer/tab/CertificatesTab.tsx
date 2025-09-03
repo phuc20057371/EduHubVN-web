@@ -103,7 +103,7 @@ const CertificatesTab = ({
   };
 
   const handleDelete = (item: any) => {
-    setItemToDelete(item);
+    setItemToDelete(item.original);
     setDeleteConfirmOpen(true);
   };
 
@@ -171,7 +171,7 @@ const CertificatesTab = ({
       {certificates && certificates.length > 0 ? (
         certificates.map((item: any) => (
           <Accordion
-            key={item.id}
+            key={item.original.id}
             className="transition-all duration-300"
             sx={{
               borderRadius: 3,
@@ -217,34 +217,34 @@ const CertificatesTab = ({
                       className="font-bold"
                       sx={{ color: "white" }}
                     >
-                      {item.name}
+                      {item.original.name}
                     </Typography>
                     <Typography
                       variant="body2"
                       sx={{ color: "rgba(255,255,255,0.9)" }}
                     >
-                      {item.issuedBy}
+                      {item.original.issuedBy}
                     </Typography>
-                    {item.referenceId && (
+                    {item.original.referenceId && (
                       <Typography
                         variant="caption"
                         sx={{ color: "rgba(255,255,255,0.7)" }}
                       >
-                        Reference ID: {item.referenceId}
+                        Reference ID: {item.original.referenceId}
                       </Typography>
                     )}
                   </div>
                 </div>
                 <Chip
-                  label={getStatus(item.status)}
+                  label={getStatus(item.original.status)}
                   size="small"
                   sx={{
                     fontWeight: 600,
                     background: "rgba(255,255,255,0.9)",
                     color:
-                      item.status === "APPROVED"
+                      item.original.status === "APPROVED"
                         ? "#047857"
-                        : item.status === "PENDING"
+                        : item.original.status === "PENDING"
                           ? "#D97706"
                           : "#DC2626",
                   }}
@@ -279,11 +279,11 @@ const CertificatesTab = ({
                         Ngày cấp
                       </Typography>
                       <Typography variant="body2" className="font-medium">
-                        {formatDate(item.issueDate)}
+                        {formatDate(item.original.issueDate)}
                       </Typography>
                     </div>
                   </div>
-                  {item.expiryDate && (
+                  {item.original.expiryDate && (
                     <div
                       className="flex items-center gap-3 rounded-lg p-3"
                       style={{
@@ -305,7 +305,7 @@ const CertificatesTab = ({
                           Ngày hết hạn
                         </Typography>
                         <Typography variant="body2" className="font-medium">
-                          {formatDate(item.expiryDate)}
+                          {formatDate(item.original.expiryDate) || "Không thời hạn"}
                         </Typography>
                       </div>
                     </div>
@@ -328,13 +328,13 @@ const CertificatesTab = ({
                         Cấp độ
                       </Typography>
                       <Typography variant="body2" className="font-medium">
-                        {item.level}
+                        {item.original.level}
                       </Typography>
                     </div>
                   </div>
                 </div>
 
-                {item.description && (
+                {item.original.description && (
                   <Box
                     className="mb-4 rounded-lg p-4"
                     sx={{ background: `${colors.primary[25]}` }}
@@ -356,12 +356,12 @@ const CertificatesTab = ({
                         lineHeight: 1.6,
                       }}
                     >
-                      {item.description}
+                      {item.original.description}
                     </Typography>
                   </Box>
                 )}
 
-                {item.adminNote && (
+                {item.original.adminNote && (
                   <Box
                     className="mb-4 rounded-lg p-3"
                     sx={{
@@ -383,19 +383,19 @@ const CertificatesTab = ({
                       className="mt-1"
                       sx={{ color: "#92400E" }}
                     >
-                      {item.adminNote}
+                      {item.original.adminNote}
                     </Typography>
                   </Box>
                 )}
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-3">
-                  {item.certificateUrl && (
+                  {item.original.certificateUrl && (
                     <Button
                       variant="contained"
                       size="small"
                       startIcon={<LinkIcon />}
-                      href={item.certificateUrl}
+                      href={item.original.certificateUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{
@@ -418,7 +418,7 @@ const CertificatesTab = ({
                     variant="outlined"
                     size="small"
                     startIcon={<Edit />}
-                    onClick={() => handleEdit(item)}
+                    onClick={() => handleEdit(item.original)}
                     sx={{
                       borderColor: "#10B981",
                       color: "#10B981",

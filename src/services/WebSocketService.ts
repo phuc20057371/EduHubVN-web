@@ -36,7 +36,6 @@ class WebSocketService {
     this.client.connect({}, () => {
       console.log("✅ WebSocket connected");
 
-      // Ví dụ: mặc định subscribe kênh chung
       this.client?.subscribe("/topic/messages", (message) => {
         if (onMessage && message.body) {
           onMessage(message.body);

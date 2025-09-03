@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet } from "react-router-dom";
-import { API } from "../utils/Fetch";
 import { setUserProfile } from "../redux/slice/userSlice";
+import { API } from "../utils/Fetch";
 const BlankLayout = () => {
   const dispatch = useDispatch();
-  const userProfile = useSelector((state: any) => state.user);
+  const userProfile = useSelector((state: any) => state.userProfile);
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -20,6 +20,8 @@ const BlankLayout = () => {
     };
     fetchUserData();
   }, []);
+
+
   return (
     <div>
       <div></div>

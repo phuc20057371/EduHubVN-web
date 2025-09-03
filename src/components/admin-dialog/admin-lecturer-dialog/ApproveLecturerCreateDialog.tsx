@@ -1205,13 +1205,18 @@ const ApproveLecturerCreateDialog: React.FC<
               <CardContent sx={{ maxHeight: 400, overflow: "auto" }}>
                 {certificates.length > 0 ? (
                   certificates.map((cert) => {
-                    const status = getStatus(certStates[cert.id]?.status);
+                    const status = certStates[cert.id]?.status;
                     return (
                       <Accordion
                         key={cert.id}
                         sx={{
                           mb: 1,
-                          backgroundColor: getStatusColor(status),
+                          backgroundColor:
+                            status === "APPROVED"
+                              ? "#e6f4ea"
+                              : status === "REJECTED"
+                                ? "#fdeaea"
+                                : "#fff",
                         }}
                       >
                         <AccordionSummary
@@ -1229,15 +1234,9 @@ const ApproveLecturerCreateDialog: React.FC<
                               {cert.name} - {cert.issuedBy}
                             </Typography>
                             <Chip
-                              label={status}
+                              label={getStatus(status)}
                               size="small"
-                              color={
-                                status === "APPROVED"
-                                  ? "success"
-                                  : status === "REJECTED"
-                                    ? "error"
-                                    : "warning"
-                              }
+                              color={getStatusColor(status)}
                               sx={{ ml: 1 }}
                             />
                           </Box>

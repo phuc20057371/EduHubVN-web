@@ -15,7 +15,10 @@ import { toast } from "react-toastify";
 import type { DegreeRequest } from "../../types/DegreeRequest";
 import { API } from "../../utils/Fetch";
 import { validateDegreeInfo } from "../../utils/Validate";
-import { degreeLevelsAutoComplete, majorsAutoComplete } from "../../utils/AutoComplete";
+import {
+  degreeLevelsAutoComplete,
+  majorsAutoComplete,
+} from "../../utils/AutoComplete";
 
 const style = {
   position: "absolute" as const,
@@ -218,18 +221,18 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
             sx={{
               position: "absolute",
               top: {
-                xs: 8,    // Mobile: closer to top
-                md: 12,   // Desktop: more space from top
+                xs: 8, // Mobile: closer to top
+                md: 12, // Desktop: more space from top
               },
               right: {
-                xs: 8,    // Mobile: closer to right
-                md: 12,   // Desktop: more space from right
+                xs: 8, // Mobile: closer to right
+                md: 12, // Desktop: more space from right
               },
               zIndex: 10,
               minWidth: "auto",
               width: {
-                xs: 32,   // Mobile: smaller button
-                md: 40,   // Desktop: larger button
+                xs: 32, // Mobile: smaller button
+                md: 40, // Desktop: larger button
               },
               height: {
                 xs: 32,
@@ -246,12 +249,14 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
               transition: "all 0.2s ease-in-out",
             }}
           >
-            <Close sx={{ 
-              fontSize: {
-                xs: 18,   // Mobile: smaller icon
-                md: 20,   // Desktop: larger icon
-              }
-            }} />
+            <Close
+              sx={{
+                fontSize: {
+                  xs: 18, // Mobile: smaller icon
+                  md: 20, // Desktop: larger icon
+                },
+              }}
+            />
           </Button>
 
           <Box sx={{ position: "relative", zIndex: 1 }}>
@@ -455,7 +460,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                 >
                   <TextField
                     fullWidth
-                    label="Mã tham chiếu"
+                    label="Reference Id"
                     value={form.referenceId}
                     onChange={(e) =>
                       handleChange("referenceId", e.target.value)
@@ -466,7 +471,6 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "12px",
                         backgroundColor: "#f8fafc",
-                        border: "2px solid transparent",
                         transition: "all 0.2s ease-in-out",
                         "&:hover": {
                           backgroundColor: "#f0fdfa",
@@ -474,7 +478,6 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                         },
                         "&.Mui-focused": {
                           backgroundColor: "#ffffff",
-                          borderColor: "#14b8a6",
                           boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                         },
                       },
@@ -500,7 +503,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "12px",
                         backgroundColor: "#f8fafc",
-                        border: "2px solid transparent",
+                  
                         transition: "all 0.2s ease-in-out",
                         "&:hover": {
                           backgroundColor: "#f0fdfa",
@@ -508,7 +511,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                         },
                         "&.Mui-focused": {
                           backgroundColor: "#ffffff",
-                          borderColor: "#14b8a6",
+               
                           boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                         },
                       },
@@ -541,7 +544,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                             "& .MuiOutlinedInput-root": {
                               borderRadius: "12px",
                               backgroundColor: "#f8fafc",
-                              border: "2px solid transparent",
+                 
                               transition: "all 0.2s ease-in-out",
                               "&:hover": {
                                 backgroundColor: "#f0fdfa",
@@ -549,7 +552,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                               },
                               "&.Mui-focused": {
                                 backgroundColor: "#ffffff",
-                                borderColor: "#14b8a6",
+                       
                                 boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                               },
                             },
@@ -582,7 +585,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                             "& .MuiOutlinedInput-root": {
                               borderRadius: "12px",
                               backgroundColor: "#f8fafc",
-                              border: "2px solid transparent",
+                      
                               transition: "all 0.2s ease-in-out",
                               "&:hover": {
                                 backgroundColor: "#f0fdfa",
@@ -590,7 +593,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                               },
                               "&.Mui-focused": {
                                 backgroundColor: "#ffffff",
-                                borderColor: "#14b8a6",
+                   
                                 boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                               },
                             },
@@ -620,7 +623,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "12px",
                         backgroundColor: "#f8fafc",
-                        border: "2px solid transparent",
+
                         transition: "all 0.2s ease-in-out",
                         "&:hover": {
                           backgroundColor: "#f0fdfa",
@@ -628,7 +631,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                         },
                         "&.Mui-focused": {
                           backgroundColor: "#ffffff",
-                          borderColor: "#14b8a6",
+
                           boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                         },
                       },
@@ -696,7 +699,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "12px",
                         backgroundColor: "#f8fafc",
-                        border: "2px solid transparent",
+              
                         transition: "all 0.2s ease-in-out",
                         "&:hover": {
                           backgroundColor: "#f0fdfa",
@@ -704,7 +707,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                         },
                         "&.Mui-focused": {
                           backgroundColor: "#ffffff",
-                          borderColor: "#14b8a6",
+          
                           boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                         },
                       },
@@ -739,7 +742,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                         },
                         "&.Mui-focused": {
                           backgroundColor: "#ffffff",
-                          borderColor: "#14b8a6",
+      
                           boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                         },
                       },
@@ -961,7 +964,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "12px",
                       backgroundColor: "#f8fafc",
-                      border: "2px solid transparent",
+            
                       transition: "all 0.2s ease-in-out",
                       "&:hover": {
                         backgroundColor: "#f0fdfa",
@@ -969,7 +972,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                       },
                       "&.Mui-focused": {
                         backgroundColor: "#ffffff",
-                        borderColor: "#14b8a6",
+           
                         boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                       },
                     },

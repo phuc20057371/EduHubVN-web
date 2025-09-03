@@ -49,7 +49,14 @@ import { validateLecturerInfo } from "../../utils/Validate";
 import { useSelector } from "react-redux";
 import { colors } from "../../theme/colors";
 import { formatDate, getAcademicRank } from "../../utils/ChangeText";
-import { jobFieldAutoComplete, majorsAutoComplete } from "../../utils/AutoComplete";
+import {
+  jobFieldAutoComplete,
+  majorsAutoComplete,
+} from "../../utils/AutoComplete";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { vi } from "date-fns/locale";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 const RegisterLecturer = () => {
   const steps = [
@@ -684,23 +691,32 @@ const RegisterLecturer = () => {
                     gap: 4,
                   }}
                 >
-                  <TextField
-                    fullWidth
-                    label="Ngày sinh"
-                    type="date"
-                    value={dateOfBirth}
-                    onChange={(e) => setDateOfBirth(e.target.value)}
-                    required
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
-                        backgroundColor: colors.background.secondary,
-                        border: `1px solid ${colors.border.light}`,
-                      },
-                    }}
-                  />
+                  <LocalizationProvider
+                    dateAdapter={AdapterDateFns}
+                    adapterLocale={vi}
+                  >
+                    <DatePicker
+                      label="Ngày sinh"
+                      value={dateOfBirth}
+                      onChange={(newValue) => setDateOfBirth(newValue)}
+                      format="dd/MM/yyyy"
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          required: true,
+                          variant: "outlined",
+                          InputLabelProps: { shrink: true },
+                          sx: {
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: 3,
+                              backgroundColor: "#f9f9f9",
+                              border: `1px solid #ccc`,
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
                   <TextField
                     select
                     fullWidth
@@ -952,7 +968,7 @@ const RegisterLecturer = () => {
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
                     backgroundColor: colors.background.secondary,
-                    border: `1px solid ${colors.border.light}`,
+                    
                     transition: "all 0.3s ease",
                     "&:hover": {
                       backgroundColor: colors.background.primary,
@@ -960,7 +976,6 @@ const RegisterLecturer = () => {
                     },
                     "&.Mui-focused": {
                       backgroundColor: colors.background.primary,
-                      borderColor: colors.primary[500],
                       boxShadow: `0 4px 20px ${alpha(colors.primary[500], 0.15)}`,
                     },
                   },
@@ -1171,20 +1186,14 @@ const RegisterLecturer = () => {
 
                             <div className="mb-4 space-y-2">
                               <div className="flex flex-col sm:flex-row sm:justify-between">
-                                <Typography
-                                  variant="body2"
-                                  className="text-gray-600"
-                                >
-                                  <span className="font-semibold">Ngành:</span>{" "}
-                                  {degree.major}
-                                </Typography>
+                                
                               </div>
                               <div className="flex flex-col sm:flex-row sm:justify-between">
                                 <Typography
                                   variant="body2"
                                   className="text-gray-600"
                                 >
-                                  <span className="font-semibold">Trường:</span>{" "}
+                                  <span className="font-semibold">Cấp bởi:</span>{" "}
                                   {degree.institution}
                                 </Typography>
                               </div>
@@ -1682,7 +1691,7 @@ const RegisterLecturer = () => {
 
           <Box sx={{ p: 6, position: "relative", zIndex: 1 }}>
             <Alert
-              severity="info"
+              severity="warning"
               sx={{
                 mb: 6,
                 borderRadius: 3,

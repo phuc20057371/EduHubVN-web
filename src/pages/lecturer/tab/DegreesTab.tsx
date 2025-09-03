@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Add,
   Business,
@@ -18,21 +17,22 @@ import {
   Box,
   Button,
   Chip,
-  Typography,
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
+  DialogContent,
   DialogContentText,
+  DialogTitle,
+  Typography,
 } from "@mui/material";
-import { colors } from "../../../theme/colors";
-import { getStatus } from "../../../utils/ChangeText";
-import UploadDegreeModal from "../../../components/lecturer-dialog/CreateDegreeModal";
-import { API } from "../../../utils/Fetch";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+import UploadDegreeModal from "../../../components/lecturer-dialog/CreateDegreeModal";
 import { setLecturerProfile } from "../../../redux/slice/LecturerProfileSlice";
+import { colors } from "../../../theme/colors";
 import type { Degree } from "../../../types/Degree";
+import { getStatus } from "../../../utils/ChangeText";
+import { API } from "../../../utils/Fetch";
 
 interface DegreesTabProps {
   degrees: Degree[];
@@ -100,13 +100,12 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
   };
 
   const handleDelete = (item: any) => {
-    setItemToDelete(item);
+    setItemToDelete(item.original);
     setDeleteConfirmOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     if (!itemToDelete) return;
-
     try {
       const response = await API.user.deleteDegree(itemToDelete.id);
       if (response.data.success) {
@@ -169,7 +168,7 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
       {degrees && degrees.length > 0 ? (
         degrees.map((item: any) => (
           <Accordion
-            key={item.id}
+            key={item.original.id}
             className="transition-all duration-300"
             sx={{
               borderRadius: 3,
@@ -215,34 +214,34 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                       className="font-bold"
                       sx={{ color: "white" }}
                     >
-                      {item.name}
+                      {item.original.name}
                     </Typography>
                     <Typography
                       variant="body2"
                       sx={{ color: "rgba(255,255,255,0.9)" }}
                     >
-                      {item.major}
+                      {item.original.major}
                     </Typography>
-                    {item.referenceId && (
+                    {item.original.referenceId && (
                       <Typography
                         variant="caption"
                         sx={{ color: "rgba(255,255,255,0.7)" }}
                       >
-                        Reference ID: {item.referenceId}
+                        Reference ID: {item.original.referenceId}
                       </Typography>
                     )}
                   </div>
                 </div>
                 <Chip
-                  label={getStatus(item.status)}
+                  label={getStatus(item.original.status)}
                   size="small"
                   sx={{
                     fontWeight: 600,
                     background: "rgba(255,255,255,0.9)",
                     color:
-                      item.status === "APPROVED"
+                      item.original.status === "APPROVED"
                         ? "#047857"
-                        : item.status === "PENDING"
+                        : item.original.status === "PENDING"
                           ? "#D97706"
                           : "#DC2626",
                   }}
@@ -277,7 +276,7 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                         Trường/Tổ chức
                       </Typography>
                       <Typography variant="body2" className="font-medium">
-                        {item.institution}
+                        {item.original.institution}
                       </Typography>
                     </div>
                   </div>
@@ -302,7 +301,8 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                         Thời gian
                       </Typography>
                       <Typography variant="body2" className="font-medium">
-                        {item.startYear} - {item.graduationYear}
+                        {item.original.startYear} -{" "}
+                        {item.original.graduationYear}
                       </Typography>
                     </div>
                   </div>
@@ -324,13 +324,13 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                         Trình độ
                       </Typography>
                       <Typography variant="body2" className="font-medium">
-                        {item.level}
+                        {item.original.level}
                       </Typography>
                     </div>
                   </div>
                 </div>
 
-                {item.description && (
+                {item.original.description && (
                   <Box
                     className="mb-4 rounded-lg p-4"
                     sx={{ background: `${colors.primary[25]}` }}
@@ -352,12 +352,12 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                         lineHeight: 1.6,
                       }}
                     >
-                      {item.description}
+                      {item.original.description}
                     </Typography>
                   </Box>
                 )}
 
-                {item.adminNote && (
+                {item.original.adminNote && (
                   <Box
                     className="mb-4 rounded-lg p-3"
                     sx={{
@@ -379,19 +379,19 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                       className="mt-1"
                       sx={{ color: "#92400E" }}
                     >
-                      {item.adminNote}
+                      {item.original.adminNote}
                     </Typography>
                   </Box>
                 )}
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-3">
-                  {item.url && (
+                  {item.original.url && (
                     <Button
                       variant="contained"
                       size="small"
                       startIcon={<LinkIcon />}
-                      href={item.url}
+                      href={item.original.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{
@@ -413,7 +413,7 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                     variant="outlined"
                     size="small"
                     startIcon={<Edit />}
-                    onClick={() => handleEdit(item)}
+                    onClick={() => handleEdit(item.original)}
                     sx={{
                       borderColor: colors.primary[500],
                       color: colors.primary[500],

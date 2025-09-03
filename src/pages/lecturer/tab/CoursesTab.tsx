@@ -64,7 +64,7 @@ const CoursesTab = ({
   const [deleteType, setDeleteType] = useState<'owned' | 'attended'>('owned');
 
   const handleDelete = (item: any, type: 'owned' | 'attended') => {
-    setItemToDelete(item);
+    setItemToDelete(item.original);
     setDeleteType(type);
     setDeleteConfirmOpen(true);
   };
@@ -104,7 +104,7 @@ const CoursesTab = ({
 
   const renderCourseCard = (item: any, isOwned: boolean = false) => (
     <Accordion
-      key={item.id}
+      key={item.original.id}
       className="transition-all duration-300"
       sx={{
         borderRadius: 3,
@@ -170,7 +170,7 @@ const CoursesTab = ({
                   mb: 0.5,
                 }}
               >
-                {item.name || item.title}
+                {item.original.name || item.original.title}
               </Typography>
               <Typography
                 variant="body2"
@@ -179,22 +179,22 @@ const CoursesTab = ({
                   fontSize: "0.875rem",
                 }}
               >
-                {isOwned ? `Chủ đề: ${item.topic || 'Không xác định'}` : `Tổ chức: ${item.organizer || 'Không xác định'}`}
+                {isOwned ? `Chủ đề: ${item.original.topic || 'Không xác định'}` : `Tổ chức: ${item.original.organizer || 'Không xác định'}`}
               </Typography>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Chip
-              label={getStatus(item.status)}
+              label={getStatus(item.original.status)}
               size="small"
               sx={{
                 fontWeight: 600,
                 background: "rgba(255,255,255,0.9)",
                 height: "28px",
                 color:
-                  item.status === "APPROVED"
+                  item.original.status === "APPROVED"
                     ? "#047857"
-                    : item.status === "PENDING"
+                    : item.original.status === "PENDING"
                       ? "#D97706"
                       : "#DC2626",
               }}
@@ -234,7 +234,7 @@ const CoursesTab = ({
                 <Button
                   variant="outlined"
                   size="small"
-                  onClick={() => onEdit(item)}
+                  onClick={() => onEdit(item.original)}
                   sx={{
                     minWidth: "auto",
                     width: 32,
@@ -275,11 +275,11 @@ const CoursesTab = ({
           </Box>
           
           {/* Thumbnail - Compact display */}
-          {isOwned && item.thumbnailUrl && (
+          {isOwned && item.original.thumbnailUrl && (
             <Box sx={{ mb: 2 }}>
               <img
-                src={item.thumbnailUrl}
-                alt={item.title || item.name}
+                src={item.original.thumbnailUrl}
+                alt={item.original.title || item.original.name}
                 style={{
                   width: "100%",
                   maxWidth: "150px",
@@ -295,10 +295,10 @@ const CoursesTab = ({
           {/* Chips Section - Compact */}
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
             {/* Price as Chip */}
-            {isOwned && item.price && (
+            {isOwned && item.original.price && (
               <Chip
                 icon={<AttachMoney sx={{ fontSize: 16, color: "white !important" }} />}
-                label={`${item.price.toLocaleString('vi-VN')} VNĐ`}
+                label={`${item.original.price.toLocaleString('vi-VN')} VNĐ`}
                 size="small"
                 sx={{
                   background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
@@ -312,10 +312,10 @@ const CoursesTab = ({
             )}
 
             {/* Language as Chip */}
-            {isOwned && item.language && (
+            {isOwned && item.original.language && (
               <Chip
                 icon={<Language sx={{ fontSize: 16, color: "white !important" }} />}
-                label={item.language === "Vietnamese" ? "Tiếng Việt" : item.language}
+                label={item.original.language === "Vietnamese" ? "Tiếng Việt" : item.original.language}
                 size="small"
                 sx={{
                   background: "linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)",
@@ -333,12 +333,12 @@ const CoursesTab = ({
           <Box sx={{ mb: 2 }}>
             <div className="flex flex-wrap gap-2">
               {/* Link khóa học - Course URL */}
-              {isOwned && item.courseUrl && (
+              {isOwned && item.original.courseUrl && (
                 <Button
                   variant="contained"
                   size="small"
                   startIcon={<LinkIcon />}
-                  href={item.courseUrl}
+                  href={item.original.courseUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   sx={{
@@ -360,12 +360,12 @@ const CoursesTab = ({
               )}
 
               {/* Xem tài liệu - Content URL */}
-              {((!isOwned && (item.url || item.contentUrl)) || (isOwned && item.contentUrl)) && (
+              {((!isOwned && (item.original.url || item.original.contentUrl)) || (isOwned && item.original.contentUrl)) && (
                 <Button
                   variant="contained"
                   size="small"
                   startIcon={<Description />}
-                  href={isOwned ? item.contentUrl : (item.url || item.contentUrl)}
+                  href={isOwned ? item.original.contentUrl : (item.original.url || item.original.contentUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
                   sx={{
@@ -394,7 +394,7 @@ const CoursesTab = ({
           <Box sx={{ mb: 2 }}>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
               {/* Số giờ (for attended courses) */}
-              {!isOwned && item.numberOfHour && (
+              {!isOwned && item.original.numberOfHour && (
                 <div
                   className="flex items-center gap-3 rounded-lg p-3"
                   style={{
@@ -415,14 +415,14 @@ const CoursesTab = ({
                       Số giờ
                     </Typography>
                     <Typography variant="body2" className="font-medium">
-                      {item.numberOfHour} giờ
+                      {item.original.numberOfHour} giờ
                     </Typography>
                   </div>
                 </div>
               )}
 
               {/* Loại khóa học */}
-              {item.courseType && (
+              {item.original.courseType && (
                 <div
                   className="flex items-center gap-3 rounded-lg p-3"
                   style={{
@@ -443,14 +443,14 @@ const CoursesTab = ({
                       Loại khóa học
                     </Typography>
                     <Typography variant="body2" className="font-medium">
-                      {getCourseType(item.courseType)}
+                      {getCourseType(item.original.courseType)}
                     </Typography>
                   </div>
                 </div>
               )}
 
               {/* Quy mô */}
-              {item.scale && (
+              {item.original.scale && (
                 <div
                   className="flex items-center gap-3 rounded-lg p-3"
                   style={{
@@ -471,14 +471,14 @@ const CoursesTab = ({
                       Quy mô
                     </Typography>
                     <Typography variant="body2" className="font-medium">
-                      {getScale(item.scale)}
+                      {getScale(item.original.scale)}
                     </Typography>
                   </div>
                 </div>
               )}
 
               {/* Trình độ (chỉ hiển thị cho owned courses) */}
-              {isOwned && item.level && (
+              {isOwned && item.original.level && (
                 <div
                   className="flex items-center gap-3 rounded-lg p-3"
                   style={{
@@ -499,7 +499,7 @@ const CoursesTab = ({
                       Trình độ
                     </Typography>
                     <Typography variant="body2" className="font-medium">
-                      {item.level}
+                      {item.original.level}
                     </Typography>
                   </div>
                 </div>
@@ -546,8 +546,8 @@ const CoursesTab = ({
                     Thời gian
                   </Typography>
                   <Typography variant="body2" className="font-medium">
-                    {formatDate(item.startDate)} -{" "}
-                    {formatDate(item.endDate)}
+                    {formatDate(item.original.startDate)} -{" "}
+                    {formatDate(item.original.endDate)}
                   </Typography>
                 </div>
               </div>
@@ -573,21 +573,21 @@ const CoursesTab = ({
                     {isOwned ? "Địa điểm/Link" : "Địa điểm"}
                   </Typography>
                   <Typography variant="body2" className="font-medium">
-                    {item.location || item.address || "Không có thông tin"}
+                    {item.original.location || item.original.address || "Không có thông tin"}
                   </Typography>
                 </div>
               </div>
 
               {/* Hình thức học as simple checkbox (chỉ hiển thị cho owned courses) */}
-              {isOwned && typeof item.isOnline !== 'undefined' && (
+              {isOwned && typeof item.original.isOnline !== 'undefined' && (
                 <div className="flex items-center gap-2">
-                  {item.isOnline ? (
+                  {item.original.isOnline ? (
                     <CheckBox sx={{ color: "#10B981", fontSize: 20 }} />
                   ) : (
                     <CheckBoxOutlineBlank sx={{ color: "#6B7280", fontSize: 20 }} />
                   )}
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {item.isOnline ? "Online" : "Offline"}
+                    {item.original.isOnline ? "Online" : "Offline"}
                   </Typography>
                 </div>
               )}
@@ -595,7 +595,7 @@ const CoursesTab = ({
           </Box>
 
           {/* Yêu cầu (chỉ hiển thị cho owned courses) - Compact */}
-          {isOwned && item.requirements && (
+          {isOwned && item.original.requirements && (
             <Box
               sx={{ 
                 mb: 2,
@@ -623,13 +623,13 @@ const CoursesTab = ({
                   lineHeight: 1.6,
                 }}
               >
-                {item.requirements}
+                {item.original.requirements}
               </Typography>
             </Box>
           )}
 
           {/* Mô tả - Compact */}
-          {item.description && (
+          {item.original.description && (
             <Box
               sx={{ 
                 mb: 2,
@@ -659,13 +659,13 @@ const CoursesTab = ({
                   lineHeight: 1.6,
                 }}
               >
-                {item.description}
+                {item.original.description}
               </Typography>
             </Box>
           )}
 
           {/* Admin Note - Compact */}
-          {item.adminNote && (
+          {item.original.adminNote && (
             <Box
               sx={{
                 p: 3,
@@ -689,7 +689,7 @@ const CoursesTab = ({
                 variant="body2"
                 sx={{ color: "#92400E" }}
               >
-                {item.adminNote}
+                {item.original.adminNote}
               </Typography>
             </Box>
           )}
