@@ -18,11 +18,9 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -39,39 +37,7 @@ import {
   getStatusColor,
 } from "../../../utils/ChangeText";
 import { API } from "../../../utils/Fetch";
-
-interface ConfirmDialogProps {
-  open: boolean;
-  title: string;
-  content: React.ReactNode;
-  onClose: () => void;
-  onConfirm: () => void;
-}
-
-const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
-  open,
-  title,
-  content,
-  onClose,
-  onConfirm,
-}) => (
-  <Dialog open={open} onClose={onClose}>
-    <DialogTitle>{title}</DialogTitle>
-    <DialogContent>
-      {typeof content === "string" ? (
-        <DialogContentText>{content}</DialogContentText>
-      ) : (
-        content
-      )}
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose}>Hủy</Button>
-      <Button onClick={onConfirm} color="primary" variant="contained">
-        Xác nhận
-      </Button>
-    </DialogActions>
-  </Dialog>
-);
+import ConfirmDialog from "../../general-dialog/ConfirmDialog";
 
 export interface ApproveLecturerCreateDialogProps {
   open: boolean;
@@ -106,6 +72,7 @@ const ApproveLecturerCreateDialog: React.FC<
     type: "Degree" | "Certification" | "Lecturer";
     note?: string;
   } | null>(null);
+  const [rejectNote, setRejectNote] = useState("");
   const [loading, setLoading] = useState(false);
   // Load from localStorage on open
   // const domain = window.location.hostname;
@@ -238,14 +205,15 @@ const ApproveLecturerCreateDialog: React.FC<
   };
   const handleReject = (id: string, type: "Degree" | "Certification") => {
     setConfirmType("reject");
+    const note = type === "Degree"
+      ? (degreeStates[id]?.note ?? "")
+      : (certStates[id]?.note ?? "");
     setConfirmTarget({
       id,
       type,
-      note:
-        type === "Degree"
-          ? (degreeStates[id]?.note ?? "")
-          : (certStates[id]?.note ?? ""),
+      note,
     });
+    setRejectNote(note);
     setConfirmOpen(true);
   };
   // Approve/Reject for all types
@@ -388,6 +356,7 @@ const ApproveLecturerCreateDialog: React.FC<
     setConfirmOpen(false);
     setConfirmType(null);
     setConfirmTarget(null);
+    setRejectNote("");
   };
   // Refresh status to PENDING
   const handleRefresh = (
@@ -615,6 +584,7 @@ const ApproveLecturerCreateDialog: React.FC<
                           type: "Lecturer",
                           note: "",
                         });
+                        setRejectNote("");
                         setConfirmOpen(true);
                       }}
                     >
@@ -1698,57 +1668,45 @@ const ApproveLecturerCreateDialog: React.FC<
 
       <ConfirmDialog
         open={confirmOpen}
+        type={confirmType || "approve"}
         title={
           confirmType === "approve" ? "Xác nhận duyệt" : "Xác nhận từ chối"
         }
-        content={
-          confirmType === "approve" ? (
-            <Box sx={{ width: 400 }}>
-              Bạn có chắc chắn muốn duyệt hồ sơ này?
-            </Box>
-          ) : (
-            <Box sx={{ width: 400 }}>
-              <div>Bạn có chắc chắn muốn từ chối hồ sơ này?</div>
-              <TextField
-                label="Lý do từ chối"
-                size="small"
-                value={confirmTarget?.note ?? ""}
-                onChange={(e) => {
-                  setConfirmTarget((t) =>
-                    t ? { ...t, note: e.target.value } : t,
-                  );
-                  if (confirmTarget?.type === "Degree") {
-                    setDegreeStates((prev) => ({
-                      ...prev,
-                      [confirmTarget.id]: {
-                        ...prev[confirmTarget.id],
-                        note: e.target.value,
-                      },
-                    }));
-                  } else if (confirmTarget?.type === "Certification") {
-                    setCertStates((prev) => ({
-                      ...prev,
-                      [confirmTarget.id]: {
-                        ...prev[confirmTarget.id],
-                        note: e.target.value,
-                      },
-                    }));
-                  }
-                }}
-                fullWidth
-                sx={{ mt: 2 }}
-              />
-            </Box>
-          )
+        message={
+          confirmType === "approve" 
+            ? "Bạn có chắc chắn muốn duyệt hồ sơ này?"
+            : "Bạn có chắc chắn muốn từ chối hồ sơ này?"
         }
+        loading={loading}
+        rejectNote={rejectNote}
+        onRejectNoteChange={setRejectNote}
+        rejectNoteRequired={confirmType === "reject"}
         onClose={handleCloseConfirm}
         onConfirm={() => {
-          if (
-            confirmType === "reject" &&
-            (!confirmTarget?.note || confirmTarget.note.trim() === "")
-          ) {
+          if (confirmType === "reject" && !rejectNote.trim()) {
             toast.error("Vui lòng nhập lý do từ chối.");
             return;
+          }
+          // Cập nhật note vào confirmTarget và states
+          if (confirmTarget && confirmType === "reject") {
+            setConfirmTarget(t => t ? { ...t, note: rejectNote } : t);
+            if (confirmTarget.type === "Degree") {
+              setDegreeStates(prev => ({
+                ...prev,
+                [confirmTarget.id]: {
+                  ...prev[confirmTarget.id],
+                  note: rejectNote,
+                },
+              }));
+            } else if (confirmTarget.type === "Certification") {
+              setCertStates(prev => ({
+                ...prev,
+                [confirmTarget.id]: {
+                  ...prev[confirmTarget.id],
+                  note: rejectNote,
+                },
+              }));
+            }
           }
           handleConfirm();
         }}

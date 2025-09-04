@@ -61,7 +61,7 @@ import {
   jobFieldAutoComplete,
   majorsAutoComplete,
 } from "../../utils/AutoComplete";
-import { getStatus, getStatusColor } from "../../utils/ChangeText";
+import { formatDate, getStatus, getStatusColor } from "../../utils/ChangeText";
 import { API } from "../../utils/Fetch";
 import { navigateToRole } from "../../utils/navigationRole";
 import { validateLecturerInfo } from "../../utils/Validate";
@@ -1018,6 +1018,7 @@ const LecturerPendingPage = () => {
                             onChange={(e) => setAcademicRank(e.target.value)}
                             label="Học vị"
                           >
+                            <MenuItem value="KS">Kỹ sư</MenuItem>
                             <MenuItem value="CN">Cử nhân</MenuItem>
                             <MenuItem value="THS">Thạc sĩ</MenuItem>
                             <MenuItem value="TS">Tiến sĩ</MenuItem>
@@ -1329,135 +1330,212 @@ const LecturerPendingPage = () => {
                   gap: 4,
                 }}
               >
-                {
-                  /* DegreesTab-like Degrees Section */
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      borderRadius: 3,
-                      border: `1px solid ${colors.border.light}`,
-                      background: colors.background.primary,
-                      flex: 1,
-                      position: "relative",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <Box className="flex items-center justify-between px-6 pb-2 pt-6">
+                {/* Enhanced Degrees Section */}
+                <Paper
+                  elevation={0}
+                  sx={{
+                    borderRadius: 3,
+                    border: `1px solid ${colors.border.light}`,
+                    background: colors.background.primary,
+                    flex: 1,
+                    position: "relative",
+                    overflow: "hidden",
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: `
+                        radial-gradient(circle at 10% 90%, ${alpha(colors.accent.lightBlue, 0.1)} 0%, transparent 50%),
+                        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23${colors.accent.lightBlue.slice(1)}' fill-opacity='0.02'%3E%3Cpath d='M30 30c16.569 0 30-13.431 30-30H30z'/%3E%3C/g%3E%3C/svg%3E")
+                      `,
+                      zIndex: 0,
+                    },
+                  }}
+                >
+                  <CardHeader
+                    avatar={
+                      <Box
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: 2,
+                          background: alpha(colors.primary[500], 0.1),
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          border: `1px solid ${alpha(colors.primary[300], 0.3)}`,
+                        }}
+                      >
+                        <SchoolIcon
+                          sx={{ color: colors.primary[600], fontSize: 24 }}
+                        />
+                      </Box>
+                    }
+                    title={
                       <Typography
                         variant="h6"
-                        sx={{ color: colors.text.primary, fontWeight: 600 }}
+                        sx={{
+                          fontFamily: "'Inter', sans-serif",
+                          fontWeight: 700,
+                          color: colors.text.primary,
+                        }}
                       >
                         Danh sách bằng cấp ({degrees?.length || 0})
                       </Typography>
+                    }
+                    subheader={
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: colors.text.tertiary,
+                          fontFamily: "'Inter', sans-serif",
+                        }}
+                      >
+                        Quản lý thông tin bằng cấp của bạn
+                      </Typography>
+                    }
+                    action={
                       <Button
                         variant="contained"
                         startIcon={<Add />}
                         onClick={handleOpenDegreeModal}
                         sx={{
-                          background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
+                          background: colors.background.gradient.primary,
                           color: "white",
                           fontWeight: 600,
                           textTransform: "none",
-                          borderRadius: 2,
+                          borderRadius: 3,
+                          px: 3,
+                          py: 1.5,
+                          boxShadow: `0 4px 12px ${alpha(colors.primary[500], 0.3)}`,
                           "&:hover": {
-                            transform: "translateY(-1px)",
-                            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                            transform: "translateY(-2px)",
+                            boxShadow: `0 6px 16px ${alpha(colors.primary[500], 0.4)}`,
                           },
+                          transition: "all 0.3s ease",
                         }}
                       >
                         Thêm bằng cấp
                       </Button>
-                    </Box>
-                    <CardContent
-                      sx={{
-                        pt: 0,
-                        maxHeight: "400px",
-                        overflow: "auto",
-                        position: "relative",
-                        zIndex: 1,
-                      }}
-                    >
-                      {degrees && degrees.length > 0 ? (
-                        degrees.map((item: any) => (
+                    }
+                  />
+                  <CardContent
+                    sx={{
+                      pt: 0,
+                      maxHeight: "450px",
+                      overflow: "auto",
+                      position: "relative",
+                      zIndex: 1,
+                    }}
+                  >
+                    {degrees && degrees.length > 0 ? (
+                      <Stack spacing={2}>
+                        {degrees.map((item: any) => (
                           <Accordion
                             key={item.id}
                             sx={{
                               borderRadius: 3,
-                              border: `1px solid ${colors.primary[100]}`,
+                              border: `1px solid ${colors.border.light}`,
                               boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                              background: `
+                                linear-gradient(135deg, ${colors.background.primary} 0%, ${alpha(colors.primary[50], 0.3)} 100%)
+                              `,
                               "&:before": { display: "none" },
                               "&.Mui-expanded": {
                                 boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
                                 transform: "translateY(-2px)",
                               },
+                              transition: "all 0.3s ease",
                             }}
                           >
                             <AccordionSummary
                               expandIcon={<ExpandMoreIcon />}
                               sx={{
-                                background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
+                                background: colors.background.gradient.primary,
                                 color: "white",
                                 borderRadius: "12px",
+                                minHeight: 80,
+                                position: "relative",
                                 "& .MuiAccordionSummary-expandIconWrapper": {
                                   color: "white",
                                 },
                                 "&.Mui-expanded": {
                                   borderRadius: "12px 12px 0 0",
                                 },
+                                "&::after": {
+                                  content: '""',
+                                  position: "absolute",
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  height: 1,
+                                  background: `linear-gradient(90deg, transparent, ${alpha(colors.primary[300], 0.5)}, transparent)`,
+                                },
                               }}
                             >
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  width: "100%",
-                                  justifyContent: "space-between",
-                                }}
-                              >
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: 1, pr: 2 }}>
                                 <Box
                                   sx={{
+                                    width: 52,
+                                    height: 52,
+                                    borderRadius: 2.5,
+                                    background: "rgba(255,255,255,0.15)",
                                     display: "flex",
                                     alignItems: "center",
-                                    gap: 2,
+                                    justifyContent: "center",
+                                    border: "1px solid rgba(255,255,255,0.2)",
                                   }}
                                 >
-                                  <Box
+                                  <SchoolIcon
+                                    sx={{ color: "white", fontSize: 28 }}
+                                  />
+                                </Box>
+                                <Box sx={{ flex: 1 }}>
+                                  <Typography
+                                    variant="h6"
                                     sx={{
-                                      background: "rgba(255,255,255,0.2)",
-                                      borderRadius: 2,
-                                      p: 1,
+                                      color: "white",
+                                      fontWeight: 700,
+                                      fontFamily: "'Inter', sans-serif",
+                                      mb: 0.5,
                                     }}
                                   >
-                                    <SchoolIcon sx={{ color: "white" }} />
-                                  </Box>
-                                  <Box>
+                                    {item.name}
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
+                                      color: "rgba(255,255,255,0.85)",
+                                      fontFamily: "'Inter', sans-serif",
+                                      mb: 0.5,
+                                    }}
+                                  >
+                                    {item.major}
+                                  </Typography>
+                                  {item.referenceId && (
                                     <Typography
-                                      variant="h6"
-                                      sx={{ color: "white", fontWeight: 700 }}
+                                      variant="caption"
+                                      sx={{
+                                        color: "rgba(255,255,255,0.7)",
+                                        fontFamily: "'Inter', sans-serif",
+                                        fontSize: "0.7rem",
+                                      }}
                                     >
-                                      {item.name}
+                                      ID: {item.referenceId}
                                     </Typography>
-                                    <Typography
-                                      variant="body2"
-                                      sx={{ color: "rgba(255,255,255,0.9)" }}
-                                    >
-                                      {item.major}
-                                    </Typography>
-                                    {item.referenceId && (
-                                      <Typography
-                                        variant="caption"
-                                        sx={{ color: "rgba(255,255,255,0.7)" }}
-                                      >
-                                        Reference ID: {item.referenceId}
-                                      </Typography>
-                                    )}
-                                  </Box>
+                                  )}
                                 </Box>
                                 <Chip
                                   label={getStatus(item.status)}
+                                  color={getStatusColor(item.status)}
                                   size="small"
                                   sx={{
+                                    fontFamily: "'Inter', sans-serif",
                                     fontWeight: 600,
+                                    fontSize: "0.75rem",
                                     background: "rgba(255,255,255,0.9)",
                                     color:
                                       item.status === "APPROVED"
@@ -1465,6 +1543,14 @@ const LecturerPendingPage = () => {
                                         : item.status === "PENDING"
                                           ? "#D97706"
                                           : "#DC2626",
+                                    boxShadow: `0 2px 8px ${alpha(
+                                      item.status === "PENDING"
+                                        ? colors.warning[500]
+                                        : item.status === "APPROVED"
+                                          ? colors.success[500]
+                                          : colors.error[500],
+                                      0.25,
+                                    )}`,
                                   }}
                                 />
                               </Box>
@@ -1480,24 +1566,24 @@ const LecturerPendingPage = () => {
                                 <Box
                                   sx={{
                                     display: "grid",
-                                    gridTemplateColumns: "1fr 1fr 1fr",
+                                    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
                                     gap: 2,
-                                    mb: 2,
+                                    mb: 3,
                                   }}
                                 >
                                   <Box
                                     sx={{
                                       display: "flex",
                                       alignItems: "center",
-                                      gap: 1,
-                                      background: colors.background.tertiary,
-                                      borderRadius: 2,
+                                      gap: 1.5,
                                       p: 2,
+                                      borderRadius: 2,
+                                      background: alpha(colors.primary[50], 0.5),
+                                      border: `1px solid ${alpha(colors.primary[500], 0.3)}`,
                                     }}
                                   >
                                     <BusinessIcon
-                                      sx={{ color: "#2563EB" }}
-                                      fontSize="small"
+                                      sx={{ color: colors.primary[600], fontSize: 20 }}
                                     />
                                     <Box>
                                       <Typography
@@ -1505,31 +1591,39 @@ const LecturerPendingPage = () => {
                                         sx={{
                                           color: colors.text.tertiary,
                                           fontWeight: 600,
+                                          fontSize: "0.7rem",
+                                          textTransform: "uppercase",
+                                          letterSpacing: "0.5px",
                                         }}
                                       >
                                         Trường/Tổ chức
                                       </Typography>
                                       <Typography
                                         variant="body2"
-                                        sx={{ fontWeight: 500 }}
+                                        sx={{
+                                          fontWeight: 600,
+                                          color: colors.text.primary,
+                                          fontSize: "0.875rem",
+                                        }}
                                       >
                                         {item.institution}
                                       </Typography>
                                     </Box>
                                   </Box>
+
                                   <Box
                                     sx={{
                                       display: "flex",
                                       alignItems: "center",
-                                      gap: 1,
-                                      background: colors.background.tertiary,
-                                      borderRadius: 2,
+                                      gap: 1.5,
                                       p: 2,
+                                      borderRadius: 2,
+                                      background: alpha(colors.success[50], 0.5),
+                                      border: `1px solid ${alpha(colors.success[500], 0.3)}`,
                                     }}
                                   >
                                     <CalendarIcon
-                                      sx={{ color: "#059669" }}
-                                      fontSize="small"
+                                      sx={{ color: colors.success[600], fontSize: 20 }}
                                     />
                                     <Box>
                                       <Typography
@@ -1537,31 +1631,39 @@ const LecturerPendingPage = () => {
                                         sx={{
                                           color: colors.text.tertiary,
                                           fontWeight: 600,
+                                          fontSize: "0.7rem",
+                                          textTransform: "uppercase",
+                                          letterSpacing: "0.5px",
                                         }}
                                       >
-                                        Thời gian
+                                        Thời gian học
                                       </Typography>
                                       <Typography
                                         variant="body2"
-                                        sx={{ fontWeight: 500 }}
+                                        sx={{
+                                          fontWeight: 600,
+                                          color: colors.text.primary,
+                                          fontSize: "0.875rem",
+                                        }}
                                       >
                                         {item.startYear} - {item.graduationYear}
                                       </Typography>
                                     </Box>
                                   </Box>
+
                                   <Box
                                     sx={{
                                       display: "flex",
                                       alignItems: "center",
-                                      gap: 1,
-                                      background: colors.background.tertiary,
-                                      borderRadius: 2,
+                                      gap: 1.5,
                                       p: 2,
+                                      borderRadius: 2,
+                                      background: alpha(colors.secondary[50], 0.5),
+                                      border: `1px solid ${alpha(colors.secondary[500], 0.3)}`,
                                     }}
                                   >
                                     <GradeIcon
-                                      sx={{ color: "#7C3AED" }}
-                                      fontSize="small"
+                                      sx={{ color: colors.secondary[600], fontSize: 20 }}
                                     />
                                     <Box>
                                       <Typography
@@ -1569,26 +1671,36 @@ const LecturerPendingPage = () => {
                                         sx={{
                                           color: colors.text.tertiary,
                                           fontWeight: 600,
+                                          fontSize: "0.7rem",
+                                          textTransform: "uppercase",
+                                          letterSpacing: "0.5px",
                                         }}
                                       >
                                         Trình độ
                                       </Typography>
                                       <Typography
                                         variant="body2"
-                                        sx={{ fontWeight: 500 }}
+                                        sx={{
+                                          fontWeight: 600,
+                                          color: colors.text.primary,
+                                          fontSize: "0.875rem",
+                                        }}
                                       >
                                         {item.level}
                                       </Typography>
                                     </Box>
                                   </Box>
                                 </Box>
+
+                                {/* Description */}
                                 {item.description && (
                                   <Box
                                     sx={{
-                                      mb: 2,
-                                      background: colors.primary[25],
+                                      mb: 3,
+                                      p: 3,
                                       borderRadius: 2,
-                                      p: 2,
+                                      background: alpha(colors.neutral[50], 0.5),
+                                      border: `1px solid ${alpha(colors.neutral[500], 0.3)}`,
                                     }}
                                   >
                                     <Typography
@@ -1596,6 +1708,11 @@ const LecturerPendingPage = () => {
                                       sx={{
                                         color: colors.text.tertiary,
                                         fontWeight: 600,
+                                        fontSize: "0.7rem",
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.5px",
+                                        mb: 1,
+                                        display: "block",
                                       }}
                                     >
                                       Mô tả
@@ -1605,37 +1722,64 @@ const LecturerPendingPage = () => {
                                       sx={{
                                         color: colors.text.secondary,
                                         lineHeight: 1.6,
-                                        mt: 1,
+                                        fontFamily: "'Inter', sans-serif",
                                       }}
                                     >
                                       {item.description}
                                     </Typography>
                                   </Box>
                                 )}
+
+                                {/* Admin Note */}
                                 {item.adminNote && (
                                   <Box
                                     sx={{
-                                      mb: 2,
-                                      background: "#FEF3C7",
-                                      border: "1px solid #F59E0B",
+                                      mb: 3,
+                                      p: 3,
                                       borderRadius: 2,
-                                      p: 2,
+                                      background: alpha(colors.warning[50], 0.7),
+                                      border: `1px solid ${colors.warning[500]}`,
+                                      position: "relative",
+                                      "&::before": {
+                                        content: '""',
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        width: 4,
+                                        height: "100%",
+                                        background: colors.warning[500],
+                                        borderRadius: "2px 0 0 2px",
+                                      },
                                     }}
                                   >
                                     <Typography
                                       variant="caption"
-                                      sx={{ color: "#92400E", fontWeight: 600 }}
+                                      sx={{
+                                        color: colors.warning[700],
+                                        fontWeight: 600,
+                                        fontSize: "0.7rem",
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.5px",
+                                        mb: 1,
+                                        display: "block",
+                                      }}
                                     >
-                                      Ghi chú của quản trị viên
+                                      Ghi chú từ quản trị viên
                                     </Typography>
                                     <Typography
                                       variant="body2"
-                                      sx={{ color: "#92400E", mt: 1 }}
+                                      sx={{
+                                        color: colors.warning[700],
+                                        lineHeight: 1.6,
+                                        fontFamily: "'Inter', sans-serif",
+                                      }}
                                     >
                                       {item.adminNote}
                                     </Typography>
                                   </Box>
                                 )}
+
+                                {/* Action Buttons */}
                                 <Box
                                   sx={{
                                     display: "flex",
@@ -1652,13 +1796,15 @@ const LecturerPendingPage = () => {
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       sx={{
-                                        background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
+                                        background: colors.background.gradient.primary,
                                         color: "white",
                                         fontWeight: 600,
                                         textTransform: "none",
                                         borderRadius: 2,
+                                        px: 3,
                                         "&:hover": {
                                           transform: "translateY(-1px)",
+                                          boxShadow: `0 4px 12px ${alpha(colors.primary[500], 0.3)}`,
                                         },
                                       }}
                                     >
@@ -1672,10 +1818,11 @@ const LecturerPendingPage = () => {
                                     onClick={() => handleEditDegreeModal(item)}
                                     sx={{
                                       borderColor: colors.primary[500],
-                                      color: colors.primary[500],
+                                      color: colors.primary[600],
                                       fontWeight: 600,
                                       textTransform: "none",
                                       borderRadius: 2,
+                                      px: 3,
                                       "&:hover": {
                                         borderColor: colors.primary[600],
                                         backgroundColor: colors.primary[50],
@@ -1691,14 +1838,15 @@ const LecturerPendingPage = () => {
                                     startIcon={<DeleteIcon />}
                                     onClick={() => handleDeleteDegreeTab(item)}
                                     sx={{
-                                      borderColor: "#EF4444",
-                                      color: "#EF4444",
+                                      borderColor: colors.error[500],
+                                      color: colors.error[600],
                                       fontWeight: 600,
                                       textTransform: "none",
                                       borderRadius: 2,
+                                      px: 3,
                                       "&:hover": {
-                                        borderColor: "#DC2626",
-                                        backgroundColor: "#FEF2F2",
+                                        borderColor: colors.error[600],
+                                        backgroundColor: colors.error[50],
                                         transform: "translateY(-1px)",
                                       },
                                     }}
@@ -1709,18 +1857,69 @@ const LecturerPendingPage = () => {
                               </Box>
                             </AccordionDetails>
                           </Accordion>
-                        ))
-                      ) : (
-                        <Alert
-                          severity="info"
-                          sx={{ textAlign: "center", mt: 3 }}
+                        ))}
+                      </Stack>
+                    ) : (
+                      <Box
+                        sx={{
+                          textAlign: "center",
+                          py: 6,
+                          px: 4,
+                          borderRadius: 3,
+                          background: `
+                            linear-gradient(135deg, ${alpha(colors.primary[50], 0.3)} 0%, ${alpha(colors.secondary[50], 0.2)} 100%)
+                          `,
+                          border: `1px solid ${alpha(colors.primary[200], 0.3)}`,
+                        }}
+                      >
+                        <SchoolIcon
+                          sx={{
+                            fontSize: 64,
+                            color: alpha(colors.primary[400], 0.5),
+                            mb: 2,
+                          }}
+                        />
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            color: colors.text.secondary,
+                            fontWeight: 600,
+                            mb: 1,
+                            fontFamily: "'Inter', sans-serif",
+                          }}
                         >
-                          Chưa có thông tin trong mục này
-                        </Alert>
-                      )}
-                    </CardContent>
-                  </Paper>
-                }
+                          Chưa có bằng cấp nào
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: colors.text.tertiary,
+                            mb: 3,
+                            fontFamily: "'Inter', sans-serif",
+                          }}
+                        >
+                          Thêm bằng cấp đầu tiên để hoàn thiện hồ sơ của bạn
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          startIcon={<Add />}
+                          onClick={handleOpenDegreeModal}
+                          sx={{
+                            background: colors.background.gradient.primary,
+                            color: "white",
+                            fontWeight: 600,
+                            textTransform: "none",
+                            borderRadius: 3,
+                            px: 4,
+                            py: 1.5,
+                          }}
+                        >
+                          Thêm bằng cấp đầu tiên
+                        </Button>
+                      </Box>
+                    )}
+                  </CardContent>
+                </Paper>
                 {/* Enhanced Certifications Section */}
                 <Paper
                   elevation={0}
@@ -1730,7 +1929,7 @@ const LecturerPendingPage = () => {
                     background: colors.background.primary,
                     flex: 1,
                     position: "relative",
-                    overflow: "auto",
+                    overflow: "hidden",
                     "&::before": {
                       content: '""',
                       position: "absolute",
@@ -1740,432 +1939,576 @@ const LecturerPendingPage = () => {
                       bottom: 0,
                       background: `
                         radial-gradient(circle at 10% 90%, ${alpha(colors.accent.lightBlue, 0.1)} 0%, transparent 50%),
-                        url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23${colors.accent.lightBlue.slice(1)}' fill-opacity='0.02'%3E%3Cpath d='M0 20c11.046 0 20-8.954 20-20H0z'/%3E%3C/g%3E%3C/svg%3E")
+                        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23${colors.accent.lightBlue.slice(1)}' fill-opacity='0.02'%3E%3Cpath d='M30 30c16.569 0 30-13.431 30-30H30z'/%3E%3C/g%3E%3C/svg%3E")
                       `,
                       zIndex: 0,
                     },
                   }}
                 >
-                  <Box className="flex items-center justify-between px-6 pb-2 pt-6">
-                    <Typography
-                      variant="h6"
-                      sx={{ color: colors.text.primary, fontWeight: 600 }}
-                    >
-                      Danh sách chứng chỉ ({certifications?.length || 0})
-                    </Typography>
-                    <Button
-                      variant="contained"
-                      startIcon={<Add />}
-                      onClick={handleOpenCertificateModal}
-                      sx={{
-                        background: `linear-gradient(135deg, ${colors.accent.lightBlue} 0%, #059669 100%)`,
-                        color: "white",
-                        fontWeight: 600,
-                        textTransform: "none",
-                        borderRadius: 2,
-                        "&:hover": {
-                          transform: "translateY(-1px)",
-                          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                        },
-                      }}
-                    >
-                      Thêm chứng chỉ
-                    </Button>
-                  </Box>
+                  <CardHeader
+                    avatar={
+                      <Box
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: 2,
+                          background: alpha(colors.accent.lightBlue, 0.1),
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          border: `1px solid ${alpha(colors.accent.lightBlue, 0.3)}`,
+                        }}
+                      >
+                        <AssignmentIcon
+                          sx={{ color: colors.accent.lightBlue, fontSize: 24 }}
+                        />
+                      </Box>
+                    }
+                    title={
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontFamily: "'Inter', sans-serif",
+                          fontWeight: 700,
+                          color: colors.text.primary,
+                        }}
+                      >
+                        Danh sách chứng chỉ ({certifications?.length || 0})
+                      </Typography>
+                    }
+                    subheader={
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: colors.text.tertiary,
+                          fontFamily: "'Inter', sans-serif",
+                        }}
+                      >
+                        Quản lý thông tin chứng chỉ của bạn
+                      </Typography>
+                    }
+                    action={
+                      <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={handleOpenCertificateModal}
+                        sx={{
+                          background: `linear-gradient(135deg, ${colors.accent.lightBlue} 0%, #059669 100%)`,
+                          color: "white",
+                          fontWeight: 600,
+                          textTransform: "none",
+                          borderRadius: 3,
+                          px: 3,
+                          py: 1.5,
+                          boxShadow: `0 4px 12px ${alpha(colors.accent.lightBlue, 0.3)}`,
+                          "&:hover": {
+                            transform: "translateY(-2px)",
+                            boxShadow: `0 6px 16px ${alpha(colors.accent.lightBlue, 0.4)}`,
+                          },
+                          transition: "all 0.3s ease",
+                        }}
+                      >
+                        Thêm chứng chỉ
+                      </Button>
+                    }
+                  />
                   <CardContent
                     sx={{
                       pt: 0,
-                      maxHeight: "400px",
+                      maxHeight: "450px",
                       overflow: "auto",
                       position: "relative",
                       zIndex: 1,
                     }}
                   >
                     {certifications && certifications.length > 0 ? (
-                      certifications.map((item: any) => (
-                        <Accordion
-                          key={item.id}
-                          sx={{
-                            borderRadius: 3,
-                            border: `1px solid ${colors.primary[100]}`,
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                            "&:before": { display: "none" },
-                            "&.Mui-expanded": {
-                              boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-                              transform: "translateY(-2px)",
-                            },
-                          }}
-                        >
-                          <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
+                      <Stack spacing={2}>
+                        {certifications.map((item: any) => (
+                          <Accordion
+                            key={item.id}
                             sx={{
-                              background: `linear-gradient(135deg, ${colors.accent.lightBlue} 0%, #059669 100%)`,
-                              color: "white",
-                              borderRadius: "12px",
-                              "& .MuiAccordionSummary-expandIconWrapper": {
-                                color: "white",
-                              },
+                              borderRadius: 3,
+                              border: `1px solid ${colors.border.light}`,
+                              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                              background: `
+                                linear-gradient(135deg, ${colors.background.primary} 0%, ${alpha(colors.accent.lightBlue, 0.05)} 100%)
+                              `,
+                              "&:before": { display: "none" },
                               "&.Mui-expanded": {
-                                borderRadius: "12px 12px 0 0",
+                                boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                                transform: "translateY(-2px)",
                               },
+                              transition: "all 0.3s ease",
                             }}
                           >
-                            <Box
+                            <AccordionSummary
+                              expandIcon={<ExpandMoreIcon />}
                               sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                width: "100%",
-                                justifyContent: "space-between",
+                                background: `linear-gradient(135deg, ${colors.accent.lightBlue} 0%, #059669 100%)`,
+                                color: "white",
+                                borderRadius: "12px",
+                                minHeight: 80,
+                                position: "relative",
+                                "& .MuiAccordionSummary-expandIconWrapper": {
+                                  color: "white",
+                                },
+                                "&.Mui-expanded": {
+                                  borderRadius: "12px 12px 0 0",
+                                },
+                                "&::after": {
+                                  content: '""',
+                                  position: "absolute",
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  height: 1,
+                                  background: `linear-gradient(90deg, transparent, ${alpha(colors.accent.lightBlue, 0.5)}, transparent)`,
+                                },
                               }}
                             >
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 2,
-                                }}
-                              >
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: 1, pr: 2 }}>
                                 <Box
                                   sx={{
-                                    background: "rgba(255,255,255,0.2)",
-                                    borderRadius: 2,
-                                    p: 1,
+                                    width: 52,
+                                    height: 52,
+                                    borderRadius: 2.5,
+                                    background: "rgba(255,255,255,0.15)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    border: "1px solid rgba(255,255,255,0.2)",
                                   }}
                                 >
-                                  <AssignmentIcon sx={{ color: "white" }} />
+                                  <AssignmentIcon
+                                    sx={{ color: "white", fontSize: 28 }}
+                                  />
                                 </Box>
-                                <Box>
+                                <Box sx={{ flex: 1 }}>
                                   <Typography
                                     variant="h6"
-                                    sx={{ color: "white", fontWeight: 700 }}
+                                    sx={{
+                                      color: "white",
+                                      fontWeight: 700,
+                                      fontFamily: "'Inter', sans-serif",
+                                      mb: 0.5,
+                                    }}
                                   >
                                     {item.name}
                                   </Typography>
                                   <Typography
                                     variant="body2"
-                                    sx={{ color: "rgba(255,255,255,0.9)" }}
+                                    sx={{
+                                      color: "rgba(255,255,255,0.85)",
+                                      fontFamily: "'Inter', sans-serif",
+                                      mb: 0.5,
+                                    }}
                                   >
                                     {item.issuedBy}
                                   </Typography>
                                   {item.referenceId && (
                                     <Typography
                                       variant="caption"
-                                      sx={{ color: "rgba(255,255,255,0.7)" }}
+                                      sx={{
+                                        color: "rgba(255,255,255,0.7)",
+                                        fontFamily: "'Inter', sans-serif",
+                                        fontSize: "0.7rem",
+                                      }}
                                     >
-                                      Reference ID: {item.referenceId}
+                                      ID: {item.referenceId}
                                     </Typography>
                                   )}
                                 </Box>
+                                <Chip
+                                  label={getStatus(item.status)}
+                                  color={getStatusColor(item.status)}
+                                  size="small"
+                                  sx={{
+                                    fontFamily: "'Inter', sans-serif",
+                                    fontWeight: 600,
+                                    fontSize: "0.75rem",
+                                    background: "rgba(255,255,255,0.9)",
+                                    color:
+                                      item.status === "APPROVED"
+                                        ? "#047857"
+                                        : item.status === "PENDING"
+                                          ? "#D97706"
+                                          : "#DC2626",
+                                    boxShadow: `0 2px 8px ${alpha(
+                                      item.status === "PENDING"
+                                        ? colors.warning[500]
+                                        : item.status === "APPROVED"
+                                          ? colors.success[500]
+                                          : colors.error[500],
+                                      0.25,
+                                    )}`,
+                                  }}
+                                />
                               </Box>
-                              <Chip
-                                label={getStatus(item.status)}
-                                size="small"
-                                sx={{
-                                  fontWeight: 600,
-                                  background: "rgba(255,255,255,0.9)",
-                                  color:
-                                    item.status === "APPROVED"
-                                      ? "#047857"
-                                      : item.status === "PENDING"
-                                        ? "#D97706"
-                                        : "#DC2626",
-                                }}
-                              />
-                            </Box>
-                          </AccordionSummary>
-                          <AccordionDetails
-                            sx={{
-                              p: 0,
-                              background: "white",
-                              borderRadius: "0 0 12px 12px",
-                            }}
-                          >
-                            <Box sx={{ p: 3 }}>
-                              <Box
-                                sx={{
-                                  display: "grid",
-                                  gridTemplateColumns: "1fr 1fr",
-                                  gap: 2,
-                                  mb: 2,
-                                }}
-                              >
+                            </AccordionSummary>
+                            <AccordionDetails
+                              sx={{
+                                p: 0,
+                                background: "white",
+                                borderRadius: "0 0 12px 12px",
+                              }}
+                            >
+                              <Box sx={{ p: 3 }}>
                                 <Box
                                   sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 1,
-                                    background: colors.background.tertiary,
-                                    borderRadius: 2,
-                                    p: 2,
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                                    gap: 2,
+                                    mb: 3,
                                   }}
                                 >
-                                  <GradeIcon
-                                    sx={{ color: "#7C3AED" }}
-                                    fontSize="small"
-                                  />
-                                  <Box>
-                                    <Typography
-                                      variant="caption"
-                                      sx={{
-                                        color: colors.text.tertiary,
-                                        fontWeight: 600,
-                                      }}
-                                    >
-                                      Cấp độ
-                                    </Typography>
-                                    <Typography
-                                      variant="body2"
-                                      sx={{ fontWeight: 500 }}
-                                    >
-                                      {item.level}
-                                    </Typography>
-                                  </Box>
-                                </Box>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 1,
-                                    background: colors.background.tertiary,
-                                    borderRadius: 2,
-                                    p: 2,
-                                  }}
-                                >
-                                  <BusinessIcon
-                                    sx={{ color: "#059669" }}
-                                    fontSize="small"
-                                  />
-                                  <Box>
-                                    <Typography
-                                      variant="caption"
-                                      sx={{
-                                        color: colors.text.tertiary,
-                                        fontWeight: 600,
-                                      }}
-                                    >
-                                      Đơn vị cấp
-                                    </Typography>
-                                    <Typography
-                                      variant="body2"
-                                      sx={{ fontWeight: 500 }}
-                                    >
-                                      {item.issuedBy}
-                                    </Typography>
-                                  </Box>
-                                </Box>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 1,
-                                    background: colors.background.tertiary,
-                                    borderRadius: 2,
-                                    p: 2,
-                                  }}
-                                >
-                                  <CalendarIcon
-                                    sx={{ color: "#2563EB" }}
-                                    fontSize="small"
-                                  />
-                                  <Box>
-                                    <Typography
-                                      variant="caption"
-                                      sx={{
-                                        color: colors.text.tertiary,
-                                        fontWeight: 600,
-                                      }}
-                                    >
-                                      Ngày cấp
-                                    </Typography>
-                                    <Typography
-                                      variant="body2"
-                                      sx={{ fontWeight: 500 }}
-                                    >
-                                      {item.issueDate}
-                                    </Typography>
-                                  </Box>
-                                </Box>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 1,
-                                    background: colors.background.tertiary,
-                                    borderRadius: 2,
-                                    p: 2,
-                                  }}
-                                >
-                                  <CalendarIcon
-                                    sx={{ color: "#DC2626" }}
-                                    fontSize="small"
-                                  />
-                                  <Box>
-                                    <Typography
-                                      variant="caption"
-                                      sx={{
-                                        color: colors.text.tertiary,
-                                        fontWeight: 600,
-                                      }}
-                                    >
-                                      Ngày hết hạn
-                                    </Typography>
-                                    <Typography
-                                      variant="body2"
-                                      sx={{ fontWeight: 500 }}
-                                    >
-                                      {item.expiryDate || "Không có"}
-                                    </Typography>
-                                  </Box>
-                                </Box>
-                              </Box>
-                              {item.description && (
-                                <Box
-                                  sx={{
-                                    mb: 2,
-                                    background: colors.primary[25],
-                                    borderRadius: 2,
-                                    p: 2,
-                                  }}
-                                >
-                                  <Typography
-                                    variant="caption"
+                                  <Box
                                     sx={{
-                                      color: colors.text.tertiary,
-                                      fontWeight: 600,
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 1.5,
+                                      p: 2,
+                                      borderRadius: 2,
+                                      background: alpha(colors.accent.lightBlue, 0.1),
+                                      border: `1px solid ${alpha(colors.accent.lightBlue, 0.2)}`,
                                     }}
                                   >
-                                    Mô tả
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
+                                    <GradeIcon
+                                      sx={{ color: colors.accent.lightBlue, fontSize: 20 }}
+                                    />
+                                    <Box>
+                                      <Typography
+                                        variant="caption"
+                                        sx={{
+                                          color: colors.text.tertiary,
+                                          fontWeight: 600,
+                                          fontSize: "0.7rem",
+                                          textTransform: "uppercase",
+                                          letterSpacing: "0.5px",
+                                        }}
+                                      >
+                                        Cấp độ
+                                      </Typography>
+                                      <Typography
+                                        variant="body2"
+                                        sx={{
+                                          fontWeight: 600,
+                                          color: colors.text.primary,
+                                          fontSize: "0.875rem",
+                                        }}
+                                      >
+                                        {item.level}
+                                      </Typography>
+                                    </Box>
+                                  </Box>
+
+                                  <Box
                                     sx={{
-                                      color: colors.text.secondary,
-                                      lineHeight: 1.6,
-                                      mt: 1,
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 1.5,
+                                      p: 2,
+                                      borderRadius: 2,
+                                      background: alpha(colors.success[50], 0.5),
+                                      border: `1px solid ${alpha(colors.success[500], 0.3)}`,
                                     }}
                                   >
-                                    {item.description}
-                                  </Typography>
+                                    <BusinessIcon
+                                      sx={{ color: colors.success[600], fontSize: 20 }}
+                                    />
+                                    <Box>
+                                      <Typography
+                                        variant="caption"
+                                        sx={{
+                                          color: colors.text.tertiary,
+                                          fontWeight: 600,
+                                          fontSize: "0.7rem",
+                                          textTransform: "uppercase",
+                                          letterSpacing: "0.5px",
+                                        }}
+                                      >
+                                        Đơn vị cấp
+                                      </Typography>
+                                      <Typography
+                                        variant="body2"
+                                        sx={{
+                                          fontWeight: 600,
+                                          color: colors.text.primary,
+                                          fontSize: "0.875rem",
+                                        }}
+                                      >
+                                        {item.issuedBy}
+                                      </Typography>
+                                    </Box>
+                                  </Box>
+
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 1.5,
+                                      p: 2,
+                                      borderRadius: 2,
+                                      background: alpha(colors.primary[50], 0.5),
+                                      border: `1px solid ${alpha(colors.primary[200], 0.3)}`,
+                                    }}
+                                  >
+                                    <CalendarIcon
+                                      sx={{ color: colors.primary[600], fontSize: 20 }}
+                                    />
+                                    <Box>
+                                      <Typography
+                                        variant="caption"
+                                        sx={{
+                                          color: colors.text.tertiary,
+                                          fontWeight: 600,
+                                          fontSize: "0.7rem",
+                                          textTransform: "uppercase",
+                                          letterSpacing: "0.5px",
+                                        }}
+                                      >
+                                        Ngày cấp
+                                      </Typography>
+                                      <Typography
+                                        variant="body2"
+                                        sx={{
+                                          fontWeight: 600,
+                                          color: colors.text.primary,
+                                          fontSize: "0.875rem",
+                                        }}
+                                      >
+                                        {formatDate(item.issueDate)} - {formatDate(item.expiryDate) || "Không thời hạn"}
+                                      </Typography>
+                                    </Box>
+                                  </Box>
                                 </Box>
-                              )}
-                              {item.adminNote && (
+
+                                {/* Description */}
+                                {item.description && (
+                                  <Box
+                                    sx={{
+                                      mb: 3,
+                                      p: 3,
+                                      borderRadius: 2,
+                                      background: alpha(colors.neutral[50], 0.5),
+                                      border: `1px solid ${alpha(colors.neutral[200], 0.3)}`,
+                                    }}
+                                  >
+                                    <Typography
+                                      variant="caption"
+                                      sx={{
+                                        color: colors.text.tertiary,
+                                        fontWeight: 600,
+                                        fontSize: "0.7rem",
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.5px",
+                                        mb: 1,
+                                        display: "block",
+                                      }}
+                                    >
+                                      Mô tả
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        color: colors.text.secondary,
+                                        lineHeight: 1.6,
+                                        fontFamily: "'Inter', sans-serif",
+                                      }}
+                                    >
+                                      {item.description}
+                                    </Typography>
+                                  </Box>
+                                )}
+
+                                {/* Admin Note */}
+                                {item.adminNote && (
+                                  <Box
+                                    sx={{
+                                      mb: 3,
+                                      p: 3,
+                                      borderRadius: 2,
+                                      background: alpha(colors.warning[50], 0.7),
+                                      border: `1px solid ${colors.warning[200]}`,
+                                      position: "relative",
+                                      "&::before": {
+                                        content: '""',
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        width: 4,
+                                        height: "100%",
+                                        background: colors.warning[500],
+                                        borderRadius: "2px 0 0 2px",
+                                      },
+                                    }}
+                                  >
+                                    <Typography
+                                      variant="caption"
+                                      sx={{
+                                        color: colors.warning[700],
+                                        fontWeight: 600,
+                                        fontSize: "0.7rem",
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.5px",
+                                        mb: 1,
+                                        display: "block",
+                                      }}
+                                    >
+                                      Ghi chú từ quản trị viên
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        color: colors.warning[700],
+                                        lineHeight: 1.6,
+                                        fontFamily: "'Inter', sans-serif",
+                                      }}
+                                    >
+                                      {item.adminNote}
+                                    </Typography>
+                                  </Box>
+                                )}
+
+                                {/* Action Buttons */}
                                 <Box
                                   sx={{
-                                    mb: 2,
-                                    background: "#FEF3C7",
-                                    border: "1px solid #F59E0B",
-                                    borderRadius: 2,
-                                    p: 2,
+                                    display: "flex",
+                                    gap: 2,
+                                    flexWrap: "wrap",
+                                    pt: 2,
+                                    borderTop: `1px solid ${alpha(colors.border.light, 0.5)}`,
                                   }}
                                 >
-                                  <Typography
-                                    variant="caption"
-                                    sx={{ color: "#92400E", fontWeight: 600 }}
-                                  >
-                                    Ghi chú của quản trị viên
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    sx={{ color: "#92400E", mt: 1 }}
-                                  >
-                                    {item.adminNote}
-                                  </Typography>
-                                </Box>
-                              )}
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  gap: 2,
-                                  flexWrap: "wrap",
-                                  mb: 2,
-                                }}
-                              >
-                                {item.certificateUrl && (
+                                  {item.certificateUrl && (
+                                    <Button
+                                      variant="contained"
+                                      size="small"
+                                      startIcon={<LinkIcon />}
+                                      href={item.certificateUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      sx={{
+                                        background: `linear-gradient(135deg, ${colors.accent.lightBlue} 0%, #059669 100%)`,
+                                        color: "white",
+                                        fontWeight: 600,
+                                        textTransform: "none",
+                                        borderRadius: 2,
+                                        px: 3,
+                                        "&:hover": {
+                                          transform: "translateY(-1px)",
+                                          boxShadow: `0 4px 12px ${alpha(colors.accent.lightBlue, 0.3)}`,
+                                        },
+                                      }}
+                                    >
+                                      Xem tài liệu
+                                    </Button>
+                                  )}
                                   <Button
-                                    variant="contained"
+                                    variant="outlined"
                                     size="small"
-                                    startIcon={<LinkIcon />}
-                                    href={item.certificateUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    startIcon={<EditIcon />}
+                                    onClick={() => handleEditCertificateModal(item)}
                                     sx={{
-                                      background: `linear-gradient(135deg, ${colors.accent.lightBlue} 0%, #059669 100%)`,
-                                      color: "white",
+                                      borderColor: colors.accent.lightBlue,
+                                      color: colors.accent.lightBlue,
                                       fontWeight: 600,
                                       textTransform: "none",
                                       borderRadius: 2,
+                                      px: 3,
                                       "&:hover": {
+                                        borderColor: "#047857",
+                                        backgroundColor: alpha(colors.accent.lightBlue, 0.1),
                                         transform: "translateY(-1px)",
                                       },
                                     }}
                                   >
-                                    Xem tài liệu
+                                    Chỉnh sửa
                                   </Button>
-                                )}
+                                  <Button
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<DeleteIcon />}
+                                    onClick={() => handleDeleteCertificateTab(item)}
+                                    sx={{
+                                      borderColor: colors.error[500],
+                                      color: colors.error[600],
+                                      fontWeight: 600,
+                                      textTransform: "none",
+                                      borderRadius: 2,
+                                      px: 3,
+                                      "&:hover": {
+                                        borderColor: colors.error[600],
+                                        backgroundColor: colors.error[50],
+                                        transform: "translateY(-1px)",
+                                      },
+                                    }}
+                                  >
+                                    Xóa
+                                  </Button>
+                                </Box>
                               </Box>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  gap: 2,
-                                  flexWrap: "wrap",
-                                }}
-                              >
-                                <Button
-                                  variant="outlined"
-                                  size="small"
-                                  startIcon={<EditIcon />}
-                                  onClick={() =>
-                                    handleEditCertificateModal(item)
-                                  }
-                                  sx={{
-                                    borderColor: "#10B981",
-                                    color: "#10B981",
-                                    fontWeight: 600,
-                                    textTransform: "none",
-                                    borderRadius: 2,
-                                    "&:hover": {
-                                      borderColor: "#047857",
-                                      backgroundColor: "#ECFDF5",
-                                      transform: "translateY(-1px)",
-                                    },
-                                  }}
-                                >
-                                  Chỉnh sửa
-                                </Button>
-                                <Button
-                                  variant="outlined"
-                                  size="small"
-                                  startIcon={<DeleteIcon />}
-                                  onClick={() =>
-                                    handleDeleteCertificateTab(item)
-                                  }
-                                  sx={{
-                                    borderColor: "#EF4444",
-                                    color: "#EF4444",
-                                    fontWeight: 600,
-                                    textTransform: "none",
-                                    borderRadius: 2,
-                                    "&:hover": {
-                                      borderColor: "#DC2626",
-                                      backgroundColor: "#FEF2F2",
-                                      transform: "translateY(-1px)",
-                                    },
-                                  }}
-                                >
-                                  Xóa
-                                </Button>
-                              </Box>
-                            </Box>
-                          </AccordionDetails>
-                        </Accordion>
-                      ))
+                            </AccordionDetails>
+                          </Accordion>
+                        ))}
+                      </Stack>
                     ) : (
-                      <Alert
-                        severity="info"
-                        sx={{ textAlign: "center", mt: 3 }}
+                      <Box
+                        sx={{
+                          textAlign: "center",
+                          py: 6,
+                          px: 4,
+                          borderRadius: 3,
+                          background: `
+                            linear-gradient(135deg, ${alpha(colors.accent.lightBlue, 0.1)} 0%, ${alpha(colors.success[50], 0.2)} 100%)
+                          `,
+                          border: `1px solid ${alpha(colors.accent.lightBlue, 0.2)}`,
+                        }}
                       >
-                        Chưa có thông tin trong mục này
-                      </Alert>
+                        <AssignmentIcon
+                          sx={{
+                            fontSize: 64,
+                            color: alpha(colors.accent.lightBlue, 0.5),
+                            mb: 2,
+                          }}
+                        />
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            color: colors.text.secondary,
+                            fontWeight: 600,
+                            mb: 1,
+                            fontFamily: "'Inter', sans-serif",
+                          }}
+                        >
+                          Chưa có chứng chỉ nào
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: colors.text.tertiary,
+                            mb: 3,
+                            fontFamily: "'Inter', sans-serif",
+                          }}
+                        >
+                          Thêm chứng chỉ đầu tiên để hoàn thiện hồ sơ của bạn
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          startIcon={<Add />}
+                          onClick={handleOpenCertificateModal}
+                          sx={{
+                            background: `linear-gradient(135deg, ${colors.accent.lightBlue} 0%, #059669 100%)`,
+                            color: "white",
+                            fontWeight: 600,
+                            textTransform: "none",
+                            borderRadius: 3,
+                            px: 4,
+                            py: 1.5,
+                          }}
+                        >
+                          Thêm chứng chỉ đầu tiên
+                        </Button>
+                      </Box>
                     )}
                   </CardContent>
                 </Paper>
