@@ -22,7 +22,7 @@ import {
   DateRange,
 } from "@mui/icons-material";
 import ApproveLecturerUpdateDialog from "../../../../components/admin-dialog/admin-lecturer-dialog/ApproveLecturerUpdateDialog";
-import { getAcademicRank } from "../../../../utils/ChangeText";
+import { getAcademicRank, getRelativeTime } from "../../../../utils/ChangeText";
 
 interface AdminLecturerUpdateTabProps {
   lecturerUpdateList: any[];
@@ -53,8 +53,8 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
     }
 
     filtered = [...filtered].sort((a: any, b: any) => {
-      const dateA = new Date(a.lecturer.updatedAt || a.lecturer.createdAt || 0);
-      const dateB = new Date(b.lecturer.updatedAt || b.lecturer.createdAt || 0);
+      const dateA = new Date(a.lecturerUpdate.updatedAt || a.lecturerUpdate.createdAt || 0);
+      const dateB = new Date(b.lecturerUpdate.updatedAt || b.lecturerUpdate.createdAt || 0);
 
       if (updateDateSort === "oldest") {
         return dateA.getTime() - dateB.getTime();
@@ -387,30 +387,9 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
                           variant="body2"
                           sx={{ fontWeight: 500, fontSize: "0.75rem" }}
                         >
-                          {(() => {
-                            if (!item.lecturer.updatedAt)
-                              return "Chưa cập nhật";
-
-                            const now = new Date();
-                            const updatedTime = new Date(
-                              item.lecturer.updatedAt,
-                            );
-                            const diffInHours = Math.floor(
-                              (now.getTime() - updatedTime.getTime()) /
-                                (1000 * 60 * 60),
-                            );
-
-                            if (diffInHours < 1) {
-                              return "Vừa cập nhật";
-                            } else if (diffInHours < 48) {
-                              return `${diffInHours}h trước`;
-                            } else {
-                              const diffInDays = Math.floor(
-                                diffInHours / 24,
-                              );
-                              return `${diffInDays}d trước`;
-                            }
-                          })()}
+                          {getRelativeTime(
+                            item.lecturerUpdate.updatedAt
+                          )}
                         </Typography>
                       </Box>
                     </Box>

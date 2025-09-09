@@ -1,4 +1,12 @@
-import { Edit, Email, LocationOn, Phone, School } from "@mui/icons-material";
+import {
+  Assignment,
+  Edit,
+  Email,
+  Language,
+  LocationOn,
+  Phone,
+  School
+} from "@mui/icons-material";
 import {
   Avatar,
   Box,
@@ -6,30 +14,94 @@ import {
   Card,
   CardContent,
   Chip,
+  CircularProgress,
   Container,
-  Typography,
+  LinearProgress,
 } from "@mui/material";
-import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import InstitutionUpdateInfoDialog from "../../components/institution-dialog/InstitutionUpdateInfoDialog";
+import { setInstitutionProfile } from "../../redux/slice/InstitutionProfileSlice";
+import { InstitutionMessageHandler } from "../../services/InstitutionMessageHandler";
+import WebSocketService from "../../services/WebSocketService";
 import { colors } from "../../theme/colors";
+import {
+  getInstitutionTypeText,
+  getStatus,
+  getStatusColor
+} from "../../utils/ChangeText";
+import { API } from "../../utils/Fetch";
+import { Typography } from "@mui/material";
 
 const InstitutionProfilePage = () => {
-  // Giả sử dữ liệu trung tâm lấy từ redux
-  // const institutionProfile = useSelector((state: any) => state.institutionProfile);
+  const dispatch = useDispatch();
   const userProfile = useSelector((state: any) => state.userProfile);
+  const institutionProfile = useSelector(
+    (state: any) => state.institutionProfile,
+  );
 
+  // Local state
+  const [loading, setLoading] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  const institution = userProfile?.educationInstitution;
-  if (!institution) {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await API.institution.getInstitutionProfile();
+        if (!response.data.success) {
+          throw new Error("Failed to fetch institution profile");
+        }
+        const data = response.data.data;
+        dispatch(setInstitutionProfile(data));
+      } catch (error) {
+        console.error("Error fetching institution profile:", error);
+        toast.error("Không thể tải thông tin trường/trung tâm");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (userProfile && userProfile.role === "SCHOOL") {
+      WebSocketService.connect(
+        userProfile,
+        () => console.log("✅ School WebSocket connected"),
+        (message) => {
+          InstitutionMessageHandler.handleIncomingMessage(message, dispatch);
+        },
+      );
+    }
+
+    return () => {
+      WebSocketService.disconnect();
+    };
+  }, [userProfile, dispatch]);
+
+  const handleEditClick = () => {
+    setEditDialogOpen(true);
+  };
+
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false);
+  };
+
+  if (loading && !institutionProfile) {
     return (
-      <Container className="py-8">
-        <div className="flex h-64 items-center justify-center">
-          <Typography variant="h6" className="text-gray-600">
-            Đang tải thông tin trung tâm...
-          </Typography>
-        </div>
-      </Container>
+      <Box sx={{ width: "100%" }}>
+        <LinearProgress />
+        <Box sx={{ p: 4, textAlign: "center" }}>
+          <Typography variant="h6">Đang tải thông tin...</Typography>
+        </Box>
+      </Box>
     );
   }
+
+  const institution = institutionProfile?.institution || {};
+  const institutionUpdate = institutionProfile?.institutionUpdate || null;
 
   return (
     <div
@@ -37,7 +109,7 @@ const InstitutionProfilePage = () => {
       style={{ backgroundColor: colors.background.secondary }}
     >
       <Container maxWidth="xl" className="py-8">
-        {/* Banner cá nhân Trung tâm đào tạo */}
+        {/* Header Section - Banner tương tự LecturerProfilePage */}
         <Card
           className="mb-8 overflow-hidden"
           sx={{
@@ -69,10 +141,10 @@ const InstitutionProfilePage = () => {
               p: { xs: 4, md: 6 },
             }}
           >
-            {/* Avatar */}
+            {/* Logo */}
             <Box sx={{ position: "relative" }}>
               <Avatar
-                src={institution.avatarUrl || ""}
+                src={institution.logoUrl}
                 sx={{
                   width: 140,
                   height: 140,
@@ -80,13 +152,15 @@ const InstitutionProfilePage = () => {
                   boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
                   fontSize: "3rem",
                   fontWeight: 700,
+                  backgroundColor: colors.background.primary,
                 }}
               >
-                {institution.name?.charAt(0)}
+                <School sx={{ fontSize: "4rem", color: colors.primary[500] }} />
               </Avatar>
+              
             </Box>
 
-            {/* Info */}
+            {/* Institution Info */}
             <Box sx={{ flex: 1 }}>
               {/* Name & Buttons */}
               <Box
@@ -99,7 +173,7 @@ const InstitutionProfilePage = () => {
                 }}
               >
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                  {/* Tên trung tâm */}
+                  {/* Tên trường/trung tâm */}
                   <Typography
                     variant="h4"
                     sx={{
@@ -109,10 +183,10 @@ const InstitutionProfilePage = () => {
                       textShadow: "0 2px 4px rgba(0,0,0,0.3)",
                     }}
                   >
-                    {institution.name}
+                    {institution.institutionName || "Chưa cập nhật"}
                   </Typography>
 
-                  {/* Lĩnh vực chuyên ngành */}
+                  {/* Loại trường */}
                   <Box
                     sx={{
                       display: "flex",
@@ -122,7 +196,7 @@ const InstitutionProfilePage = () => {
                     }}
                   >
                     <Chip
-                      label={institution.specialization || "Chưa cập nhật"}
+                      label={getInstitutionTypeText(institution.institutionType)}
                       size="medium"
                       sx={{
                         background: "linear-gradient(135deg, #FF9800, #FFC107)",
@@ -136,46 +210,47 @@ const InstitutionProfilePage = () => {
                   </Box>
                 </Box>
 
-                <Box gap={2} display="flex">
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1, alignItems: { xs: "center", md: "flex-end" } }}>
                   <Button
                     variant="contained"
                     startIcon={<Edit />}
+                    onClick={handleEditClick}
+                    disabled={loading}
                     sx={{
-                      background: colors.background.gradient.secondary,
+                      background: "rgba(255,255,255,0.2)",
                       color: "white",
                       fontWeight: 600,
                       borderRadius: 3,
                       textTransform: "none",
+                      backdropFilter: "blur(10px)",
+                      border: "1px solid rgba(255,255,255,0.3)",
                       "&:hover": {
-                        background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
+                        background: "rgba(255,255,255,0.3)",
                         transform: "translateY(-1px)",
                       },
                     }}
                   >
-                    Chỉnh sửa hồ sơ
+                    {loading ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      institutionUpdate ? "Xem lại chỉnh sửa" : "Chỉnh sửa"
+                    )}
                   </Button>
-                  <Button
-                    variant="contained"
-                    onClick={() =>
-                      window.open(
-                        `/institution-info/${institution.id}`,
-                        "_blank",
-                      )
-                    }
-                    sx={{
-                      background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[600]} 100%)`,
-                      color: "white",
-                      fontWeight: 600,
-                      borderRadius: 3,
-                      textTransform: "none",
-                      "&:hover": {
-                        background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
-                        transform: "translateY(-1px)",
-                      },
-                    }}
-                  >
-                    CV của trung tâm
-                  </Button>
+                  
+                  {/* Chip trạng thái bên dưới nút */}
+                  {institutionUpdate && (
+                    <Chip
+                      label={`Trạng thái: ${getStatus(institutionUpdate.status)}`}
+                      size="medium"
+                      color={getStatusColor(institutionUpdate.status)}
+                      sx={{
+                        color: "#fff",
+                        fontWeight: 600,
+                        borderRadius: "16px",
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                      }}
+                    />
+                  )}
                 </Box>
               </Box>
 
@@ -188,27 +263,39 @@ const InstitutionProfilePage = () => {
                   gap: 2,
                 }}
               >
+               
                 <Box display="flex" alignItems="center" gap={1}>
-                  <School fontSize="small" />{" "}
-                  {institution.type || "Trung tâm đào tạo"}
+                  <Assignment fontSize="small" />
+                  <span>ĐKKD: {institution.businessRegistrationNumber}</span>
                 </Box>
                 <Box display="flex" alignItems="center" gap={1}>
-                  <Email fontSize="small" />{" "}
+                  <Email fontSize="small" />
                   {institution.email || userProfile?.email || "Chưa cập nhật"}
                 </Box>
                 <Box display="flex" alignItems="center" gap={1}>
-                  <LocationOn fontSize="small" />{" "}
-                  {institution.address || "Chưa cập nhật"}
+                  <Phone fontSize="small" />
+                  {institution.phoneNumber}
                 </Box>
                 <Box display="flex" alignItems="center" gap={1}>
-                  <Phone fontSize="small" />{" "}
-                  {institution.phoneNumber || "Chưa cập nhật"}
+                  <LocationOn fontSize="small" />
+                  {institution.address}
+                </Box>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Language fontSize="small" />
+                  {institution.website}
                 </Box>
               </Box>
             </Box>
           </CardContent>
         </Card>
-        {/* ...các phần khác của trang... */}
+
+        {/* Institution Update Dialog */}
+        <InstitutionUpdateInfoDialog
+          open={editDialogOpen}
+          onClose={handleCloseEditDialog}
+          institution={institution}
+          institutionUpdate={institutionUpdate}
+        />
       </Container>
     </div>
   );

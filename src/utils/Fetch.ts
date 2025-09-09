@@ -208,10 +208,11 @@ export const API = {
     // Institution
     updateInstitutionProfile: (data: InstitutionRequest) =>
       fetch.post("/api/v1/institution/update-profile", data),
+    getInstitutionProfile: () => fetch.get("/api/v1/institution/get-institution-profile"),
   },
   partner: {
     // Get
-
+    getPartnerProfile: () => fetch.get("/api/v1/partner/get-partner-profile"),
     // Partner
     updatePartnerProfile: (data: PartnerRequest) =>
       fetch.post("/api/v1/partner/update-profile", data),

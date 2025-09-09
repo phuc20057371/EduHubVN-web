@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
 	Dialog,
@@ -38,8 +37,24 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 	onClose,
 	onConfirm,
 }) => {
+	const handleKeyPress = (event: React.KeyboardEvent) => {
+		if (event.key === 'Enter' && !loading) {
+			// Nếu là reject và cần ghi chú nhưng chưa có thì không submit
+			if (type === 'reject' && rejectNoteRequired && !rejectNote.trim()) {
+				return;
+			}
+			onConfirm();
+		}
+	};
+
 	return (
-		<Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+		<Dialog 
+			open={open} 
+			onClose={onClose} 
+			maxWidth="sm" 
+			fullWidth
+			onKeyDown={handleKeyPress}
+		>
 			<DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 				{type === "approve" ? (
 					<>
@@ -64,11 +79,17 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 								label="Lý do từ chối *"
 								value={rejectNote}
 								onChange={(e) => onRejectNoteChange?.(e.target.value)}
+								onKeyDown={(e) => {
+									if (e.key === 'Enter' && e.ctrlKey && !loading && rejectNote.trim()) {
+										// Ctrl + Enter để submit khi đang trong TextField
+										onConfirm();
+									}
+								}}
 								fullWidth
 								multiline
 								rows={3}
 								variant="outlined"
-								placeholder="Nhập lý do từ chối..."
+								placeholder="Nhập lý do từ chối... (Ctrl + Enter để xác nhận)"
 								required
 							/>
 						)}
@@ -83,7 +104,8 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 					onClick={onConfirm}
 					variant="contained"
 					color={type === "approve" ? "success" : "error"}
-					disabled={loading}
+					disabled={loading || (type === "reject" && rejectNoteRequired && !rejectNote.trim())}
+					autoFocus={type === "approve" || !rejectNoteRequired}
 					sx={{ minWidth: 100 }}
 				>
 					{loading

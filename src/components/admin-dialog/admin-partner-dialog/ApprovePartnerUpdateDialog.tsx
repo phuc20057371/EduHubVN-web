@@ -156,13 +156,11 @@ const ApprovePartnerUpdateDialog = ({
             </Avatar>
             <Box flex={1}>
               <Typography variant="h5" component="div">
-                So sánh thông tin cập nhật
+                Yêu cầu cập nhật thông tin đối tác
               </Typography>
+
               <Typography variant="body2" color="text.secondary">
-                {oldData?.organizationName || newData?.organizationName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                ID: {oldData?.id || newData?.id}
+                ID: {oldData?.id}
               </Typography>
             </Box>
           </Box>
@@ -379,23 +377,23 @@ const ApprovePartnerUpdateDialog = ({
                   );
                 })}
               </CardContent>
-              <Box>
-                <Divider />
-                <Box
-                  display="flex"
-                  justifyContent="flex-end"
-                  p={2}
-                  sx={{ bgcolor: "#f5f5f5" }}
-                >
-                  <Typography variant="caption" color="text.secondary">
-                    {newData?.updatedAt
-                      ? `Cập nhật lúc: ${new Date(newData.updatedAt).toLocaleString()}`
-                      : "Chưa có thông tin cập nhật"}
-                  </Typography>
-                </Box>
-              </Box>
             </Card>
           ))}
+          <Box width={"100%"} textAlign="right" mt={2}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Được tạo lúc :{" "}
+              {newData.createdAt
+                ? new Date(newData.createdAt).toLocaleString("vi-VN")
+                : "Chưa cập nhật"}
+            </Typography>
+
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Cập nhật lúc{" "}
+              {newData.updatedAt
+                ? new Date(newData.updatedAt).toLocaleString("vi-VN")
+                : "Chưa cập nhật"}
+            </Typography>
+          </Box>
         </DialogContent>
 
         <DialogActions sx={{ p: 3 }}>

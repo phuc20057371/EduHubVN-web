@@ -1,10 +1,12 @@
 import { setInstitutionPendingCreate } from "../redux/slice/InstitutionPendingCreateSlice";
+import { setInstitutionPendingUpdate } from "../redux/slice/InstitutionPendingUpdateSlice";
 import { setInstitutions } from "../redux/slice/InstitutionSlice";
 import { setLecturerPendingCreate } from "../redux/slice/LecturerPendingCreateSlice";
 import { setLecturerPendingUpdate } from "../redux/slice/LecturerPendingUpdateSlice";
 import { setLecturerProfileUpdate } from "../redux/slice/LecturerProfileUpdateSlice";
 import { setLecturers } from "../redux/slice/LecturerSlice";
 import { setPartnerPendingCreate } from "../redux/slice/PartnerPendingCreateSlice";
+import { setPartnerPendingUpdate } from "../redux/slice/PartnerPendingUpdateSlice";
 import { setPartner } from "../redux/slice/PartnerSlice";
 import { setAttendedCourseRequests } from "../redux/slice/RequestAttendedCourseSlice";
 import { setCertificationRequests } from "../redux/slice/RequestCertificationSlice";
@@ -215,6 +217,7 @@ export const AdminMessageHandler = {
             "🏢 Handling institution editing:",
             parsedMessage.content,
           );
+          await handleInstitutionUpdate(dispatch);
 
           break;
 
@@ -223,7 +226,6 @@ export const AdminMessageHandler = {
             "🏢 Handling institution deletion:",
             parsedMessage.content,
           );
-
           break;
 
         /// PARTNER
@@ -239,6 +241,7 @@ export const AdminMessageHandler = {
 
         case "EDIT_PARTNER":
           console.log("🤝 Handling partner editing:", parsedMessage.content);
+          await handlePartnerUpdate(dispatch);
 
           break;
 
@@ -307,4 +310,17 @@ const handlePartnerCreate = async (dispatch: any) => {
   dispatch(setPartnerPendingCreate(res.data.data));
   const response = await API.admin.getAllPartners();
   dispatch(setPartner(response.data.data));
+};
+const handlePartnerUpdate = async (dispatch: any) => {
+  const res = await API.admin.getPartnerPendingUpdate();
+  dispatch(setPartnerPendingUpdate(res.data.data));
+  const response = await API.admin.getAllPartners();
+  dispatch(setPartner(response.data.data));
+}
+
+const handleInstitutionUpdate = async (dispatch: any) => {
+  const res = await API.admin.getInstitutionPendingUpdate();
+  dispatch(setInstitutionPendingUpdate(res.data.data));
+  const response = await API.admin.getAllInstitutions();
+  dispatch(setInstitutions(response.data.data));
 };

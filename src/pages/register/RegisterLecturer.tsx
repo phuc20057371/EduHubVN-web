@@ -826,6 +826,7 @@ const RegisterLecturer = () => {
                     }}
                   >
                     <MenuItem value="">Chọn học hàm</MenuItem>
+                    <MenuItem value="KS">Kỹ sư</MenuItem>
                     <MenuItem value="CN">Cử nhân</MenuItem>
                     <MenuItem value="THS">Thạc sĩ</MenuItem>
                     <MenuItem value="TS">Tiến sĩ</MenuItem>

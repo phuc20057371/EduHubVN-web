@@ -201,11 +201,9 @@ const ApprovePartnerCreateDialog = ({
             </Avatar>
             <Box>
               <Typography variant="h5" component="div">
-                {partner.organizationName}
+                Yêu cầu tạo mới đối tác
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Chi tiết đối tác
-              </Typography>
+              <Typography variant="body2" color="text.secondary"></Typography>
               <Box display="flex" justifyContent="space-between">
                 <Typography variant="body2" color="text.secondary">
                   ID: {partner.id}
@@ -477,45 +475,6 @@ const ApprovePartnerCreateDialog = ({
                   </CardContent>
                 </Card>
 
-                {/* System Info Card */}
-                <Card elevation={1}>
-                  <CardHeader
-                    avatar={
-                      <Avatar sx={{ bgcolor: "warning.main" }}>🔧</Avatar>
-                    }
-                    title="Thông tin hệ thống"
-                  />
-                  <CardContent>
-                    <Box display="flex" flexDirection="column" gap={1.5}>
-                      <Box display="flex" justifyContent="space-between">
-                        <Typography variant="body2" color="text.secondary">
-                          Thời gian tạo:
-                        </Typography>
-                        <Typography variant="body2" fontWeight={500}>
-                          {partner.createdAt
-                            ? new Date(partner.createdAt).toLocaleDateString(
-                                "vi-VN",
-                              )
-                            : "Chưa có"}
-                        </Typography>
-                      </Box>
-                      <Divider />
-                      <Box display="flex" justifyContent="space-between">
-                        <Typography variant="body2" color="text.secondary">
-                          Cập nhật lần cuối:
-                        </Typography>
-                        <Typography variant="body2" fontWeight={500}>
-                          {partner.updatedAt
-                            ? new Date(partner.updatedAt).toLocaleDateString(
-                                "vi-VN",
-                              )
-                            : "Chưa có"}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </CardContent>
-                </Card>
-
                 {/* Description Card */}
                 <Card elevation={1}>
                   <CardHeader
@@ -532,6 +491,29 @@ const ApprovePartnerCreateDialog = ({
                     </Typography>
                   </CardContent>
                 </Card>
+                <Box>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    gutterBottom
+                  >
+                    Được tạo lúc :{" "}
+                    {partner.createdAt
+                      ? new Date(partner.createdAt).toLocaleString("vi-VN")
+                      : "Chưa cập nhật"}
+                  </Typography>
+
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    gutterBottom
+                  >
+                    Cập nhật lúc{" "}
+                    {partner.updatedAt
+                      ? new Date(partner.updatedAt).toLocaleString("vi-VN")
+                      : "Chưa cập nhật"}
+                  </Typography>
+                </Box>
               </Box>
             </Box>
           </Box>

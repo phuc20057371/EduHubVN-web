@@ -168,7 +168,6 @@ const LecturerProfilePage = () => {
   };
   const handleSubmitResearchProject = async (projectData: any) => {
     try {
-
       if (isEditMode && editingItem) {
         if (editingItem.status === "APPROVED") {
           await API.lecturer.editResearchProject(projectData);
@@ -275,7 +274,7 @@ const LecturerProfilePage = () => {
 
   const {
     lecturer,
-    // lecturerUpdate,
+    lecturerUpdate,
     degrees,
     certificates,
     ownedCourses,
@@ -308,9 +307,7 @@ const LecturerProfilePage = () => {
       id: "courses",
       label: "Kinh nghiệm Đào tạo",
       icon: <WorkHistory />,
-      count:
-        (ownedCourses?.length || 0) +
-        (attendedCourses?.length || 0),
+      count: (ownedCourses?.length || 0) + (attendedCourses?.length || 0),
       description: "Khóa học và đào tạo",
     },
     {
@@ -334,11 +331,7 @@ const LecturerProfilePage = () => {
   const renderSection = (items: any[], type: string) => {
     switch (type) {
       case "degrees":
-        return (
-          <DegreesTab
-            degrees={items}
-          />
-        );
+        return <DegreesTab degrees={items} />;
       case "certificates":
         return (
           <CertificatesTab
@@ -431,19 +424,6 @@ const LecturerProfilePage = () => {
               >
                 {lecturer.fullName?.charAt(0)}
               </Avatar>
-              {/* {lecturerUpdate?.status === "PENDING" && (
-                <Chip
-                  label="Chờ duyệt"
-                  color="warning"
-                  size="small"
-                  sx={{
-                    position: "absolute",
-                    top: -8,
-                    right: -8,
-                    fontWeight: 600,
-                  }}
-                />
-              )} */}
             </Box>
 
             {/* Info */}
@@ -506,44 +486,82 @@ const LecturerProfilePage = () => {
                   </Box>
                 </Box>
 
-                <Box gap={2} display="flex">
-                  <Button
-                    variant="contained"
-                    startIcon={<Edit />}
-                    onClick={handleEditProfile}
-                    sx={{
-                      background: colors.background.gradient.secondary,
-                      color: "white",
-                      fontWeight: 600,
-                      borderRadius: 3,
-                      textTransform: "none",
-                      "&:hover": {
-                        background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
-                        transform: "translateY(-1px)",
-                      },
-                    }}
-                  >
-                    Chỉnh sửa hồ sơ
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={() =>
-                      window.open(`/lecturer-info/${lecturer.id}`, "_blank")
-                    }
-                    sx={{
-                      background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[600]} 100%)`,
-                      color: "white",
-                      fontWeight: 600,
-                      borderRadius: 3,
-                      textTransform: "none",
-                      "&:hover": {
-                        background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
-                        transform: "translateY(-1px)",
-                      },
-                    }}
-                  >
-                    CV của tôi
-                  </Button>
+                <Box
+                  gap={2}
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="flex-end"
+                >
+                  <Box gap={2} display="flex">
+                    <Button
+                      variant="contained"
+                      onClick={() =>
+                        window.open(`/lecturer-info/${lecturer.id}`, "_blank")
+                      }
+                      sx={{
+                        background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[600]} 100%)`,
+                        color: "white",
+                        fontWeight: 600,
+                        borderRadius: 3,
+                        textTransform: "none",
+                        "&:hover": {
+                          background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
+                          transform: "translateY(-1px)",
+                        },
+                      }}
+                    >
+                      CV của tôi
+                    </Button>
+                    <Button
+                      variant="contained"
+                      startIcon={<Edit />}
+                      onClick={handleEditProfile}
+                      sx={{
+                        background: colors.background.gradient.secondary,
+                        color: "white",
+                        fontWeight: 600,
+                        borderRadius: 3,
+                        textTransform: "none",
+                        "&:hover": {
+                          background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
+                          transform: "translateY(-1px)",
+                        },
+                      }}
+                    >
+                      {lecturerUpdate
+                        ? "Xem lại hồ sơ chỉnh sửa"
+                        : "Chỉnh sửa hồ sơ"}
+                    </Button>
+                  </Box>
+
+                  {/* Chip trạng thái lecturerUpdate */}
+                  {lecturerUpdate && (
+                    <Chip
+                      label={`Trạng thái: ${
+                        getStatusColor(lecturerUpdate.status) === "warning"
+                          ? "Đang chờ duyệt"
+                          : getStatusColor(lecturerUpdate.status) === "success"
+                            ? "Đã được duyệt"
+                            : "Đã bị từ chối"
+                      }`}
+                      color={getStatusColor(lecturerUpdate.status)}
+                      variant="filled"
+                      size="small"
+                      sx={{
+                        fontWeight: 600,
+                        fontSize: "0.75rem",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                        background:
+                          getStatusColor(lecturerUpdate.status) === "warning"
+                            ? "linear-gradient(135deg, #FF9800, #F57C00)"
+                            : getStatusColor(lecturerUpdate.status) ===
+                                "success"
+                              ? "linear-gradient(135deg, #4CAF50, #388E3C)"
+                              : "linear-gradient(135deg, #F44336, #D32F2F)",
+                        color: "white",
+                      }}
+                    />
+                  )}
                 </Box>
               </Box>
 
@@ -719,6 +737,7 @@ const LecturerProfilePage = () => {
           open={editDialogOpen}
           onClose={handleCloseEditDialog}
           lecturer={lecturer}
+          lecturerUpdate={lecturerUpdate}
         />
 
         {/* Create Owned Course Dialog */}

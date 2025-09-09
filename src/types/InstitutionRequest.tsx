@@ -4,7 +4,7 @@ export type EducationInstitutionType = "UNIVERSITY" | "TRAINING_CENTER" ;
 export type InstitutionRequest = {
     businessRegistrationNumber: string;
     institutionName: string;
-    institutionType: EducationInstitutionType;
+    institutionType: string
     phoneNumber: string;
     website: string;
     address: string;

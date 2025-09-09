@@ -46,6 +46,11 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import LinearProgress from "@mui/material/LinearProgress";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import "dayjs/locale/vi";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -65,6 +70,9 @@ import { formatDate, getStatus, getStatusColor } from "../../utils/ChangeText";
 import { API } from "../../utils/Fetch";
 import { navigateToRole } from "../../utils/navigationRole";
 import { validateLecturerInfo } from "../../utils/Validate";
+
+// Cấu hình dayjs locale
+dayjs.locale("vi");
 
 const LecturerPendingPage = () => {
   const dispatch = useDispatch();
@@ -812,27 +820,57 @@ const LecturerPendingPage = () => {
                             },
                           }}
                         />
-                        <TextField
-                          label="Ngày sinh"
-                          value={dateOfBirth}
-                          onChange={(e) => setDateOfBirth(e.target.value)}
-                          type="date"
-                          InputLabelProps={{ shrink: true }}
-                          variant="outlined"
-                          InputProps={{
-                            startAdornment: (
-                              <CalendarIcon
-                                sx={{ mr: 1, color: colors.text.tertiary }}
-                              />
-                            ),
-                          }}
-                          sx={{
-                            "& .MuiOutlinedInput-root": {
-                              borderRadius: 2,
-                              backgroundColor: colors.background.secondary,
-                            },
-                          }}
-                        />
+                        <LocalizationProvider
+                          dateAdapter={AdapterDayjs}
+                          adapterLocale="vi"
+                        >
+                          <DatePicker
+                            label="Ngày sinh"
+                            value={dateOfBirth ? dayjs(dateOfBirth) : null}
+                            onChange={(newValue) => {
+                              if (newValue && dayjs.isDayjs(newValue)) {
+                                setDateOfBirth(newValue.format("YYYY-MM-DD"));
+                              } else {
+                                setDateOfBirth("");
+                              }
+                            }}
+                            format="DD/MM/YYYY"
+                            slotProps={{
+                              textField: {
+                                variant: "outlined",
+                                fullWidth: true,
+                                InputProps: {
+                                  startAdornment: (
+                                    <CalendarIcon
+                                      sx={{
+                                        mr: 1,
+                                        color: colors.text.tertiary,
+                                      }}
+                                    />
+                                  ),
+                                },
+                                sx: {
+                                  "& .MuiOutlinedInput-root": {
+                                    borderRadius: 2,
+                                    backgroundColor:
+                                      colors.background.secondary,
+                                    transition: "all 0.3s ease",
+                                    "&:hover": {
+                                      backgroundColor:
+                                        colors.background.primary,
+                                      boxShadow: `0 2px 8px ${alpha(colors.primary[500], 0.1)}`,
+                                    },
+                                    "&.Mui-focused": {
+                                      backgroundColor:
+                                        colors.background.primary,
+                                      boxShadow: `0 4px 12px ${alpha(colors.primary[500], 0.15)}`,
+                                    },
+                                  },
+                                },
+                              },
+                            }}
+                          />
+                        </LocalizationProvider>
                       </Box>
 
                       <Box
@@ -1122,203 +1160,125 @@ const LecturerPendingPage = () => {
                           },
                         }}
                       />
+
+                      {/* Save Changes Button */}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          mt: 4,
+                        }}
+                      >
+                        <Button
+                          variant="contained"
+                          size="large"
+                          startIcon={
+                            loading ? (
+                              <CircularProgress size={20} color="inherit" />
+                            ) : (
+                              <SaveIcon />
+                            )
+                          }
+                          onClick={handleSaveChanges}
+                          disabled={loading}
+                          sx={{
+                            px: 6,
+                            py: 2,
+                            borderRadius: 3,
+                            fontWeight: 600,
+                            fontSize: "1rem",
+                            fontFamily: "'Inter', sans-serif",
+                            background: colors.background.gradient.primary,
+                            boxShadow: `0 6px 16px ${alpha(colors.primary[500], 0.3)}`,
+                            textTransform: "none",
+                            "&:hover": {
+                              transform: "translateY(-2px)",
+                              boxShadow: `0 8px 20px ${alpha(colors.primary[500], 0.4)}`,
+                            },
+                            "&:disabled": {
+                              background: colors.neutral[300],
+                              color: colors.neutral[500],
+                            },
+                            transition: "all 0.3s ease",
+                          }}
+                        >
+                          {loading ? "Đang lưu..." : "Lưu thay đổi"}
+                        </Button>
+                      </Box>
                     </Stack>
                   </CardContent>
                 </Paper>
-
-                {/* Enhanced Timestamps */}
-                <Paper
-                  elevation={0}
-                  sx={{
-                    borderRadius: 3,
-                    border: `1px solid ${colors.border.light}`,
-                    background: `
-                      linear-gradient(135deg, ${colors.background.primary} 0%, ${alpha(colors.neutral[50], 0.5)} 100%)
-                    `,
-                    position: "relative",
-                    "&::before": {
-                      content: '""',
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: 4,
-                      height: "100%",
-                      background: colors.background.gradient.primary,
-                      borderRadius: "2px 0 0 2px",
-                    },
-                  }}
-                >
-                  <CardHeader
-                    avatar={
-                      <Box
-                        sx={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: 2,
-                          background: alpha(colors.info[500], 0.1),
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          border: `1px solid ${alpha(colors.info[300], 0.3)}`,
-                        }}
-                      >
-                        <CalendarIcon
-                          sx={{ color: colors.info[600], fontSize: 24 }}
-                        />
-                      </Box>
-                    }
-                    title={
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontFamily: "'Inter', sans-serif",
-                          fontWeight: 700,
-                          color: colors.text.primary,
-                        }}
-                      >
-                        Thông tin thời gian
-                      </Typography>
-                    }
-                    subheader={
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: colors.text.tertiary,
-                          fontFamily: "'Inter', sans-serif",
-                        }}
-                      >
-                        Ngày tạo và cập nhật hồ sơ
-                      </Typography>
-                    }
-                  />
-                  <CardContent sx={{ pt: 0 }}>
-                    <Box
+                <Box>
+                  <Box flex={1} flexDirection={"row"} mb={2}>
+                    <Typography
                       sx={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: 3,
+                        fontWeight: 600,
+                        fontSize: "0.75rem",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        fontFamily: "'Inter', sans-serif",
+                        mb: 1,
+                        display: "block",
                       }}
                     >
-                      {/* Ngày tạo */}
-                      <Box
-                        sx={{
-                          padding: 3,
-                          borderRadius: 2,
-                          backgroundColor: alpha(colors.success[50], 0.5),
-                          border: `1px solid ${alpha(colors.success[500], 0.3)}`,
-                          position: "relative",
-                          overflow: "hidden",
-                          "&::before": {
-                            content: '""',
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: 3,
-                            background: colors.success[500],
-                          },
-                        }}
-                      >
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            color: colors.success[700],
-                            fontWeight: 600,
-                            fontSize: "0.75rem",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.5px",
-                            fontFamily: "'Inter', sans-serif",
-                            mb: 1,
-                            display: "block",
-                          }}
-                        >
-                          Ngày tạo
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            color: colors.text.primary,
-                            fontWeight: 600,
-                            fontSize: "1rem",
-                            fontFamily: "'Inter', sans-serif",
-                          }}
-                        >
-                          {lecturer.createdAt
-                            ? new Date(lecturer.createdAt).toLocaleString(
-                                "vi-VN",
-                                {
-                                  year: "numeric",
-                                  month: "2-digit",
-                                  day: "2-digit",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                },
-                              )
-                            : "Chưa cập nhật"}
-                        </Typography>
-                      </Box>
-
-                      {/* Ngày cập nhật */}
-                      <Box
-                        sx={{
-                          padding: 3,
-                          borderRadius: 2,
-                          backgroundColor: alpha(colors.warning[50], 0.5),
-                          border: `1px solid ${alpha(colors.warning[200], 0.3)}`,
-                          position: "relative",
-                          overflow: "hidden",
-                          "&::before": {
-                            content: '""',
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: 3,
-                            background: colors.warning[400],
-                          },
-                        }}
-                      >
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            color: colors.warning[700],
-                            fontWeight: 600,
-                            fontSize: "0.75rem",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.5px",
-                            fontFamily: "'Inter', sans-serif",
-                            mb: 1,
-                            display: "block",
-                          }}
-                        >
-                          Cập nhật gần nhất
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            color: colors.text.primary,
-                            fontWeight: 600,
-                            fontSize: "1rem",
-                            fontFamily: "'Inter', sans-serif",
-                          }}
-                        >
-                          {lecturer.updatedAt
-                            ? new Date(lecturer.updatedAt).toLocaleString(
-                                "vi-VN",
-                                {
-                                  year: "numeric",
-                                  month: "2-digit",
-                                  day: "2-digit",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                },
-                              )
-                            : "Chưa cập nhật"}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </CardContent>
-                </Paper>
+                      Ngày tạo
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontWeight: 600,
+                        fontSize: "1rem",
+                        fontFamily: "'Inter', sans-serif",
+                      }}
+                    >
+                      {lecturer.createdAt
+                        ? new Date(lecturer.createdAt).toLocaleString("vi-VN", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "Chưa cập nhật"}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: colors.warning[700],
+                        fontWeight: 600,
+                        fontSize: "0.75rem",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        fontFamily: "'Inter', sans-serif",
+                        mb: 1,
+                        display: "block",
+                      }}
+                    >
+                      Cập nhật gần nhất
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: colors.text.primary,
+                        fontWeight: 600,
+                        fontSize: "1rem",
+                        fontFamily: "'Inter', sans-serif",
+                      }}
+                    >
+                      {lecturer.updatedAt
+                        ? new Date(lecturer.updatedAt).toLocaleString("vi-VN", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "Chưa cập nhật"}
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
 
               {/* Right Side - DegreesTab-like Degrees Section */}
@@ -1476,7 +1436,15 @@ const LecturerPendingPage = () => {
                                 },
                               }}
                             >
-                              <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: 1, pr: 2 }}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 2,
+                                  flex: 1,
+                                  pr: 2,
+                                }}
+                              >
                                 <Box
                                   sx={{
                                     width: 52,
@@ -1566,7 +1534,8 @@ const LecturerPendingPage = () => {
                                 <Box
                                   sx={{
                                     display: "grid",
-                                    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                                    gridTemplateColumns:
+                                      "repeat(auto-fit, minmax(200px, 1fr))",
                                     gap: 2,
                                     mb: 3,
                                   }}
@@ -1578,12 +1547,18 @@ const LecturerPendingPage = () => {
                                       gap: 1.5,
                                       p: 2,
                                       borderRadius: 2,
-                                      background: alpha(colors.primary[50], 0.5),
+                                      background: alpha(
+                                        colors.primary[50],
+                                        0.5,
+                                      ),
                                       border: `1px solid ${alpha(colors.primary[500], 0.3)}`,
                                     }}
                                   >
                                     <BusinessIcon
-                                      sx={{ color: colors.primary[600], fontSize: 20 }}
+                                      sx={{
+                                        color: colors.primary[600],
+                                        fontSize: 20,
+                                      }}
                                     />
                                     <Box>
                                       <Typography
@@ -1618,12 +1593,18 @@ const LecturerPendingPage = () => {
                                       gap: 1.5,
                                       p: 2,
                                       borderRadius: 2,
-                                      background: alpha(colors.success[50], 0.5),
+                                      background: alpha(
+                                        colors.success[50],
+                                        0.5,
+                                      ),
                                       border: `1px solid ${alpha(colors.success[500], 0.3)}`,
                                     }}
                                   >
                                     <CalendarIcon
-                                      sx={{ color: colors.success[600], fontSize: 20 }}
+                                      sx={{
+                                        color: colors.success[600],
+                                        fontSize: 20,
+                                      }}
                                     />
                                     <Box>
                                       <Typography
@@ -1658,12 +1639,18 @@ const LecturerPendingPage = () => {
                                       gap: 1.5,
                                       p: 2,
                                       borderRadius: 2,
-                                      background: alpha(colors.secondary[50], 0.5),
+                                      background: alpha(
+                                        colors.secondary[50],
+                                        0.5,
+                                      ),
                                       border: `1px solid ${alpha(colors.secondary[500], 0.3)}`,
                                     }}
                                   >
                                     <GradeIcon
-                                      sx={{ color: colors.secondary[600], fontSize: 20 }}
+                                      sx={{
+                                        color: colors.secondary[600],
+                                        fontSize: 20,
+                                      }}
                                     />
                                     <Box>
                                       <Typography
@@ -1699,7 +1686,10 @@ const LecturerPendingPage = () => {
                                       mb: 3,
                                       p: 3,
                                       borderRadius: 2,
-                                      background: alpha(colors.neutral[50], 0.5),
+                                      background: alpha(
+                                        colors.neutral[50],
+                                        0.5,
+                                      ),
                                       border: `1px solid ${alpha(colors.neutral[500], 0.3)}`,
                                     }}
                                   >
@@ -1737,7 +1727,10 @@ const LecturerPendingPage = () => {
                                       mb: 3,
                                       p: 3,
                                       borderRadius: 2,
-                                      background: alpha(colors.warning[50], 0.7),
+                                      background: alpha(
+                                        colors.warning[50],
+                                        0.7,
+                                      ),
                                       border: `1px solid ${colors.warning[500]}`,
                                       position: "relative",
                                       "&::before": {
@@ -1796,7 +1789,8 @@ const LecturerPendingPage = () => {
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       sx={{
-                                        background: colors.background.gradient.primary,
+                                        background:
+                                          colors.background.gradient.primary,
                                         color: "white",
                                         fontWeight: 600,
                                         textTransform: "none",
@@ -2066,7 +2060,15 @@ const LecturerPendingPage = () => {
                                 },
                               }}
                             >
-                              <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: 1, pr: 2 }}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 2,
+                                  flex: 1,
+                                  pr: 2,
+                                }}
+                              >
                                 <Box
                                   sx={{
                                     width: 52,
@@ -2156,7 +2158,8 @@ const LecturerPendingPage = () => {
                                 <Box
                                   sx={{
                                     display: "grid",
-                                    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                                    gridTemplateColumns:
+                                      "repeat(auto-fit, minmax(200px, 1fr))",
                                     gap: 2,
                                     mb: 3,
                                   }}
@@ -2168,12 +2171,18 @@ const LecturerPendingPage = () => {
                                       gap: 1.5,
                                       p: 2,
                                       borderRadius: 2,
-                                      background: alpha(colors.accent.lightBlue, 0.1),
+                                      background: alpha(
+                                        colors.accent.lightBlue,
+                                        0.1,
+                                      ),
                                       border: `1px solid ${alpha(colors.accent.lightBlue, 0.2)}`,
                                     }}
                                   >
                                     <GradeIcon
-                                      sx={{ color: colors.accent.lightBlue, fontSize: 20 }}
+                                      sx={{
+                                        color: colors.accent.lightBlue,
+                                        fontSize: 20,
+                                      }}
                                     />
                                     <Box>
                                       <Typography
@@ -2208,12 +2217,18 @@ const LecturerPendingPage = () => {
                                       gap: 1.5,
                                       p: 2,
                                       borderRadius: 2,
-                                      background: alpha(colors.success[50], 0.5),
+                                      background: alpha(
+                                        colors.success[50],
+                                        0.5,
+                                      ),
                                       border: `1px solid ${alpha(colors.success[500], 0.3)}`,
                                     }}
                                   >
                                     <BusinessIcon
-                                      sx={{ color: colors.success[600], fontSize: 20 }}
+                                      sx={{
+                                        color: colors.success[600],
+                                        fontSize: 20,
+                                      }}
                                     />
                                     <Box>
                                       <Typography
@@ -2248,12 +2263,18 @@ const LecturerPendingPage = () => {
                                       gap: 1.5,
                                       p: 2,
                                       borderRadius: 2,
-                                      background: alpha(colors.primary[50], 0.5),
+                                      background: alpha(
+                                        colors.primary[50],
+                                        0.5,
+                                      ),
                                       border: `1px solid ${alpha(colors.primary[200], 0.3)}`,
                                     }}
                                   >
                                     <CalendarIcon
-                                      sx={{ color: colors.primary[600], fontSize: 20 }}
+                                      sx={{
+                                        color: colors.primary[600],
+                                        fontSize: 20,
+                                      }}
                                     />
                                     <Box>
                                       <Typography
@@ -2276,7 +2297,9 @@ const LecturerPendingPage = () => {
                                           fontSize: "0.875rem",
                                         }}
                                       >
-                                        {formatDate(item.issueDate)} - {formatDate(item.expiryDate) || "Không thời hạn"}
+                                        {formatDate(item.issueDate)} -{" "}
+                                        {formatDate(item.expiryDate) ||
+                                          "Không thời hạn"}
                                       </Typography>
                                     </Box>
                                   </Box>
@@ -2289,8 +2312,11 @@ const LecturerPendingPage = () => {
                                       mb: 3,
                                       p: 3,
                                       borderRadius: 2,
-                                      background: alpha(colors.neutral[50], 0.5),
-                                      border: `1px solid ${alpha(colors.neutral[200], 0.3)}`,
+                                      background: alpha(
+                                        colors.neutral[50],
+                                        0.5,
+                                      ),
+                                      border: `1px solid ${alpha(colors.neutral[500], 0.3)}`,
                                     }}
                                   >
                                     <Typography
@@ -2327,8 +2353,11 @@ const LecturerPendingPage = () => {
                                       mb: 3,
                                       p: 3,
                                       borderRadius: 2,
-                                      background: alpha(colors.warning[50], 0.7),
-                                      border: `1px solid ${colors.warning[200]}`,
+                                      background: alpha(
+                                        colors.warning[50],
+                                        0.7,
+                                      ),
+                                      border: `1px solid ${colors.warning[500]}`,
                                       position: "relative",
                                       "&::before": {
                                         content: '""',
@@ -2407,7 +2436,9 @@ const LecturerPendingPage = () => {
                                     variant="outlined"
                                     size="small"
                                     startIcon={<EditIcon />}
-                                    onClick={() => handleEditCertificateModal(item)}
+                                    onClick={() =>
+                                      handleEditCertificateModal(item)
+                                    }
                                     sx={{
                                       borderColor: colors.accent.lightBlue,
                                       color: colors.accent.lightBlue,
@@ -2417,7 +2448,10 @@ const LecturerPendingPage = () => {
                                       px: 3,
                                       "&:hover": {
                                         borderColor: "#047857",
-                                        backgroundColor: alpha(colors.accent.lightBlue, 0.1),
+                                        backgroundColor: alpha(
+                                          colors.accent.lightBlue,
+                                          0.1,
+                                        ),
                                         transform: "translateY(-1px)",
                                       },
                                     }}
@@ -2428,7 +2462,9 @@ const LecturerPendingPage = () => {
                                     variant="outlined"
                                     size="small"
                                     startIcon={<DeleteIcon />}
-                                    onClick={() => handleDeleteCertificateTab(item)}
+                                    onClick={() =>
+                                      handleDeleteCertificateTab(item)
+                                    }
                                     sx={{
                                       borderColor: colors.error[500],
                                       color: colors.error[600],
@@ -2513,56 +2549,6 @@ const LecturerPendingPage = () => {
                   </CardContent>
                 </Paper>
               </Box>
-            </Box>
-
-            {/* Enhanced Save Button */}
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={
-                  loading ? (
-                    <CircularProgress size={20} color="inherit" />
-                  ) : (
-                    <SaveIcon />
-                  )
-                }
-                onClick={handleSaveChanges}
-                disabled={loading}
-                sx={{
-                  px: 8,
-                  py: 2.5,
-                  borderRadius: 4,
-                  fontWeight: 600,
-                  fontSize: "1.1rem",
-                  fontFamily: "'Inter', sans-serif",
-                  background: colors.background.gradient.primary,
-                  boxShadow: `0 8px 24px ${alpha(colors.primary[500], 0.3)}`,
-                  position: "relative",
-                  overflow: "hidden",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: "-100%",
-                    width: "100%",
-                    height: "100%",
-                    background:
-                      "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
-                    transition: "left 0.6s",
-                  },
-                  "&:hover": {
-                    transform: "translateY(-2px)",
-                    boxShadow: `0 12px 32px ${alpha(colors.primary[500], 0.4)}`,
-                    "&::before": {
-                      left: "100%",
-                    },
-                  },
-                  transition: "all 0.3s ease",
-                }}
-              >
-                {loading ? "Đang lưu..." : "Lưu thay đổi"}
-              </Button>
             </Box>
 
             {loading && (

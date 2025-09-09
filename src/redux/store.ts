@@ -26,6 +26,8 @@ import requestCertificationReducer from "./slice/RequestCertificationSlice";
 import requestAttendedCourseReducer from "./slice/RequestAttendedCourseSlice";
 import requestOwnedCourseReducer from "./slice/RequestOwnedCourseSlice";
 import requestResearchProjectReducer from "./slice/RequestResearchProjectSlice";
+import institutionProfileReducer from "./slice/InstitutionProfileSlice";
+import partnerProfileReducer from "./slice/PartnerProfileSlice";
 
 export const store = configureStore({
   reducer: {
@@ -49,6 +51,8 @@ export const store = configureStore({
     lecturerRequests: lecturerRequestReducer,
     courses: CourseReducer,
     lecturerProfileUpdate: lecturerProfileUpdateReducer,
+    institutionProfile: institutionProfileReducer,
+    partnerProfile: partnerProfileReducer,
 
     requestDegree: requestDegreeReducer,
     requestCertification: requestCertificationReducer,

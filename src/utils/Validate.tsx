@@ -1,5 +1,3 @@
-import type { InstitutionRequest } from "../types/InstitutionRequest";
-import type { PartnerRequest } from "../types/PartnerRequest";
 import type { AttendedCourseRequest } from "../types/AttendedCourse";
 import type { ResearchProjectRequest } from "../types/ResearchProject";
 
@@ -323,7 +321,7 @@ export const validateLecturerInfo = (formData: any) => {
   return errors;
 };
 
-export const validateInstitutionInfo = (formData: InstitutionRequest) => {
+export const validateInstitutionInfo = (formData: any) => {
   const errors: validateResult = {
     success: true,
     errorField: "",
@@ -428,7 +426,7 @@ export const validateInstitutionInfo = (formData: InstitutionRequest) => {
   return errors;
 };
 
-export const validatePartnerInfo = (formData: PartnerRequest) => {
+export const validatePartnerInfo = (formData: any) => {
   const errors: validateResult = {
     success: true,
     errorField: "",

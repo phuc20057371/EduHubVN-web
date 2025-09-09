@@ -22,7 +22,7 @@ import {
   DateRange,
 } from "@mui/icons-material";
 import ApproveLecturerCreateDialog from "../../../../components/admin-dialog/admin-lecturer-dialog/ApproveLecturerCreateDialog";
-import { getAcademicRank } from "../../../../utils/ChangeText";
+import { getAcademicRank, getRelativeTime } from "../../../../utils/ChangeText";
 
 interface AdminLecturerCreateTabProps {
   lecturerCreateList: any[];
@@ -382,30 +382,9 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
                           variant="body2"
                           sx={{ fontWeight: 500, fontSize: "0.75rem" }}
                         >
-                          {(() => {
-                            if (!item.lecturer.updatedAt)
-                              return "Chưa cập nhật";
-
-                            const now = new Date();
-                            const updatedTime = new Date(
-                              item.lecturer.updatedAt,
-                            );
-                            const diffInHours = Math.floor(
-                              (now.getTime() - updatedTime.getTime()) /
-                                (1000 * 60 * 60),
-                            );
-
-                            if (diffInHours < 1) {
-                              return "Vừa cập nhật";
-                            } else if (diffInHours < 48) {
-                              return `${diffInHours}h trước`;
-                            } else {
-                              const diffInDays = Math.floor(
-                                diffInHours / 24,
-                              );
-                              return `${diffInDays}d trước`;
-                            }
-                          })()}
+                          {getRelativeTime(
+                            item.lecturer.updatedAt
+                          )}
                         </Typography>
                       </Box>
                     </Box>

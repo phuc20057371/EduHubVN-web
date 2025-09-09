@@ -210,3 +210,5 @@ export const certificationLevelsAutoComplete = [
   "Chứng chỉ kỹ thuật",
   "Khác",
 ];
+
+export const institutionTypesAutoComplete = ["Đại học", "Trung tâm đào tạo"];

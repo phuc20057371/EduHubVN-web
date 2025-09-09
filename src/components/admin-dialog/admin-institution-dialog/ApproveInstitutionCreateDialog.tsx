@@ -1,31 +1,34 @@
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
 import BusinessIcon from "@mui/icons-material/Business";
+import CancelIcon from "@mui/icons-material/Cancel";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CloseIcon from "@mui/icons-material/Close";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PersonIcon from "@mui/icons-material/Person";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
 import Avatar from "@mui/material/Avatar";
-import Chip from "@mui/material/Chip";
-import Divider from "@mui/material/Divider";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardHeader from "@mui/material/CardHeader";
+import Chip from "@mui/material/Chip";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { API } from "../../../utils/Fetch";
-import TextField from "@mui/material/TextField";
 import { setInstitutionPendingCreate } from "../../../redux/slice/InstitutionPendingCreateSlice";
-import { formatDateToVietnamTime, getInstitutionType } from "../../../utils/ChangeText";
 import { setInstitutions } from "../../../redux/slice/InstitutionSlice";
+import {
+  formatDateToVietnamTime,
+  getInstitutionTypeText,
+} from "../../../utils/ChangeText";
+import { API } from "../../../utils/Fetch";
+import ConfirmDialog from "../../general-dialog/ConfirmDialog";
 
 interface InstitutionDetailDialogProps {
   open: boolean;
@@ -41,7 +44,7 @@ const ApproveInstitutionCreateDialog = ({
   const dispatch = useDispatch();
   const [confirmDialog, setConfirmDialog] = useState({
     open: false,
-    action: "",
+    type: "approve" as "approve" | "reject",
     title: "",
     message: "",
   });
@@ -53,7 +56,7 @@ const ApproveInstitutionCreateDialog = ({
   const handleApprove = () => {
     setConfirmDialog({
       open: true,
-      action: "approve",
+      type: "approve",
       title: "Xác nhận duyệt cơ sở",
       message: "Bạn có chắc chắn muốn duyệt cơ sở này?",
     });
@@ -62,14 +65,14 @@ const ApproveInstitutionCreateDialog = ({
   const handleReject = () => {
     setConfirmDialog({
       open: true,
-      action: "reject",
+      type: "reject",
       title: "Xác nhận từ chối cơ sở",
       message: "Bạn có chắc chắn muốn từ chối cơ sở này?",
     });
   };
 
   const handleConfirmAction = async () => {
-    if (confirmDialog.action === "reject" && !adminNote.trim()) {
+    if (confirmDialog.type === "reject" && !adminNote.trim()) {
       toast.error("Vui lòng nhập lý do từ chối.");
       return;
     }
@@ -77,7 +80,7 @@ const ApproveInstitutionCreateDialog = ({
     try {
       let sendMailData: { to: string; subject: string; body: string } | null =
         null;
-      if (confirmDialog.action === "approve") {
+      if (confirmDialog.type === "approve") {
         await API.admin.approveInstitution({ id: institution.id });
         const response = await API.admin.getInstitutionPendingCreate();
         dispatch(setInstitutionPendingCreate(response.data.data));
@@ -129,7 +132,7 @@ const ApproveInstitutionCreateDialog = ({
           `,
           };
         }
-      } else if (confirmDialog.action === "reject") {
+      } else if (confirmDialog.type === "reject") {
         await API.admin.rejectInstitution({ id: institution.id, adminNote });
         const response = await API.admin.getInstitutionPendingCreate();
         dispatch(setInstitutionPendingCreate(response.data.data));
@@ -171,7 +174,7 @@ const ApproveInstitutionCreateDialog = ({
           };
         }
       }
-      setConfirmDialog({ open: false, action: "", title: "", message: "" });
+      setConfirmDialog({ open: false, type: "approve", title: "", message: "" });
       setAdminNote("");
       onClose();
 
@@ -189,7 +192,7 @@ const ApproveInstitutionCreateDialog = ({
   };
 
   const handleCancelConfirm = () => {
-    setConfirmDialog({ open: false, action: "", title: "", message: "" });
+    setConfirmDialog({ open: false, type: "approve", title: "", message: "" });
     setAdminNote("");
   };
 
@@ -217,7 +220,7 @@ const ApproveInstitutionCreateDialog = ({
             </Avatar>
             <Box>
               <Typography variant="h5" component="div">
-               Yêu cầu tạo mới
+                Yêu cầu tạo mới hồ sơ cơ sở giáo dục
               </Typography>
               <Box display="flex" justifyContent="space-between">
                 <Typography variant="body2" color="text.secondary">
@@ -303,27 +306,6 @@ const ApproveInstitutionCreateDialog = ({
                     <Button
                       variant="contained"
                       sx={{
-                        bgcolor: "rgba(76, 175, 80, 0.9)",
-                        color: "white",
-                        fontWeight: 600,
-                        px: 3,
-                        py: 1,
-                        borderRadius: 2,
-                        "&:hover": {
-                          bgcolor: "rgba(76, 175, 80, 1)",
-                          transform: "translateY(-2px)",
-                          boxShadow: "0 8px 20px rgba(76, 175, 80, 0.3)",
-                        },
-                        transition: "all 0.3s ease",
-                      }}
-                      onClick={handleApprove}
-                      startIcon={<CheckCircleIcon />}
-                    >
-                      Duyệt
-                    </Button>
-                    <Button
-                      variant="contained"
-                      sx={{
                         bgcolor: "rgba(244, 67, 54, 0.9)",
                         color: "white",
                         fontWeight: 600,
@@ -341,6 +323,27 @@ const ApproveInstitutionCreateDialog = ({
                       startIcon={<CancelIcon />}
                     >
                       Từ chối
+                    </Button>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        bgcolor: "rgba(76, 175, 80, 0.9)",
+                        color: "white",
+                        fontWeight: 600,
+                        px: 3,
+                        py: 1,
+                        borderRadius: 2,
+                        "&:hover": {
+                          bgcolor: "rgba(76, 175, 80, 1)",
+                          transform: "translateY(-2px)",
+                          boxShadow: "0 8px 20px rgba(76, 175, 80, 0.3)",
+                        },
+                        transition: "all 0.3s ease",
+                      }}
+                      onClick={handleApprove}
+                      startIcon={<CheckCircleIcon />}
+                    >
+                      Duyệt
                     </Button>
                   </Box>
                 )}
@@ -375,7 +378,7 @@ const ApproveInstitutionCreateDialog = ({
                         Loại:
                       </Typography>
                       <Typography variant="body2" fontWeight={500}>
-                        {getInstitutionType(institution.institutionType)}
+                        {getInstitutionTypeText(institution.institutionType)}
                       </Typography>
                     </Box>
                     <Divider />
@@ -511,107 +514,36 @@ const ApproveInstitutionCreateDialog = ({
         <DialogActions>
           <Button
             variant="contained"
-            color="success"
-            onClick={handleApprove}
-            startIcon={<CheckCircleIcon />}
-          >
-            Duyệt
-          </Button>
-          <Button
-            variant="contained"
             color="error"
             onClick={handleReject}
             startIcon={<CancelIcon />}
           >
             Từ chối
           </Button>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleApprove}
+            startIcon={<CheckCircleIcon />}
+          >
+            Duyệt
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Confirmation Dialog */}
-      <Dialog
+      <ConfirmDialog
         open={confirmDialog.open}
+        type={confirmDialog.type}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        loading={isProcessing}
+        rejectNote={adminNote}
+        onRejectNoteChange={setAdminNote}
+        rejectNoteRequired={confirmDialog.type === "reject"}
         onClose={handleCancelConfirm}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle
-          sx={{
-            bgcolor:
-              confirmDialog.action === "approve"
-                ? "primary.main"
-                : "error.main",
-            color: "white",
-            fontWeight: "bold",
-          }}
-        >
-          {confirmDialog.title}
-        </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            {confirmDialog.message}
-          </Typography>
-          {confirmDialog.action === "reject" && (
-            <TextField
-              label="Lý do từ chối (bắt buộc)"
-              value={adminNote}
-              onChange={(e) => setAdminNote(e.target.value)}
-              fullWidth
-              multiline
-              rows={3}
-              variant="outlined"
-              required
-              error={!adminNote.trim()}
-              helperText={
-                !adminNote.trim() ? "Vui lòng nhập lý do từ chối" : ""
-              }
-            />
-          )}
-        </DialogContent>
-        <DialogActions sx={{ p: 3 }}>
-          <Button
-            onClick={handleConfirmAction}
-            variant="contained"
-            disabled={
-              isProcessing ||
-              (confirmDialog.action === "reject" && !adminNote.trim())
-            }
-            sx={{
-              bgcolor:
-                confirmDialog.action === "approve"
-                  ? "success.main"
-                  : "error.main",
-              "&:hover": {
-                bgcolor:
-                  confirmDialog.action === "approve"
-                    ? "success.dark"
-                    : "error.dark",
-              },
-              textTransform: "none",
-              fontWeight: "bold",
-              borderRadius: 2,
-            }}
-          >
-            {isProcessing
-              ? "Đang xử lý..."
-              : confirmDialog.action === "approve"
-                ? "Xác nhận duyệt"
-                : "Xác nhận từ chối"}
-          </Button>
-          <Button
-            onClick={handleCancelConfirm}
-            variant="outlined"
-            disabled={isProcessing}
-            sx={{
-              textTransform: "none",
-              fontWeight: "bold",
-              borderRadius: 2,
-            }}
-          >
-            Hủy
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onConfirm={handleConfirmAction}
+      />
     </>
   );
 };

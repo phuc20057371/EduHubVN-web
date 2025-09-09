@@ -1,5 +1,6 @@
 // Removed duplicate Dialog, DialogTitle, DialogContent, DialogActions imports
 import {
+  Alert,
   Autocomplete,
   Avatar,
   Box,
@@ -37,45 +38,52 @@ import {
   jobFieldAutoComplete,
   specializationAutoComplete,
 } from "../../utils/AutoComplete";
-import { getAcademicRank } from "../../utils/ChangeText";
+import { getAcademicRank, getStatus, getStatusColor } from "../../utils/ChangeText";
 
 interface LecturerUpdateDialogProps {
   open: boolean;
   onClose: () => void;
   lecturer?: Lecturer;
+  lecturerUpdate?: any;
 }
 
 const LecturerUpdateInfoDialog = ({
   open,
   onClose,
   lecturer,
+  lecturerUpdate,
 }: LecturerUpdateDialogProps) => {
   if (!open || !lecturer) return null;
+  
+  // Use lecturerUpdate data if available, otherwise use lecturer data
+  const displayData = lecturerUpdate || lecturer;
+  const isReviewMode = !!lecturerUpdate; // True when viewing an update, false when editing
+  
   const dispatch = useDispatch();
-  const [fullName, setFullName] = useState(lecturer.fullName || "");
-  const [citizenId, setCitizenId] = useState(lecturer.citizenId || "");
-  const [email] = useState((lecturer as Lecturer).email || "");
-  const [academicRank, setAcademicRank] = useState(lecturer.academicRank || "");
+  const [fullName, setFullName] = useState(displayData.fullName || "");
+  const [citizenId, setCitizenId] = useState(displayData.citizenId || "");
+  const [email] = useState(lecturer.email || "");
+  const [academicRank, setAcademicRank] = useState(displayData.academicRank || "");
   const [specialization, setSpecialization] = useState(
-    lecturer.specialization || "",
+    displayData.specialization || "",
   );
-  const [jobField, setJobField] = useState(lecturer.jobField || "");
+  const [jobField, setJobField] = useState(displayData.jobField || "");
   const [experienceYears, setExperienceYears] = useState(
-    lecturer.experienceYears || "",
+    displayData.experienceYears || "",
   );
-  const [phoneNumber, setPhoneNumber] = useState(lecturer.phoneNumber || "");
-  const [dateOfBirth, setDateOfBirth] = useState(lecturer.dateOfBirth || "");
+  const [phoneNumber, setPhoneNumber] = useState(displayData.phoneNumber || "");
+  const [dateOfBirth, setDateOfBirth] = useState(displayData.dateOfBirth || "");
   const [gender, setGender] = useState(
-    lecturer.gender === true || lecturer.gender
+    displayData.gender === true || displayData.gender
       ? "true"
-      : lecturer.gender === false || lecturer.gender === "false"
+      : displayData.gender === false || displayData.gender === "false"
         ? "false"
         : "",
   );
-  const [address, setAddress] = useState(lecturer.address || "");
-  const [bio, setBio] = useState(lecturer.bio || "");
-  const [status] = useState(lecturer.status || "");
-  const [adminNote] = useState(lecturer.adminNote || "");
+  const [address, setAddress] = useState(displayData.address || "");
+  const [bio, setBio] = useState(displayData.bio || "");
+  const [status] = useState(displayData.status || "");
+  const [adminNote] = useState(displayData.adminNote || "");
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleSave = () => {
@@ -153,12 +161,14 @@ const LecturerUpdateInfoDialog = ({
             <Avatar sx={{ bgcolor: "primary.main" }}>
               <EditIcon />
             </Avatar>
-            <Box>
-              <Typography variant="h5" component="div">
-                Chỉnh sửa thông tin giảng viên
-              </Typography>
+            <Box sx={{ flex: 1 }}>
+              <Box display="flex" alignItems="center" gap={2} mb={1}>
+                <Typography variant="h5" component="div">
+                  {lecturerUpdate ? 'Xem lại hồ sơ chỉnh sửa' : 'Chỉnh sửa thông tin giảng viên'}
+                </Typography>
+              </Box>
               <Typography variant="body2" color="text.secondary">
-                {lecturer?.fullName} #{lecturer?.id}
+                ID: {lecturer?.id}
               </Typography>
             </Box>
           </Box>
@@ -179,6 +189,15 @@ const LecturerUpdateInfoDialog = ({
           </Button>
         </DialogTitle>
         <DialogContent dividers>
+          {/* Thông báo khi đang xem lại hồ sơ chỉnh sửa */}
+          {isReviewMode && (
+            <Alert severity="info" sx={{ mb: 3 }}>
+              <Typography variant="body2">
+                Bạn đang xem lại thông tin từ yêu cầu cập nhật hồ sơ. Bạn có thể tiếp tục chỉnh sửa và cập nhật thông tin.
+              </Typography>
+            </Alert>
+          )}
+          
           {lecturer ? (
             <Box display="flex" flexDirection="column" gap={3}>
               {/* Profile Header Card */}
@@ -264,22 +283,14 @@ const LecturerUpdateInfoDialog = ({
                           mb: 1,
                         }}
                       >
-                        Trạng thái
+                        Trạng thái hồ sơ
                       </Typography>
                       <Chip
                         label={
-                          lecturer.status === "APPROVED"
-                            ? "Đã duyệt"
-                            : lecturer.status === "REJECTED"
-                              ? "Đã từ chối"
-                              : "Chờ duyệt"
+                          getStatus(lecturerUpdate ? lecturerUpdate.status : lecturer.status)
                         }
                         color={
-                          lecturer.status === "APPROVED"
-                            ? "success"
-                            : lecturer.status === "REJECTED"
-                              ? "error"
-                              : "warning"
+                          getStatusColor(lecturerUpdate ? lecturerUpdate.status : lecturer.status)
                         }
                         variant="filled"
                         size="medium"
@@ -549,15 +560,19 @@ const LecturerUpdateInfoDialog = ({
             size="large"
             startIcon={<EditIcon />}
           >
-            Lưu thay đổi
+            {isReviewMode ? 'Cập nhật hồ sơ' : 'Lưu thay đổi'}
           </Button>
         </DialogActions>
       </Dialog>
       {/* Confirmation Dialog */}
       <Dialog open={confirmOpen} onClose={handleCancel}>
-        <DialogTitle>Xác nhận lưu thay đổi</DialogTitle>
+        <DialogTitle>
+          {isReviewMode ? 'Xác nhận cập nhật hồ sơ' : 'Xác nhận lưu thay đổi'}
+        </DialogTitle>
         <DialogContent>
-          Bạn có chắc chắn muốn lưu các thay đổi cho giảng viên này?
+          {isReviewMode 
+            ? 'Bạn có chắc chắn muốn cập nhật hồ sơ với những thông tin đã chỉnh sửa?' 
+            : 'Bạn có chắc chắn muốn lưu các thay đổi cho giảng viên này?'}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleConfirm} color="primary" variant="contained">

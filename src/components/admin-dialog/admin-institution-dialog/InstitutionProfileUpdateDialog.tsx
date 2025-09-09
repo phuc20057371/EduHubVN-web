@@ -14,6 +14,10 @@ import {
   CardHeader,
   Chip,
   IconButton,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SchoolIcon from "@mui/icons-material/School";
@@ -28,6 +32,7 @@ import type {
   EducationInstitutionType,
   InstitutionRequest,
 } from "../../../types/InstitutionRequest";
+import { getInstitutionTypeText, getStatus, getStatusColor } from "../../../utils/ChangeText";
 
 interface InstitutionEditDialogProps {
   open: boolean;
@@ -136,7 +141,7 @@ const InstitutionProfileUpdateDialog = ({
                 Chỉnh sửa thông tin cơ sở giáo dục
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {institution.institutionName} #{institution.id}
+                ID: {institution.id}
               </Typography>
             </Box>
           </Box>
@@ -199,7 +204,7 @@ const InstitutionProfileUpdateDialog = ({
                         textShadow: "0 1px 2px rgba(0,0,0,0.2)",
                       }}
                     >
-                      Loại: {institutionType || "Chưa cập nhật"}
+                       {getInstitutionTypeText(institutionType) || "Chưa cập nhật"}
                     </Typography>
                   </Box>
                   <Box
@@ -218,8 +223,8 @@ const InstitutionProfileUpdateDialog = ({
                       Trạng thái
                     </Typography>
                     <Chip
-                      label={institution.status || "Chưa cập nhật"}
-                      color="primary"
+                      label={getStatus(institution.status) || "Chưa cập nhật"}
+                      color={getStatusColor(institution.status)}
                       variant="filled"
                       size="medium"
                       sx={{
@@ -261,25 +266,45 @@ const InstitutionProfileUpdateDialog = ({
                         variant="outlined"
                         InputLabelProps={{ shrink: !!institutionName }}
                       />
-                      <TextField
-                        label="Loại cơ sở"
-                        value={institutionType}
-                        onChange={(e) => setInstitutionType(e.target.value)}
-                        fullWidth
-                        variant="outlined"
-                        InputLabelProps={{ shrink: !!institutionType }}
-                      />
-                      <TextField
-                        label="Năm thành lập"
-                        value={establishedYear}
-                        onChange={(e) =>
-                          setEstablishedYear(Number(e.target.value))
-                        }
-                        fullWidth
-                        type="number"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: !!establishedYear }}
-                      />
+                      <FormControl fullWidth variant="outlined">
+                        <InputLabel>Loại cơ sở</InputLabel>
+                        <Select
+                          value={institutionType}
+                          onChange={(e) => setInstitutionType(e.target.value)}
+                          label="Loại cơ sở"
+                        >
+                          <MenuItem value="UNIVERSITY">Đại học</MenuItem>
+                          <MenuItem value="TRAINING_CENTER">Trung tâm đào tạo</MenuItem>
+                        </Select>
+                      </FormControl>
+                      
+                      {/* Năm thành lập và Số đăng ký kinh doanh trên cùng một hàng */}
+                      <Box display="flex" gap={2}>
+                        <TextField
+                          label="Năm thành lập"
+                          value={establishedYear}
+                          onChange={(e) =>
+                            setEstablishedYear(Number(e.target.value))
+                          }
+                          fullWidth
+                          type="number"
+                          variant="outlined"
+                          InputLabelProps={{ shrink: !!establishedYear }}
+                        />
+                        <TextField
+                          label="Số đăng ký kinh doanh"
+                          value={businessRegistrationNumber}
+                          onChange={(e) =>
+                            setBusinessRegistrationNumber(e.target.value)
+                          }
+                          fullWidth
+                          variant="outlined"
+                          InputLabelProps={{
+                            shrink: !!businessRegistrationNumber,
+                          }}
+                        />
+                      </Box>
+                      
                       <TextField
                         label="Số điện thoại"
                         value={phoneNumber}
@@ -303,18 +328,6 @@ const InstitutionProfileUpdateDialog = ({
                         fullWidth
                         variant="outlined"
                         InputLabelProps={{ shrink: !!address }}
-                      />
-                      <TextField
-                        label="Số đăng ký kinh doanh"
-                        value={businessRegistrationNumber}
-                        onChange={(e) =>
-                          setBusinessRegistrationNumber(e.target.value)
-                        }
-                        fullWidth
-                        variant="outlined"
-                        InputLabelProps={{
-                          shrink: !!businessRegistrationNumber,
-                        }}
                       />
                     </Box>
                   </CardContent>
@@ -349,19 +362,34 @@ const InstitutionProfileUpdateDialog = ({
                         variant="outlined"
                         InputLabelProps={{ shrink: !!position }}
                       />
-                      <TextField
-                        label="Mô tả cơ sở"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        fullWidth
-                        variant="outlined"
-                        multiline
-                        rows={4}
-                        InputLabelProps={{ shrink: !!description }}
-                      />
                     </Box>
                   </CardContent>
                 </Card>
+                
+                {/* Mô tả cơ sở - Card riêng */}
+                <Card elevation={1}>
+                  <CardHeader
+                    avatar={
+                      <Avatar sx={{ bgcolor: "primary.main" }}>
+                        <SchoolIcon />
+                      </Avatar>
+                    }
+                    title="Mô tả cơ sở"
+                  />
+                  <CardContent>
+                    <TextField
+                      label="Mô tả chi tiết về cơ sở giáo dục"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      fullWidth
+                      variant="outlined"
+                      multiline
+                      rows={6}
+                      InputLabelProps={{ shrink: !!description }}
+                    />
+                  </CardContent>
+                </Card>
+                
                 <Box>
                   <Typography
                     variant="body2"

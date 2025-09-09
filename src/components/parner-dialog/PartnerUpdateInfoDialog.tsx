@@ -20,40 +20,46 @@ import PersonIcon from "@mui/icons-material/Person";
 
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import type { Partner } from "../../../types/Parner";
-import { API } from "../../../utils/Fetch";
-import { setPartner } from "../../../redux/slice/PartnerSlice";
-import { validatePartnerInfo } from "../../../utils/Validate";
+import type { Partner } from "../../types/Parner";
+import { getStatus, getStatusColor } from "../../utils/ChangeText";
+import { validatePartnerInfo } from "../../utils/Validate";
+import { API } from "../../utils/Fetch";
+import { setPartnerProfile } from "../../redux/slice/PartnerProfileSlice";
 
 interface PartnerEditDialogProps {
   open: boolean;
   onClose: () => void;
   partner?: Partner;
+  partnerUpdate?: Partner | null;
 }
 
 const PartnerProfileUpdateDialog = ({
   open,
   onClose,
   partner,
+  partnerUpdate,
 }: PartnerEditDialogProps) => {
   if (!open || !partner) return null;
 
   const dispatch = useDispatch();
 
+  // Sử dụng dữ liệu từ partnerUpdate nếu có, ngược lại sử dụng partner gốc
+  const dataToDisplay = partnerUpdate || partner;
+
   const [organizationName, setOrganizationName] = useState(
-    partner.organizationName || "",
+    dataToDisplay.organizationName || "",
   );
-  const [industry, setIndustry] = useState(partner.industry || "");
-  const [phoneNumber, setPhoneNumber] = useState(partner.phoneNumber || "");
-  const [website, setWebsite] = useState(partner.website || "");
-  const [address, setAddress] = useState(partner.address || "");
+  const [industry, setIndustry] = useState(dataToDisplay.industry || "");
+  const [phoneNumber, setPhoneNumber] = useState(dataToDisplay.phoneNumber || "");
+  const [website, setWebsite] = useState(dataToDisplay.website || "");
+  const [address, setAddress] = useState(dataToDisplay.address || "");
   const [representativeName, setRepresentativeName] = useState(
-    partner.representativeName || "",
+    dataToDisplay.representativeName || "",
   );
-  const [position, setPosition] = useState(partner.position || "");
-  const [description, setDescription] = useState(partner.description || "");
+  const [position, setPosition] = useState(dataToDisplay.position || "");
+  const [description, setDescription] = useState(dataToDisplay.description || "");
   const [establishedYear, setEstablishedYear] = useState(
-    partner.establishedYear?.toString() || "",
+    dataToDisplay.establishedYear?.toString() || "",
   );
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -87,9 +93,13 @@ const PartnerProfileUpdateDialog = ({
         );
         return;
       }
-      await API.admin.updatePartner(updatedPartner);
-      const res = await API.admin.getAllPartners();
-      dispatch(setPartner(res.data.data));
+      const response = await API.partner.updatePartnerProfile(updatedPartner);
+      if (!response.data.success) {
+        toast.error(response.data.message || "Cập nhật thông tin đối tác thất bại");
+        return;
+      }
+      const res = await API.partner.getPartnerProfile();
+      dispatch(setPartnerProfile(res.data.data));
       toast.success("Cập nhật thông tin đối tác thành công");
       onClose();
     } catch (error: any) {
@@ -114,7 +124,7 @@ const PartnerProfileUpdateDialog = ({
             <BusinessIcon sx={{ fontSize: 40, color: "primary.main" }} />
             <Box>
               <Typography variant="h5" component="div" sx={{ fontWeight: 700 }}>
-                Chỉnh sửa thông tin đối tác
+                {partnerUpdate ? "Xem lại thông tin chỉnh sửa" : "Chỉnh sửa thông tin đối tác"}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 ID: {partner.id}
@@ -178,7 +188,7 @@ const PartnerProfileUpdateDialog = ({
                         mb: 1,
                       }}
                     >
-                      {organizationName}
+                      {partner.organizationName}
                     </Typography>
                     <Typography
                       variant="body2"
@@ -188,7 +198,7 @@ const PartnerProfileUpdateDialog = ({
                         textShadow: "0 1px 2px rgba(0,0,0,0.2)",
                       }}
                     >
-                      Ngành nghề: {industry || "Chưa cập nhật"}
+                      Ngành nghề: {partner.industry || "Chưa cập nhật"}
                     </Typography>
                   </Box>
                   <Box
@@ -208,18 +218,12 @@ const PartnerProfileUpdateDialog = ({
                     </Typography>
                     <Chip
                       label={
-                        partner.status === "APPROVED"
-                          ? "Đã duyệt"
-                          : partner.status === "REJECTED"
-                            ? "Đã từ chối"
-                            : "Chờ duyệt"
+                        getStatus(partnerUpdate ? partnerUpdate.status : (partner.status || "Đang cập nhật"))
                       }
                       color={
-                        partner.status === "APPROVED"
-                          ? "success"
-                          : partner.status === "REJECTED"
-                            ? "error"
-                            : "warning"
+                        partnerUpdate 
+                          ? (getStatusColor(partnerUpdate.status) || "primary")
+                          : (getStatusColor(partner.status) || "primary")
                       }
                       variant="filled"
                       size="medium"
@@ -309,7 +313,7 @@ const PartnerProfileUpdateDialog = ({
                   </CardContent>
                 </Card>
               </Box>
-              
+
               {/* Representative Info Card */}
               <Box flex={1} display="flex" flexDirection="column" gap={3}>
                 <Card elevation={1} sx={{ height: "fit-content" }}>
@@ -343,32 +347,32 @@ const PartnerProfileUpdateDialog = ({
                   </CardContent>
                 </Card>
 
-              {/* Organization Description Card */}
-              <Card elevation={1} sx={{ height: "fit-content" }}>
-                <CardHeader
-                  avatar={
-                    <Avatar sx={{ bgcolor: "warning.main" }}>
-                      <BusinessIcon />
-                    </Avatar>
-                  }
-                  title="Mô tả tổ chức"
-                />
-                <CardContent>
-                  <Box display="flex" flexDirection="column" gap={2}>
-                    <TextField
-                      label="Mô tả chi tiết về tổ chức"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      fullWidth
-                      variant="outlined"
-                      multiline
-                      rows={6}
-                      placeholder="Nhập mô tả chi tiết về hoạt động, dịch vụ, và các thông tin khác của tổ chức..."
-                      InputLabelProps={{ shrink: !!description }}
-                    />
-                  </Box>
-                </CardContent>
-              </Card>
+                {/* Organization Description Card */}
+                <Card elevation={1} sx={{ height: "fit-content" }}>
+                  <CardHeader
+                    avatar={
+                      <Avatar sx={{ bgcolor: "warning.main" }}>
+                        <BusinessIcon />
+                      </Avatar>
+                    }
+                    title="Mô tả tổ chức"
+                  />
+                  <CardContent>
+                    <Box display="flex" flexDirection="column" gap={2}>
+                      <TextField
+                        label="Mô tả chi tiết về tổ chức"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        fullWidth
+                        variant="outlined"
+                        multiline
+                        rows={6}
+                        placeholder="Nhập mô tả chi tiết về hoạt động, dịch vụ, và các thông tin khác của tổ chức..."
+                        InputLabelProps={{ shrink: !!description }}
+                      />
+                    </Box>
+                  </CardContent>
+                </Card>
                 <Box>
                   <Typography
                     variant="body2"

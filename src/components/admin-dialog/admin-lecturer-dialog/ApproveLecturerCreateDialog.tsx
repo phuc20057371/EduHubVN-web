@@ -33,6 +33,8 @@ import type { Lecturer } from "../../../types/Lecturer";
 import {
   formatDate,
   formatDateToVietnamTime,
+  getAcademicRank,
+  getRelativeTime,
   getStatus,
   getStatusColor,
 } from "../../../utils/ChangeText";
@@ -205,9 +207,10 @@ const ApproveLecturerCreateDialog: React.FC<
   };
   const handleReject = (id: string, type: "Degree" | "Certification") => {
     setConfirmType("reject");
-    const note = type === "Degree"
-      ? (degreeStates[id]?.note ?? "")
-      : (certStates[id]?.note ?? "");
+    const note =
+      type === "Degree"
+        ? (degreeStates[id]?.note ?? "")
+        : (certStates[id]?.note ?? "");
     setConfirmTarget({
       id,
       type,
@@ -500,14 +503,28 @@ const ApproveLecturerCreateDialog: React.FC<
                   </Avatar>
                   <Box>
                     <Typography variant="h6" fontWeight={600} color="white">
-                      Trạng thái duyệt hồ sơ
+                      {lecturer.fullName}
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{ color: "rgba(255,255,255,0.8)" }}
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.5,
+                        mt: 1,
+                      }}
                     >
-                      Quản lý phê duyệt giảng viên
-                    </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "rgba(255,255,255,0.7)",
+                          fontSize: "0.75rem",
+                        }}
+                      >
+                        Cập nhật:{" "}
+                        {getRelativeTime(lecturer.updatedAt)}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
                 <Chip
@@ -729,17 +746,7 @@ const ApproveLecturerCreateDialog: React.FC<
                     </Typography>
                     <Chip
                       label={
-                        lecturer.academicRank === "CN"
-                          ? "Cử nhân"
-                          : lecturer.academicRank === "THS"
-                            ? "Thạc Sĩ"
-                            : lecturer.academicRank === "TS"
-                              ? "Tiến Sĩ"
-                              : lecturer.academicRank === "PGS"
-                                ? "Phó Giáo Sư"
-                                : lecturer.academicRank === "GS"
-                                  ? "Giáo Sư"
-                                  : lecturer.academicRank || "Chưa có"
+                        getAcademicRank(lecturer.academicRank) 
                       }
                       size="small"
                       color="primary"
@@ -771,35 +778,6 @@ const ApproveLecturerCreateDialog: React.FC<
                     </Typography>
                     <Typography variant="body2" fontWeight={500}>
                       {lecturer.experienceYears || 0} năm
-                    </Typography>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-
-            {/* System Info Card */}
-            <Card elevation={1} sx={{ flex: 1 }}>
-              <CardHeader
-                avatar={<Avatar sx={{ bgcolor: "warning.main" }}>🔧</Avatar>}
-                title="Thông tin hệ thống"
-              />
-              <CardContent>
-                <Box display="flex" flexDirection="column" gap={1.5}>
-                  <Box display="flex" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">
-                      Tạo lúc:
-                    </Typography>
-                    <Typography variant="body2" fontWeight={500}>
-                      {formatDateToVietnamTime(lecturer.createdAt)}
-                    </Typography>
-                  </Box>
-                  <Divider />
-                  <Box display="flex" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">
-                      Cập nhật lúc:
-                    </Typography>
-                    <Typography variant="body2" fontWeight={500}>
-                      {formatDateToVietnamTime(lecturer.updatedAt)}
                     </Typography>
                   </Box>
                 </Box>
@@ -1673,7 +1651,7 @@ const ApproveLecturerCreateDialog: React.FC<
           confirmType === "approve" ? "Xác nhận duyệt" : "Xác nhận từ chối"
         }
         message={
-          confirmType === "approve" 
+          confirmType === "approve"
             ? "Bạn có chắc chắn muốn duyệt hồ sơ này?"
             : "Bạn có chắc chắn muốn từ chối hồ sơ này?"
         }
@@ -1689,9 +1667,9 @@ const ApproveLecturerCreateDialog: React.FC<
           }
           // Cập nhật note vào confirmTarget và states
           if (confirmTarget && confirmType === "reject") {
-            setConfirmTarget(t => t ? { ...t, note: rejectNote } : t);
+            setConfirmTarget((t) => (t ? { ...t, note: rejectNote } : t));
             if (confirmTarget.type === "Degree") {
-              setDegreeStates(prev => ({
+              setDegreeStates((prev) => ({
                 ...prev,
                 [confirmTarget.id]: {
                   ...prev[confirmTarget.id],
@@ -1699,7 +1677,7 @@ const ApproveLecturerCreateDialog: React.FC<
                 },
               }));
             } else if (confirmTarget.type === "Certification") {
-              setCertStates(prev => ({
+              setCertStates((prev) => ({
                 ...prev,
                 [confirmTarget.id]: {
                   ...prev[confirmTarget.id],

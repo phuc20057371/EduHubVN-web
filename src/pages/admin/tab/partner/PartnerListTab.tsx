@@ -60,12 +60,6 @@ interface HeadCell {
 
 const headCells: readonly HeadCell[] = [
   {
-    id: "businessRegistrationNumber",
-    numeric: false,
-    disablePadding: false,
-    label: "Số ĐKKD",
-  },
-  {
     id: "organizationName",
     numeric: false,
     disablePadding: false,
@@ -410,7 +404,6 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({ partners, onEdit }) => 
           item.organizationName?.toLowerCase().includes(searchLower) ||
           item.address?.toLowerCase().includes(searchLower) ||
           item.representativeName?.toLowerCase().includes(searchLower) ||
-          item.businessRegistrationNumber?.toLowerCase().includes(searchLower) ||
           item.phoneNumber?.includes(searchTerm) ||
           item.description?.toLowerCase().includes(searchLower) ||
           item.website?.toLowerCase().includes(searchLower) ||
@@ -659,11 +652,6 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({ partners, onEdit }) => 
                         transition: "all 0.2s ease-in-out",
                       }}
                     >
-                      <TableCell sx={{ py: 2 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {row.businessRegistrationNumber}
-                        </Typography>
-                      </TableCell>
                       <TableCell sx={{ py: 2, minWidth: 200 }}>
                         <Box
                           sx={{
@@ -752,7 +740,7 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({ partners, onEdit }) => 
                           size="small"
                           onClick={(e) => {
                             e.stopPropagation();
-                            window.open(`/partner-info/${row.id}`, "_blank");
+                            onEdit(row);
                           }}
                           sx={{
                             minWidth: 100,
@@ -763,7 +751,7 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({ partners, onEdit }) => 
                             fontWeight: 600,
                           }}
                         >
-                          Chi tiết
+                          Chỉnh sửa
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -775,7 +763,7 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({ partners, onEdit }) => 
                       height: 53 * emptyRows,
                     }}
                   >
-                    <TableCell colSpan={11} />
+                    <TableCell colSpan={7} />
                   </TableRow>
                 )}
               </TableBody>

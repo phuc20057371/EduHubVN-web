@@ -74,12 +74,6 @@ interface HeadCell {
 
 const headCells: readonly HeadCell[] = [
   {
-    id: "businessRegistrationNumber",
-    numeric: false,
-    disablePadding: false,
-    label: "Số ĐKKD",
-  },
-  {
     id: "institutionName",
     numeric: false,
     disablePadding: false,
@@ -615,7 +609,7 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
             </Box>
           ) : (
             <Table
-              sx={{ minWidth: 1400, width: "100%" }}
+              sx={{ minWidth: 1200, width: "100%" }}
               aria-labelledby="tableTitle"
             >
               <EnhancedTableHead
@@ -655,11 +649,6 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
                         },
                       }}
                     >
-                      <TableCell sx={{ py: 2 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {row.businessRegistrationNumber}
-                        </Typography>
-                      </TableCell>
                       <TableCell sx={{ py: 2, minWidth: 200 }}>
                         <Box
                           sx={{
@@ -763,13 +752,11 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
                         <Button
                           variant="contained"
                           size="small"
-                          // onClick={(e) => {
-                          // e.stopPropagation();
-                          // window.open(
-                          //   `/institution-info/${row.id}`,
-                          //   "_blank",
-                          // );
-                          // }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedInstitution({ institution: row });
+                            setOpenEditDialog(true);
+                          }}
                           sx={{
                             minWidth: 100,
                             borderRadius: 2,
@@ -791,7 +778,7 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
                       height: 53 * emptyRows,
                     }}
                   >
-                    <TableCell colSpan={11} />
+                    <TableCell colSpan={8} />
                   </TableRow>
                 )}
               </TableBody>

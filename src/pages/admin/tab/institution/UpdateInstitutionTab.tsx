@@ -20,7 +20,9 @@ import { Business, Update } from "@mui/icons-material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import ApproveInstitutionUpdateDialog from "../../../../components/admin-dialog/admin-institution-dialog/ApproveInstitutionUpdateDialog";
-import { getInstitutionType } from "../../../../utils/ChangeText";
+import { getInstitutionType, formatDateToVietnamTime, getRelativeTime } from "../../../../utils/ChangeText";
+
+
 
 interface UpdateInstitutionTabProps {
   institutionPendingUpdate: any[];
@@ -74,8 +76,8 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
 
     // Sort by date with proper date handling
     filtered = [...filtered].sort((a: any, b: any) => {
-      const dateA = new Date(a.updatedAt || a.createdAt || 0);
-      const dateB = new Date(b.updatedAt || b.createdAt || 0);
+      const dateA = new Date(a.educationInstitutionUpdate.updatedAt || a.educationInstitutionUpdate.createdAt || 0);
+      const dateB = new Date(b.educationInstitutionUpdate.updatedAt || b.educationInstitutionUpdate.createdAt || 0);
 
       if (updateDateSort === "oldest") {
         return dateA.getTime() - dateB.getTime();
@@ -369,10 +371,25 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
                           textOverflow: "ellipsis",
                           whiteSpace: "normal",
                           maxWidth: "100%",
+                          lineHeight: 1.4,
+                          minHeight: "2.8em", // Fixed height for 2 lines to ensure consistent card height
                         }}
                         title={edu.address}
                       >
                         <strong>Địa chỉ:</strong> {edu.address}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ 
+                          mb: 2,
+                          fontStyle: "italic",
+                          fontSize: "0.75rem",
+                          color: "#757575"
+                        }}
+                        title={`Cập nhật lúc: ${formatDateToVietnamTime(eduUpdate.updatedAt)}`}
+                      >
+                        <strong>Cập nhật:</strong> {getRelativeTime(eduUpdate.updatedAt)}
                       </Typography>
                     </Box>
 

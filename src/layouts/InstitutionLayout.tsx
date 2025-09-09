@@ -46,12 +46,14 @@ import {
 import { alpha } from "@mui/material/styles";
 import colors from "../theme/colors";
 import Logoweb from "../assets/eduhub-01.png";
+import WebSocketService from "../services/WebSocketService";
+import { InstitutionMessageHandler } from "../services/InstitutionMessageHandler";
 
 const InstitutionLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const userProfile = useSelector((state: any) => state.user);
+  const userProfile = useSelector((state: any) => state.userProfile);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -91,24 +93,22 @@ const InstitutionLayout = () => {
     fetchUserData();
   }, [dispatch, navigate, location.pathname]);
 
-  // Optionally fetch institution profile if you have a separate API
-  // useEffect(() => {
-  //   if (API.institution && API.institution.getInstitutionProfile) {
-  //     const fetchInstitutionProfile = async () => {
-  //       try {
-  //         const response = await API.institution.getInstitutionProfile();
-  //         if (!response.data.success) {
-  //           throw new Error("Failed to fetch institution profile");
-  //         }
-  //         dispatch({ type: "institution/setProfile", payload: response.data.data });
-  //       } catch (error) {
-  //         console.error("Error fetching institution profile:", error);
-  //         navigate("/error");
-  //       }
-  //     };
-  //     fetchInstitutionProfile();
-  //   }
-  // }, [dispatch, navigate]);
+useEffect(() => {
+    if (userProfile && userProfile.role === "SCHOOL") {
+      WebSocketService.connect(
+        userProfile,
+        () => console.log("✅ Institution WebSocket connected"),
+        (message) => {
+          InstitutionMessageHandler.handleIncomingMessage(message, dispatch);
+        },
+      );
+    }
+
+    // Cleanup khi component unmount
+    return () => {
+      WebSocketService.disconnect();
+    };
+  }, [userProfile]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);

@@ -1,59 +1,74 @@
-import { useState } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Avatar,
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  CardHeader,
-  Chip,
-} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import BusinessIcon from "@mui/icons-material/Business";
 import PersonIcon from "@mui/icons-material/Person";
-
+import SchoolIcon from "@mui/icons-material/School";
+import {
+    Avatar,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    CardHeader,
+    Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Select,
+    TextField,
+    Typography,
+} from "@mui/material";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import type { Partner } from "../../../types/Parner";
-import { API } from "../../../utils/Fetch";
-import { setPartner } from "../../../redux/slice/PartnerSlice";
-import { validatePartnerInfo } from "../../../utils/Validate";
+import { setInstitutionProfile } from "../../redux/slice/InstitutionProfileSlice";
+import type { Institution } from "../../types/Institution";
+import { getInstitutionTypeText, getStatus, getStatusColor } from "../../utils/ChangeText";
+import { API } from "../../utils/Fetch";
+import { validateInstitutionInfo } from "../../utils/Validate";
 
-interface PartnerEditDialogProps {
+interface InstitutionEditDialogProps {
   open: boolean;
   onClose: () => void;
-  partner?: Partner;
+  institution?: Institution;
+  institutionUpdate?: Institution | null;
 }
 
-const PartnerProfileUpdateDialog = ({
+const InstitutionUpdateInfoDialog = ({
   open,
   onClose,
-  partner,
-}: PartnerEditDialogProps) => {
-  if (!open || !partner) return null;
+  institution,
+  institutionUpdate,
+}: InstitutionEditDialogProps) => {
+  if (!open || !institution) return null;
 
   const dispatch = useDispatch();
 
-  const [organizationName, setOrganizationName] = useState(
-    partner.organizationName || "",
+  // Sử dụng dữ liệu từ institutionUpdate nếu có, ngược lại sử dụng institution gốc
+  const dataToDisplay = institutionUpdate || institution;
+
+  const [institutionName, setInstitutionName] = useState(
+    dataToDisplay.institutionName || "",
   );
-  const [industry, setIndustry] = useState(partner.industry || "");
-  const [phoneNumber, setPhoneNumber] = useState(partner.phoneNumber || "");
-  const [website, setWebsite] = useState(partner.website || "");
-  const [address, setAddress] = useState(partner.address || "");
+  const [institutionType, setInstitutionType] = useState(
+    dataToDisplay.institutionType || "",
+  );
+  const [phoneNumber, setPhoneNumber] = useState(dataToDisplay.phoneNumber || "");
+  const [website, setWebsite] = useState(dataToDisplay.website || "");
+  const [address, setAddress] = useState(dataToDisplay.address || "");
   const [representativeName, setRepresentativeName] = useState(
-    partner.representativeName || "",
+    dataToDisplay.representativeName || "",
   );
-  const [position, setPosition] = useState(partner.position || "");
-  const [description, setDescription] = useState(partner.description || "");
+  const [position, setPosition] = useState(dataToDisplay.position || "");
+  const [description, setDescription] = useState(dataToDisplay.description || "");
   const [establishedYear, setEstablishedYear] = useState(
-    partner.establishedYear?.toString() || "",
+    dataToDisplay.establishedYear || 0,
+  );
+  const [businessRegistrationNumber, setBusinessRegistrationNumber] = useState(
+    dataToDisplay.businessRegistrationNumber || "",
   );
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -64,33 +79,30 @@ const PartnerProfileUpdateDialog = ({
   const handleConfirm = async () => {
     setConfirmOpen(false);
     try {
-      const updatedPartner: Partner = {
-        ...partner,
-        organizationName,
-        industry,
+      const updatedInstitution: Institution = {
+        ...institution,
+        businessRegistrationNumber,
+        institutionName,
+        institutionType,
         phoneNumber,
         website,
         address,
         representativeName,
         position,
         description,
-        establishedYear: Number(establishedYear) || null,
-        logoUrl: partner.logoUrl || "",
-        id: partner.id,
-        adminNote: partner.adminNote,
+        establishedYear,
+        logoUrl: institution.logoUrl || "",
       };
 
-      const validationResult = validatePartnerInfo(updatedPartner);
-      if (validationResult && !validationResult.success) {
-        toast.error(
-          validationResult?.error || "Thông tin đối tác không hợp lệ",
-        );
+      const validate = validateInstitutionInfo(updatedInstitution);
+      if (validate && !validate.success) {
+        toast.error(validate?.error || "Thông tin cơ sở giáo dục không hợp lệ");
         return;
       }
-      await API.admin.updatePartner(updatedPartner);
-      const res = await API.admin.getAllPartners();
-      dispatch(setPartner(res.data.data));
-      toast.success("Cập nhật thông tin đối tác thành công");
+      await API.institution.updateInstitutionProfile(updatedInstitution);
+      const res = await API.institution.getInstitutionProfile();
+      dispatch(setInstitutionProfile(res.data.data)); 
+      toast.success("Cập nhật thông tin cơ sở giáo dục thành công");
       onClose();
     } catch (error: any) {
       if (error.response?.data?.message?.includes("đã tồn tại")) {
@@ -110,36 +122,28 @@ const PartnerProfileUpdateDialog = ({
       <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
         <DialogTitle>
           <Box display="flex" alignItems="center" gap={2}>
-            {/* Thay Avatar bằng icon giống LecturerUpdateDialog */}
-            <BusinessIcon sx={{ fontSize: 40, color: "primary.main" }} />
+            <SchoolIcon sx={{ fontSize: 40, color: "primary.main" }} />
             <Box>
               <Typography variant="h5" component="div" sx={{ fontWeight: 700 }}>
-                Chỉnh sửa thông tin đối tác
+                {institutionUpdate ? "Xem lại thông tin chỉnh sửa" : "Chỉnh sửa thông tin cơ sở giáo dục"}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                ID: {partner.id}
+                ID: {institution.id}
+              
               </Typography>
             </Box>
           </Box>
-          <Button
+          <IconButton
             onClick={onClose}
             sx={{
               position: "absolute",
               right: 16,
               top: 16,
-              minWidth: 0,
-              p: 1,
               color: "primary.main",
-              background: "rgba(240,240,240,0.8)",
-              "&:hover": {
-                bgcolor: "primary.light",
-                color: "white",
-              },
-              borderRadius: "50%",
             }}
           >
             <CloseIcon />
-          </Button>
+          </IconButton>
         </DialogTitle>
         <DialogContent dividers sx={{ bgcolor: "#f9f9f9" }}>
           <Box display="flex" flexDirection="column" gap={3}>
@@ -155,8 +159,8 @@ const PartnerProfileUpdateDialog = ({
               <CardContent sx={{ p: 3 }}>
                 <Box display="flex" alignItems="center" gap={3}>
                   <Avatar
-                    src={partner.logoUrl || undefined}
-                    alt={partner.organizationName}
+                    src={institution.logoUrl || undefined}
+                    alt={institution.institutionName}
                     sx={{
                       width: 80,
                       height: 80,
@@ -166,7 +170,7 @@ const PartnerProfileUpdateDialog = ({
                         "linear-gradient(45deg, #f093fb 0%, #f5576c 100%)",
                     }}
                   >
-                    <BusinessIcon sx={{ fontSize: 40, color: "white" }} />
+                    <SchoolIcon sx={{ fontSize: 40, color: "white" }} />
                   </Avatar>
                   <Box flex={1}>
                     <Typography
@@ -178,7 +182,7 @@ const PartnerProfileUpdateDialog = ({
                         mb: 1,
                       }}
                     >
-                      {organizationName}
+                      {institution.institutionName}
                     </Typography>
                     <Typography
                       variant="body2"
@@ -188,7 +192,7 @@ const PartnerProfileUpdateDialog = ({
                         textShadow: "0 1px 2px rgba(0,0,0,0.2)",
                       }}
                     >
-                      Ngành nghề: {industry || "Chưa cập nhật"}
+                      {getInstitutionTypeText(institution.institutionType)}
                     </Typography>
                   </Box>
                   <Box
@@ -208,18 +212,12 @@ const PartnerProfileUpdateDialog = ({
                     </Typography>
                     <Chip
                       label={
-                        partner.status === "APPROVED"
-                          ? "Đã duyệt"
-                          : partner.status === "REJECTED"
-                            ? "Đã từ chối"
-                            : "Chờ duyệt"
+                        getStatus(institutionUpdate ? institutionUpdate.status : (institution.status || "Hoạt động"))
                       }
                       color={
-                        partner.status === "APPROVED"
-                          ? "success"
-                          : partner.status === "REJECTED"
-                            ? "error"
-                            : "warning"
+                        institutionUpdate 
+                          ? (getStatusColor(institutionUpdate.status) || "primary")
+                          : (getStatusColor(institution.status) || "primary")
                       }
                       variant="filled"
                       size="medium"
@@ -238,47 +236,69 @@ const PartnerProfileUpdateDialog = ({
             {/* Form Cards Grid */}
             <Box
               display="flex"
-              flexDirection={{ xs: "column", md: "row" }}
+              flexDirection={{ xs: "column", lg: "row" }}
               gap={3}
             >
-              {/* Organization Info Card */}
+              {/* Institution Info Card */}
               <Box flex={1}>
                 <Card elevation={1} sx={{ height: "100%" }}>
                   <CardHeader
                     avatar={
                       <Avatar sx={{ bgcolor: "info.main" }}>
-                        <BusinessIcon />
+                        <SchoolIcon />
                       </Avatar>
                     }
-                    title="Thông tin tổ chức"
+                    title="Thông tin cơ sở"
                   />
                   <CardContent>
                     <Box display="flex" flexDirection="column" gap={2}>
                       <TextField
-                        label="Tên tổ chức"
-                        value={organizationName}
-                        onChange={(e) => setOrganizationName(e.target.value)}
+                        label="Tên cơ sở giáo dục"
+                        value={institutionName}
+                        onChange={(e) => setInstitutionName(e.target.value)}
                         fullWidth
                         variant="outlined"
-                        InputLabelProps={{ shrink: !!organizationName }}
+                        InputLabelProps={{ shrink: !!institutionName }}
                       />
-                      <TextField
-                        label="Ngành nghề"
-                        value={industry}
-                        onChange={(e) => setIndustry(e.target.value)}
-                        fullWidth
-                        variant="outlined"
-                        InputLabelProps={{ shrink: !!industry }}
-                      />
-                      <TextField
-                        label="Năm thành lập"
-                        value={establishedYear}
-                        onChange={(e) => setEstablishedYear(e.target.value)}
-                        fullWidth
-                        type="number"
-                        variant="outlined"
-                        InputLabelProps={{ shrink: !!establishedYear }}
-                      />
+                      <FormControl fullWidth variant="outlined">
+                        <InputLabel>Loại cơ sở</InputLabel>
+                        <Select
+                          value={institutionType}
+                          onChange={(e) => setInstitutionType(e.target.value)}
+                          label="Loại cơ sở"
+                        >
+                          <MenuItem value="UNIVERSITY">Đại học</MenuItem>
+                          <MenuItem value="TRAINING_CENTER">Trung tâm đào tạo</MenuItem>
+                        </Select>
+                      </FormControl>
+                      
+                      {/* Năm thành lập và Số đăng ký kinh doanh trên cùng một hàng */}
+                      <Box display="flex" gap={2}>
+                        <TextField
+                          label="Năm thành lập"
+                          value={establishedYear}
+                          onChange={(e) =>
+                            setEstablishedYear(Number(e.target.value))
+                          }
+                          fullWidth
+                          type="number"
+                          variant="outlined"
+                          InputLabelProps={{ shrink: !!establishedYear }}
+                        />
+                        <TextField
+                          label="Số đăng ký kinh doanh"
+                          value={businessRegistrationNumber}
+                          onChange={(e) =>
+                            setBusinessRegistrationNumber(e.target.value)
+                          }
+                          fullWidth
+                          variant="outlined"
+                          InputLabelProps={{
+                            shrink: !!businessRegistrationNumber,
+                          }}
+                        />
+                      </Box>
+                      
                       <TextField
                         label="Số điện thoại"
                         value={phoneNumber}
@@ -301,15 +321,12 @@ const PartnerProfileUpdateDialog = ({
                         onChange={(e) => setAddress(e.target.value)}
                         fullWidth
                         variant="outlined"
-                        multiline
-                        rows={2}
                         InputLabelProps={{ shrink: !!address }}
                       />
                     </Box>
                   </CardContent>
                 </Card>
               </Box>
-              
               {/* Representative Info Card */}
               <Box flex={1} display="flex" flexDirection="column" gap={3}>
                 <Card elevation={1} sx={{ height: "fit-content" }}>
@@ -342,55 +359,53 @@ const PartnerProfileUpdateDialog = ({
                     </Box>
                   </CardContent>
                 </Card>
-
-              {/* Organization Description Card */}
-              <Card elevation={1} sx={{ height: "fit-content" }}>
-                <CardHeader
-                  avatar={
-                    <Avatar sx={{ bgcolor: "warning.main" }}>
-                      <BusinessIcon />
-                    </Avatar>
-                  }
-                  title="Mô tả tổ chức"
-                />
-                <CardContent>
-                  <Box display="flex" flexDirection="column" gap={2}>
+                
+                {/* Mô tả cơ sở - Card riêng */}
+                <Card elevation={1}>
+                  <CardHeader
+                    avatar={
+                      <Avatar sx={{ bgcolor: "primary.main" }}>
+                        <SchoolIcon />
+                      </Avatar>
+                    }
+                    title="Mô tả cơ sở"
+                  />
+                  <CardContent>
                     <TextField
-                      label="Mô tả chi tiết về tổ chức"
+                      label="Mô tả chi tiết về cơ sở giáo dục"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       fullWidth
                       variant="outlined"
                       multiline
                       rows={6}
-                      placeholder="Nhập mô tả chi tiết về hoạt động, dịch vụ, và các thông tin khác của tổ chức..."
                       InputLabelProps={{ shrink: !!description }}
                     />
-                  </Box>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+                
                 <Box>
                   <Typography
                     variant="body2"
                     color="text.secondary"
                     gutterBottom
                   >
-                    Được tạo lúc :{" "}
-                    {partner.createdAt
-                      ? new Date(partner.createdAt).toLocaleString("vi-VN")
+                    Được tạo lúc:{" "}
+                    {dataToDisplay.createdAt
+                      ? new Date(dataToDisplay.createdAt).toLocaleString("vi-VN")
                       : "Chưa cập nhật"}
                   </Typography>
-
                   <Typography
                     variant="body2"
                     color="text.secondary"
                     gutterBottom
                   >
-                    Cập nhật lúc{" "}
-                    {partner.updatedAt
-                      ? new Date(partner.updatedAt).toLocaleString("vi-VN")
+                    Cập nhật lúc:{" "}
+                    {dataToDisplay.updatedAt
+                      ? new Date(dataToDisplay.updatedAt).toLocaleString("vi-VN")
                       : "Chưa cập nhật"}
                   </Typography>
+                 
                 </Box>
               </Box>
             </Box>
@@ -421,7 +436,7 @@ const PartnerProfileUpdateDialog = ({
       <Dialog open={confirmOpen} onClose={handleCancel}>
         <DialogTitle>Xác nhận lưu thay đổi</DialogTitle>
         <DialogContent>
-          Bạn có chắc chắn muốn lưu các thay đổi cho đối tác này?
+          Bạn có chắc chắn muốn lưu các thay đổi cho cơ sở giáo dục này?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleConfirm} color="primary" variant="contained">
@@ -436,4 +451,4 @@ const PartnerProfileUpdateDialog = ({
   );
 };
 
-export default PartnerProfileUpdateDialog;
+export default InstitutionUpdateInfoDialog;

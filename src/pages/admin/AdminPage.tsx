@@ -27,7 +27,6 @@ import { API } from "../../utils/Fetch";
 import { setLecturers } from "../../redux/slice/LecturerSlice";
 import { setInstitutions } from "../../redux/slice/InstitutionSlice";
 import { setPartner } from "../../redux/slice/PartnerSlice";
-import WebSocketService from "../../services/WebSocketService";
 
 interface StatCard {
   title: string;
@@ -81,7 +80,6 @@ const AdminPage = () => {
     fetchData();
 
     setLoading(false);
-    return () => WebSocketService.disconnect();
   }, []);
 
   const statsData: StatCard[] = useMemo(() => {

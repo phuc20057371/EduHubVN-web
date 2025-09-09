@@ -118,30 +118,30 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
     onSubmit(form);
     onClose();
   };
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
-      setSelectedFile(event.target.files[0]);
+      const file = event.target.files[0];
+      setSelectedFile(file);
+      
+      // Tự động tải lên file ngay khi chọn
+      setIsUploading(true);
+      await API.user
+        .uploadFileToServer(file)
+        .then((response: any) => {
+          console.log("✅ File uploaded successfully:", response.data);
+          setForm((prev) => ({ ...prev, url: response.data }));
+          toast.success("Tải lên tài liệu thành công");
+        })
+        .catch((error: any) => {
+          console.error("❌ Error uploading file:", error);
+          toast.error("Tải lên tài liệu không thành công. (.pdf, .jpg, .png)");
+          setSelectedFile(null);
+          setForm((prev) => ({ ...prev, url: "" }));
+        })
+        .finally(() => {
+          setIsUploading(false);
+        });
     }
-  };
-  const handleFileUpload = async () => {
-    if (!selectedFile) return;
-    setIsUploading(true);
-    await API.user
-      .uploadFileToServer(selectedFile)
-      .then((response: any) => {
-        console.log("✅ File uploaded successfully:", response.data);
-        setForm((prev) => ({ ...prev, url: response.data }));
-        toast.success("Tải lên tài liệu thành công");
-      })
-      .catch((error: any) => {
-        console.error("❌ Error uploading file:", error);
-        toast.error("Tải lên tài liệu không thành công. (.pdf, .jpg, .png)");
-        setSelectedFile(null);
-        setForm((prev) => ({ ...prev, url: "" }));
-      })
-      .finally(() => {
-        setIsUploading(false);
-      });
   };
 
   return (
@@ -828,35 +828,10 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
 
                 <Box display="flex" gap={2}>
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     component="label"
                     fullWidth
-                    startIcon={<AttachFile />}
-                    sx={{
-                      py: 2,
-                      borderRadius: "12px",
-                      borderWidth: "2px",
-                      borderColor: "#14b8a6",
-                      color: "#0f766e",
-                      fontWeight: 600,
-                      fontSize: "0.95rem",
-                      textTransform: "none",
-                      "&:hover": {
-                        borderWidth: "2px",
-                        borderColor: "#0d9488",
-                        backgroundColor: "#f0fdfa",
-                      },
-                    }}
-                  >
-                    Chọn file bằng cấp
-                    <input type="file" hidden onChange={handleFileChange} />
-                  </Button>
-
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    onClick={handleFileUpload}
-                    disabled={isUploading || !selectedFile}
+                    disabled={isUploading}
                     startIcon={
                       isUploading ? (
                         <CircularProgress size={20} color="inherit" />
@@ -884,7 +859,8 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                       },
                     }}
                   >
-                    {isUploading ? "Đang tải lên..." : "Tải lên"}
+                    {isUploading ? "Đang tải lên..." : "Chọn và tải lên file bằng cấp"}
+                    <input type="file" hidden onChange={handleFileChange} />
                   </Button>
                 </Box>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { API } from "../utils/Fetch";
@@ -79,23 +79,32 @@ const AdminLayout = () => {
     fetchUserData();
   }, [dispatch, navigate]);
 
-  // WebSocket connection effect
+  // WebSocket connection effect  
   useEffect(() => {
     if (userProfile && userProfile.role === "ADMIN") {
-      WebSocketService.connect(
-        userProfile,
-        () => console.log("✅ Admin WebSocket connected"),
-        (message) => {
-          AdminMessageHandler.handleIncomingMessage(message, dispatch);
-        },
-      );
+      // Chỉ connect nếu chưa connected hoặc user khác
+      if (!WebSocketService.isConnected() || 
+          WebSocketService.getCurrentUser()?.id !== userProfile.id) {
+        WebSocketService.connect(
+          userProfile,
+          () => console.log("✅ Admin WebSocket connected"),
+          (message) => {
+            AdminMessageHandler.handleIncomingMessage(message, dispatch);
+          },
+        );
+      }
     }
+    // Không cleanup ở đây để tránh disconnect khi chuyển tab
+  }, [userProfile, dispatch]);
 
-    // Cleanup khi component unmount
+  // Cleanup khi component AdminLayout unmount (rời khỏi admin area)
+  useEffect(() => {
     return () => {
+      console.log("🔄 AdminLayout cleanup triggered");
+      // Chỉ disconnect khi thực sự rời khỏi admin area
       WebSocketService.disconnect();
     };
-  }, [userProfile]);
+  }, []);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -106,6 +115,8 @@ const AdminLayout = () => {
   };
 
   const handleLogout = () => {
+    // Disconnect WebSocket trước khi logout
+    WebSocketService.disconnect();
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     navigate("/login");

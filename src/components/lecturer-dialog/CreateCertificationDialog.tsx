@@ -121,29 +121,29 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
-      setSelectedFile(event.target.files[0]);
+      const file = event.target.files[0];
+      setSelectedFile(file);
+      
+      // Tự động tải lên file ngay khi chọn
+      setIsUploading(true);
+      await API.user
+        .uploadFileToServer(file)
+        .then((res: any) => {
+          setForm((prev) => ({ ...prev, certificateUrl: res.data }));
+          toast.success("Tải lên tài liệu thành công");
+        })
+        .catch((err) => {
+          console.error("❌ Error uploading file:", err);
+          toast.error("Tải lên tài liệu không thành công. (.pdf, .jpg, .png)");
+          setSelectedFile(null);
+          setForm((prev) => ({ ...prev, certificateUrl: "" }));
+        })
+        .finally(() => {
+          setIsUploading(false);
+        });
     }
-  };
-
-  const handleFileUpload = async () => {
-    if (!selectedFile) return;
-    setIsUploading(true);
-
-    await API.user
-      .uploadFileToServer(selectedFile)
-      .then((res: any) => {
-        setForm((prev) => ({ ...prev, certificateUrl: res.data }));
-        toast.success("Tải lên tài liệu thành công");
-      })
-      .catch((err) => {
-        console.error("❌ Error uploading file:", err);
-        toast.error("Tải lên tài liệu không thành công. (.pdf, .jpg, .png)");
-      })
-      .finally(() => {
-        setIsUploading(false);
-      });
   };
 
   const handleSubmit = () => {
@@ -868,35 +868,10 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
 
                 <Box display="flex" gap={2}>
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     component="label"
                     fullWidth
-                    startIcon={<AttachFile />}
-                    sx={{
-                      py: 2,
-                      borderRadius: "12px",
-                      borderWidth: "2px",
-                      
-                      color: "#0e7490",
-                      fontWeight: 600,
-                      fontSize: "0.95rem",
-                      textTransform: "none",
-                      "&:hover": {
-                        borderWidth: "2px",
-                        borderColor: "#0891b2",
-                        backgroundColor: "#ecfeff",
-                      },
-                    }}
-                  >
-                    Chọn file chứng chỉ
-                    <input type="file" hidden onChange={handleFileChange} />
-                  </Button>
-
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    onClick={handleFileUpload}
-                    disabled={isUploading || !selectedFile}
+                    disabled={isUploading}
                     startIcon={
                       isUploading ? (
                         <CircularProgress size={20} color="inherit" />
@@ -924,7 +899,8 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
                       },
                     }}
                   >
-                    {isUploading ? "Đang tải lên..." : "Tải lên"}
+                    {isUploading ? "Đang tải lên..." : "Chọn và tải lên file chứng chỉ"}
+                    <input type="file" hidden onChange={handleFileChange} />
                   </Button>
                 </Box>
 

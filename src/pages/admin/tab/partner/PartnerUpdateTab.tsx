@@ -19,6 +19,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import { Update, Domain } from "@mui/icons-material";
+import { getRelativeTime } from "../../../../utils/ChangeText";
 
 interface PartnerUpdateTabProps {
   partnerPendingUpdate: any[];
@@ -43,17 +44,23 @@ const PartnerUpdateTab: React.FC<PartnerUpdateTabProps> = ({
       filtered = filtered.filter((item: any) => {
         const partner = item.partnerOrganization;
         const partnerUpdate = item.partnerOrganizationUpdate;
-        
+
         return (
           partner?.organizationName?.toLowerCase().includes(searchLower) ||
           partner?.representativeName?.toLowerCase().includes(searchLower) ||
-          partner?.businessRegistrationNumber?.toLowerCase().includes(searchLower) ||
+          partner?.businessRegistrationNumber
+            ?.toLowerCase()
+            .includes(searchLower) ||
           partner?.address?.toLowerCase().includes(searchLower) ||
           partner?.description?.toLowerCase().includes(searchLower) ||
           partner?.phoneNumber?.includes(updateSearchTerm) ||
           partner?.website?.toLowerCase().includes(searchLower) ||
-          partnerUpdate?.organizationName?.toLowerCase().includes(searchLower) ||
-          partnerUpdate?.representativeName?.toLowerCase().includes(searchLower) ||
+          partnerUpdate?.organizationName
+            ?.toLowerCase()
+            .includes(searchLower) ||
+          partnerUpdate?.representativeName
+            ?.toLowerCase()
+            .includes(searchLower) ||
           partnerUpdate?.address?.toLowerCase().includes(searchLower)
         );
       });
@@ -61,8 +68,8 @@ const PartnerUpdateTab: React.FC<PartnerUpdateTabProps> = ({
 
     // Sort by date with proper date handling
     filtered = [...filtered].sort((a: any, b: any) => {
-      const dateA = new Date(a.updatedAt || a.createdAt || 0);
-      const dateB = new Date(b.updatedAt || b.createdAt || 0);
+      const dateA = new Date(a.partnerOrganizationUpdate.updatedAt || a.partnerOrganizationUpdate.createdAt || 0);
+      const dateB = new Date(b.partnerOrganizationUpdate.updatedAt || b.partnerOrganizationUpdate.createdAt || 0);
 
       if (updateDateSort === "oldest") {
         return dateA.getTime() - dateB.getTime();
@@ -112,7 +119,7 @@ const PartnerUpdateTab: React.FC<PartnerUpdateTabProps> = ({
               Yêu cầu cập nhật thông tin đối tác
             </Typography>
             <Typography variant="body2" sx={{ color: "#6c757d" }}>
-              {(updateSearchTerm || updateDateSort !== "oldest")
+              {updateSearchTerm || updateDateSort !== "oldest"
                 ? `Đã lọc ${filteredUpdateList.length} yêu cầu`
                 : `Tổng cộng ${filteredUpdateList.length} yêu cầu chờ phê duyệt`}
             </Typography>
@@ -248,7 +255,8 @@ const PartnerUpdateTab: React.FC<PartnerUpdateTabProps> = ({
                     border: "2px solid",
                     borderColor: "warning.light",
                     borderRadius: 3,
-                    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+                    background:
+                      "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
                     "&:hover": {
                       transform: "translateY(-8px)",
                       boxShadow: "0 12px 40px rgba(255, 152, 0, 0.2)",
@@ -256,13 +264,21 @@ const PartnerUpdateTab: React.FC<PartnerUpdateTabProps> = ({
                     },
                   }}
                 >
-                  <CardContent sx={{ p: 3, display: "flex", flexDirection: "column", flex: 1 }}>
+                  <CardContent
+                    sx={{
+                      p: 3,
+                      display: "flex",
+                      flexDirection: "column",
+                      flex: 1,
+                    }}
+                  >
                     <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                       <Avatar
                         src={partner.logoUrl || ""}
                         sx={{
                           bgcolor: "warning.main",
-                          background: "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)",
+                          background:
+                            "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)",
                           mr: 2,
                           width: 48,
                           height: 48,
@@ -308,7 +324,8 @@ const PartnerUpdateTab: React.FC<PartnerUpdateTabProps> = ({
                         color="text.secondary"
                         sx={{ mb: 1 }}
                       >
-                        <strong>Đại diện:</strong> {partner.representativeName} ({partner.position})
+                        <strong>Đại diện:</strong> {partner.representativeName}{" "}
+                        ({partner.position})
                       </Typography>
                       <Typography
                         variant="body2"
@@ -322,7 +339,8 @@ const PartnerUpdateTab: React.FC<PartnerUpdateTabProps> = ({
                         color="text.secondary"
                         sx={{ mb: 1 }}
                       >
-                        <strong>ĐKKD:</strong> {partner.businessRegistrationNumber}
+                        <strong>ĐKKD:</strong>{" "}
+                        {partner.businessRegistrationNumber}
                       </Typography>
                       <Typography
                         variant="body2"
@@ -346,24 +364,8 @@ const PartnerUpdateTab: React.FC<PartnerUpdateTabProps> = ({
                         color="text.secondary"
                         sx={{ mb: 1 }}
                       >
-                        <strong>Thời gian:</strong>{" "}
-                        {(() => {
-                          const date = partnerUpdate.updatedAt || partnerUpdate.createdAt;
-                          if (!date) return "Chưa cập nhật";
-                          const now = new Date();
-                          const updatedTime = new Date(date);
-                          const diffInHours = Math.floor(
-                            (now.getTime() - updatedTime.getTime()) / (1000 * 60 * 60)
-                          );
-                          if (diffInHours < 1) {
-                            return "Vừa cập nhật";
-                          } else if (diffInHours < 48) {
-                            return `${diffInHours} giờ trước`;
-                          } else {
-                            const diffInDays = Math.floor(diffInHours / 24);
-                            return `${diffInDays} ngày trước`;
-                          }
-                        })()}
+                        <strong>Cập nhật:</strong>{" "}
+                        {getRelativeTime(partnerUpdate.updatedAt)}
                       </Typography>
                     </Box>
                     <Box sx={{ flexGrow: 1 }} />

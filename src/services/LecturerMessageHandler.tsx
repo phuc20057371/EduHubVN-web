@@ -150,6 +150,21 @@ export const LecturerMessageHandler = {
           );
           await handleLecturerProfile(dispatch);
           break;
+        /// LECTURER
+        case "APPROVE_LECTURER_UPDATE":
+          console.log(
+            "👨‍🏫 Handling LECTURER UPDATE approval:",
+            parsedMessage.content,
+          );
+          await handleLecturerProfile(dispatch);
+          break;
+        case "REJECT_LECTURER_UPDATE":
+          console.log(
+            "👨‍🏫 Handling LECTURER UPDATE rejection:",
+            parsedMessage.content,
+          );
+          await handleLecturerProfile(dispatch);
+          break;
 
         default:
           console.log("⚠️ Unknown message type:", parsedMessage.type);

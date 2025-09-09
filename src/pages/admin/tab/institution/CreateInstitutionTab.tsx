@@ -20,7 +20,7 @@ import { Business, Add } from "@mui/icons-material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import ApproveInstitutionCreateDialog from "../../../../components/admin-dialog/admin-institution-dialog/ApproveInstitutionCreateDialog";
-import { getInstitutionType } from "../../../../utils/ChangeText";
+import { getInstitutionType, getRelativeTime } from "../../../../utils/ChangeText";
 
 interface CreateInstitutionTabProps {
   institutionPendingCreate: any[];
@@ -360,31 +360,15 @@ const CreateInstitutionTab: React.FC<CreateInstitutionTabProps> = ({
                   <Typography
                     variant="body2"
                     color="text.secondary"
-                    sx={{ mb: 1 }}
+                     sx={{ 
+                          mb: 2,
+                          fontStyle: "italic",
+                          fontSize: "0.75rem",
+                          color: "#757575"
+                        }}
                   >
-                    <strong>Thời gian:</strong>{" "}
-                    {(() => {
-                      if (!item.updatedAt && !item.createdAt)
-                        return "Chưa cập nhật";
-
-                      const now = new Date();
-                      const updatedTime = new Date(
-                        item.updatedAt || item.createdAt,
-                      );
-                      const diffInHours = Math.floor(
-                        (now.getTime() - updatedTime.getTime()) /
-                          (1000 * 60 * 60),
-                      );
-
-                      if (diffInHours < 1) {
-                        return "Vừa cập nhật";
-                      } else if (diffInHours < 48) {
-                        return `${diffInHours} giờ trước`;
-                      } else {
-                        const diffInDays = Math.floor(diffInHours / 24);
-                        return `${diffInDays} ngày trước`;
-                      }
-                    })()}
+                    <strong>Cập nhật:</strong>{" "}
+                    {getRelativeTime(item.updatedAt)}
                   </Typography>
                 </Box>
 
