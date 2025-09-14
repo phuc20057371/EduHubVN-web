@@ -5,7 +5,6 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import * as React from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -37,12 +36,75 @@ import { setAttendedCourseRequests } from "../../redux/slice/RequestAttendedCour
 import { setOwnedCourseRequests } from "../../redux/slice/RequestOwnedCourseSlice";
 import { setResearchProjectRequests } from "../../redux/slice/RequestResearchProjectSlice";
 import { LinearProgress, Typography } from "@mui/material";
+import CreateLecturerDialog from "../../components/admin-dialog/admin-lecturer-dialog/CreateLecturerDialog";
 
 const AdminLecturerPage = () => {
-  // TAB STATE & GENERAL FILTERS
-  const [value, setValue] = useState("1");
+  // PERMISSION CHECKS FIRST (before useState)
+  const userProfile = useSelector((state: any) => state.userProfile);
 
-  // REDUX SELECTORS
+  const canViewLecturerTab = React.useMemo(() => {
+    console.log("Checking lecturer tab permission for user:", userProfile?.role, userProfile?.permissions);
+    if (userProfile.role === "ADMIN") return true;
+    if (userProfile.role === "SUB_ADMIN") {
+      return userProfile.permissions?.includes("LECTURER_READ");
+    }
+    return false;
+  }, [userProfile]);
+
+  const canViewApprovalTabs = React.useMemo(() => {
+    console.log("Checking approval tabs permission for user:", userProfile?.role, userProfile?.permissions);
+    if (userProfile.role === "ADMIN") return true;
+    if (userProfile.role === "SUB_ADMIN") {
+      return userProfile.permissions?.includes("LECTURER_APPROVE");
+    }
+    return false;
+  }, [userProfile]);
+
+  const canEditLecturer = React.useMemo(() => {
+    if (userProfile.role === "ADMIN") return true;
+    if (userProfile.role === "SUB_ADMIN") {
+      return userProfile.permissions?.includes("LECTURER_UPDATE");
+    }
+    return false;
+  }, [userProfile]);
+
+  const canDeleteLecturer = React.useMemo(() => {
+    if (userProfile.role === "ADMIN") return true;
+    if (userProfile.role === "SUB_ADMIN") {
+      return userProfile.permissions?.includes("LECTURER_DELETE");
+    }
+    return false;
+  }, [userProfile]);
+
+  const canCreateLecturer = React.useMemo(() => {
+    if (userProfile.role === "ADMIN") return true;
+    if (userProfile.role === "SUB_ADMIN") {
+      return userProfile.permissions?.includes("LECTURER_CREATE");
+    }
+    return false;
+  }, [userProfile]);
+
+  // Get the first available tab value based on permissions
+  const getFirstAvailableTab = () => {
+    if (canViewLecturerTab) return "1";
+    if (canViewApprovalTabs) return "2";
+    return "1"; // fallback
+  };
+
+  // TAB STATE & GENERAL FILTERS
+  const [value, setValue] = useState(() => getFirstAvailableTab());
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
+
+  // Update tab when permissions change
+  useEffect(() => {
+    const currentTab = getFirstAvailableTab();
+    console.log("useEffect - Current tab:", value, "First available:", currentTab);
+    if (value !== currentTab) {
+      console.log("Updating tab from", value, "to", currentTab);
+      setValue(currentTab);
+    }
+  }, [canViewLecturerTab, canViewApprovalTabs]); // Remove 'value' from dependencies to avoid loop
+
   const lecturerPendingCreate = useSelector(
     (state: any) => state.lecturerPendingCreate,
   );
@@ -136,9 +198,10 @@ const AdminLecturerPage = () => {
   const lecturers = useSelector((state: any) => state.lecturer || []);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
+  // Refresh data function
+  const refreshData = async () => {
+    try {
+      if (userProfile.role === "ADMIN") {
         const res = await API.admin.getAllLecturers();
         dispatch(setLecturers(res.data.data));
 
@@ -151,30 +214,201 @@ const AdminLecturerPage = () => {
         const resDegree = await API.admin.getDegreeRequests();
         dispatch(setDegreeRequests(resDegree.data.data));
 
-        const resCertification = await API.admin.getCertificationRequests();
-        dispatch(setCertificationRequests(resCertification.data.data));
+        const resCert = await API.admin.getCertificationRequests();
+        dispatch(setCertificationRequests(resCert.data.data));
 
-        const resAttendedCourse = await API.admin.getAttendedCourseRequests();
-        dispatch(setAttendedCourseRequests(resAttendedCourse.data.data));
-
-        const resOwnedCourse = await API.admin.getOwnedCourseRequests();
-        dispatch(setOwnedCourseRequests(resOwnedCourse.data.data));
+        const resAttended = await API.admin.getAttendedCourseRequests();
+        const resOwned = await API.admin.getOwnedCourseRequests();
+        dispatch(setAttendedCourseRequests(resAttended.data.data));
+        dispatch(setOwnedCourseRequests(resOwned.data.data));
 
         const resResearchProject = await API.admin.getResearchProjectRequests();
         dispatch(setResearchProjectRequests(resResearchProject.data.data));
+      }
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (userProfile.role === "ADMIN") {
+          const res = await API.admin.getAllLecturers();
+          dispatch(setLecturers(res.data.data));
+
+          const resCreate = await API.admin.getLecturerPendingCreate();
+          dispatch(setLecturerPendingCreate(resCreate.data.data));
+
+          const resUpdate = await API.admin.getLecturerPendingUpdate();
+          dispatch(setLecturerPendingUpdate(resUpdate.data.data));
+
+          const resDegree = await API.admin.getDegreeRequests();
+          dispatch(setDegreeRequests(resDegree.data.data));
+
+          const resCertification = await API.admin.getCertificationRequests();
+          dispatch(setCertificationRequests(resCertification.data.data));
+
+          const resAttendedCourse = await API.admin.getAttendedCourseRequests();
+          dispatch(setAttendedCourseRequests(resAttendedCourse.data.data));
+
+          const resOwnedCourse = await API.admin.getOwnedCourseRequests();
+          dispatch(setOwnedCourseRequests(resOwnedCourse.data.data));
+
+          const resResearchProject =
+            await API.admin.getResearchProjectRequests();
+          dispatch(setResearchProjectRequests(resResearchProject.data.data));
+        } else if (userProfile.role === "SUB_ADMIN") {
+          if (userProfile.permissions.includes("LECTURER_READ")) {
+            const res = await API.admin.getAllLecturers();
+            dispatch(setLecturers(res.data.data));
+          }
+          if (userProfile.permissions.includes("LECTURER_APPROVE")) {
+            const resCreate = await API.admin.getLecturerPendingCreate();
+            dispatch(setLecturerPendingCreate(resCreate.data.data));
+            const resUpdate = await API.admin.getLecturerPendingUpdate();
+            dispatch(setLecturerPendingUpdate(resUpdate.data.data));
+            const resDegree = await API.admin.getDegreeRequests();
+            dispatch(setDegreeRequests(resDegree.data.data));
+            const resCertification = await API.admin.getCertificationRequests();
+            dispatch(setCertificationRequests(resCertification.data.data));
+            const resAttendedCourse =
+              await API.admin.getAttendedCourseRequests();
+            dispatch(setAttendedCourseRequests(resAttendedCourse.data.data));
+            const resOwnedCourse = await API.admin.getOwnedCourseRequests();
+            dispatch(setOwnedCourseRequests(resOwnedCourse.data.data));
+            const resResearchProject =
+              await API.admin.getResearchProjectRequests();
+            dispatch(setResearchProjectRequests(resResearchProject.data.data));
+          }
+        }
       } catch (error) {
         console.error("Error initializing AdminLecturerPage:", error);
       }
     };
-    fetchData();
-  }, []);
+    
+    // Chỉ chạy fetchData khi userProfile đã có và có role
+    if (userProfile && userProfile.role) {
+      fetchData();
+    }
+  }, [userProfile]);
 
   // EVENT HANDLERS
   const handleChange = (_event: SyntheticEvent, newValue: string) => {
-    setValue(newValue);
+    console.log("=== TAB CHANGE EVENT ===");
+    console.log("Tab change requested:", newValue, "Current:", value);
+    console.log("Permissions:", { canViewLecturerTab, canViewApprovalTabs });
+    
+    // Only allow switching to tabs user has permission for
+    const tabNumber = parseInt(newValue);
+    if (tabNumber === 1 && canViewLecturerTab) {
+      console.log("✅ Switching to lecturer tab");
+      setValue(newValue);
+    } else if (tabNumber >= 2 && tabNumber <= 6 && canViewApprovalTabs) {
+      console.log("✅ Switching to approval tab");
+      setValue(newValue);
+    } else {
+      console.log("❌ Tab change blocked due to permissions");
+    }
+    console.log("=== END TAB CHANGE ===");
   };
 
+  const handleCreateSuccess = async () => {
+    // Refresh lecturer data after successful creation
+    try {
+      const res = await API.admin.getAllLecturers();
+      dispatch(setLecturers(res.data.data));
+    } catch (error) {
+      console.error("Error refreshing lecturer data:", error);
+    }
+  };
+
+  // Create tabs array based on permissions
+  const availableTabs = React.useMemo(() => {
+    console.log("Creating available tabs with permissions:", { canViewLecturerTab, canViewApprovalTabs });
+    const tabs = [];
+
+    // Tab 1 - Lecturer List
+    if (canViewLecturerTab) {
+      console.log("Adding lecturer tab");
+      tabs.push(
+        <Tab
+          key="tab-1"
+          label="Giảng viên"
+          value="1"
+        />
+      );
+    }
+
+    // Tabs 2-6 - Approval Tabs
+    if (canViewApprovalTabs) {
+      console.log("Adding approval tabs");
+      tabs.push(
+        <Tab
+          key="tab-2"
+          label="Tạo mới hồ sơ"
+          value="2"
+        />,
+        <Tab
+          key="tab-3"
+          label="Cập nhật hồ sơ"
+          value="3"
+        />,
+        <Tab
+          key="tab-4"
+          label="Chứng chỉ/Bằng cấp"
+          value="4"
+        />,
+        <Tab
+          key="tab-5"
+          label="Kinh nghiệm đào tạo"
+          value="5"
+        />,
+        <Tab
+          key="tab-6"
+          label="Kinh nghiệm nghiên cứu"
+          value="6"
+        />
+      );
+    }
+
+    console.log("Total tabs created:", tabs.length);
+    return tabs;
+  }, [canViewLecturerTab, canViewApprovalTabs]); // Simplify dependencies to only permissions
+
   // RENDER COMPONENT
+  // If user has no permissions, show access denied message
+  if (userProfile && userProfile.role === "SUB_ADMIN" && !canViewLecturerTab && !canViewApprovalTabs) {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "50vh",
+          p: 3,
+        }}
+      >
+        <Paper
+          sx={{
+            p: 4,
+            textAlign: "center",
+            borderRadius: 3,
+            boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+          }}
+        >
+          <Typography variant="h5" color="error" gutterBottom>
+            Không có quyền truy cập
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Bạn không có quyền truy cập vào trang quản lý giảng viên.
+          </Typography>
+        </Paper>
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -200,6 +434,10 @@ const AdminLecturerPage = () => {
               borderBottom: 1,
               borderColor: "divider",
               bgcolor: "background.paper",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              pr: 2,
             }}
           >
             <TabList
@@ -209,6 +447,7 @@ const AdminLecturerPage = () => {
               scrollButtons="auto"
               allowScrollButtonsMobile
               sx={{
+                flex: 1,
                 px: { xs: 1, sm: 3 },
                 "& .MuiTab-root": {
                   fontWeight: 600,
@@ -234,292 +473,140 @@ const AdminLecturerPage = () => {
                 },
               }}
             >
-              <Tab
-                label={
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: { xs: 0.5, sm: 1 },
-                      flexWrap: "nowrap",
-                    }}
-                  >
-                    <span>Giảng viên</span>
-                    <Chip
-                      size="small"
-                      label={lecturers.length}
-                      color="primary"
-                      sx={{
-                        fontWeight: 600,
-                        minWidth: "auto",
-                        height: { xs: 18, sm: 20 },
-                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
-                        "& .MuiChip-label": {
-                          px: { xs: 0.5, sm: 1 },
-                        },
-                      }}
-                    />
-                  </Box>
-                }
-                value="1"
-              />
-              <Tab
-                label={
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: { xs: 0.5, sm: 1 },
-                      flexWrap: "nowrap",
-                    }}
-                  >
-                    <span>Tạo mới hồ sơ</span>
-                    <Chip
-                      size="small"
-                      label={lecturerCreateList.length}
-                      color="success"
-                      sx={{
-                        fontWeight: 600,
-                        minWidth: "auto",
-                        height: { xs: 18, sm: 20 },
-                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
-                        "& .MuiChip-label": {
-                          px: { xs: 0.5, sm: 1 },
-                        },
-                      }}
-                    />
-                  </Box>
-                }
-                value="2"
-              />
-              <Tab
-                label={
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: { xs: 0.5, sm: 1 },
-                      flexWrap: "nowrap",
-                    }}
-                  >
-                    <span>Cập nhật hồ sơ</span>
-                    <Chip
-                      size="small"
-                      label={lecturerUpdateList.length}
-                      color="warning"
-                      sx={{
-                        fontWeight: 600,
-                        minWidth: "auto",
-                        height: { xs: 18, sm: 20 },
-                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
-                        "& .MuiChip-label": {
-                          px: { xs: 0.5, sm: 1 },
-                        },
-                      }}
-                    />
-                  </Box>
-                }
-                value="3"
-              />
-              <Tab
-                label={
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: { xs: 0.5, sm: 1 },
-                      flexWrap: "nowrap",
-                    }}
-                  >
-                    <span style={{ whiteSpace: "nowrap" }}>
-                      Chứng chỉ/Bằng cấp
-                    </span>
-                    <Chip
-                      size="small"
-                      label={lecturerRequestsDGCC.length}
-                      color="secondary"
-                      sx={{
-                        fontWeight: 600,
-                        minWidth: "auto",
-                        height: { xs: 18, sm: 20 },
-                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
-                        "& .MuiChip-label": {
-                          px: { xs: 0.5, sm: 1 },
-                        },
-                      }}
-                    />
-                  </Box>
-                }
-                value="4"
-              />
-              <Tab
-                label={
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: { xs: 0.5, sm: 1 },
-                      flexWrap: "nowrap",
-                    }}
-                  >
-                    <span style={{ whiteSpace: "nowrap" }}>
-                      Kinh nghiệm đào tạo
-                    </span>
-                    <Chip
-                      size="small"
-                      label={lecturerRequestsCourse.length}
-                      color="info"
-                      sx={{
-                        fontWeight: 600,
-                        minWidth: "auto",
-                        height: { xs: 18, sm: 20 },
-                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
-                        "& .MuiChip-label": {
-                          px: { xs: 0.5, sm: 1 },
-                        },
-                      }}
-                    />
-                  </Box>
-                }
-                value="5"
-              />
-              <Tab
-                label={
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: { xs: 0.5, sm: 1 },
-                      flexWrap: "nowrap",
-                    }}
-                  >
-                    <span style={{ whiteSpace: "nowrap" }}>
-                      Kinh nghiệm nghiên cứu
-                    </span>
-                    <Chip
-                      size="small"
-                      label={lecturerRequestsResearch.length}
-                      color="success"
-                      sx={{
-                        fontWeight: 600,
-                        minWidth: "auto",
-                        height: { xs: 18, sm: 20 },
-                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
-                        "& .MuiChip-label": {
-                          px: { xs: 0.5, sm: 1 },
-                        },
-                      }}
-                    />
-                  </Box>
-                }
-                value="6"
-              />
+              {availableTabs}
             </TabList>
           </Box>
         </Paper>
 
+        {/* TAB PANELS */}
         {/* TAB 1 - MAIN LECTURER MANAGEMENT */}
-        <TabPanel value="1" sx={{ p: 0 }}>
-          <React.Suspense
-            fallback={
-              <Box sx={{ width: "100%" }}>
-                <LinearProgress />
-                <Box sx={{ p: 4, textAlign: "center" }}>
-                  <Typography variant="h6">Đang tải dữ liệu...</Typography>
+        {canViewLecturerTab && (
+          <TabPanel value="1" sx={{ p: 0 }}>
+            <React.Suspense
+              fallback={
+                <Box sx={{ width: "100%" }}>
+                  <LinearProgress />
+                  <Box sx={{ p: 4, textAlign: "center" }}>
+                    <Typography variant="h6">Đang tải dữ liệu...</Typography>
+                  </Box>
                 </Box>
-              </Box>
-            }
-          >
-            <AdminLecturerMainTab lecturers={lecturers} />
-          </React.Suspense>
-        </TabPanel>
+              }
+            >
+              <AdminLecturerMainTab 
+                lecturers={lecturers}
+                canEdit={canEditLecturer}
+                canDelete={canDeleteLecturer}
+                canCreate={canCreateLecturer}
+                onCreateClick={() => setOpenCreateDialog(true)}
+                onRefresh={refreshData}
+              />
+            </React.Suspense>
+          </TabPanel>
+        )}
 
         {/* TAB 2 - CREATE LECTURER REQUESTS */}
-        <TabPanel value="2" sx={{ p: 0 }}>
-          <React.Suspense
-            fallback={
-              <Box sx={{ width: "100%" }}>
-                <LinearProgress />
-                <Box sx={{ p: 4, textAlign: "center" }}>
-                  <Typography variant="h6">Đang tải dữ liệu...</Typography>
+        {canViewApprovalTabs && (
+          <TabPanel value="2" sx={{ p: 0 }}>
+            <React.Suspense
+              fallback={
+                <Box sx={{ width: "100%" }}>
+                  <LinearProgress />
+                  <Box sx={{ p: 4, textAlign: "center" }}>
+                    <Typography variant="h6">Đang tải dữ liệu...</Typography>
+                  </Box>
                 </Box>
-              </Box>
-            }
-          >
-            <AdminLecturerCreateTab lecturerCreateList={lecturerCreateList} />
-          </React.Suspense>
-        </TabPanel>
+              }
+            >
+              <AdminLecturerCreateTab lecturerCreateList={lecturerCreateList} />
+            </React.Suspense>
+          </TabPanel>
+        )}
 
         {/* TAB 3 - UPDATE LECTURER REQUESTS */}
-        <TabPanel value="3" sx={{ p: 0 }}>
-          <React.Suspense
-            fallback={
-              <Box sx={{ width: "100%" }}>
-                <LinearProgress />
-                <Box sx={{ p: 4, textAlign: "center" }}>
-                  <Typography variant="h6">Đang tải dữ liệu...</Typography>
+        {canViewApprovalTabs && (
+          <TabPanel value="3" sx={{ p: 0 }}>
+            <React.Suspense
+              fallback={
+                <Box sx={{ width: "100%" }}>
+                  <LinearProgress />
+                  <Box sx={{ p: 4, textAlign: "center" }}>
+                    <Typography variant="h6">Đang tải dữ liệu...</Typography>
+                  </Box>
                 </Box>
-              </Box>
-            }
-          >
-            <AdminLecturerUpdateTab lecturerUpdateList={lecturerUpdateList} />
-          </React.Suspense>
-        </TabPanel>
+              }
+            >
+              <AdminLecturerUpdateTab lecturerUpdateList={lecturerUpdateList} />
+            </React.Suspense>
+          </TabPanel>
+        )}
 
         {/* TAB 4 - DEGREE/CERTIFICATE REQUESTS */}
-        <TabPanel value="4" sx={{ p: 0 }}>
-          <React.Suspense
-            fallback={
-              <Box sx={{ width: "100%" }}>
-                <LinearProgress />
-                <Box sx={{ p: 4, textAlign: "center" }}>
-                  <Typography variant="h6">Đang tải dữ liệu...</Typography>
+        {canViewApprovalTabs && (
+          <TabPanel value="4" sx={{ p: 0 }}>
+            <React.Suspense
+              fallback={
+                <Box sx={{ width: "100%" }}>
+                  <LinearProgress />
+                  <Box sx={{ p: 4, textAlign: "center" }}>
+                    <Typography variant="h6">Đang tải dữ liệu...</Typography>
+                  </Box>
                 </Box>
-              </Box>
-            }
-          >
-            <AdminLecturerDegreeTab
-              lecturerRequestsDGCC={lecturerRequestsDGCC}
-            />
-          </React.Suspense>
-        </TabPanel>
+              }
+            >
+              <AdminLecturerDegreeTab
+                lecturerRequestsDGCC={lecturerRequestsDGCC}
+              />
+            </React.Suspense>
+          </TabPanel>
+        )}
 
         {/* TAB 5 - COURSE REQUESTS */}
-        <TabPanel value="5" sx={{ p: 0 }}>
-          <React.Suspense
-            fallback={
-              <Box sx={{ width: "100%" }}>
-                <LinearProgress />
-                <Box sx={{ p: 4, textAlign: "center" }}>
-                  <Typography variant="h6">Đang tải dữ liệu...</Typography>
+        {canViewApprovalTabs && (
+          <TabPanel value="5" sx={{ p: 0 }}>
+            <React.Suspense
+              fallback={
+                <Box sx={{ width: "100%" }}>
+                  <LinearProgress />
+                  <Box sx={{ p: 4, textAlign: "center" }}>
+                    <Typography variant="h6">Đang tải dữ liệu...</Typography>
+                  </Box>
                 </Box>
-              </Box>
-            }
-          >
-            <AdminLecturerCourseTab
-              lecturerRequestsCourse={lecturerRequestsCourse}
-            />
-          </React.Suspense>
-        </TabPanel>
+              }
+            >
+              <AdminLecturerCourseTab
+                lecturerRequestsCourse={lecturerRequestsCourse}
+              />
+            </React.Suspense>
+          </TabPanel>
+        )}
 
         {/* TAB 6 - RESEARCH PROJECT REQUESTS */}
-        <TabPanel value="6" sx={{ p: 0 }}>
-          <React.Suspense
-            fallback={
-              <Box sx={{ width: "100%" }}>
-                <LinearProgress />
-                <Box sx={{ p: 4, textAlign: "center" }}>
-                  <Typography variant="h6">Đang tải dữ liệu...</Typography>
+        {canViewApprovalTabs && (
+          <TabPanel value="6" sx={{ p: 0 }}>
+            <React.Suspense
+              fallback={
+                <Box sx={{ width: "100%" }}>
+                  <LinearProgress />
+                  <Box sx={{ p: 4, textAlign: "center" }}>
+                    <Typography variant="h6">Đang tải dữ liệu...</Typography>
+                  </Box>
                 </Box>
-              </Box>
-            }
-          >
-            <AdminLecturerResearchTab
-              lecturerRequestsResearch={lecturerRequestsResearch}
-            />
-          </React.Suspense>
-        </TabPanel>
+              }
+            >
+              <AdminLecturerResearchTab
+                lecturerRequestsResearch={lecturerRequestsResearch}
+              />
+            </React.Suspense>
+          </TabPanel>
+        )}
       </TabContext>
+
+      {/* Create Lecturer Dialog */}
+      <CreateLecturerDialog
+        open={openCreateDialog}
+        onClose={() => setOpenCreateDialog(false)}
+        onSuccess={handleCreateSuccess}
+      />
     </Box>
   );
 };

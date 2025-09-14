@@ -1,4 +1,5 @@
 import {
+  Add,
   Assignment,
   CalendarToday,
   ExpandMore,
@@ -25,6 +26,7 @@ import {
   getStatus,
 } from "../../../../utils/ChangeText";
 import { API } from "../../../../utils/Fetch";
+import AddCertificationDialog from "../AddCertificationDialog";
 import ApproveCertificationCreateDialog from "../ApproveCertificationCreateDialog";
 import ApproveCertificationUpdateDialog from "../ApproveCertificationUpdateDialog";
 
@@ -32,6 +34,8 @@ interface LecturerProfileCertificationsTabProps {
   onAddCertification?: () => void;
   onEditCertification?: (certification: any) => void;
   onDeleteCertification?: (certification: any) => void;
+  canCreateLecturer?: boolean;
+  canApproveLecturer?: boolean;
 }
 
 const LecturerProfileCertificationsTab: React.FC<
@@ -40,6 +44,8 @@ const LecturerProfileCertificationsTab: React.FC<
   {
     // onAddCertification,
     // onEditCertification, onDeleteCertification
+    canCreateLecturer = true,
+    canApproveLecturer = true,
   },
 ) => {
   // Get lecturer data from Redux
@@ -66,6 +72,9 @@ const LecturerProfileCertificationsTab: React.FC<
     open: boolean;
     data: any;
   }>({ open: false, data: null });
+
+  // State for AddCertificationDialog
+  const [addCertificationDialog, setAddCertificationDialog] = useState(false);
 
   // Dialog handlers
   const handleOpenApproveCertificationCreateDialog = (
@@ -108,6 +117,17 @@ const LecturerProfileCertificationsTab: React.FC<
     }
   };
 
+  const handleSuccessAddCertification = async () => {
+    setAddCertificationDialog(false);
+    // Refresh lecturer data after adding certification
+    const response = await API.admin.getLecturerAllProfile({
+      id: lecturerProfileUpdate.lecturer.id,
+    });
+    if (response.data.success) {
+      dispatch(setLecturerProfileUpdate(response.data.data));
+    }
+  };
+
   // Function to get banner color based on status
   const getBannerColor = (status: string) => {
     switch (status) {
@@ -132,24 +152,26 @@ const LecturerProfileCertificationsTab: React.FC<
         >
           Danh sách chứng chỉ ({certifications?.length || 0})
         </Typography>
-        {/* <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={onAddCertification}
-          sx={{
-            background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
-            color: "white",
-            fontWeight: 600,
-            textTransform: "none",
-            borderRadius: 2,
-            "&:hover": {
-              transform: "translateY(-1px)",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            },
-          }}
-        >
-          Thêm chứng chỉ
-        </Button> */}
+        {canCreateLecturer && (
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => setAddCertificationDialog(true)}
+            sx={{
+              background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
+              color: "white",
+              fontWeight: 600,
+              textTransform: "none",
+              borderRadius: 2,
+              "&:hover": {
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              },
+            }}
+          >
+            Thêm Chứng chỉ
+          </Button>
+        )}
       </div>
       {certifications && certifications.length > 0 ? (
         certifications.map((item: any) => (
@@ -231,34 +253,37 @@ const LecturerProfileCertificationsTab: React.FC<
                     }}
                   />
                   {(item.original?.status || item.status) === "PENDING" ? (
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() =>
-                        handleOpenApproveCertificationCreateDialog(item)
-                      }
-                      sx={{
-                        fontWeight: 600,
-                        background: "rgba(255,255,255,0.9)",
-                        color: "#1976d2",
-                        textTransform: "none",
-                        borderRadius: 2,
-                        fontSize: "0.75rem",
-                        px: 2,
-                        py: 0.5,
-                        "&:hover": {
-                          background: "rgba(255,255,255,1)",
-                          transform: "translateY(-1px)",
-                          boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                        },
-                      }}
-                    >
-                      Xem chi tiết
-                    </Button>
+                    canApproveLecturer && (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() =>
+                          handleOpenApproveCertificationCreateDialog(item)
+                        }
+                        sx={{
+                          fontWeight: 600,
+                          background: "rgba(255,255,255,0.9)",
+                          color: "#1976d2",
+                          textTransform: "none",
+                          borderRadius: 2,
+                          fontSize: "0.75rem",
+                          px: 2,
+                          py: 0.5,
+                          "&:hover": {
+                            background: "rgba(255,255,255,1)",
+                            transform: "translateY(-1px)",
+                            boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                          },
+                        }}
+                      >
+                        Xem chi tiết
+                      </Button>
+                    )
                   ) : (
                     (item.original?.status || item.status) === "APPROVED" &&
                     item.update &&
-                    item.update.status === "PENDING" && (
+                    item.update.status === "PENDING" &&
+                    canApproveLecturer && (
                       <Button
                         variant="contained"
                         size="small"
@@ -490,6 +515,16 @@ const LecturerProfileCertificationsTab: React.FC<
           data={approveCertificationUpdateDialog.data}
           onClose={handleCloseApproveCertificationUpdateDialog}
           onSuccess={handleSuccessApproveCertificationUpdateDialog}
+        />
+      )}
+
+      {/* AddCertificationDialog */}
+      {addCertificationDialog && (
+        <AddCertificationDialog
+          open={addCertificationDialog}
+          onClose={() => setAddCertificationDialog(false)}
+          lecturer={lecturerProfileUpdate.lecturer}
+          onSuccess={handleSuccessAddCertification}
         />
       )}
     </div>

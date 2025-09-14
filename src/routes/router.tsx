@@ -38,6 +38,7 @@ import RegisterInstitution from "../pages/register/RegisterInstitution";
 import RegisterLecturer from "../pages/register/RegisterLecturer";
 import RegisterPartner from "../pages/register/RegisterPartner";
 import ProtectedRoute from "../utils/ProtectedRoute";
+import AdminOnlyRoute from "../utils/AdminOnlyRoute";
 import InstitutionContractPage from "../pages/institution/InstitutionContractPage";
 import InstitutionCourse from "../pages/institution/InstitutionCourse";
 import InstitutionLecturerPage from "../pages/institution/InstitutionLecturerPage";
@@ -47,6 +48,7 @@ import PartnerContractPage from "../pages/partner/PartnerContractPage";
 import PartnerCoursePage from "../pages/partner/PartnerCoursePage";
 import PartnerLecturerPage from "../pages/partner/PartnerLecturerPage";
 import PartnerProjectPage from "../pages/partner/PartnerProjectPage";
+import SubAdminPage from "../pages/admin/SubAdminPage";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -83,6 +85,11 @@ export const router = createBrowserRouter(
           />
           <Route path="/admin/partners" element={<AdminPartner />} />
           <Route path="/admin/courses" element={<AdminCourse />} />
+          
+          {/* Protected route for ADMIN role only */}
+          <Route element={<AdminOnlyRoute />}>
+            <Route path="/admin/sub-admin" element={<SubAdminPage />} />
+          </Route>
         </Route>
       </Route>
 

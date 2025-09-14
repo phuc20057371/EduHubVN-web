@@ -27,13 +27,18 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { Add } from "@mui/icons-material";
+import { toast } from "react-toastify";
 import LecturerProfileUpdateDialog from "../../../../components/admin-dialog/admin-lecturer-dialog/LecturerProfileUpdateDialog";
+import LecturerBasicInfoEditDialog from "../../../../components/admin-dialog/admin-lecturer-dialog/LecturerBasicInfoEditDialog";
+import ConfirmDeleteDialog from "../../../../components/general-dialog/ConfirmDeleteDialog";
 import type { Lecturer } from "../../../../types/Lecturer";
 import {
   getAcademicRank,
   getStatus,
   getStatusColor,
 } from "../../../../utils/ChangeText";
+import { API } from "../../../../utils/Fetch";
 
 type Order = "asc" | "desc";
 
@@ -164,10 +169,22 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 interface AdminLecturerMainTabProps {
   lecturers: Lecturer[];
+  canEdit?: boolean;
+  canDelete?: boolean;
+  canCreate?: boolean;
+  onCreateClick?: () => void;
+  onRefresh?: () => void;
+  onLecturerDeleted?: (lecturerId: string) => void;
 }
 
 const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
   lecturers,
+  canEdit = true,
+  canDelete = true,
+  canCreate = false,
+  onCreateClick,
+  onRefresh,
+  onLecturerDeleted,
 }) => {
   // Local state for filters and table
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -177,13 +194,28 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
   const [orderBy, setOrderBy] = React.useState<keyof Lecturer>("id");
   const [selected, setSelected] = React.useState<string | null>(null);
 
+  // Local lecturers state to handle immediate updates
+  const [localLecturers, setLocalLecturers] = React.useState<Lecturer[]>(lecturers);
+
+  // Sync local lecturers with props when lecturers change
+  React.useEffect(() => {
+    setLocalLecturers(lecturers);
+  }, [lecturers]);
+
   const [openUpdateDialog, setOpenUpdateDialog] = React.useState(false);
+  const [openBasicInfoEditDialog, setOpenBasicInfoEditDialog] = React.useState(false);
+  const [openConfirmDeleteDialog, setOpenConfirmDeleteDialog] = React.useState(false);
   const [selectedLecturerUpdate, setSelectedLecturerUpdate] =
     React.useState<any>(null);
+  const [selectedLecturerEdit, setSelectedLecturerEdit] =
+    React.useState<any>(null);
+  const [selectedLecturerDelete, setSelectedLecturerDelete] =
+    React.useState<Lecturer | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
   // Filtered data logic
   const filteredLecturers = React.useMemo(() => {
-    let filtered = lecturers;
+    let filtered = localLecturers;
 
     if (searchTerm) {
       filtered = filtered.filter(
@@ -211,7 +243,7 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
     }
 
     return filtered;
-  }, [lecturers, searchTerm, academicRankFilter, statusFilter]);
+  }, [localLecturers, searchTerm, academicRankFilter, statusFilter]);
 
   const handleRequestSort = (
     _event: React.MouseEvent<unknown>,
@@ -246,6 +278,60 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
   );
 
   const emptyRows = 10 - visibleRows.length > 0 ? 10 - visibleRows.length : 0;
+
+  // Delete lecturer handler
+  const handleDeleteClick = (lecturer: Lecturer) => {
+    setSelectedLecturerDelete(lecturer);
+    setOpenConfirmDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedLecturerDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await API.admin.deleteLecturer({ id: selectedLecturerDelete.id });
+      
+      if (response.data.success) {
+        toast.success("Xóa giảng viên thành công!");
+        
+        // Remove lecturer from local state immediately
+        setLocalLecturers(prev => prev.filter(lecturer => lecturer.id !== selectedLecturerDelete.id));
+        
+        // Clear selection if the deleted lecturer was selected
+        if (selected === selectedLecturerDelete.id) {
+          setSelected(null);
+        }
+        
+        setOpenConfirmDeleteDialog(false);
+        setSelectedLecturerDelete(null);
+        
+        // Notify parent component
+        if (onLecturerDeleted) {
+          onLecturerDeleted(selectedLecturerDelete.id);
+        }
+        
+        // Refresh data from server (async)
+        if (onRefresh) {
+          onRefresh();
+        }
+      } else {
+        toast.error(response.data.message || "Có lỗi xảy ra khi xóa giảng viên");
+      }
+    } catch (error: any) {
+      console.error("Error deleting lecturer:", error);
+      toast.error(error.response?.data?.message || "Có lỗi xảy ra khi xóa giảng viên");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCloseDeleteDialog = () => {
+    if (!isDeleting) {
+      setOpenConfirmDeleteDialog(false);
+      setSelectedLecturerDelete(null);
+    }
+  };
 
   return (
     <>
@@ -297,7 +383,8 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
             </Box>
           </Box>
 
-          {selected && (
+          {/* Comment out toolbar action buttons - moved to table column */}
+          {/* {selected && (
             <Box sx={{ display: "flex", gap: 1 }}>
               <Tooltip title="Chỉnh sửa">
                 <IconButton
@@ -339,7 +426,7 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                 </IconButton>
               </Tooltip>
             </Box>
-          )}
+          )} */}
         </Box>
 
         {/* Filters */}
@@ -423,6 +510,32 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
               }}
             />
           </Box>
+
+          {/* Create Button */}
+          {canCreate && onCreateClick && (
+            <Box sx={{ flexShrink: 0 }}>
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={onCreateClick}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  "&:hover": {
+                    background: "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                    transform: "translateY(-1px)",
+                    boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
+                  },
+                  transition: "all 0.2s ease-in-out",
+                }}
+              >
+                Tạo mới
+              </Button>
+            </Box>
+          )}
         </Box>
 
         {/* Active Filters Display */}
@@ -576,17 +689,74 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                       />
                     </TableCell>
                     <TableCell align="center">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        color="primary"
-                        onClick={() =>
-                          window.open(`/lecturer-info/${row.id}`, "_blank")
-                        }
-                        sx={{ minWidth: 100 }}
-                      >
-                        Xem CV
-                      </Button>
+                      <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          color="secondary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(`/lecturer-info/${row.id}`, "_blank");
+                          }}
+                          sx={{ minWidth: 50 }}
+                        >
+                          CV
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          color="info"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedLecturerUpdate({ lecturer: row });
+                            setOpenUpdateDialog(true);
+                          }}
+                          sx={{ minWidth: 70 }}
+                        >
+                          Hồ sơ
+                        </Button>
+                        {canEdit && (
+                          <Tooltip title="Chỉnh sửa thông tin cơ bản">
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedLecturerEdit({ lecturer: row });
+                                setOpenBasicInfoEditDialog(true);
+                              }}
+                              sx={{
+                                bgcolor: "rgba(25, 118, 210, 0.1)",
+                                "&:hover": {
+                                  bgcolor: "rgba(25, 118, 210, 0.2)",
+                                },
+                              }}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {canDelete && (
+                          <Tooltip title="Xóa">
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteClick(row);
+                              }}
+                              sx={{
+                                bgcolor: "rgba(211, 47, 47, 0.1)",
+                                "&:hover": {
+                                  bgcolor: "rgba(211, 47, 47, 0.2)",
+                                },
+                              }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </Box>
                     </TableCell>
                   </TableRow>
                 );
@@ -607,6 +777,18 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
           open={openUpdateDialog}
           onClose={() => setOpenUpdateDialog(false)}
           lecturer={selectedLecturerUpdate?.lecturer}
+        />
+        <LecturerBasicInfoEditDialog
+          open={openBasicInfoEditDialog}
+          onClose={() => setOpenBasicInfoEditDialog(false)}
+          lecturer={selectedLecturerEdit?.lecturer}
+        />
+        <ConfirmDeleteDialog
+          open={openConfirmDeleteDialog}
+          lecturer={selectedLecturerDelete}
+          loading={isDeleting}
+          onClose={handleCloseDeleteDialog}
+          onConfirm={handleConfirmDelete}
         />
       </Paper>
     </>

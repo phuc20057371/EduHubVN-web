@@ -35,15 +35,20 @@ import { validateLecturerInfo } from "../../../../utils/Validate";
 import { GeneralConfirmDialog } from "../../../general-dialog";
 import ApproveLecturerUpdateDialog from "../ApproveLecturerUpdateDialog";
 import { setLecturerProfileUpdate } from "../../../../redux/slice/LecturerProfileUpdateSlice";
-import { specializationAutoComplete, jobFieldAutoComplete } from "../../../../utils/AutoComplete";
+import {
+  specializationAutoComplete,
+  jobFieldAutoComplete,
+} from "../../../../utils/AutoComplete";
 
 interface LecturerProfileBasicInfoTabProps {
   onRefreshData: () => Promise<void>;
+  canUpdate?: boolean;
+  canApproveLecturer?: boolean;
 }
 
 const LecturerProfileBasicInfoTab: React.FC<
   LecturerProfileBasicInfoTabProps
-> = ({ onRefreshData }) => {
+> = ({ onRefreshData, canUpdate = true, canApproveLecturer = true }) => {
   const dispatch = useDispatch();
   // Get lecturer data from Redux
   const lecturerProfileUpdate = useSelector(
@@ -90,7 +95,6 @@ const LecturerProfileBasicInfoTab: React.FC<
       setGender(lecturer.gender ? "true" : "false");
       setAddress(lecturer.address || "");
       setBio(lecturer.bio || "");
-      
     }
   }, [lecturer]);
 
@@ -299,15 +303,17 @@ const LecturerProfileBasicInfoTab: React.FC<
                   </Typography>
                 </Box>
               </Box>
-              <Button
-                variant="contained"
-                color="warning"
-                size="small"
-                onClick={() => setShowApprovalDialog(true)}
-                sx={{ fontWeight: 600 }}
-              >
-                Xem chi tiết
-              </Button>
+              {canApproveLecturer && (
+                <Button
+                  variant="contained"
+                  color="warning"
+                  size="small"
+                  onClick={() => setShowApprovalDialog(true)}
+                  sx={{ fontWeight: 600 }}
+                >
+                  Xem chi tiết
+                </Button>
+              )}
             </Box>
           </CardContent>
         </Card>
@@ -337,6 +343,7 @@ const LecturerProfileBasicInfoTab: React.FC<
                     }
                     sx={{ flex: "1 1 auto" }}
                     variant="outlined"
+                    disabled={!canUpdate}
                   />
                   <TextField
                     label="CCCD/CMND"
@@ -346,6 +353,7 @@ const LecturerProfileBasicInfoTab: React.FC<
                     }
                     sx={{ flex: "0 0 150px" }}
                     variant="outlined"
+                    disabled={!canUpdate}
                   />
                 </Box>
 
@@ -357,6 +365,7 @@ const LecturerProfileBasicInfoTab: React.FC<
                   }
                   fullWidth
                   variant="outlined"
+                  disabled={!canUpdate}
                 />
 
                 <Box display="flex" gap={2}>
@@ -372,8 +381,9 @@ const LecturerProfileBasicInfoTab: React.FC<
                     }}
                     sx={{ flex: "0 0 150px" }}
                     variant="outlined"
+                    disabled={!canUpdate}
                   />
-                  <FormControl sx={{  width: '100%' }}>
+                  <FormControl sx={{ width: "100%" }}>
                     <Typography variant="body2" gutterBottom>
                       Giới tính
                     </Typography>
@@ -384,13 +394,15 @@ const LecturerProfileBasicInfoTab: React.FC<
                     >
                       <FormControlLabel
                         value="true"
-                        control={<Radio size="small" />}
+                        control={<Radio size="small" disabled={!canUpdate} />}
                         label="Nam"
+                        disabled={!canUpdate}
                       />
                       <FormControlLabel
                         value="false"
-                        control={<Radio size="small" />}
+                        control={<Radio size="small" disabled={!canUpdate} />}
                         label="Nữ"
+                        disabled={!canUpdate}
                       />
                     </RadioGroup>
                   </FormControl>
@@ -406,6 +418,7 @@ const LecturerProfileBasicInfoTab: React.FC<
                   multiline
                   rows={2}
                   variant="outlined"
+                  disabled={!canUpdate}
                 />
               </Box>
             </CardContent>
@@ -432,11 +445,14 @@ const LecturerProfileBasicInfoTab: React.FC<
                       value={academicRank}
                       onChange={(e) => setAcademicRank(e.target.value)}
                       label="Học vị"
+                      disabled={!canUpdate}
                     >
                       <MenuItem value="">
                         <em>Chọn học vị</em>
                       </MenuItem>
+
                       <MenuItem value="CN">Cử nhân</MenuItem>
+                      <MenuItem value="KS">Kỹ sư</MenuItem>
                       <MenuItem value="THS">Thạc sĩ</MenuItem>
                       <MenuItem value="TS">Tiến sĩ</MenuItem>
                       <MenuItem value="PGS">Phó giáo sư</MenuItem>
@@ -450,11 +466,13 @@ const LecturerProfileBasicInfoTab: React.FC<
                       setSpecialization(newValue || "");
                     }}
                     freeSolo
+                    disabled={!canUpdate}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         label="Chuyên ngành"
                         variant="outlined"
+                        disabled={!canUpdate}
                       />
                     )}
                     sx={{ flex: "1 1 auto" }}
@@ -469,11 +487,13 @@ const LecturerProfileBasicInfoTab: React.FC<
                       setJobField(newValue || "");
                     }}
                     freeSolo
+                    disabled={!canUpdate}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         label="Lĩnh vực"
                         variant="outlined"
+                        disabled={!canUpdate}
                       />
                     )}
                     sx={{ flex: "1 1 auto" }}
@@ -487,6 +507,7 @@ const LecturerProfileBasicInfoTab: React.FC<
                     sx={{ maxWidth: 120, flex: "0 0 auto" }}
                     type="number"
                     variant="outlined"
+                    disabled={!canUpdate}
                   />
                 </Box>
 
@@ -500,6 +521,7 @@ const LecturerProfileBasicInfoTab: React.FC<
                   multiline
                   rows={5}
                   variant="outlined"
+                  disabled={!canUpdate}
                 />
               </Box>
             </CardContent>
@@ -530,26 +552,28 @@ const LecturerProfileBasicInfoTab: React.FC<
       </Box>
 
       {/* Save Button */}
-      <Box display="flex" justifyContent="center" mt={3}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          sx={{
-            borderRadius: 2,
-            px: 4,
-            py: 1.5,
-            fontSize: "1rem",
-            fontWeight: 600,
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            "&:hover": {
-              background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
-            },
-          }}
-        >
-          Lưu
-        </Button>
-      </Box>
+      {canUpdate && (
+        <Box display="flex" justifyContent="center" mt={3}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSave}
+            sx={{
+              borderRadius: 2,
+              px: 4,
+              py: 1.5,
+              fontSize: "1rem",
+              fontWeight: 600,
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              "&:hover": {
+                background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
+              },
+            }}
+          >
+            Lưu
+          </Button>
+        </Box>
+      )}
 
       {/* Approve Lecturer Update Dialog */}
       {lecturerData?.lecturerUpdate && (

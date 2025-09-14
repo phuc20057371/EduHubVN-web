@@ -28,6 +28,7 @@ import requestOwnedCourseReducer from "./slice/RequestOwnedCourseSlice";
 import requestResearchProjectReducer from "./slice/RequestResearchProjectSlice";
 import institutionProfileReducer from "./slice/InstitutionProfileSlice";
 import partnerProfileReducer from "./slice/PartnerProfileSlice";
+import subAdminReducer from "./slice/SubAdminSlice";
 
 export const store = configureStore({
   reducer: {
@@ -59,5 +60,7 @@ export const store = configureStore({
     requestAttendedCourse: requestAttendedCourseReducer,
     requestOwnedCourse: requestOwnedCourseReducer,
     requestResearchProject: requestResearchProjectReducer,
+
+    subAdmin: subAdminReducer,
   },
 });

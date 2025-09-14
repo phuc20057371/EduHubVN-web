@@ -9,6 +9,7 @@ import {
   Avatar,
   Chip,
   LinearProgress,
+  Alert,
 } from "@mui/material";
 import {
   Dashboard,
@@ -55,6 +56,8 @@ interface QuickAction {
 }
 
 const AdminPage = () => {
+  console.log("AdminPage: Component is being rendered!");
+
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
@@ -62,25 +65,75 @@ const AdminPage = () => {
   const institutions = useSelector((state: any) => state.institution || []);
   const partners = useSelector((state: any) => state.partner || []);
 
+  const userProfile = useSelector((state: any) => state.userProfile);
+
+  // Thêm useEffect riêng để debug userProfile changes
   useEffect(() => {
     const fetchData = async () => {
-      if (lecturers.length === 0 || institutions.length === 0 || partners.length === 0) {
+      // Kiểm tra xem userProfile đã được load chưa
+      if (!userProfile || !userProfile.role) {
+        return;
+      }
+
+      if (
+        lecturers.length === 0 ||
+        institutions.length === 0 ||
+        partners.length === 0
+      ) {
         try {
-          const res = await API.admin.getAllLecturers();
-          dispatch(setLecturers(res.data.data));
-          const res2 = await API.admin.getAllInstitutions();
-          dispatch(setInstitutions(res2.data.data));
-          const res3 = await API.admin.getAllPartners();
-          dispatch(setPartner(res3.data.data));
+          if (userProfile.role === "ADMIN") {
+            const res = await API.admin.getAllLecturers();
+            dispatch(setLecturers(res.data.data));
+            const res2 = await API.admin.getAllInstitutions();
+            dispatch(setInstitutions(res2.data.data));
+            const res3 = await API.admin.getAllPartners();
+            dispatch(setPartner(res3.data.data));
+          } else if (userProfile.role === "SUB_ADMIN") {
+            if (
+              userProfile.permissions &&
+              userProfile.permissions.includes("LECTURER_READ")
+            ) {
+              const res = await API.admin.getAllLecturers();
+              dispatch(setLecturers(res.data.data));
+            } else {
+              console.log("No LECTURER_READ permission");
+            }
+
+            if (
+              userProfile.permissions &&
+              userProfile.permissions.includes("SCHOOL_READ")
+            ) {
+              const res = await API.admin.getAllInstitutions();
+              dispatch(setInstitutions(res.data.data));
+            } else {
+              console.log("No SCHOOL_READ permission");
+            }
+
+            if (
+              userProfile.permissions &&
+              userProfile.permissions.includes("ORGANIZATION_READ")
+            ) {
+              const res = await API.admin.getAllPartners();
+              dispatch(setPartner(res.data.data));
+            } else {
+              console.log("No ORGANIZATION_READ permission");
+            }
+          }
         } catch (error) {
-          console.error("Error initializing AdminLecturerPage:", error);
+          console.error("Error initializing AdminPage:", error);
         }
       }
     };
-    fetchData();
 
+    fetchData();
     setLoading(false);
-  }, []);
+  }, [
+    userProfile,
+    lecturers.length,
+    institutions.length,
+    partners.length,
+    dispatch,
+  ]);
 
   const statsData: StatCard[] = useMemo(() => {
     const now = new Date();
@@ -122,14 +175,25 @@ const AdminPage = () => {
       return { percentChange: `${percent}%`, trend };
     };
 
-    const lecturerStats = calculateChange(lecturers, "status");
-    const institutionStats = calculateChange(institutions, "status");
-    const partnerStats = calculateChange(partners, "status");
+    // Check permissions for SUB_ADMIN
+    const isAdmin = userProfile?.role === "ADMIN";
+    const isSubAdmin = userProfile?.role === "SUB_ADMIN";
+    const permissions = userProfile?.permissions || [];
+
+    const hasLecturerRead = isAdmin || (isSubAdmin && permissions.includes("LECTURER_READ"));
+    const hasSchoolRead = isAdmin || (isSubAdmin && permissions.includes("SCHOOL_READ"));
+    const hasOrganizationRead = isAdmin || (isSubAdmin && permissions.includes("ORGANIZATION_READ"));
+
+    const lecturerStats = hasLecturerRead ? calculateChange(lecturers, "status") : { percentChange: "0%", trend: "stable" as const };
+    const institutionStats = hasSchoolRead ? calculateChange(institutions, "status") : { percentChange: "0%", trend: "stable" as const };
+    const partnerStats = hasOrganizationRead ? calculateChange(partners, "status") : { percentChange: "0%", trend: "stable" as const };
 
     return [
       {
         title: "Tổng Giảng viên",
-        value: lecturers.filter((l: any) => l.status === "APPROVED").length,
+        value: hasLecturerRead 
+          ? lecturers.filter((l: any) => l.status === "APPROVED").length
+          : "no_permission",
         icon: <People sx={{ fontSize: 40 }} />,
         color: "#2e7d32",
         change: lecturerStats.percentChange,
@@ -137,7 +201,9 @@ const AdminPage = () => {
       },
       {
         title: "Trung tâm Đào tạo",
-        value: institutions.filter((i: any) => i.status === "APPROVED").length,
+        value: hasSchoolRead 
+          ? institutions.filter((i: any) => i.status === "APPROVED").length
+          : "no_permission",
         icon: <School sx={{ fontSize: 40 }} />,
         color: "#1976d2",
         change: institutionStats.percentChange,
@@ -145,14 +211,16 @@ const AdminPage = () => {
       },
       {
         title: "Đối tác",
-        value: partners.filter((p: any) => p.status === "APPROVED").length,
+        value: hasOrganizationRead 
+          ? partners.filter((p: any) => p.status === "APPROVED").length
+          : "no_permission",
         icon: <Business sx={{ fontSize: 40 }} />,
         color: "#ed6c02",
         change: partnerStats.percentChange,
         trend: partnerStats.trend,
       },
     ];
-  }, [lecturers, institutions, partners]);
+  }, [lecturers, institutions, partners, userProfile]);
 
   const recentActivities: RecentActivity[] = [
     {
@@ -219,6 +287,22 @@ const AdminPage = () => {
       route: "/admin/courses",
     },
   ];
+
+  // Check permissions for quick actions
+  const getActionPermissions = () => {
+    const isAdmin = userProfile?.role === "ADMIN";
+    const isSubAdmin = userProfile?.role === "SUB_ADMIN";
+    const permissions = userProfile?.permissions || [];
+
+    return {
+      lecturer: isAdmin || (isSubAdmin && permissions.includes("LECTURER_READ")),
+      school: isAdmin || (isSubAdmin && permissions.includes("SCHOOL_READ")),
+      organization: isAdmin || (isSubAdmin && permissions.includes("ORGANIZATION_READ")),
+      course: isAdmin || (isSubAdmin && permissions.includes("COURSE_READ")),
+    };
+  };
+
+  const actionPermissions = getActionPermissions();
 
   const getStatusChip = (status: string) => {
     switch (status) {
@@ -328,27 +412,44 @@ const AdminPage = () => {
                   >
                     {stat.title}
                   </Typography>
-                  <Typography variant="h4" sx={{ fontWeight: "bold", mb: 1 }}>
-                    {stat.value.toLocaleString()}
-                  </Typography>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <TrendingUp
-                      sx={{ fontSize: 16, color: stat.color, mr: 0.5 }}
-                    />
-                    <Typography
-                      variant="body2"
-                      sx={{ color: stat.color, fontWeight: "bold" }}
+                  {typeof stat.value === "string" ? (
+                    <Alert 
+                      severity="info" 
+                      sx={{ 
+                        mb: 1,
+                        '& .MuiAlert-message': {
+                          fontSize: '0.875rem',
+                          fontWeight: 'medium'
+                        }
+                      }}
                     >
-                      {stat.change}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ ml: 0.5 }}
-                    >
-                      so với tháng trước
-                    </Typography>
-                  </Box>
+                      Không có dữ liệu
+                    </Alert>
+                  ) : (
+                    <>
+                      <Typography variant="h4" sx={{ fontWeight: "bold", mb: 1 }}>
+                        {stat.value.toLocaleString()}
+                      </Typography>
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <TrendingUp
+                          sx={{ fontSize: 16, color: stat.color, mr: 0.5 }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{ color: stat.color, fontWeight: "bold" }}
+                        >
+                          {stat.change}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ ml: 0.5 }}
+                        >
+                          so với tháng trước
+                        </Typography>
+                      </Box>
+                    </>
+                  )}
                 </Box>
                 <Avatar sx={{ bgcolor: stat.color, width: 64, height: 64 }}>
                   {stat.icon}
@@ -371,47 +472,81 @@ const AdminPage = () => {
               Thao tác nhanh
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {quickActions.map((action, index) => (
-                <Card
-                  key={index}
-                  variant="outlined"
-                  sx={{
-                    cursor: "pointer",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      boxShadow: 2,
-                      transform: "translateY(-2px)",
-                    },
-                  }}
-                  onClick={() => navigate(action.route)}
-                >
-                  <CardContent sx={{ p: 2 }}>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Avatar sx={{ bgcolor: action.color, mr: 2 }}>
-                        {action.icon}
-                      </Avatar>
-                      <Box sx={{ flexGrow: 1 }}>
-                        <Typography
-                          variant="subtitle1"
-                          sx={{ fontWeight: "bold" }}
+              {quickActions.map((action, index) => {
+                let hasPermission = true;
+                let disabledReason = "";
+
+                // Check permissions based on action
+                if (action.title === "Quản lý Giảng viên") {
+                  hasPermission = actionPermissions.lecturer;
+                  disabledReason = "Không có quyền LECTURER_READ";
+                } else if (action.title === "Quản lý Trung tâm") {
+                  hasPermission = actionPermissions.school;
+                  disabledReason = "Không có quyền SCHOOL_READ";
+                } else if (action.title === "Quản lý Đối tác") {
+                  hasPermission = actionPermissions.organization;
+                  disabledReason = "Không có quyền ORGANIZATION_READ";
+                } else if (action.title === "Quản lý Khóa học") {
+                  hasPermission = actionPermissions.course;
+                  disabledReason = "Không có quyền COURSE_READ";
+                }
+
+                return (
+                  <Card
+                    key={index}
+                    variant="outlined"
+                    sx={{
+                      cursor: hasPermission ? "pointer" : "not-allowed",
+                      transition: "all 0.3s ease",
+                      opacity: hasPermission ? 1 : 0.5,
+                      "&:hover": hasPermission ? {
+                        boxShadow: 2,
+                        transform: "translateY(-2px)",
+                      } : {},
+                    }}
+                    onClick={() => hasPermission && navigate(action.route)}
+                    title={!hasPermission ? disabledReason : ""}
+                  >
+                    <CardContent sx={{ p: 2 }}>
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <Avatar 
+                          sx={{ 
+                            bgcolor: hasPermission ? action.color : "#999", 
+                            mr: 2 
+                          }}
                         >
-                          {action.title}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {action.description}
-                        </Typography>
+                          {action.icon}
+                        </Avatar>
+                        <Box sx={{ flexGrow: 1 }}>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ fontWeight: "bold" }}
+                          >
+                            {action.title}
+                          </Typography>
+                          <Typography 
+                            variant="body2" 
+                            color={hasPermission ? "text.secondary" : "error.main"}
+                          >
+                            {hasPermission ? action.description : disabledReason}
+                          </Typography>
+                        </Box>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          disabled={!hasPermission}
+                          sx={{ 
+                            color: hasPermission ? action.color : "#999", 
+                            borderColor: hasPermission ? action.color : "#999" 
+                          }}
+                        >
+                          Xem
+                        </Button>
                       </Box>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        sx={{ color: action.color, borderColor: action.color }}
-                      >
-                        Xem
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </Box>
           </CardContent>
         </Card>

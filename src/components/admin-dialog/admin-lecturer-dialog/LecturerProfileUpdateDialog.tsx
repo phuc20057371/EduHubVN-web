@@ -15,7 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { setLecturerProfileUpdate } from "../../../redux/slice/LecturerProfileUpdateSlice";
 import type { Lecturer } from "../../../types/Lecturer";
@@ -63,6 +63,23 @@ const LecturerProfileUpdateDialog = ({
 }: LecturerProfileUpdateDialogProps) => {
   if (!open || !lecturer) return null;
   const dispatch = useDispatch();
+  const userProfile = useSelector((state: any) => state.userProfile);
+
+  // Permission checks
+  const canCreateLecturer = userProfile?.permissions?.includes("LECTURER_CREATE") || false;
+  const canUpdateLecturer = userProfile?.permissions?.includes("LECTURER_UPDATE") || false;
+  const canApproveLecturer = userProfile?.permissions?.includes("LECTURER_APPROVE") || false;
+  const canDeleteLecturer = userProfile?.permissions?.includes("LECTURER_DELETE") || false;
+
+  // Debug permissions
+  console.log("🔍 Debug Permissions:", {
+    userProfile,
+    permissions: userProfile?.permissions,
+    canCreateLecturer,
+    canUpdateLecturer,
+    canApproveLecturer,
+    canDeleteLecturer
+  });
 
   // Tab state
   const [tabValue, setTabValue] = useState(0);
@@ -72,8 +89,23 @@ const LecturerProfileUpdateDialog = ({
   useEffect(() => {
     if (open && lecturer?.id) {
       fetchLecturerData();
+      // Also refresh user profile to get latest permissions
+      refreshUserProfile();
     }
   }, [open, lecturer?.id]);
+
+  const refreshUserProfile = async () => {
+    try {
+      // TODO: Add API call to refresh user profile if needed
+      // const response = await API.auth.getCurrentUser();
+      // if (response.data.success) {
+      //   dispatch(setProfile(response.data.data));
+      // }
+      console.log("🔄 Would refresh user profile here");
+    } catch (error) {
+      console.error("Error refreshing user profile:", error);
+    }
+  };
 
   const fetchLecturerData = async () => {
     try {
@@ -285,35 +317,46 @@ const LecturerProfileUpdateDialog = ({
         ) : (
           <>
             <TabPanel value={tabValue} index={0}>
-              <LecturerProfileBasicInfoTab onRefreshData={handleRefreshData} />
+              <LecturerProfileBasicInfoTab 
+                onRefreshData={handleRefreshData}
+                canUpdate={canUpdateLecturer}
+                canApproveLecturer={canApproveLecturer}
+              />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
               <LecturerProfileDegreesTab
-                onAddDegree={handleAddDegree}
+                onAddDegree={canCreateLecturer ? handleAddDegree : undefined}
                 onEditDegree={handleEditDegree}
                 onDeleteDegree={handleDeleteDegree}
+                canCreateLecturer={canCreateLecturer}
+                canApproveLecturer={canApproveLecturer}
+                canDeleteLecturer={canDeleteLecturer}
               />
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
               <LecturerProfileCertificationsTab
-                onAddCertification={handleAddCertification}
+                onAddCertification={canCreateLecturer ? handleAddCertification : undefined}
                 onEditCertification={handleEditCertification}
                 onDeleteCertification={handleDeleteCertification}
+                canCreateLecturer={canCreateLecturer}
+                canApproveLecturer={canApproveLecturer}
               />
             </TabPanel>
             <TabPanel value={tabValue} index={3}>
               <LecturerProfileCoursesTab
-                onAddOwnedCourse={handleAddOwnedCourse}
-                onAddAttendedCourse={handleAddAttendedCourse}
+                onAddOwnedCourse={canCreateLecturer ? handleAddOwnedCourse : undefined}
+                onAddAttendedCourse={canCreateLecturer ? handleAddAttendedCourse : undefined}
                 onEditOwnedCourse={handleEditOwnedCourse}
                 onEditAttendedCourse={handleEditAttendedCourse}
                 onDeleteOwnedCourse={handleDeleteOwnedCourse}
                 onDeleteAttendedCourse={handleDeleteAttendedCourse}
+                canCreateLecturer={canCreateLecturer}
+                canApproveLecturer={canApproveLecturer}
               />
             </TabPanel>
             <TabPanel value={tabValue} index={4}>
               <LecturerProfileResearchProjectsTab
-                onAddResearchProject={handleAddResearchProject}
+                onAddResearchProject={canCreateLecturer ? handleAddResearchProject : undefined}
                 onEditResearchProject={handleEditResearchProject}
                 onDeleteResearchProject={handleDeleteResearchProject}
                 onApproveResearchProjectUpdate={
@@ -322,6 +365,8 @@ const LecturerProfileUpdateDialog = ({
                 onRejectResearchProjectUpdate={
                   handleRejectResearchProjectUpdate
                 }
+                canCreateLecturer={canCreateLecturer}
+                canApproveLecturer={canApproveLecturer}
               />
             </TabPanel>
           </>

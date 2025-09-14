@@ -1,4 +1,5 @@
 import {
+  Add,
   Assignment,
   AttachMoney,
   Business,
@@ -31,6 +32,7 @@ import {
   getStatus,
 } from "../../../../utils/ChangeText";
 import { API } from "../../../../utils/Fetch";
+import AddResearchProjectDialog from "../AddResearchProjectDialog";
 import ApproveResearchProjectCreateDialog from "../ApproveResearchProjectCreateDialog";
 import ApproveResearchProjectUpdateDialog from "../ApproveResearchProjectUpdateDialog";
 
@@ -40,6 +42,8 @@ interface LecturerProfileResearchProjectsTabProps {
   onDeleteResearchProject?: (project: any) => void;
   onApproveResearchProjectUpdate?: (projectData: any) => void;
   onRejectResearchProjectUpdate?: (projectData: any) => void;
+  canCreateLecturer?: boolean;
+  canApproveLecturer?: boolean;
 }
 
 const LecturerProfileResearchProjectsTab: React.FC<
@@ -49,6 +53,8 @@ const LecturerProfileResearchProjectsTab: React.FC<
     // onAddResearchProject,
     // onEditResearchProject,
     // onDeleteResearchProject,
+    canCreateLecturer = true,
+    canApproveLecturer = true,
   },
 ) => {
   // Get lecturer data from Redux
@@ -70,6 +76,9 @@ const LecturerProfileResearchProjectsTab: React.FC<
     open: boolean;
     data: any;
   }>({ open: false, data: null });
+
+  // State for AddResearchProjectDialog
+  const [addResearchProjectDialog, setAddResearchProjectDialog] = useState(false);
 
   const formatCurrency = (amount: number) => {
     if (!amount) return "Không xác định";
@@ -119,6 +128,28 @@ const LecturerProfileResearchProjectsTab: React.FC<
     }
   };
 
+  const handleOpenAddResearchProjectDialog = () => {
+    setAddResearchProjectDialog(true);
+  };
+
+  const handleCloseAddResearchProjectDialog = () => {
+    setAddResearchProjectDialog(false);
+  };
+
+  const handleSuccessAddResearchProject = async () => {
+    // Refresh data after successfully adding research project
+    try {
+      const response = await API.admin.getLecturerAllProfile({
+        id: lecturerProfileUpdate.lecturer.id,
+      });
+      if (response.data.success) {
+        dispatch(setLecturerProfileUpdate(response.data.data));
+      }
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+    }
+  };
+
   // Function to get banner color based on status
   const getBannerColor = (status: string) => {
     switch (status) {
@@ -150,11 +181,11 @@ const LecturerProfileResearchProjectsTab: React.FC<
             </Typography>
           </div>
         </div>
-        {/* {onAddResearchProject && (
+        {canCreateLecturer && (
           <Button
             variant="contained"
             startIcon={<Add sx={{ fontSize: 18 }} />}
-            onClick={onAddResearchProject}
+            onClick={handleOpenAddResearchProjectDialog}
             size="small"
             sx={{
               background: colors.background.gradient.primary,
@@ -174,7 +205,7 @@ const LecturerProfileResearchProjectsTab: React.FC<
           >
             Thêm
           </Button>
-        )} */}
+        )}
       </div>
 
       {researchProjects && researchProjects.length > 0 ? (
@@ -271,35 +302,38 @@ const LecturerProfileResearchProjectsTab: React.FC<
                       }}
                     />
                     {projectData.original?.status === "PENDING" ? (
-                      <Button
-                        variant="contained"
-                        size="small"
-                        onClick={() =>
-                          handleOpenApproveCreateDialog(projectData)
-                        }
-                        sx={{
-                          width: "max-content",
-                          fontWeight: 600,
-                          background: "rgba(255,255,255,0.9)",
-                          color: "#1976d2",
-                          textTransform: "none",
-                          borderRadius: 2,
-                          fontSize: "0.75rem",
-                          px: 2,
-                          py: 0.5,
-                          "&:hover": {
-                            background: "rgba(255,255,255,1)",
-                            transform: "translateY(-1px)",
-                            boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                          },
-                        }}
-                      >
-                        Xem chi tiết
-                      </Button>
+                      canApproveLecturer && (
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() =>
+                            handleOpenApproveCreateDialog(projectData)
+                          }
+                          sx={{
+                            width: "max-content",
+                            fontWeight: 600,
+                            background: "rgba(255,255,255,0.9)",
+                            color: "#1976d2",
+                            textTransform: "none",
+                            borderRadius: 2,
+                            fontSize: "0.75rem",
+                            px: 2,
+                            py: 0.5,
+                            "&:hover": {
+                              background: "rgba(255,255,255,1)",
+                              transform: "translateY(-1px)",
+                              boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                            },
+                          }}
+                        >
+                          Xem chi tiết
+                        </Button>
+                      )
                     ) : (
                       projectData.original?.status === "APPROVED" &&
                       projectData.update &&
-                      projectData.update.status === "PENDING" && (
+                      projectData.update.status === "PENDING" &&
+                      canApproveLecturer && (
                         <Button
                           variant="contained"
                           size="small"
@@ -823,6 +857,14 @@ const LecturerProfileResearchProjectsTab: React.FC<
           onClose={handleCloseApproveUpdateDialog}
         />
       )}
+
+      {/* AddResearchProjectDialog */}
+      <AddResearchProjectDialog
+        open={addResearchProjectDialog}
+        onClose={handleCloseAddResearchProjectDialog}
+        lecturer={lecturerProfileUpdate.lecturer}
+        onSuccess={handleSuccessAddResearchProject}
+      />
     </div>
   );
 };

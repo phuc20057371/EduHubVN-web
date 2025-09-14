@@ -1,4 +1,5 @@
 import {
+  Add,
   CalendarToday,
   Category,
   ExpandMore,
@@ -31,6 +32,11 @@ import {
   getScale,
   getStatus,
 } from "../../../../utils/ChangeText";
+import { API } from "../../../../utils/Fetch";
+import { setLecturerProfileUpdate } from "../../../../redux/slice/LecturerProfileUpdateSlice";
+import { useDispatch } from "react-redux";
+import AddAttendedCourseDialog from "../AddAttendedCourseDialog";
+import AddOwnedCourseDialog from "../AddOwnedCourseDialog";
 import ApproveAttendedCourseCreateDialog from "../ApproveAttendedCourseCreateDialog";
 import ApproveAttendedCourseUpdateDialog from "../ApproveAttendedCourseUpdateDialog";
 import ApproveOwnedCourseCreateDialog from "../ApproveOwnedCourseCreateDialog";
@@ -43,6 +49,8 @@ interface LecturerProfileCoursesTabProps {
   onEditAttendedCourse?: (course: any) => void;
   onDeleteOwnedCourse?: (course: any) => void;
   onDeleteAttendedCourse?: (course: any) => void;
+  canCreateLecturer?: boolean;
+  canApproveLecturer?: boolean;
 }
 
 const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
@@ -52,6 +60,8 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
   // onEditAttendedCourse,
   onDeleteOwnedCourse,
   onDeleteAttendedCourse,
+  canCreateLecturer = true,
+  canApproveLecturer = true,
 }) => {
   // Get lecturer data from Redux
   const lecturerProfileUpdate = useSelector(
@@ -60,9 +70,15 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
   const ownedCourses = lecturerProfileUpdate?.ownedCourses || [];
   const attendedCourses = lecturerProfileUpdate?.attendedCourses || [];
 
+  const dispatch = useDispatch();
+
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
   const [deleteType, _setDeleteType] = useState<"owned" | "attended">("owned");
+
+  // State for Add dialogs
+  const [addOwnedCourseDialog, setAddOwnedCourseDialog] = useState(false);
+  const [addAttendedCourseDialog, setAddAttendedCourseDialog] = useState(false);
 
   // State for ApproveOwnedCourseCreateDialog
   const [approveOwnedCreateDialog, setApproveOwnedCreateDialog] = useState<{
@@ -171,6 +187,29 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
     setApproveAttendedUpdateDialog({ open: false, data: null });
   };
 
+  // Add course handlers
+  const handleSuccessAddOwnedCourse = async () => {
+    setAddOwnedCourseDialog(false);
+    // Refresh lecturer data after adding owned course
+    const response = await API.admin.getLecturerAllProfile({
+      id: lecturerProfileUpdate.lecturer.id,
+    });
+    if (response.data.success) {
+      dispatch(setLecturerProfileUpdate(response.data.data));
+    }
+  };
+
+  const handleSuccessAddAttendedCourse = async () => {
+    setAddAttendedCourseDialog(false);
+    // Refresh lecturer data after adding attended course
+    const response = await API.admin.getLecturerAllProfile({
+      id: lecturerProfileUpdate.lecturer.id,
+    });
+    if (response.data.success) {
+      dispatch(setLecturerProfileUpdate(response.data.data));
+    }
+  };
+
   // const handleDelete = (item: any, type: "owned" | "attended") => {
   //   setItemToDelete(item);
   //   setDeleteType(type);
@@ -275,35 +314,38 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
                 }}
               />
               {currentData.status === "PENDING" ? (
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={() =>
-                    isOwned
-                      ? handleOpenApproveOwnedCreateDialog(item)
-                      : handleOpenApproveAttendedCreateDialog(item)
-                  }
-                  sx={{
-                    fontWeight: 600,
-                    background: "rgba(255,255,255,0.9)",
-                    color: "#1976d2",
-                    textTransform: "none",
-                    borderRadius: 2,
-                    fontSize: "0.75rem",
-                    px: 2,
-                    py: 0.5,
-                    "&:hover": {
-                      background: "rgba(255,255,255,1)",
-                      transform: "translateY(-1px)",
-                      boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                    },
-                  }}
-                >
-                  Xem chi tiết
-                </Button>
+                canApproveLecturer && (
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() =>
+                      isOwned
+                        ? handleOpenApproveOwnedCreateDialog(item)
+                        : handleOpenApproveAttendedCreateDialog(item)
+                    }
+                    sx={{
+                      fontWeight: 600,
+                      background: "rgba(255,255,255,0.9)",
+                      color: "#1976d2",
+                      textTransform: "none",
+                      borderRadius: 2,
+                      fontSize: "0.75rem",
+                      px: 2,
+                      py: 0.5,
+                      "&:hover": {
+                        background: "rgba(255,255,255,1)",
+                        transform: "translateY(-1px)",
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                      },
+                    }}
+                  >
+                    Xem chi tiết
+                  </Button>
+                )
               ) : (
                 currentData.status === "APPROVED" &&
-                hasUpdate && (
+                hasUpdate &&
+                canApproveLecturer && (
                   <Button
                     variant="contained"
                     size="small"
@@ -923,24 +965,26 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
             Khóa học sở hữu ({ownedCourses?.length || 0})
           </Typography>
 
-          {/* <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={onAddOwnedCourse}
-            sx={{
-              background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
-              color: "white",
-              fontWeight: 600,
-              textTransform: "none",
-              borderRadius: 2,
-              "&:hover": {
-                transform: "translateY(-1px)",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-              },
-            }}
-          >
-            Thêm khóa học sở hữu
-          </Button> */}
+          {canCreateLecturer && (
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setAddOwnedCourseDialog(true)}
+              sx={{
+                background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
+                color: "white",
+                fontWeight: 600,
+                textTransform: "none",
+                borderRadius: 2,
+                "&:hover": {
+                  transform: "translateY(-1px)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                },
+              }}
+            >
+              Thêm
+            </Button>
+          )}
         </div>
 
         {ownedCourses && ownedCourses.length > 0 ? (
@@ -966,24 +1010,26 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
             Khóa học đã tham gia ({attendedCourses?.length || 0})
           </Typography>
 
-          {/* <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={onAddAttendedCourse}
-            sx={{
-              background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
-              color: "white",
-              fontWeight: 600,
-              textTransform: "none",
-              borderRadius: 2,
-              "&:hover": {
-                transform: "translateY(-1px)",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-              },
-            }}
-          >
-            Thêm khóa học đã tham gia
-          </Button> */}
+          {canCreateLecturer && (
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setAddAttendedCourseDialog(true)}
+              sx={{
+                background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
+                color: "white",
+                fontWeight: 600,
+                textTransform: "none",
+                borderRadius: 2,
+                "&:hover": {
+                  transform: "translateY(-1px)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                },
+              }}
+            >
+              Thêm
+            </Button>
+          )}
         </div>
 
         {attendedCourses && attendedCourses.length > 0 ? (
@@ -1091,6 +1137,26 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
           open={approveAttendedUpdateDialog.open}
           data={approveAttendedUpdateDialog.data}
           onClose={handleCloseApproveAttendedUpdateDialog}
+        />
+      )}
+
+      {/* AddOwnedCourseDialog */}
+      {addOwnedCourseDialog && (
+        <AddOwnedCourseDialog
+          open={addOwnedCourseDialog}
+          onClose={() => setAddOwnedCourseDialog(false)}
+          lecturer={lecturerProfileUpdate.lecturer}
+          onSuccess={handleSuccessAddOwnedCourse}
+        />
+      )}
+
+      {/* AddAttendedCourseDialog */}
+      {addAttendedCourseDialog && (
+        <AddAttendedCourseDialog
+          open={addAttendedCourseDialog}
+          onClose={() => setAddAttendedCourseDialog(false)}
+          lecturer={lecturerProfileUpdate.lecturer}
+          onSuccess={handleSuccessAddAttendedCourse}
         />
       )}
     </div>

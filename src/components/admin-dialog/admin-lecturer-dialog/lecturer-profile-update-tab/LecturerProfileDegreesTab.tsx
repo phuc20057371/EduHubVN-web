@@ -1,6 +1,8 @@
 import {
+  Add,
   Business,
   CalendarToday,
+  Delete,
   ExpandMore,
   Grade,
   Link as LinkIcon,
@@ -22,13 +24,19 @@ import { setLecturerProfileUpdate } from "../../../../redux/slice/LecturerProfil
 import { colors } from "../../../../theme/colors";
 import { formatDateToVietnamTime, getStatus } from "../../../../utils/ChangeText";
 import { API } from "../../../../utils/Fetch";
+import GeneralConfirmDialog from "../../../general-dialog/GeneralConfirmDialog";
+import AddDegreeDialog from "../AddDegreeDialog";
 import ApproveDegreeCreateDialog from "../ApproveDegreeCreateDialog";
 import ApproveDegreeUpdateDialog from "../ApproveDegreeUpdateDialog";
+import { toast } from "react-toastify";
 
 interface LecturerProfileDegreesTabProps {
   onAddDegree?: () => void;
   onEditDegree?: (degree: any) => void;
   onDeleteDegree?: (degree: any) => void;
+  canCreateLecturer?: boolean;
+  canApproveLecturer?: boolean;
+  canDeleteLecturer?: boolean;
 }
 
 const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
@@ -36,6 +44,9 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
     // onAddDegree,
     // onEditDegree,
     // onDeleteDegree,
+    canCreateLecturer = true,
+    canApproveLecturer = true,
+    canDeleteLecturer = false,
   },
 ) => {
   // Get lecturer data from Redux
@@ -58,6 +69,16 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
     data: any;
   }>({ open: false, data: null });
 
+  // State for AddDegreeDialog
+  const [addDegreeDialog, setAddDegreeDialog] = useState(false);
+
+  // State for Delete Confirmation Dialog
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    degree: any;
+    loading: boolean;
+  }>({ open: false, degree: null, loading: false });
+
   const handleOpenApproveCreateDialog = (degreeData: any) => {
     // Format data for ApproveDegreeCreateDialog
     const formattedData = {
@@ -74,6 +95,58 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
       dispatch(setLecturerProfileUpdate(response.data.data));
     }
     console.log("after", lecturerProfileUpdate);
+  };
+
+  const handleSuccessAddDegree = async () => {
+    setAddDegreeDialog(false);
+    // Refresh lecturer data after adding degree
+    const response = await API.admin.getLecturerAllProfile({
+      id: lecturerProfileUpdate.lecturer.id,
+    });
+    if (response.data.success) {
+      dispatch(setLecturerProfileUpdate(response.data.data));
+    }
+  };
+
+  const handleOpenDeleteDialog = (degree: any) => {
+    setDeleteDialog({ open: true, degree, loading: false });
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialog({ open: false, degree: null, loading: false });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteDialog.degree) return;
+
+    setDeleteDialog(prev => ({ ...prev, loading: true }));
+    
+    try {
+      // Call API to delete degree
+      const response = await API.admin.deleteDegree({
+        id: deleteDialog.degree.id,
+      });
+      
+      if (response.data.success) {
+        // Refresh lecturer data after deleting degree
+        toast.success("Xóa bằng cấp thành công");
+        const refreshResponse = await API.admin.getLecturerAllProfile({
+          id: lecturerProfileUpdate.lecturer.id,
+        });
+        
+        if (refreshResponse.data.success) {
+          dispatch(setLecturerProfileUpdate(refreshResponse.data.data));
+        }
+        
+        handleCloseDeleteDialog();
+      } else {
+        console.error("Failed to delete degree:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting degree:", error);
+    } finally {
+      setDeleteDialog(prev => ({ ...prev, loading: false }));
+    }
   };
 
   const handleCloseApproveCreateDialog = () => {
@@ -121,24 +194,26 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
           Danh sách bằng cấp ({degrees?.length || 0})
         </Typography>
 
-        {/* <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={onAddDegree}
-          sx={{
-            background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
-            color: "white",
-            fontWeight: 600,
-            textTransform: "none",
-            borderRadius: 2,
-            "&:hover": {
-              transform: "translateY(-1px)",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            },
-          }}
-        >
-          Thêm bằng cấp
-        </Button> */}
+        {canCreateLecturer && (
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => setAddDegreeDialog(true)}
+            sx={{
+              background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
+              color: "white",
+              fontWeight: 600,
+              textTransform: "none",
+              borderRadius: 2,
+              "&:hover": {
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              },
+            }}
+          >
+            Thêm Bằng cấp
+          </Button>
+        )}
       </div>
 
       {degrees && degrees.length > 0 ? (
@@ -218,32 +293,35 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
                     }}
                   />
                   {degreeData.original?.status === "PENDING" ? (
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() => handleOpenApproveCreateDialog(degreeData)}
-                      sx={{
-                        fontWeight: 600,
-                        background: "rgba(255,255,255,0.9)",
-                        color: "#1976d2",
-                        textTransform: "none",
-                        borderRadius: 2,
-                        fontSize: "0.75rem",
-                        px: 2,
-                        py: 0.5,
-                        "&:hover": {
-                          background: "rgba(255,255,255,1)",
-                          transform: "translateY(-1px)",
-                          boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                        },
-                      }}
-                    >
-                      Xem chi tiết
-                    </Button>
+                    canApproveLecturer && (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => handleOpenApproveCreateDialog(degreeData)}
+                        sx={{
+                          fontWeight: 600,
+                          background: "rgba(255,255,255,0.9)",
+                          color: "#1976d2",
+                          textTransform: "none",
+                          borderRadius: 2,
+                          fontSize: "0.75rem",
+                          px: 2,
+                          py: 0.5,
+                          "&:hover": {
+                            background: "rgba(255,255,255,1)",
+                            transform: "translateY(-1px)",
+                            boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                          },
+                        }}
+                      >
+                        Xem chi tiết
+                      </Button>
+                    )
                   ) : (
                     degreeData.original?.status === "APPROVED" &&
                     degreeData.update &&
-                    degreeData.update.status === "PENDING" && (
+                    degreeData.update.status === "PENDING" &&
+                    canApproveLecturer && (
                       <Button
                         variant="contained"
                         size="small"
@@ -411,7 +489,7 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
                     </Box>
                   )}
 
-                  {/* Action Buttons for Original */}
+                    {/* Action Buttons for Original */}
                   <div className="flex flex-wrap gap-3">
                     {degreeData.original?.url && (
                       <Button
@@ -436,49 +514,28 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
                       </Button>
                     )}
 
-                    {/* 
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<Edit />}
-                      onClick={() => onEditDegree?.(degreeData.original)}
-                      sx={{
-                        borderColor: colors.primary[500],
-                        color: colors.primary[500],
-                        fontWeight: 600,
-                        textTransform: "none",
-                        borderRadius: 2,
-                        "&:hover": {
-                          borderColor: colors.primary[600],
-                          backgroundColor: colors.primary[50],
-                          transform: "translateY(-1px)",
-                        },
-                      }}
-                    >
-                      Chỉnh sửa
-                    </Button>
-
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<Delete />}
-                      onClick={() => onDeleteDegree?.(degreeData.original)}
-                      sx={{
-                        borderColor: "#EF4444",
-                        color: "#EF4444",
-                        fontWeight: 600,
-                        textTransform: "none",
-                        borderRadius: 2,
-                        "&:hover": {
-                          borderColor: "#DC2626",
-                          backgroundColor: "#FEF2F2",
-                          transform: "translateY(-1px)",
-                        },
-                      }}
-                    >
-                      Xóa
-                    </Button>
-                    */}
+                    {canDeleteLecturer && (
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<Delete />}
+                        onClick={() => handleOpenDeleteDialog(degreeData.original)}
+                        sx={{
+                          borderColor: "#EF4444",
+                          color: "#EF4444",
+                          fontWeight: 600,
+                          textTransform: "none",
+                          borderRadius: 2,
+                          "&:hover": {
+                            borderColor: "#DC2626",
+                            backgroundColor: "#FEF2F2",
+                            transform: "translateY(-1px)",
+                          },
+                        }}
+                      >
+                        Xóa
+                      </Button>
+                    )}
                   </div>
                 </div>
                 {/* Thông tin thời gian tạo/cập nhật */}
@@ -520,6 +577,32 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
           onSuccess={handleSuccessApproveUpdateDialog}
         />
       )}
+
+      {/* AddDegreeDialog */}
+      {addDegreeDialog && (
+        <AddDegreeDialog
+          open={addDegreeDialog}
+          onClose={() => setAddDegreeDialog(false)}
+          lecturer={lecturerProfileUpdate.lecturer}
+          onSuccess={handleSuccessAddDegree}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <GeneralConfirmDialog
+        open={deleteDialog.open}
+        title="Xác nhận xóa bằng cấp"
+        message={`Bạn có chắc chắn muốn xóa bằng cấp "${deleteDialog.degree?.name}" không? Hành động này không thể hoàn tác.`}
+        confirmText="Xóa"
+        cancelText="Hủy"
+        confirmColor="error"
+        alertSeverity="error"
+        showAlert={true}
+        alertTitle="Cảnh báo"
+        loading={deleteDialog.loading}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 };

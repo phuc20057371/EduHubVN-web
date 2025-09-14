@@ -21,14 +21,22 @@ import {
   InputLabel,
   IconButton,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Alert,
 } from "@mui/material";
+import { useDispatch } from "react-redux";
 import { visuallyHidden } from "@mui/utils";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
-import { Domain } from "@mui/icons-material";
+import { Domain, Add } from "@mui/icons-material";
 import type { Partner } from "../../../../types/Parner";
+import { removePartner } from "../../../../redux/slice/PartnerSlice";
+import { API } from "../../../../utils/Fetch";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -102,10 +110,11 @@ interface EnhancedTableProps {
   order: Order;
   orderBy: string;
   rowCount: number;
+  headCells: readonly HeadCell[];
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
-  const { order, orderBy, onRequestSort } = props;
+  const { order, orderBy, onRequestSort, headCells: propHeadCells } = props;
   const createSortHandler =
     (property: keyof Partner) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
@@ -121,7 +130,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         }}
       >
-        {headCells.map((headCell) => (
+        {propHeadCells.map((headCell) => (
           <TableCell
             key={headCell.id}
             align={headCell.numeric ? "right" : "left"}
@@ -165,24 +174,28 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 interface EnhancedTableToolbarProps {
-  numSelected: number;
-  onEdit?: () => void;
+  // numSelected: number;
+  // onEdit?: () => void;
   onSearch: (value: string) => void;
   searchTerm: string;
   onIndustryFilter: (value: string) => void;
   industryFilter: string;
   onStatusFilter: (value: string) => void;
   statusFilter: string;
+  canCreate?: boolean;
+  onCreateClick?: () => void;
 }
 
 function EnhancedTableToolbar({
-  numSelected,
-  onEdit,
+  // numSelected,
+  // onEdit,
   onSearch,
   searchTerm,
   industryFilter,
   onStatusFilter,
   statusFilter,
+  canCreate = false,
+  onCreateClick,
 }: EnhancedTableToolbarProps) {
   const statusOptions = [
     { value: "", label: "Tất cả" },
@@ -238,7 +251,7 @@ function EnhancedTableToolbar({
           </Box>
         </Box>
 
-        {numSelected > 0 && (
+        {/* {numSelected > 0 && (
           <Box sx={{ display: "flex", gap: 1 }}>
             <Tooltip title="Chỉnh sửa">
               <IconButton
@@ -275,7 +288,7 @@ function EnhancedTableToolbar({
               </IconButton>
             </Tooltip>
           </Box>
-        )}
+        )} */}
       </Box>
 
       {/* Filter Controls */}
@@ -337,6 +350,32 @@ function EnhancedTableToolbar({
             }}
           />
         </Box>
+
+        {/* Create Button */}
+        {canCreate && onCreateClick && (
+          <Box sx={{ flexShrink: 0 }}>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={onCreateClick}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                borderRadius: 2,
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                  transform: "translateY(-1px)",
+                  boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
+                },
+                transition: "all 0.2s ease-in-out",
+              }}
+            >
+              Tạo mới
+            </Button>
+          </Box>
+        )}
       </Box>
     </Box>
   );
@@ -345,17 +384,37 @@ function EnhancedTableToolbar({
 interface PartnerListTabProps {
   partners: Partner[];
   onEdit: (partner: Partner) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
+  canCreate?: boolean;
+  onCreateClick?: () => void;
 }
 
-const PartnerListTab: React.FC<PartnerListTabProps> = ({ partners, onEdit }) => {
+const PartnerListTab: React.FC<PartnerListTabProps> = ({ 
+  partners, 
+  onEdit, 
+  canEdit = true, 
+  canDelete = true,
+  canCreate = false,
+  onCreateClick
+}) => {
+  const dispatch = useDispatch();
   const [order, setOrder] = useState<Order>("asc");
   const [orderBy, setOrderBy] = useState<keyof Partner>("id");
   const [selected, setSelected] = useState<string | null>(null);
+
+  // Check if actions column should be shown
+  const showActionsColumn = canEdit || canDelete;
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [industryFilter, setIndustryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("APPROVED");
+
+  // Delete confirmation states
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [partnerToDelete, setPartnerToDelete] = useState<Partner | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const statusOptions = [
     { value: "", label: "Tất cả" },
@@ -449,6 +508,34 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({ partners, onEdit }) => 
     setStatusFilter("APPROVED");
   };
 
+  // Delete handlers
+  const handleDeleteClick = (partner: Partner) => {
+    setPartnerToDelete(partner);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!partnerToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await API.admin.deletePartner({ id: partnerToDelete.id });
+      dispatch(removePartner(partnerToDelete.id));
+      setDeleteDialogOpen(false);
+      setPartnerToDelete(null);
+    } catch (error) {
+      console.error("Error deleting partner:", error);
+      // You might want to show an error message here
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setPartnerToDelete(null);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
       case "PENDING":
@@ -482,22 +569,33 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({ partners, onEdit }) => 
 
   const emptyRows = 10 - visibleRows.length > 0 ? 10 - visibleRows.length : 0;
 
+  // Dynamic headCells based on permissions
+  const displayHeadCells = useMemo(() => {
+    if (showActionsColumn) {
+      return headCells;
+    }
+    // Filter out the actions column (last column)
+    return headCells.filter(cell => cell.id !== "createdAt");
+  }, [showActionsColumn]);
+
   return (
     <Box sx={{ p: 0 }}>
       <EnhancedTableToolbar
-        numSelected={selected ? 1 : 0}
-        onEdit={() => {
-          const partner = partners.find((p: Partner) => p.id === selected);
-          if (partner) {
-            onEdit(partner);
-          }
-        }}
+        // numSelected={selected ? 1 : 0}
+        // onEdit={() => {
+        //   const partner = partners.find((p: Partner) => p.id === selected);
+        //   if (partner) {
+        //     onEdit(partner);
+        //   }
+        // }}
         onSearch={handleSearch}
         searchTerm={searchTerm}
         onIndustryFilter={handleIndustryFilter}
         industryFilter={industryFilter}
         onStatusFilter={handleStatusFilter}
         statusFilter={statusFilter}
+        canCreate={canCreate}
+        onCreateClick={onCreateClick}
       />
 
       {/* Active Filters Display */}
@@ -608,6 +706,7 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({ partners, onEdit }) => 
                 onSelectAllClick={handleSelectAllClick}
                 onRequestSort={handleRequestSort}
                 rowCount={filteredPartners.length}
+                headCells={displayHeadCells}
               />
               <TableBody>
                 {visibleRows.map((row, _index) => {
@@ -734,26 +833,52 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({ partners, onEdit }) => 
                           sx={{ fontWeight: 600 }}
                         />
                       </TableCell>
-                      <TableCell align="center" sx={{ py: 2 }}>
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEdit(row);
-                          }}
-                          sx={{
-                            minWidth: 100,
-                            borderRadius: 2,
-                            textTransform: "none",
-                            background:
-                              "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                            fontWeight: 600,
-                          }}
-                        >
-                          Chỉnh sửa
-                        </Button>
-                      </TableCell>
+                      {showActionsColumn && (
+                        <TableCell align="center" sx={{ py: 2 }}>
+                          <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+                            {canEdit && (
+                              <Tooltip title="Chỉnh sửa">
+                                <IconButton
+                                  size="small"
+                                  color="primary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEdit(row);
+                                  }}
+                                  sx={{
+                                    bgcolor: "rgba(25, 118, 210, 0.1)",
+                                    "&:hover": {
+                                      bgcolor: "rgba(25, 118, 210, 0.2)",
+                                    },
+                                  }}
+                                >
+                                  <EditIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            {canDelete && (
+                              <Tooltip title="Xóa">
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteClick(row);
+                                  }}
+                                  sx={{
+                                    bgcolor: "rgba(211, 47, 47, 0.1)",
+                                    "&:hover": {
+                                      bgcolor: "rgba(211, 47, 47, 0.2)",
+                                    },
+                                  }}
+                                >
+                                  <DeleteIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                          </Box>
+                        </TableCell>
+                      )}
                     </TableRow>
                   );
                 })}
@@ -763,7 +888,7 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({ partners, onEdit }) => 
                       height: 53 * emptyRows,
                     }}
                   >
-                    <TableCell colSpan={7} />
+                    <TableCell colSpan={showActionsColumn ? 7 : 6} />
                   </TableRow>
                 )}
               </TableBody>
@@ -771,6 +896,50 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({ partners, onEdit }) => 
           )}
         </TableContainer>
       </Paper>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h6" component="div">
+            Xác nhận xóa đối tác
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              <strong>Cảnh báo:</strong> Hành động này không thể hoàn tác!
+            </Typography>
+          </Alert>
+          {partnerToDelete && (
+            <Typography variant="body1">
+              Bạn có chắc chắn muốn xóa đối tác{" "}
+              <strong>{partnerToDelete.organizationName}</strong> không?
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleDeleteCancel}
+            color="inherit"
+            disabled={isDeleting}
+          >
+            Hủy
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color="error"
+            variant="contained"
+            disabled={isDeleting}
+          >
+            {isDeleting ? "Đang xóa..." : "Xóa"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

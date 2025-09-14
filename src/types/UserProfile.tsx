@@ -1,4 +1,4 @@
-type UserRole = "USER" | "LECTURER" | "SCHOOL" | "ORGANIZATION" | "ADMIN";
+type UserRole = "USER" | "LECTURER" | "SCHOOL" | "ORGANIZATION" | "ADMIN" | "SUB_ADMIN";
 
 export type UserProfile = {
     id: string;

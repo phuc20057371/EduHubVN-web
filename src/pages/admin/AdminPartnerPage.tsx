@@ -1,9 +1,10 @@
-import { useEffect, useState, type SyntheticEvent } from "react";
+import { useEffect, useState, type SyntheticEvent, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
+import * as React from "react";
 import { API } from "../../utils/Fetch";
 import { useDispatch, useSelector } from "react-redux";
 import { createSelector } from "@reduxjs/toolkit";
@@ -12,14 +13,14 @@ import { setPartnerPendingUpdate } from "../../redux/slice/PartnerPendingUpdateS
 import ApprovePartnerCreateDialog from "../../components/admin-dialog/admin-partner-dialog/ApprovePartnerCreateDialog";
 import ApprovePartnerUpdateDialog from "../../components/admin-dialog/admin-partner-dialog/ApprovePartnerUpdateDialog";
 import PartnerProfileUpdateDialog from "../../components/admin-dialog/admin-partner-dialog/PartnerProfileUpdateDialog";
+import CreatePartnerDialog from "../../components/admin-dialog/admin-partner-dialog/CreatePartnerDialog";
 import {
   PartnerListTab,
   PartnerCreateTab,
   PartnerUpdateTab,
 } from "./tab/partner";
-import { Paper, Chip } from "@mui/material";
+import { Paper } from "@mui/material";
 import { setPartner } from "../../redux/slice/PartnerSlice";
-import { Add, Update, Domain } from "@mui/icons-material";
 
 // Memoized selectors
 const selectPartnerPendingCreate = createSelector(
@@ -40,9 +41,94 @@ const selectPartners = createSelector(
 );
 
 const AdminPartnerPage = () => {
+  // PERMISSION CHECKS FIRST
+  const userProfile = useSelector((state: any) => state.userProfile);
+
+  const canViewPartnerTab = useMemo(() => {
+    if (userProfile.role === "ADMIN") return true;
+    if (userProfile.role === "SUB_ADMIN") {
+      return userProfile.permissions?.includes("ORGANIZATION_READ");
+    }
+    return false;
+  }, [userProfile]);
+
+  const canViewApprovalTabs = useMemo(() => {
+    if (userProfile.role === "ADMIN") return true;
+    if (userProfile.role === "SUB_ADMIN") {
+      return userProfile.permissions?.includes("ORGANIZATION_APPROVE");
+    }
+    return false;
+  }, [userProfile]);
+
+  // New permission checks for edit and delete actions
+  const canEditPartner = useMemo(() => {
+    if (userProfile.role === "ADMIN") return true;
+    if (userProfile.role === "SUB_ADMIN") {
+      return userProfile.permissions?.includes("ORGANIZATION_UPDATE");
+    }
+    return false;
+  }, [userProfile]);
+
+  const canDeletePartner = useMemo(() => {
+    if (userProfile.role === "ADMIN") return true;
+    if (userProfile.role === "SUB_ADMIN") {
+      return userProfile.permissions?.includes("ORGANIZATION_DELETE");
+    }
+    return false;
+  }, [userProfile]);
+
+  const canCreatePartner = useMemo(() => {
+    if (userProfile.role === "ADMIN") return true;
+    if (userProfile.role === "SUB_ADMIN") {
+      return userProfile.permissions?.includes("ORGANIZATION_CREATE");
+    }
+    return false;
+  }, [userProfile]);
+
+  // Get tabs available based on permissions
+  const availableTabs = useMemo(() => {
+    const tabs = [];
+    
+    if (canViewPartnerTab) {
+      tabs.push({
+        value: "1",
+        label: "Đối tác"
+      });
+    }
+    
+    if (canViewApprovalTabs) {
+      tabs.push({
+        value: "2", 
+        label: "Tạo mới"
+      });
+      tabs.push({
+        value: "3",
+        label: "Cập nhật"
+      });
+    }
+    
+    return tabs;
+  }, [canViewPartnerTab, canViewApprovalTabs]);
+
+  // Get the first available tab value based on permissions
+  const getFirstAvailableTab = () => {
+    if (canViewPartnerTab) return "1";
+    if (canViewApprovalTabs) return "2";
+    return "1"; // fallback
+  };
+
   const dispatch = useDispatch();
 
-  const [value, setValue] = useState("1");
+  const [value, setValue] = useState(() => getFirstAvailableTab());
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+
+  // Update tab when permissions change
+  useEffect(() => {
+    const currentTab = getFirstAvailableTab();
+    if (value !== currentTab) {
+      setValue(currentTab);
+    }
+  }, [canViewPartnerTab, canViewApprovalTabs]);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<any>(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -59,21 +145,51 @@ const AdminPartnerPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await API.admin.getAllPartners();
-        dispatch(setPartner(res.data.data));
-        const response = await API.admin.getPartnerPendingCreate();
-        dispatch(setPartnerPendingCreate(response.data.data));
-        const updateResponse = await API.admin.getPartnerPendingUpdate();
-        dispatch(setPartnerPendingUpdate(updateResponse.data.data));
+        if (userProfile.role === "ADMIN") {
+          const res = await API.admin.getAllPartners();
+          dispatch(setPartner(res.data.data));
+          const response = await API.admin.getPartnerPendingCreate();
+          dispatch(setPartnerPendingCreate(response.data.data));
+          const updateResponse = await API.admin.getPartnerPendingUpdate();
+          dispatch(setPartnerPendingUpdate(updateResponse.data.data));
+        } else if (userProfile.role === "SUB_ADMIN") {
+          if (userProfile.permissions.includes("ORGANIZATION_READ")) {
+            const res = await API.admin.getAllPartners();
+            dispatch(setPartner(res.data.data));
+          }
+          if (userProfile.permissions.includes("ORGANIZATION_APPROVE")) {
+            const response = await API.admin.getPartnerPendingCreate();
+            dispatch(setPartnerPendingCreate(response.data.data));
+            const updateResponse = await API.admin.getPartnerPendingUpdate();
+            dispatch(setPartnerPendingUpdate(updateResponse.data.data));
+          }
+        }
       } catch (error) {
         console.error("Error initializing AdminPartnerPage:", error);
       }
     };
-    fetchData();
-  }, [dispatch]);
+    
+    // Chỉ chạy fetchData khi userProfile đã có và có role
+    if (userProfile && userProfile.role) {
+      fetchData();
+    }
+  }, [userProfile, dispatch]);
 
   const handleChange = (_event: SyntheticEvent, newValue: string) => {
     setValue(newValue);
+  };
+
+  const handleCreatePartnerSuccess = async () => {
+    // Refresh partners list after creating new partner
+    try {
+      if (userProfile.role === "ADMIN" || 
+          (userProfile.role === "SUB_ADMIN" && userProfile.permissions?.includes("ORGANIZATION_READ"))) {
+        const res = await API.admin.getAllPartners();
+        dispatch(setPartner(res.data.data));
+      }
+    } catch (error) {
+      console.error("Error refreshing partners:", error);
+    }
   };
 
   return (
@@ -102,6 +218,7 @@ const AdminPartnerPage = () => {
               borderColor: "divider",
               bgcolor: "rgba(255,255,255,0.9)",
               backdropFilter: "blur(10px)",
+              position: "relative",
             }}
           >
             <TabList
@@ -117,93 +234,76 @@ const AdminPartnerPage = () => {
                 },
               }}
             >
-              <Tab
-                label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Domain />
-                    <span>Đối tác</span>
-                    <Chip
-                      size="small"
-                      label={partners.length}
-                      sx={{
-                        bgcolor: "primary.main",
-                        color: "white",
-                        fontWeight: 600,
-                      }}
-                    />
-                  </Box>
-                }
-                value="1"
-              />
-              <Tab
-                label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Add />
-                    <span>Tạo mới</span>
-                    <Chip
-                      size="small"
-                      label={partnerPendingCreate.length}
-                      sx={{
-                        bgcolor: "success.main",
-                        color: "white",
-                        fontWeight: 600,
-                      }}
-                    />
-                  </Box>
-                }
-                value="2"
-              />
-              <Tab
-                label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Update />
-                    <span>Cập nhật</span>
-                    <Chip
-                      size="small"
-                      label={partnerPendingUpdate.length}
-                      sx={{
-                        bgcolor: "warning.main",
-                        color: "white",
-                        fontWeight: 600,
-                      }}
-                    />
-                  </Box>
-                }
-                value="3"
-              />
+              {availableTabs.map((tab: { value: string; label: React.ReactNode }) => (
+                <Tab
+                  key={tab.value}
+                  label={tab.label}
+                  value={tab.value}
+                />
+              ))}
             </TabList>
           </Box>
         </Paper>
 
-        <TabPanel value="1" sx={{ p: 0 }}>
-          <PartnerListTab
-            partners={partners}
-            onEdit={(partner) => {
-              setSelectedPartner({ partner });
-              setOpenEditDialog(true);
+        {availableTabs.length === 0 ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: 400,
+              bgcolor: "rgba(255,255,255,0.9)",
+              borderRadius: 3,
             }}
-          />
-        </TabPanel>
+          >
+            <Box sx={{ textAlign: "center" }}>
+              <h3>Không có quyền truy cập</h3>
+              <p>Bạn không có quyền truy cập vào bất kỳ tab nào trong trang này.</p>
+            </Box>
+          </Box>
+        ) : (
+          <>
+            {canViewPartnerTab && (
+              <TabPanel value="1" sx={{ p: 0 }}>
+                <PartnerListTab
+                  partners={partners}
+                  onEdit={(partner) => {
+                    setSelectedPartner({ partner });
+                    setOpenEditDialog(true);
+                  }}
+                  canEdit={canEditPartner}
+                  canDelete={canDeletePartner}
+                  canCreate={canCreatePartner}
+                  onCreateClick={() => setCreateDialogOpen(true)}
+                />
+              </TabPanel>
+            )}
 
-        <TabPanel value="2">
-          <PartnerCreateTab
-            partnerPendingCreate={partnerPendingCreate}
-            onSelectPartner={(partner) => {
-              setSelectedPartner(partner);
-              setOpenDialog(true);
-            }}
-          />
-        </TabPanel>
+            {canViewApprovalTabs && (
+              <>
+                <TabPanel value="2">
+                  <PartnerCreateTab
+                    partnerPendingCreate={partnerPendingCreate}
+                    onSelectPartner={(partner) => {
+                      setSelectedPartner(partner);
+                      setOpenDialog(true);
+                    }}
+                  />
+                </TabPanel>
 
-        <TabPanel value="3">
-          <PartnerUpdateTab
-            partnerPendingUpdate={partnerPendingUpdate}
-            onSelectUpdate={(update) => {
-              setSelectedUpdate(update);
-              setOpenUpdateDialog(true);
-            }}
-          />
-        </TabPanel>
+                <TabPanel value="3">
+                  <PartnerUpdateTab
+                    partnerPendingUpdate={partnerPendingUpdate}
+                    onSelectUpdate={(update) => {
+                      setSelectedUpdate(update);
+                      setOpenUpdateDialog(true);
+                    }}
+                  />
+                </TabPanel>
+              </>
+            )}
+          </>
+        )}
       </TabContext>
 
       {/* Dialogs */}
@@ -222,6 +322,13 @@ const AdminPartnerPage = () => {
         open={openEditDialog}
         onClose={() => setOpenEditDialog(false)}
         partner={selectedPartner?.partner}
+      />
+      
+      {/* Create Partner Dialog */}
+      <CreatePartnerDialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+        onSuccess={handleCreatePartnerSuccess}
       />
     </Box>
   );

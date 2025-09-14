@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import {
   IconButton,
   Paper,
@@ -21,20 +22,30 @@ import {
   FormControl,
   InputLabel,
   Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
-import { Business } from "@mui/icons-material";
+import { Business, Add } from "@mui/icons-material";
 import type { Institution } from "../../../../types/Institution";
 import InstitutionProfileUpdateDialog from "../../../../components/admin-dialog/admin-institution-dialog/InstitutionProfileUpdateDialog";
+import { API } from "../../../../utils/Fetch";
+import { setInstitutions } from "../../../../redux/slice/InstitutionSlice";
 import {
   getInstitutionType,
   getStatus,
   getStatusColor,
 } from "../../../../utils/ChangeText";
+import { toast } from "react-toastify";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   const aValue = a[orderBy];
@@ -130,10 +141,11 @@ interface EnhancedTableProps {
   order: Order;
   orderBy: string;
   rowCount: number;
+  headCells: readonly HeadCell[];
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
-  const { order, orderBy, onRequestSort } = props;
+  const { order, orderBy, onRequestSort, headCells: propHeadCells } = props;
   const createSortHandler =
     (property: keyof Institution) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
@@ -142,7 +154,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   return (
     <TableHead>
       <TableRow>
-        {headCells.map((headCell) => (
+        {propHeadCells.map((headCell) => (
           <TableCell
             key={headCell.id}
             align={headCell.numeric ? "right" : "left"}
@@ -191,25 +203,35 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 interface EnhancedTableToolbarProps {
-  numSelected: number;
-  onEdit?: () => void;
+  // numSelected: number;
+  // onEdit?: () => void;
+  // onDelete?: () => void;
   onSearch: (value: string) => void;
   searchTerm: string;
   onTypeFilter: (value: string) => void;
   typeFilter: string;
   onStatusFilter: (value: string) => void;
   statusFilter: string;
+  // canEdit?: boolean;
+  // canDelete?: boolean;
+  canCreate?: boolean;
+  onCreateClick?: () => void;
 }
 
 function EnhancedTableToolbar({
-  numSelected,
-  onEdit,
+  // numSelected,
+  // onEdit,
+  // onDelete,
   onSearch,
   searchTerm,
   onTypeFilter,
   typeFilter,
   onStatusFilter,
   statusFilter,
+  // canEdit = true,
+  // canDelete = true,
+  canCreate = false,
+  onCreateClick,
 }: EnhancedTableToolbarProps) {
   return (
     <Box
@@ -255,37 +277,42 @@ function EnhancedTableToolbar({
           </Box>
         </Box>
 
-        {numSelected > 0 && (
+        {/* {numSelected > 0 && (
           <Box sx={{ display: "flex", gap: 1 }}>
-            <Tooltip title="Chỉnh sửa">
-              <IconButton
-                color="primary"
-                onClick={onEdit}
-                sx={{
-                  bgcolor: "rgba(25, 118, 210, 0.1)",
-                  "&:hover": {
-                    bgcolor: "rgba(25, 118, 210, 0.2)",
-                  },
-                }}
-              >
-                <EditIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Xóa">
-              <IconButton
-                color="error"
-                sx={{
-                  bgcolor: "rgba(211, 47, 47, 0.1)",
-                  "&:hover": {
-                    bgcolor: "rgba(211, 47, 47, 0.2)",
-                  },
-                }}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Tooltip>
+            {canEdit && (
+              <Tooltip title="Chỉnh sửa">
+                <IconButton
+                  color="primary"
+                  onClick={onEdit}
+                  sx={{
+                    bgcolor: "rgba(25, 118, 210, 0.1)",
+                    "&:hover": {
+                      bgcolor: "rgba(25, 118, 210, 0.2)",
+                    },
+                  }}
+                >
+                  <EditIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+            {canDelete && (
+              <Tooltip title="Xóa">
+                <IconButton
+                  color="error"
+                  onClick={onDelete}
+                  sx={{
+                    bgcolor: "rgba(211, 47, 47, 0.1)",
+                    "&:hover": {
+                      bgcolor: "rgba(211, 47, 47, 0.2)",
+                    },
+                  }}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </Tooltip>
+            )}
           </Box>
-        )}
+        )} */}
       </Box>
 
       {/* Filter Controls */}
@@ -369,20 +396,66 @@ function EnhancedTableToolbar({
             }}
           />
         </Box>
+
+        {/* Create Button */}
+        {canCreate && onCreateClick && (
+          <Box sx={{ flexShrink: 0 }}>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={onCreateClick}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                borderRadius: 2,
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                  transform: "translateY(-1px)",
+                  boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
+                },
+                transition: "all 0.2s ease-in-out",
+              }}
+            >
+              Tạo mới
+            </Button>
+          </Box>
+        )}
       </Box>
     </Box>
   );
 }
 interface InstitutionTabProps {
   institutions: Institution[];
+  canEdit?: boolean;
+  canDelete?: boolean;
+  canCreate?: boolean;
+  onCreateClick?: () => void;
 }
 
-const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
+const InstitutionTab: React.FC<InstitutionTabProps> = ({ 
+  institutions, 
+  canEdit = true, 
+  canDelete = true,
+  canCreate = false,
+  onCreateClick
+}) => {
+  const dispatch = useDispatch();
   const [openEditDialog, setOpenEditDialog] = useState(false);
+  
+  // Check if actions column should be shown
+  const showActionsColumn = canEdit || canDelete;
   const [selectedInstitution, setSelectedInstitution] = useState<any>(null);
   const [order, setOrder] = useState<Order>("asc");
   const [orderBy, setOrderBy] = useState<keyof Institution>("id");
   const [selected, setSelected] = useState<string | null>(null);
+
+  // Delete functionality states
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [institutionToDelete, setInstitutionToDelete] = useState<Institution | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" as "success" | "error" });
 
   // Filter states for main list
   const [searchTerm, setSearchTerm] = useState("");
@@ -466,6 +539,15 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
 
   const emptyRows = 10 - visibleRows.length > 0 ? 10 - visibleRows.length : 0;
 
+  // Dynamic headCells based on permissions
+  const displayHeadCells = useMemo(() => {
+    if (showActionsColumn) {
+      return headCells;
+    }
+    // Filter out the actions column (last column)
+    return headCells.filter(cell => cell.id !== "createdAt");
+  }, [showActionsColumn]);
+
   // Enhanced search handlers
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -486,23 +568,65 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
     setStatusFilter("APPROVED");
   };
 
+  // Delete functionality handlers - handleDeleteClick removed since we use direct onClick in table
+  const handleDeleteConfirm = async () => {
+    if (!institutionToDelete) return;
+    
+    setDeleteLoading(true);
+    try {
+      await API.admin.deleteInstitution({ id: institutionToDelete.id });
+      setSelected(null); // Clear selection
+      toast.success(`Đã xóa cơ sở giáo dục "${institutionToDelete.institutionName}" thành công!`);
+      
+      // Update Redux state by removing the deleted institution
+      const updatedInstitutions = institutions.filter(inst => inst.id !== institutionToDelete.id);
+      dispatch(setInstitutions(updatedInstitutions));
+      
+    } catch (error) {
+      console.error("Error deleting institution:", error);
+      setSnackbar({
+        open: true,
+        message: "Có lỗi xảy ra khi xóa cơ sở giáo dục!",
+        severity: "error"
+      });
+    } finally {
+      setDeleteLoading(false);
+      setOpenDeleteDialog(false);
+      setInstitutionToDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setOpenDeleteDialog(false);
+    setInstitutionToDelete(null);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
   return (
     <Box sx={{ width: "100%" }}>
       <EnhancedTableToolbar
-        numSelected={selected ? 1 : 0}
-        onEdit={() => {
-          const institution = institutions.find(
-            (l: Institution) => l.id === selected,
-          );
-          setSelectedInstitution({ institution });
-          setOpenEditDialog(true);
-        }}
+        // numSelected={selected ? 1 : 0}
+        // onEdit={() => {
+        //   const institution = institutions.find(
+        //     (l: Institution) => l.id === selected,
+        //   );
+        //   setSelectedInstitution({ institution });
+        //   setOpenEditDialog(true);
+        // }}
+        // onDelete={handleDeleteClick}
         onSearch={handleSearch}
         searchTerm={searchTerm}
         onTypeFilter={handleTypeFilter}
         typeFilter={typeFilter}
         onStatusFilter={handleStatusFilter}
         statusFilter={statusFilter}
+        // canEdit={canEdit}
+        // canDelete={canDelete}
+        canCreate={canCreate}
+        onCreateClick={onCreateClick}
       />
 
       {/* Active Filters Display */}
@@ -618,6 +742,7 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
                 onSelectAllClick={handleSelectAllClick}
                 onRequestSort={handleRequestSort}
                 rowCount={filteredInstitutions.length}
+                headCells={displayHeadCells}
               />
               <TableBody>
                 {visibleRows.map((row, _blankindex) => {
@@ -748,7 +873,55 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
                           sx={{ fontWeight: 600 }}
                         />
                       </TableCell>
-                      <TableCell align="center" sx={{ py: 2 }}>
+                      {showActionsColumn && (
+                        <TableCell align="center" sx={{ py: 2 }}>
+                          <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+                            {canEdit && (
+                              <Tooltip title="Chỉnh sửa">
+                                <IconButton
+                                  size="small"
+                                  color="primary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedInstitution({ institution: row });
+                                    setOpenEditDialog(true);
+                                  }}
+                                  sx={{
+                                    bgcolor: "rgba(25, 118, 210, 0.1)",
+                                    "&:hover": {
+                                      bgcolor: "rgba(25, 118, 210, 0.2)",
+                                    },
+                                  }}
+                                >
+                                  <EditIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            {canDelete && (
+                              <Tooltip title="Xóa">
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setInstitutionToDelete(row);
+                                    setOpenDeleteDialog(true);
+                                  }}
+                                  sx={{
+                                    bgcolor: "rgba(211, 47, 47, 0.1)",
+                                    "&:hover": {
+                                      bgcolor: "rgba(211, 47, 47, 0.2)",
+                                    },
+                                  }}
+                                >
+                                  <DeleteIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                          </Box>
+                        </TableCell>
+                      )}
+                      {/* <TableCell align="center" sx={{ py: 2 }}>
                         <Button
                           variant="contained"
                           size="small"
@@ -768,7 +941,7 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
                         >
                           Chỉnh sửa
                         </Button>
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   );
                 })}
@@ -778,7 +951,7 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
                       height: 53 * emptyRows,
                     }}
                   >
-                    <TableCell colSpan={8} />
+                    <TableCell colSpan={showActionsColumn ? 8 : 7} />
                   </TableRow>
                 )}
               </TableBody>
@@ -793,6 +966,63 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({ institutions }) => {
         onClose={() => setOpenEditDialog(false)}
         institution={selectedInstitution?.institution}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleDeleteCancel}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title" sx={{ color: "error.main" }}>
+          Xác nhận xóa cơ sở giáo dục
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Bạn có chắc chắn muốn xóa cơ sở giáo dục{" "}
+            <strong>"{institutionToDelete?.institutionName}"</strong>?
+            <br />
+            <br />
+            Hành động này không thể hoàn tác và sẽ xóa vĩnh viễn tất cả dữ liệu liên quan.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={handleDeleteCancel}
+            disabled={deleteLoading}
+          >
+            Hủy
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color="error"
+            variant="contained"
+            disabled={deleteLoading}
+            sx={{
+              background: "linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%)",
+            }}
+          >
+            {deleteLoading ? "Đang xóa..." : "Xóa"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success/Error Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

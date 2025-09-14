@@ -1,7 +1,7 @@
 export function navigateToRole(user: any, navigate: Function) {
   console.log("Navigating to role:", user);
 
-  if (user.role === "ADMIN") {
+  if (user.role === "ADMIN" || user.role === "SUB_ADMIN") {
     navigate("/admin");
     return;
   } else if (user.role === "LECTURER") {

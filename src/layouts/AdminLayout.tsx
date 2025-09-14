@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { API } from "../utils/Fetch";
@@ -56,10 +56,7 @@ const AdminLayout = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-
-  // Sử dụng AdminMessageHandler để xử lý message WebSocket
-
-  // Function to check if current path matches button path
+  const isAdmin = userProfile && (userProfile.role === "ADMIN");
   const isActivePath = (path: string) => {
     if (path === "/admin") {
       return location.pathname === "/admin" || location.pathname === "/admin/";
@@ -73,18 +70,20 @@ const AdminLayout = () => {
         const response = await API.user.getUserProfile();
         dispatch(setUserProfile(response.data.data));
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.error("AdminLayout: Error fetching user data:", error);
       }
     };
     fetchUserData();
-  }, [dispatch, navigate]);
+  }, [dispatch, navigate, location.pathname]);
 
-  // WebSocket connection effect  
+  // WebSocket connection effect
   useEffect(() => {
     if (userProfile && userProfile.role === "ADMIN") {
       // Chỉ connect nếu chưa connected hoặc user khác
-      if (!WebSocketService.isConnected() || 
-          WebSocketService.getCurrentUser()?.id !== userProfile.id) {
+      if (
+        !WebSocketService.isConnected() ||
+        WebSocketService.getCurrentUser()?.id !== userProfile.id
+      ) {
         WebSocketService.connect(
           userProfile,
           () => console.log("✅ Admin WebSocket connected"),
@@ -94,14 +93,11 @@ const AdminLayout = () => {
         );
       }
     }
-    // Không cleanup ở đây để tránh disconnect khi chuyển tab
   }, [userProfile, dispatch]);
 
-  // Cleanup khi component AdminLayout unmount (rời khỏi admin area)
   useEffect(() => {
     return () => {
       console.log("🔄 AdminLayout cleanup triggered");
-      // Chỉ disconnect khi thực sự rời khỏi admin area
       WebSocketService.disconnect();
     };
   }, []);
@@ -136,38 +132,65 @@ const AdminLayout = () => {
     setIsDarkMode(!isDarkMode);
   };
 
-  const menuItems = [
-    {
-      text: "Trang chủ",
-      icon: <Dashboard />,
-      path: "/admin",
-      description: "Tổng quan hệ thống",
-    },
-    {
-      text: "Giảng viên",
-      icon: <Person />,
-      path: "/admin/lecturers",
-      description: "Quản lý giảng viên",
-    },
-    {
-      text: "Trung tâm đào tạo",
-      icon: <School />,
-      path: "/admin/institutions",
-      description: "Quản lý trung tâm",
-    },
-    {
-      text: "Đơn vị tổ chức",
-      icon: <Business />,
-      path: "/admin/partners",
-      description: "Quản lý đối tác",
-    },
-    {
-      text: "Khóa học",
-      icon: <AccountBalanceWalletIcon />,
-      path: "/admin/courses",
-      description: "Quản lý khóa học",
-    },
-  ];
+  const menuItems = useMemo(() => {
+    const getAllMenuItems = () => [
+      {
+        text: "Trang chủ",
+        icon: <Dashboard />,
+        path: "/admin",
+        description: "Tổng quan hệ thống",
+        permissions: null, // Always visible
+      },
+      {
+        text: "Giảng viên",
+        icon: <Person />,
+        path: "/admin/lecturers",
+        description: "Quản lý giảng viên",
+        permissions: ["LECTURER_READ", "LECTURER_APPROVE"],
+      },
+      {
+        text: "Trung tâm đào tạo",
+        icon: <School />,
+        path: "/admin/institutions",
+        description: "Quản lý trung tâm",
+        permissions: ["SCHOOL_READ", "SCHOOL_APPROVE"],
+      },
+      {
+        text: "Đơn vị tổ chức",
+        icon: <Business />,
+        path: "/admin/partners",
+        description: "Quản lý đối tác",
+        permissions: ["ORGANIZATION_READ", "ORGANIZATION_APPROVE"],
+      },
+      {
+        text: "Khóa học",
+        icon: <AccountBalanceWalletIcon />,
+        path: "/admin/courses",
+        description: "Quản lý khóa học",
+        permissions: ["COURSE_READ"],
+      },
+    ];
+
+    return getAllMenuItems().filter(item => {
+      // ADMIN có thể xem tất cả
+      if (userProfile?.role === "ADMIN") {
+        return true;
+      }
+      
+      // SUB_ADMIN kiểm tra quyền
+      if (userProfile?.role === "SUB_ADMIN") {
+        if (!item.permissions) {
+          return true; // Trang chủ luôn hiển thị
+        }
+        // Kiểm tra xem user có ít nhất một trong các quyền cần thiết không
+        return item.permissions.some(permission => 
+          userProfile.permissions?.includes(permission)
+        ) || false;
+      }
+      
+      return false; // Các role khác không được xem
+    });
+  }, [userProfile]);
 
   const drawer = (
     <Box sx={{ height: "100%", background: colors.background.secondary }}>
@@ -521,7 +544,8 @@ const AdminLayout = () => {
                     variant="body2"
                     sx={{ fontWeight: 600, lineHeight: 1.2 }}
                   >
-                    {userProfile?.fullName || "Administrator"}
+                    {userProfile.role === "ADMIN" ? "Administrator" : "Mod"}
+           
                   </Typography>
                   <Typography
                     variant="caption"
@@ -568,7 +592,7 @@ const AdminLayout = () => {
                     variant="subtitle2"
                     sx={{ fontWeight: 600, color: colors.text.primary }}
                   >
-                    {userProfile?.fullName || "Administrator"}
+                    {userProfile?.role === "ADMIN" ? "Administrator" : "Mod"}
                   </Typography>
                   <Typography
                     variant="caption"
@@ -590,19 +614,24 @@ const AdminLayout = () => {
                   <AccountCircle sx={{ mr: 2, color: colors.primary[500] }} />
                   <Typography>Hồ sơ cá nhân</Typography>
                 </MenuItem>
-
-                <MenuItem
-                  onClick={handleMenuClose}
-                  sx={{
-                    py: 1.5,
-                    "&:hover": {
-                      bgcolor: colors.primary[50],
-                    },
-                  }}
-                >
-                  <Settings sx={{ mr: 2, color: colors.primary[500] }} />
-                  <Typography>Cài đặt hệ thống</Typography>
-                </MenuItem>
+                {isAdmin && (
+                  <MenuItem
+                    onClick={() => {
+                     
+                      navigate("/admin/sub-admin");
+                      handleMenuClose();
+                    }}
+                    sx={{
+                      py: 1.5,
+                      "&:hover": {
+                        bgcolor: colors.primary[50],
+                      },
+                    }}
+                  >
+                    <Settings sx={{ mr: 2, color: colors.primary[500] }} />
+                    <Typography>Quản lí tài khoản</Typography>
+                  </MenuItem>
+                )}
 
                 <Divider sx={{ my: 1 }} />
 
