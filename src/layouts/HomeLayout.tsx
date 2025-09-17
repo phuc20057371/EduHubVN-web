@@ -33,6 +33,8 @@ import {
 import { colors } from "../theme/colors";
 import Logoweb from "../assets/eduhub-02.png";
 import WebSocketService from "../services/WebSocketService";
+import EduHubSpeedDial from "../components/EduHubSpeedDial";
+import ThemeToggle from "../components/ThemeToggle";
 
 const HomeLayout = () => {
   const dispatch = useDispatch();
@@ -139,13 +141,14 @@ const HomeLayout = () => {
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       {/* Enhanced Header */}
       <AppBar
-        position="static"
+        position="fixed"
         elevation={0}
         sx={{
           background: colors.background.gradient.primary,
           borderBottom: `1px solid ${colors.border.light}`,
           backdropFilter: "blur(20px)",
           alignItems: "center",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
         }}
       >
         <Toolbar
@@ -224,6 +227,9 @@ const HomeLayout = () => {
 
           {/* User Profile luôn nằm phía bên phải */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {/* Theme Toggle */}
+            <ThemeToggle />
+            
             {/* Notifications */}
             <IconButton
               onClick={handleNotificationOpen}
@@ -505,6 +511,7 @@ const HomeLayout = () => {
           flexGrow: 1,
           bgcolor: colors.background.secondary,
           minHeight: "calc(100vh - 160px)",
+          pt: "80px", // Add padding-top for fixed header
         }}
       >
         <Outlet />
@@ -689,6 +696,11 @@ const HomeLayout = () => {
           </Box>
         </Container>
       </Box>
+      
+      {/* EduHub Speed Dial */}
+      <EduHubSpeedDial 
+        userRole={userProfile?.role?.toLowerCase() as 'admin' | 'institution' | 'lecturer' | 'partner'}
+      />
     </Box>
   );
 };

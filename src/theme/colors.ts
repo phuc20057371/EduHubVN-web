@@ -1,4 +1,7 @@
-export const colors = {
+import type { ThemeMode } from './ThemeProvider';
+
+// Base color palette (unchanged)
+const baseColors = {
   // Primary Colors (Blue)
   primary: {
     25: "#f0f9ff",
@@ -92,7 +95,12 @@ export const colors = {
     800: "#1e40af",
     900: "#1e3a8a"
   },
+};
 
+// Light theme colors
+const lightThemeColors = {
+  ...baseColors,
+  
   // Background Colors
   background: {
     primary: "#ffffff",
@@ -122,6 +130,48 @@ export const colors = {
     strong: "rgba(3, 105, 161, 0.4)"
   }
 };
+
+// Dark theme colors
+const darkThemeColors = {
+  ...baseColors,
+  
+  // Background Colors
+  background: {
+    primary: "#0f172a",
+    secondary: "#1e293b",
+    tertiary: "#334155",
+    dark: "#020617",
+    gradient: {
+      primary: "linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%)",
+      secondary: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+      dark: "linear-gradient(135deg, #020617 0%, #0f172a 100%)"
+    }
+  },
+
+  // Text Colors
+  text: {
+    primary: "#f8fafc",
+    secondary: "#e2e8f0", 
+    tertiary: "#cbd5e1",
+    light: "rgba(248, 250, 252, 0.9)",
+    muted: "rgba(226, 232, 240, 0.7)"
+  },
+
+  // Border Colors
+  border: {
+    light: "rgba(248, 250, 252, 0.1)",
+    medium: "rgba(248, 250, 252, 0.2)",
+    strong: "rgba(226, 232, 240, 0.4)"
+  }
+};
+
+// Function to get colors based on theme mode
+export const getColors = (mode: ThemeMode = 'light') => {
+  return mode === 'dark' ? darkThemeColors : lightThemeColors;
+};
+
+// Export base colors as default (backward compatibility)
+export const colors = lightThemeColors;
 
 // Utility functions
 export const getColorWithOpacity = (color: string, opacity: number): string => {

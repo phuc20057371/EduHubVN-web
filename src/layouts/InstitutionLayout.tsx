@@ -48,6 +48,7 @@ import colors from "../theme/colors";
 import Logoweb from "../assets/eduhub-01.png";
 import WebSocketService from "../services/WebSocketService";
 import { InstitutionMessageHandler } from "../services/InstitutionMessageHandler";
+import EduHubSpeedDial from "../components/EduHubSpeedDial";
 
 const InstitutionLayout = () => {
   const dispatch = useDispatch();
@@ -322,12 +323,13 @@ useEffect(() => {
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       {/* Modern Header */}
       <AppBar
-        position="static"
+        position="fixed"
         elevation={0}
         sx={{
           background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[700]} 100%)`,
           borderBottom: `1px solid ${colors.border.light}`,
           backdropFilter: "blur(10px)",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
         }}
       >
         <Container maxWidth="xl">
@@ -564,6 +566,7 @@ useEffect(() => {
           position: "relative",
           overflow: "auto",
           minHeight: 0,
+          pt: "70px", // Add padding-top for fixed header
         }}
       >
         <Container
@@ -668,6 +671,11 @@ useEffect(() => {
           </Box>
         </Container>
       </Box>
+      
+      {/* EduHub Speed Dial for Institution */}
+      <EduHubSpeedDial 
+        userRole="institution"
+      />
     </Box>
   );
 };

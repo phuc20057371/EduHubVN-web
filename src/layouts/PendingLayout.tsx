@@ -40,6 +40,7 @@ import { colors } from "../theme/colors";
 import { getStatus, getStatusColor } from "../utils/ChangeText";
 import { API } from "../utils/Fetch";
 import { navigateToRole } from "../utils/navigationRole";
+import EduHubSpeedDial from "../components/EduHubSpeedDial";
 
 const PendingLayout = () => {
   const dispatch = useDispatch();
@@ -102,13 +103,14 @@ const PendingLayout = () => {
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       {/* Header - HomeLayout Style */}
       <AppBar
-        position="static"
+        position="fixed"
         elevation={0}
         sx={{
           background: colors.background.gradient.primary,
           borderBottom: `1px solid ${colors.border.light}`,
           backdropFilter: "blur(20px)",
           alignItems: "center",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
         }}
       >
         <Toolbar
@@ -424,6 +426,7 @@ const PendingLayout = () => {
             )}' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
           `,
           py: 4,
+          pt: "100px", // Add padding-top for fixed header (larger because it's bigger)
           position: "relative",
           "&::before": {
             content: '""',
@@ -702,6 +705,11 @@ const PendingLayout = () => {
           </Box>
         </Container>
       </Box>
+      
+      {/* EduHub Speed Dial for Pending Users */}
+      <EduHubSpeedDial 
+        userRole="partner"
+      />
     </Box>
   );
 };

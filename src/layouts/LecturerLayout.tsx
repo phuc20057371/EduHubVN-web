@@ -51,6 +51,7 @@ import Logoweb from "../assets/eduhub-02.png";
 import WebSocketService from "../services/WebSocketService";
 import { useGlobalWebSocket } from "../hooks/useGlobalWebSocket";
 import { LecturerMessageHandler } from "../services/LecturerMessageHandler";
+import EduHubSpeedDial from "../components/EduHubSpeedDial";
 
 const LecturerLayout = () => {
   const dispatch = useDispatch();
@@ -354,12 +355,13 @@ const LecturerLayout = () => {
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       {/* Modern Header */}
       <AppBar
-        position="static"
+        position="fixed"
         elevation={0}
         sx={{
           background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[700]} 100%)`,
           borderBottom: `1px solid ${colors.border.light}`,
           backdropFilter: "blur(10px)",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
         }}
       >
         <Container maxWidth="xl">
@@ -698,6 +700,7 @@ const LecturerLayout = () => {
           position: "relative",
           overflow: "auto",
           minHeight: 0, // Important for flex children to scroll properly
+          pt: "70px", // Add padding-top for fixed header
         }}
       >
         <Container
@@ -980,6 +983,11 @@ const LecturerLayout = () => {
           </Box>
         </Container>
       </Box>
+      
+      {/* EduHub Speed Dial for Lecturer */}
+      <EduHubSpeedDial 
+        userRole="lecturer"
+      />
     </Box>
   );
 };

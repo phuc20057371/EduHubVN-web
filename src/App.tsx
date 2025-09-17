@@ -3,6 +3,7 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./routes/router";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { EduHubThemeProvider } from "./theme/ThemeProvider";
 
 function App() {
   useEffect(() => {
@@ -23,7 +24,7 @@ function App() {
   }, []);
 
   return (
-    <>
+    <EduHubThemeProvider>
       <RouterProvider router={router} />
       <ToastContainer
         position="top-right"
@@ -34,7 +35,7 @@ function App() {
         hideProgressBar={false}
         newestOnTop={true}
       />
-    </>
+    </EduHubThemeProvider>
   );
 }
 

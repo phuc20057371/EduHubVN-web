@@ -12,8 +12,10 @@ import {
   Phone,
   LocationOn,
 } from "@mui/icons-material";
-import Logo from "../assets/eduhub-02.png";
+import Logo from "../assets/Eduhub_logo_new.png";
 import { Container } from "@mui/system";
+import EduHubSpeedDial from "../components/EduHubSpeedDial";
+import ThemeToggle from "../components/ThemeToggle";
 
 const GuestLayout = () => {
   const navigate = useNavigate();
@@ -25,10 +27,14 @@ const GuestLayout = () => {
         sx={{
           background: "linear-gradient(135deg, #0891b2 0%, #0e7490 100%)",
           boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-          position: "relative",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
           overflow: "hidden",
           width: "100vw",
           minWidth: "100vw",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
           "&::before": {
             content: '""',
             position: "absolute",
@@ -75,38 +81,12 @@ const GuestLayout = () => {
               src={Logo}
               alt="EduHubVN Logo"
               style={{
-                height: 40,
-                marginRight: 12,
+                height: 80,
+                marginRight: 1,
                 filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.3))",
               }}
             />
-            <Box>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 800,
-                  color: "white",
-                  textShadow: "0 2px 4px rgba(0,0,0,0.3)",
-                  letterSpacing: "-0.5px",
-                  fontSize: { xs: "1.2rem", md: "1.5rem" },
-                }}
-              >
-                EduHubVN
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "rgba(255,255,255,0.9)",
-                  fontSize: { xs: "0.7rem", md: "0.75rem" },
-                  fontWeight: 500,
-                  letterSpacing: "1px",
-                  fontFamily: "'Inter', sans-serif",
-                }}
-              >
-                EDUCATION PLATFORM
-              </Typography>
-            </Box>
+           
           </Box>
 
           {/* Nút bên phải */}
@@ -119,6 +99,9 @@ const GuestLayout = () => {
               width: { xs: "100%", sm: "auto" },
             }}
           >
+            {/* Theme Toggle */}
+            <ThemeToggle />
+            
             <Button
               variant="outlined"
               onClick={() => navigate("/login")}
@@ -173,7 +156,12 @@ const GuestLayout = () => {
       </Box>
 
       {/* Content */}
-      <Box sx={{ flex: 1, bgcolor: "#f8fafc", width: "100%" }}>
+      <Box sx={{ 
+        flex: 1, 
+        bgcolor: "#f8fafc", 
+        width: "100%",
+        pt: "80px" // Add padding-top for fixed header
+      }}>
         <Outlet />
       </Box>
 
@@ -393,6 +381,11 @@ const GuestLayout = () => {
           </Box>
         </Container>
       </Box>
+      
+      {/* EduHub Speed Dial for Guest */}
+      <EduHubSpeedDial 
+        userRole="partner"
+      />
     </div>
   );
 };
