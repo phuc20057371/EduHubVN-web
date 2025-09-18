@@ -272,7 +272,7 @@ const LecturerInfoPage = () => {
                     return (
                       <div
                         key={proj.id}
-                        className="mb-6 grid grid-cols-[150px_1fr] gap-2 text-sm"
+                        className="mb-6 grid grid-s-[150px_1fr] gap-2 text-sm"
                       >
                         <div className="font-medium text-gray-800">
                           {timeRange}

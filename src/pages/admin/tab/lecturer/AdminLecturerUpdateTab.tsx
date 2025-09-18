@@ -34,9 +34,10 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
   // Local state for filters
   const [updateSearchTerm, setUpdateSearchTerm] = useState("");
   const [updateDateSort, setUpdateDateSort] = useState("oldest");
-  
+
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [selectedLecturerUpdate, setSelectedLecturerUpdate] = useState<any>(null);
+  const [selectedLecturerUpdate, setSelectedLecturerUpdate] =
+    useState<any>(null);
 
   // Filtered data logic
   const filteredUpdateList = React.useMemo(() => {
@@ -53,8 +54,12 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
     }
 
     filtered = [...filtered].sort((a: any, b: any) => {
-      const dateA = new Date(a.lecturerUpdate.updatedAt || a.lecturerUpdate.createdAt || 0);
-      const dateB = new Date(b.lecturerUpdate.updatedAt || b.lecturerUpdate.createdAt || 0);
+      const dateA = new Date(
+        a.lecturerUpdate.updatedAt || a.lecturerUpdate.createdAt || 0,
+      );
+      const dateB = new Date(
+        b.lecturerUpdate.updatedAt || b.lecturerUpdate.createdAt || 0,
+      );
 
       if (updateDateSort === "oldest") {
         return dateA.getTime() - dateB.getTime();
@@ -78,8 +83,7 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
         sx={{
           p: 3,
           mb: 3,
-          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-          borderRadius: 3,
+          borderRadius: 1,
           border: "1px solid rgba(255,255,255,0.8)",
         }}
       >
@@ -96,28 +100,20 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Avatar
               sx={{
-                bgcolor: "primary.main",
-                background:
-                  "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 width: 56,
                 height: 56,
               }}
             >
-              <Typography
-                variant="h4"
-                sx={{ color: "white", fontWeight: 700 }}
-              >
+              <Typography variant="h4" sx={{ fontWeight: 700 }}>
                 🔄
               </Typography>
             </Avatar>
             <Box>
-              <Typography
-                variant="h5"
-                sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
-              >
+              <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
                 Yêu cầu cập nhật thông tin giảng viên
               </Typography>
-              <Typography variant="body2" sx={{ color: "#6c757d" }}>
+              <Typography variant="body2">
                 {updateSearchTerm
                   ? `Đã lọc ${filteredUpdateList?.length || 0} yêu cầu`
                   : `Tổng cộng ${filteredUpdateList?.length || 0} yêu cầu cập nhật chờ phê duyệt`}
@@ -143,8 +139,7 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
                 label="Sắp xếp theo ngày"
                 onChange={(e) => setUpdateDateSort(e.target.value)}
                 sx={{
-                  bgcolor: "white",
-                  borderRadius: 2,
+                  borderRadius: 1,
                 }}
               >
                 <MenuItem value="oldest">Cũ nhất trước</MenuItem>
@@ -162,8 +157,7 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
               value={updateSearchTerm}
               onChange={(e) => setUpdateSearchTerm(e.target.value)}
               sx={{
-                bgcolor: "white",
-                borderRadius: 2,
+                borderRadius: 1,
               }}
               InputProps={{
                 startAdornment: (
@@ -263,7 +257,7 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
                 transition: "all 0.3s ease",
                 border: "2px solid",
                 borderColor: "warning.light",
-                borderRadius: 3,
+                borderRadius: 1,
                 height: "fit-content",
                 "&:hover": {
                   transform: "translateY(-4px)",
@@ -273,12 +267,8 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
               }}
             >
               <CardContent sx={{ p: 3 }}>
-                <Box
-                  sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-                >
-                  <Box
-                    sx={{ display: "flex", alignItems: "center", gap: 2 }}
-                  >
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <Avatar
                       src={item.lecturer.avatarUrl}
                       sx={{
@@ -307,9 +297,7 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
                       </Typography>
                       <Box sx={{ display: "flex", gap: 0.5, mt: 0.5 }}>
                         <Chip
-                          label={getAcademicRank(
-                            item.lecturer.academicRank,
-                          )}
+                          label={getAcademicRank(item.lecturer.academicRank)}
                           size="small"
                           color="primary"
                           variant="outlined"
@@ -367,10 +355,7 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
                         >
                           Kinh nghiệm
                         </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{ fontWeight: 500 }}
-                        >
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
                           {item.lecturer.experienceYears} năm
                         </Typography>
                       </Box>
@@ -387,9 +372,7 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
                           variant="body2"
                           sx={{ fontWeight: 500, fontSize: "0.75rem" }}
                         >
-                          {getRelativeTime(
-                            item.lecturerUpdate.updatedAt
-                          )}
+                          {getRelativeTime(item.lecturerUpdate.updatedAt)}
                         </Typography>
                       </Box>
                     </Box>
@@ -404,7 +387,7 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
                         py: 1,
                         fontWeight: 600,
                         textTransform: "none",
-                        borderRadius: 2,
+                        borderRadius: 1,
                         fontSize: "0.8rem",
                       }}
                       onClick={() => {
@@ -425,7 +408,7 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
           sx={{
             p: 6,
             textAlign: "center",
-            borderRadius: 3,
+            borderRadius: 1,
             boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
           }}
         >
@@ -437,8 +420,8 @@ const AdminLecturerUpdateTab: React.FC<AdminLecturerUpdateTabProps> = ({
             Không có yêu cầu nào
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Hiện tại không có yêu cầu cập nhật thông tin giảng viên nào cần
-            xử lý.
+            Hiện tại không có yêu cầu cập nhật thông tin giảng viên nào cần xử
+            lý.
           </Typography>
         </Paper>
       )}

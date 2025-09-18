@@ -183,8 +183,7 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> =
           sx={{
             p: 3,
             mb: 3,
-            background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-            borderRadius: 3,
+            borderRadius: 1,
             border: "1px solid rgba(255,255,255,0.8)",
           }}
         >
@@ -201,28 +200,21 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> =
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Avatar
                 sx={{
-                  bgcolor: "primary.main",
                   background:
                     "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                   width: 56,
                   height: 56,
                 }}
               >
-                <Typography
-                  variant="h4"
-                  sx={{ color: "white", fontWeight: 700 }}
-                >
+                <Typography variant="h4" sx={{ fontWeight: 700 }}>
                   🎓
                 </Typography>
               </Avatar>
               <Box>
-                <Typography
-                  variant="h5"
-                  sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
-                >
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
                   Yêu cầu chứng chỉ và bằng cấp
                 </Typography>
-                <Typography variant="body2" sx={{ color: "#6c757d" }}>
+                <Typography variant="body2">
                   {degreeSearchTerm || degreeTypeFilter
                     ? `Đã lọc ${safeFilteredDegreeList?.length || 0} yêu cầu`
                     : `Tổng cộng ${safeFilteredDegreeList?.length || 0} yêu cầu chứng chỉ và bằng cấp`}
@@ -248,8 +240,8 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> =
                   label="Loại"
                   onChange={(e) => setDegreeTypeFilter(e.target.value)}
                   sx={{
-                    bgcolor: "white",
-                    borderRadius: 2,
+                  
+                    borderRadius: 1,
                   }}
                 >
                   <MenuItem value="">
@@ -269,8 +261,8 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> =
                   label="Hành động"
                   onChange={(e) => setDegreeActionFilter(e.target.value)}
                   sx={{
-                    bgcolor: "white",
-                    borderRadius: 2,
+              
+                    borderRadius: 1,
                   }}
                 >
                   <MenuItem value="">
@@ -290,8 +282,8 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> =
                   label="Sắp xếp theo ngày"
                   onChange={(e) => setDegreeDateSort(e.target.value)}
                   sx={{
-                    bgcolor: "white",
-                    borderRadius: 2,
+                   
+                    borderRadius: 1,
                   }}
                 >
                   <MenuItem value="oldest">Cũ nhất trước</MenuItem>
@@ -309,8 +301,8 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> =
                 value={degreeSearchTerm}
                 onChange={(e) => setDegreeSearchTerm(e.target.value)}
                 sx={{
-                  bgcolor: "white",
-                  borderRadius: 2,
+                
+                  borderRadius: 1,
                 }}
                 InputProps={{
                   startAdornment: (
@@ -442,7 +434,7 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> =
                       item.label === "Create"
                         ? "success.light"
                         : "warning.light",
-                    borderRadius: 3,
+                    borderRadius: 1,
                     height: "fit-content",
                     "&:hover": {
                       transform: "translateY(-4px)",
@@ -706,7 +698,7 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> =
                             py: 1.2,
                             fontWeight: 600,
                             textTransform: "none",
-                            borderRadius: 2,
+                            borderRadius: 1,
                             fontSize: "0.85rem",
                           }}
                           onClick={() => handleDegreeItemClick(item)}
@@ -725,7 +717,7 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> =
             sx={{
               p: 6,
               textAlign: "center",
-              borderRadius: 3,
+              borderRadius: 1,
               boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
             }}
           >

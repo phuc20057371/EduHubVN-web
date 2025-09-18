@@ -34,9 +34,10 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
   // Local state for filters
   const [createSearchTerm, setCreateSearchTerm] = useState("");
   const [createDateSort, setCreateDateSort] = useState("oldest");
-  
+
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
-  const [selectedLecturerCreate, setSelectedLecturerCreate] = useState<any>(null);
+  const [selectedLecturerCreate, setSelectedLecturerCreate] =
+    useState<any>(null);
 
   // Filtered data logic
   const filteredCreateList = React.useMemo(() => {
@@ -73,8 +74,8 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
         sx={{
           p: 3,
           mb: 3,
-          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-          borderRadius: 3,
+
+          borderRadius: 1,
           border: "1px solid rgba(255,255,255,0.8)",
         }}
       >
@@ -91,28 +92,23 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Avatar
               sx={{
-                bgcolor: "primary.main",
-                background:
-                  "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 width: 56,
                 height: 56,
               }}
             >
-              <Typography
-                variant="h4"
-                sx={{ color: "white", fontWeight: 700 }}
-              >
+              <Typography variant="h4" sx={{ color: "white", fontWeight: 700 }}>
                 ✨
               </Typography>
             </Avatar>
             <Box>
               <Typography
                 variant="h5"
-                sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
+                sx={{ fontWeight: 700, mb: 0.5 }}
               >
                 Yêu cầu đăng ký giảng viên mới
               </Typography>
-              <Typography variant="body2" sx={{ color: "#6c757d" }}>
+              <Typography variant="body2" >
                 {createSearchTerm
                   ? `Đã lọc ${filteredCreateList?.length || 0} yêu cầu`
                   : `Tổng cộng ${filteredCreateList?.length || 0} yêu cầu đăng ký chờ phê duyệt`}
@@ -137,9 +133,8 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
                 value={createDateSort}
                 label="Sắp xếp theo ngày"
                 onChange={(e) => setCreateDateSort(e.target.value)}
-                sx={{
-                  bgcolor: "white",
-                  borderRadius: 2,
+                sx={{     
+                  borderRadius: 1,
                 }}
               >
                 <MenuItem value="oldest">Cũ nhất trước</MenuItem>
@@ -157,8 +152,7 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
               value={createSearchTerm}
               onChange={(e) => setCreateSearchTerm(e.target.value)}
               sx={{
-                bgcolor: "white",
-                borderRadius: 2,
+                borderRadius: 1,
               }}
               InputProps={{
                 startAdornment: (
@@ -258,7 +252,7 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
                 transition: "all 0.3s ease",
                 border: "2px solid",
                 borderColor: "success.light",
-                borderRadius: 3,
+                borderRadius: 1,
                 height: "fit-content",
                 "&:hover": {
                   transform: "translateY(-4px)",
@@ -268,12 +262,8 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
               }}
             >
               <CardContent sx={{ p: 3 }}>
-                <Box
-                  sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-                >
-                  <Box
-                    sx={{ display: "flex", alignItems: "center", gap: 2 }}
-                  >
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <Avatar
                       src={item.lecturer.avatarUrl}
                       sx={{
@@ -302,9 +292,7 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
                       </Typography>
                       <Box sx={{ display: "flex", gap: 0.5, mt: 0.5 }}>
                         <Chip
-                          label={getAcademicRank(
-                            item.lecturer.academicRank,
-                          )}
+                          label={getAcademicRank(item.lecturer.academicRank)}
                           size="small"
                           color="primary"
                           variant="outlined"
@@ -362,10 +350,7 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
                         >
                           Kinh nghiệm
                         </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{ fontWeight: 500 }}
-                        >
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
                           {item.lecturer.experienceYears} năm
                         </Typography>
                       </Box>
@@ -382,9 +367,7 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
                           variant="body2"
                           sx={{ fontWeight: 500, fontSize: "0.75rem" }}
                         >
-                          {getRelativeTime(
-                            item.lecturer.updatedAt
-                          )}
+                          {getRelativeTime(item.lecturer.updatedAt)}
                         </Typography>
                       </Box>
                     </Box>
@@ -399,7 +382,7 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
                         py: 1,
                         fontWeight: 600,
                         textTransform: "none",
-                        borderRadius: 2,
+                        borderRadius: 1,
                         fontSize: "0.8rem",
                       }}
                       onClick={() => {
@@ -420,7 +403,7 @@ const AdminLecturerCreateTab: React.FC<AdminLecturerCreateTabProps> = ({
           sx={{
             p: 6,
             textAlign: "center",
-            borderRadius: 3,
+            borderRadius: 1,
             boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
           }}
         >

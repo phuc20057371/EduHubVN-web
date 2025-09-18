@@ -24,7 +24,7 @@ import {
   TrendingUp,
   Security,
 } from "@mui/icons-material";
-import { colors } from "../../theme/colors";
+import { useColors } from "../../hooks/useColors";
 import eduhubLogo from "../../assets/eduhub-03.png";
 
 interface ProfileOption {
@@ -43,6 +43,7 @@ interface ProfileOption {
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const colors = useColors();
   const [selectedProfile, setSelectedProfile] = useState<string>("lecturer");
 
   const profileOptions: ProfileOption[] = [
@@ -53,7 +54,7 @@ const HomePage = () => {
       description:
         "Nền tảng dành cho các chuyên gia muốn chia sẻ kiến thức và xây dựng thương hiệu cá nhân",
       icon: <Person sx={{ fontSize: 48 }} />,
-      gradient: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[700]} 100%)`,
+      gradient: `linear-gradient(135deg, ${colors.primary.main} 0%, ${colors.primary.dark} 100%)`,
       route: "/register-lecturer",
       badge: "Phổ biến nhất",
       stats: { label: "Giảng viên tham gia", value: "1,200+" },
@@ -79,7 +80,7 @@ const HomePage = () => {
       description:
         "Giải pháp toàn diện cho các trường học và trung tâm đào tạo muốn nâng cao chất lượng giáo dục",
       icon: <School sx={{ fontSize: 48 }} />,
-      gradient: `linear-gradient(135deg, ${colors.secondary[500]} 0%, ${colors.secondary[700]} 100%)`,
+      gradient: `linear-gradient(135deg, ${colors.secondary.main} 0%, ${colors.secondary.dark} 100%)`,
       route: "/register-institution",
       badge: "Đối tác uy tín",
       stats: { label: "Trường đối tác", value: "350+" },
@@ -104,7 +105,7 @@ const HomePage = () => {
       description:
         "Nền tảng hợp tác chiến lược cho các doanh nghiệp muốn đầu tư vào phát triển nguồn nhân lực",
       icon: <Business sx={{ fontSize: 48 }} />,
-      gradient: `linear-gradient(135deg, ${colors.accent.lightBlue} 0%, #059669 100%)`,
+      gradient: `linear-gradient(135deg, ${colors.accent.blue} 0%, #059669 100%)`,
       route: "/register-partner",
       badge: "Giải pháp doanh nghiệp",
       stats: { label: "Doanh nghiệp tin tướng", value: "180+" },
@@ -144,7 +145,7 @@ const HomePage = () => {
       {/* Hero Section */}
       <Box
         sx={{
-          background: colors.background.gradient.primary,
+          background: colors.gradients.primary,
           py: 8,
           position: "relative",
           overflow: "hidden",
@@ -266,7 +267,7 @@ const HomePage = () => {
           variant="body1"
           sx={{
             textAlign: "center",
-            color: colors.text.tertiary,
+            color: colors.text.primary,
             mb: 6,
             fontSize: "1.1rem",
           }}
@@ -301,21 +302,21 @@ const HomePage = () => {
                 boxShadow:
                   selectedProfile === option.id
                     ? `0 20px 40px ${alpha(
-                        option.gradient.includes(colors.primary[500])
-                          ? colors.primary[500]
-                          : option.gradient.includes(colors.secondary[500])
-                          ? colors.secondary[500]
-                          : colors.accent.lightBlue,
+                        option.id === "lecturer"
+                          ? colors.primary.main
+                          : option.id === "institution"
+                          ? colors.secondary.main
+                          : colors.accent.blue,
                         0.3,
                       )}`
                     : "0 4px 20px rgba(0,0,0,0.08)",
                 border:
                   selectedProfile === option.id
-                    ? `2px solid ${option.gradient.includes(colors.primary[500])
-                        ? colors.primary[500]
-                        : option.gradient.includes(colors.secondary[500])
-                        ? colors.secondary[500]
-                        : colors.accent.lightBlue}`
+                    ? `2px solid ${option.id === "lecturer"
+                        ? colors.primary.main
+                        : option.id === "institution"
+                        ? colors.secondary.main
+                        : colors.accent.blue}`
                     : "2px solid transparent",
                 "&:hover": {
                   transform: "translateY(-4px)",
@@ -456,18 +457,18 @@ const HomePage = () => {
                         size="small"
                         sx={{
                           bgcolor: alpha(
-                            option.gradient.includes(colors.primary[500])
-                              ? colors.primary[500]
-                              : option.gradient.includes(colors.secondary[500])
-                              ? colors.secondary[500]
-                              : colors.accent.lightBlue,
+                            option.id === "lecturer"
+                              ? colors.primary.main
+                              : option.id === "institution"
+                              ? colors.secondary.main
+                              : colors.accent.blue,
                             0.1,
                           ),
                           color:
-                            option.gradient.includes(colors.primary[500])
-                              ? colors.primary[700]
-                              : option.gradient.includes(colors.secondary[500])
-                              ? colors.secondary[700]
+                            option.id === "lecturer"
+                              ? colors.primary.dark
+                              : option.id === "institution"
+                              ? colors.secondary.dark
                               : "#059669",
                           fontWeight: 500,
                         }}
@@ -496,18 +497,18 @@ const HomePage = () => {
                       >
                         <CheckCircle
                           sx={{
-                            color: option.gradient.includes(colors.primary[500])
-                              ? colors.primary[500]
-                              : option.gradient.includes(colors.secondary[500])
-                              ? colors.secondary[500]
-                              : colors.accent.lightBlue,
+                            color: option.id === "lecturer"
+                              ? colors.primary.main
+                              : option.id === "institution"
+                              ? colors.secondary.main
+                              : colors.accent.blue,
                             fontSize: 16,
                             mr: 1,
                           }}
                         />
                         <Typography
                           variant="body2"
-                          sx={{ color: colors.text.tertiary, fontSize: "0.9rem" }}
+                          sx={{ color: colors.text.primary, fontSize: "0.9rem" }}
                         >
                           {feature}
                         </Typography>
@@ -517,7 +518,7 @@ const HomePage = () => {
                       <Typography
                         variant="caption"
                         sx={{
-                          color: colors.text.tertiary,
+                          color: colors.text.primary,
                           fontStyle: "italic",
                           mt: 1,
                         }}
@@ -545,26 +546,26 @@ const HomePage = () => {
               fontSize: "1.2rem",
               fontWeight: 600,
               background:
-                selectedOption?.gradient || colors.background.gradient.primary,
+                selectedOption?.gradient || colors.gradients.primary,
               borderRadius: 4,
               textTransform: "none",
               boxShadow: `0 8px 24px ${alpha(
-                selectedOption?.gradient.includes(colors.primary[500])
-                  ? colors.primary[500]
-                  : selectedOption?.gradient.includes(colors.secondary[500])
-                  ? colors.secondary[500]
-                  : colors.accent.lightBlue,
+                selectedOption?.id === "lecturer"
+                  ? colors.primary.main
+                  : selectedOption?.id === "institution"
+                  ? colors.secondary.main
+                  : colors.accent.blue,
                 0.3,
               )}`,
               border: "none",
               "&:hover": {
                 transform: "translateY(-2px)",
                 boxShadow: `0 12px 32px ${alpha(
-                  selectedOption?.gradient.includes(colors.primary[500])
-                    ? colors.primary[500]
-                    : selectedOption?.gradient.includes(colors.secondary[500])
-                    ? colors.secondary[500]
-                    : colors.accent.lightBlue,
+                  selectedOption?.id === "lecturer"
+                    ? colors.primary.main
+                    : selectedOption?.id === "institution"
+                    ? colors.secondary.main
+                    : colors.accent.blue,
                   0.4,
                 )}`,
               },
@@ -581,7 +582,7 @@ const HomePage = () => {
           sx={{
             p: 6,
             borderRadius: 4,
-            background: colors.background.gradient.secondary,
+            background: colors.gradients.secondary,
             color: "white",
             textAlign: "center",
             position: "relative",

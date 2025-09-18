@@ -172,8 +172,7 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
         sx={{
           p: 3,
           mb: 3,
-          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-          borderRadius: 3,
+          borderRadius: 1,
           border: "1px solid rgba(255,255,255,0.8)",
         }}
       >
@@ -190,24 +189,20 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Avatar
               sx={{
-                bgcolor: "primary.main",
                 background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 width: 56,
                 height: 56,
               }}
             >
-              <Typography variant="h4" sx={{ color: "white", fontWeight: 700 }}>
+              <Typography variant="h4" sx={{ fontWeight: 700 }}>
                 📚
               </Typography>
             </Avatar>
             <Box>
-              <Typography
-                variant="h5"
-                sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
-              >
+              <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
                 Yêu cầu tạo mới và cập nhật khóa đào tạo
               </Typography>
-              <Typography variant="body2" sx={{ color: "#6c757d" }}>
+              <Typography variant="body2">
                 {courseSearchTerm || courseTypeFilter
                   ? `Đã lọc ${filteredCourseList?.length || 0} yêu cầu`
                   : `Tổng cộng ${filteredCourseList?.length || 0} yêu cầu`}
@@ -233,8 +228,7 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
                 label="Loại"
                 onChange={(e) => setCourseTypeFilter(e.target.value)}
                 sx={{
-                  bgcolor: "white",
-                  borderRadius: 2,
+                  borderRadius: 1,
                 }}
               >
                 <MenuItem value="">
@@ -254,8 +248,7 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
                 label="Sắp xếp theo ngày"
                 onChange={(e) => setCourseDateSort(e.target.value)}
                 sx={{
-                  bgcolor: "white",
-                  borderRadius: 2,
+                  borderRadius: 1,
                 }}
               >
                 <MenuItem value="oldest">Cũ nhất trước</MenuItem>
@@ -272,8 +265,7 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
                 label="Hành động"
                 onChange={(e) => setCourseActionFilter(e.target.value)}
                 sx={{
-                  bgcolor: "white",
-                  borderRadius: 2,
+                  borderRadius: 1,
                 }}
               >
                 <MenuItem value="">
@@ -294,8 +286,7 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
               value={courseSearchTerm}
               onChange={(e) => setCourseSearchTerm(e.target.value)}
               sx={{
-                bgcolor: "white",
-                borderRadius: 2,
+                borderRadius: 1,
               }}
               InputProps={{
                 startAdornment: (
@@ -429,7 +420,7 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
                   border: "2px solid",
                   borderColor:
                     item.label === "Create" ? "success.light" : "warning.light",
-                  borderRadius: 3,
+                  borderRadius: 1,
                   height: "fit-content",
                   "&:hover": {
                     transform: "translateY(-4px)",
@@ -452,9 +443,7 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
                       <Box sx={{ display: "flex", gap: 0.5, mb: 1.5 }}>
                         <Chip
                           label={
-                            item.type === "OC"
-                              ? "Khóa sở hữu"
-                              : "Khóa tham gia"
+                            item.type === "OC" ? "Khóa sở hữu" : "Khóa tham gia"
                           }
                           size="small"
                           variant="filled"
@@ -462,7 +451,9 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
                           sx={{ fontSize: "0.7rem", height: 22 }}
                         />
                         <Chip
-                          label={item.label === "Create" ? "Tạo mới" : "Cập nhật"}
+                          label={
+                            item.label === "Create" ? "Tạo mới" : "Cập nhật"
+                          }
                           size="small"
                           color={
                             item.label === "Create" ? "success" : "warning"
@@ -486,10 +477,17 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
                           minHeight: "2.4em",
                         }}
                       >
-                        {contentData?.title || contentData?.name || "Không có tên"}
+                        {contentData?.title ||
+                          contentData?.name ||
+                          "Không có tên"}
                       </Typography>
 
-                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
                         <Typography
                           variant="body2"
                           color="text.secondary"
@@ -566,14 +564,17 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
                               whiteSpace: "nowrap",
                             }}
                           >
-                            {getAcademicRank(item.lecturerInfo?.academicRank) || "Không có"}
+                            {getAcademicRank(item.lecturerInfo?.academicRank) ||
+                              "Không có"}
                           </Typography>
                         </Box>
                       </Box>
                     </Box>
 
                     {/* TIME INFORMATION - BOTTOM */}
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                    <Box
+                      sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+                    >
                       <Typography
                         variant="body2"
                         color="text.secondary"
@@ -586,7 +587,6 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
                         sx={{
                           fontWeight: 500,
                           fontSize: "0.8rem",
-                          color: "text.secondary",
                           fontStyle: "italic",
                         }}
                       >
@@ -624,7 +624,7 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
                           py: 1.2,
                           fontWeight: 600,
                           textTransform: "none",
-                          borderRadius: 2,
+                          borderRadius: 1,
                           fontSize: "0.85rem",
                         }}
                         onClick={() => handleCourseItemClick(item)}
@@ -643,7 +643,7 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
           sx={{
             p: 6,
             textAlign: "center",
-            borderRadius: 3,
+            borderRadius: 1,
             boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
           }}
         >
@@ -665,7 +665,6 @@ const AdminLecturerCourseTab: React.FC<AdminLecturerCourseTabProps> = ({
           open={openOwnedCourseCreateDialog}
           data={selectedCourse}
           onClose={() => handleDialogClose("OwnedCourseCreate")}
-          
         />
       )}
       {openOwnedCourseUpdateDialog && (

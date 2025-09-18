@@ -133,8 +133,8 @@ const AdminLecturerResearchTab: React.FC<AdminLecturerResearchTabProps> = ({
         sx={{
           p: 3,
           mb: 3,
-          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-          borderRadius: 3,
+         
+          borderRadius: 1,
           border: "1px solid rgba(255,255,255,0.8)",
         }}
       >
@@ -157,18 +157,18 @@ const AdminLecturerResearchTab: React.FC<AdminLecturerResearchTabProps> = ({
                 height: 56,
               }}
             >
-              <Typography variant="h4" sx={{ color: "white", fontWeight: 700 }}>
+              <Typography variant="h4" sx={{ fontWeight: 700 }}>
                 🔬
               </Typography>
             </Avatar>
             <Box>
               <Typography
                 variant="h5"
-                sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
+                sx={{ fontWeight: 700, }}
               >
                 Yêu cầu nghiên cứu khoa học
               </Typography>
-              <Typography variant="body2" sx={{ color: "#6c757d" }}>
+              <Typography variant="body2" >
                 {researchSearchTerm || researchActionFilter
                   ? `Đã lọc ${filteredResearchList?.length || 0} yêu cầu`
                   : `Tổng cộng ${filteredResearchList?.length || 0} yêu cầu nghiên cứu khoa học`}
@@ -194,8 +194,8 @@ const AdminLecturerResearchTab: React.FC<AdminLecturerResearchTabProps> = ({
                 label="Sắp xếp theo ngày"
                 onChange={(e) => setResearchDateSort(e.target.value)}
                 sx={{
-                  bgcolor: "white",
-                  borderRadius: 2,
+                  
+                  borderRadius: 1,
                 }}
               >
                 <MenuItem value="oldest">Cũ nhất trước</MenuItem>
@@ -212,8 +212,8 @@ const AdminLecturerResearchTab: React.FC<AdminLecturerResearchTabProps> = ({
                 label="Hành động"
                 onChange={(e) => setResearchActionFilter(e.target.value)}
                 sx={{
-                  bgcolor: "white",
-                  borderRadius: 2,
+                 
+                  borderRadius: 1,
                 }}
               >
                 <MenuItem value="">
@@ -234,13 +234,13 @@ const AdminLecturerResearchTab: React.FC<AdminLecturerResearchTabProps> = ({
               value={researchSearchTerm}
               onChange={(e) => setResearchSearchTerm(e.target.value)}
               sx={{
-                bgcolor: "white",
-                borderRadius: 2,
+                
+                borderRadius: 1,
               }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon sx={{ color: "primary.main" }} />
+                    <SearchIcon  />
                   </InputAdornment>
                 ),
                 endAdornment: researchSearchTerm && (
@@ -271,7 +271,7 @@ const AdminLecturerResearchTab: React.FC<AdminLecturerResearchTabProps> = ({
               alignItems: "center",
             }}
           >
-            <Typography variant="body2" sx={{ color: "#6c757d", mr: 1 }}>
+            <Typography variant="body2" sx={{ mr: 1 }}>
               Bộ lọc đang áp dụng:
             </Typography>
 
@@ -353,7 +353,7 @@ const AdminLecturerResearchTab: React.FC<AdminLecturerResearchTabProps> = ({
                   border: "2px solid",
                   borderColor:
                     item.label === "Create" ? "success.light" : "warning.light",
-                  borderRadius: 3,
+                  borderRadius: 1,
                   height: "fit-content",
                   "&:hover": {
                     transform: "translateY(-4px)",
@@ -395,7 +395,7 @@ const AdminLecturerResearchTab: React.FC<AdminLecturerResearchTabProps> = ({
                         variant="h6"
                         sx={{
                           fontWeight: 700,
-                          color: "text.primary",
+                        
                           mb: 1.5,
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -575,7 +575,7 @@ const AdminLecturerResearchTab: React.FC<AdminLecturerResearchTabProps> = ({
                           py: 1.2,
                           fontWeight: 600,
                           textTransform: "none",
-                          borderRadius: 2,
+                          borderRadius: 1,
                           fontSize: "0.85rem",
                         }}
                         onClick={() => handleResearchItemClick(item)}
@@ -594,7 +594,7 @@ const AdminLecturerResearchTab: React.FC<AdminLecturerResearchTabProps> = ({
           sx={{
             p: 6,
             textAlign: "center",
-            borderRadius: 3,
+            borderRadius: 1,
             boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
           }}
         >

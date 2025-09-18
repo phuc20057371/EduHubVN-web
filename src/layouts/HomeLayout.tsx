@@ -5,12 +5,8 @@ import { setUserProfile } from "../redux/slice/userSlice";
 import { API } from "../utils/Fetch";
 import { navigateToRole } from "../utils/navigationRole";
 import {
-  AppBar,
-  Toolbar,
   Typography,
-  Button,
   Box,
-  Container,
   Avatar,
   IconButton,
   Menu,
@@ -18,7 +14,6 @@ import {
   Divider,
   Badge,
   Chip,
-  Paper,
 } from "@mui/material";
 import {
   AccountCircle,
@@ -30,16 +25,18 @@ import {
   Security,
   Language,
 } from "@mui/icons-material";
-import { colors } from "../theme/colors";
-import Logoweb from "../assets/eduhub-02.png";
+import { useColors } from "../hooks/useColors";
+import Logoweb from "../assets/Eduhub_logo_new.png";
 import WebSocketService from "../services/WebSocketService";
 import EduHubSpeedDial from "../components/EduHubSpeedDial";
 import ThemeToggle from "../components/ThemeToggle";
+import Footer from "../components/Footer";
 
 const HomeLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userProfile = useSelector((state: any) => state.userProfile);
+  const colors = useColors();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notificationAnchor, setNotificationAnchor] =
     useState<null | HTMLElement>(null);
@@ -125,41 +122,51 @@ const HomeLayout = () => {
   const getRoleColor = (role: string) => {
     switch (role) {
       case "LECTURER":
-        return colors.primary[500];
+        return colors.primary.main;
       case "INSTITUTION":
-        return colors.secondary[500];
+        return colors.secondary.main;
       case "PARTNER":
-        return colors.accent.lightBlue;
+        return colors.accent.blue;
       case "ADMIN":
-        return colors.error[500];
+        return "#ef4444";
       default:
-        return colors.neutral[500];
+        return colors.text.secondary;
     }
   };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       {/* Enhanced Header */}
-      <AppBar
-        position="fixed"
-        elevation={0}
+      <Box
         sx={{
-          background: colors.background.gradient.primary,
-          borderBottom: `1px solid ${colors.border.light}`,
-          backdropFilter: "blur(20px)",
-          alignItems: "center",
+          background: colors.isDark ? colors.gradients.primary : "#ffffff",
+          boxShadow: `0 4px 20px ${colors.border.medium}`,
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          overflow: "hidden",
+          width: "100vw",
+          minWidth: "100vw",
           zIndex: (theme) => theme.zIndex.drawer + 1,
+          transition: "all 0.3s ease",
+          borderBottom: colors.isDark
+            ? "none"
+            : `1px solid ${colors.border.light}`,
         }}
       >
-        <Toolbar
-          disableGutters
+        <Box
           sx={{
+            maxWidth: "1440px",
+            margin: "0 auto",
+            position: "relative",
+            zIndex: 1,
+            display: "flex",
             alignItems: "center",
-            minHeight: { xs: 64, md: 80 },
-            py: 1,
-            px: 3, // Add padding instead of Container
             justifyContent: "space-between",
-            width: "80%", // Full width
+            py: 2,
+            px: { xs: 2, md: 4 },
+            width: "100%",
           }}
         >
           {/* Enhanced Logo */}
@@ -175,54 +182,15 @@ const HomeLayout = () => {
             }}
             onClick={() => navigate("/")}
           >
-            <Box
-              sx={{
-                width: 48,
-                height: 48,
-                borderRadius: 3,
-                background: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.indigo})`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                mr: 2,
-                boxShadow: "0 8px 25px rgba(6, 182, 212, 0.3)",
+            <img
+              src={Logoweb}
+              alt="EduHubVN Logo"
+              style={{
+                height: 60,
+                marginRight: 1,
+                filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.3))",
               }}
-            >
-              <img
-                src={Logoweb}
-                alt="EduHubVN Logo"
-                style={{
-                  height: 28,
-                  filter: "brightness(0) invert(1)",
-                }}
-              />
-            </Box>
-            <Box>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 800,
-                  color: "white",
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1,
-                }}
-              >
-                EduHubVN
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  fontFamily: "'Inter', sans-serif",
-                  color: "rgba(255,255,255,0.8)",
-                  fontSize: "0.7rem",
-                  fontWeight: 500,
-                  letterSpacing: "1px",
-                }}
-              >
-                EDUCATION PLATFORM
-              </Typography>
-            </Box>
+            />
           </Box>
 
           {/* User Profile luôn nằm phía bên phải */}
@@ -234,9 +202,11 @@ const HomeLayout = () => {
             <IconButton
               onClick={handleNotificationOpen}
               sx={{
-                color: "white",
+                color: colors.isDark ? "white" : colors.primary.main,
                 "&:hover": {
-                  backgroundColor: "rgba(255,255,255,0.1)",
+                  backgroundColor: colors.isDark 
+                    ? "rgba(255,255,255,0.1)" 
+                    : "rgba(0, 178, 255, 0.1)",
                 },
               }}
             >
@@ -246,21 +216,27 @@ const HomeLayout = () => {
             </IconButton>
 
             {/* User Profile */}
-            <Paper
+            <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
                 px: 2,
                 py: 1,
-                backgroundColor: "rgba(255,255,255,0.1)",
+                backgroundColor: colors.isDark
+                  ? "rgba(255,255,255,0.1)"
+                  : "rgba(0, 178, 255, 0.1)",
                 backdropFilter: "blur(20px)",
-                border: "1px solid rgba(255,255,255,0.2)",
+                border: colors.isDark
+                  ? "1px solid rgba(255,255,255,0.2)"
+                  : `1px solid ${colors.border.light}`,
                 borderRadius: 3,
                 cursor: "pointer",
                 transition: "all 0.3s ease",
                 "&:hover": {
-                  backgroundColor: "rgba(255,255,255,0.15)",
+                  backgroundColor: colors.isDark
+                    ? "rgba(255,255,255,0.15)"
+                    : "rgba(0, 178, 255, 0.15)",
                   transform: "translateY(-1px)",
                 },
               }}
@@ -272,7 +248,9 @@ const HomeLayout = () => {
                 sx={{
                   width: 36,
                   height: 36,
-                  border: "2px solid rgba(255,255,255,0.3)",
+                  border: colors.isDark
+                    ? "2px solid rgba(255,255,255,0.3)"
+                    : `2px solid ${colors.border.light}`,
                 }}
               >
                 {userProfile?.email?.charAt(0)}
@@ -282,7 +260,7 @@ const HomeLayout = () => {
                   variant="subtitle2"
                   sx={{
                     fontFamily: "'Inter', sans-serif",
-                    color: "white",
+                    color: colors.isDark ? "white" : colors.text.primary,
                     fontWeight: 600,
                     lineHeight: 1,
                   }}
@@ -303,9 +281,16 @@ const HomeLayout = () => {
                   }}
                 />
               </Box>
-              <KeyboardArrowDown sx={{ color: "rgba(255,255,255,0.8)" }} />
-            </Paper>
+              <KeyboardArrowDown 
+                sx={{ 
+                  color: colors.isDark 
+                    ? "rgba(255,255,255,0.8)" 
+                    : colors.text.secondary 
+                }} 
+              />
+            </Box>
           </Box>
+
           {/* User Menu */}
           <Menu
             anchorEl={anchorEl}
@@ -324,7 +309,9 @@ const HomeLayout = () => {
                   mx: 1,
                   my: 0.5,
                   "&:hover": {
-                    backgroundColor: colors.primary[50],
+                    backgroundColor: colors.isDark 
+                      ? "rgba(255,255,255,0.1)" 
+                      : "rgba(0, 178, 255, 0.1)",
                   },
                 },
               },
@@ -356,7 +343,7 @@ const HomeLayout = () => {
                     variant="body2"
                     sx={{
                       fontFamily: "'Inter', sans-serif",
-                      color: colors.text.tertiary,
+                      color: colors.text.secondary,
                     }}
                   >
                     {userProfile?.email}
@@ -366,8 +353,10 @@ const HomeLayout = () => {
                     size="small"
                     sx={{
                       mt: 1,
-                      backgroundColor: colors.primary[50],
-                      color: colors.primary[700],
+                      backgroundColor: colors.isDark 
+                        ? "rgba(255,255,255,0.1)" 
+                        : "rgba(0, 178, 255, 0.1)",
+                      color: colors.primary.main,
                       fontFamily: "'Inter', sans-serif",
                       fontWeight: 500,
                     }}
@@ -377,27 +366,27 @@ const HomeLayout = () => {
             </Box>
 
             <MenuItem onClick={handleProfile}>
-              <AccountCircle sx={{ mr: 2, color: colors.primary[600] }} />
+              <AccountCircle sx={{ mr: 2, color: colors.primary.main }} />
               <Typography>Hồ sơ cá nhân</Typography>
             </MenuItem>
 
             <MenuItem onClick={handleMenuClose}>
-              <Settings sx={{ mr: 2, color: colors.neutral[600] }} />
+              <Settings sx={{ mr: 2, color: colors.text.secondary }} />
               <Typography>Cài đặt tài khoản</Typography>
             </MenuItem>
 
             <MenuItem onClick={handleMenuClose}>
-              <Security sx={{ mr: 2, color: colors.neutral[600] }} />
+              <Security sx={{ mr: 2, color: colors.text.secondary }} />
               <Typography>Bảo mật</Typography>
             </MenuItem>
 
             <MenuItem onClick={handleMenuClose}>
-              <Language sx={{ mr: 2, color: colors.neutral[600] }} />
+              <Language sx={{ mr: 2, color: colors.text.secondary }} />
               <Typography>Ngôn ngữ</Typography>
             </MenuItem>
 
             <MenuItem onClick={handleMenuClose}>
-              <Help sx={{ mr: 2, color: colors.neutral[600] }} />
+              <Help sx={{ mr: 2, color: colors.text.secondary }} />
               <Typography>Trợ giúp & Hỗ trợ</Typography>
             </MenuItem>
 
@@ -406,9 +395,9 @@ const HomeLayout = () => {
             <MenuItem
               onClick={handleLogout}
               sx={{
-                color: colors.error[600],
+                color: "#ef4444",
                 "&:hover": {
-                  backgroundColor: colors.error[50],
+                  backgroundColor: "rgba(239, 68, 68, 0.1)",
                 },
               }}
             >
@@ -466,7 +455,7 @@ const HomeLayout = () => {
                     variant="body2"
                     sx={{
                       fontFamily: "'Inter', sans-serif",
-                      color: colors.text.tertiary,
+                      color: colors.text.secondary,
                       mt: 0.5,
                     }}
                   >
@@ -476,7 +465,7 @@ const HomeLayout = () => {
                     variant="caption"
                     sx={{
                       fontFamily: "'Inter', sans-serif",
-                      color: colors.text.tertiary,
+                      color: colors.text.secondary,
                       mt: 1,
                       display: "block",
                     }}
@@ -493,7 +482,7 @@ const HomeLayout = () => {
                 variant="body2"
                 sx={{
                   fontFamily: "'Inter', sans-serif",
-                  color: colors.primary[600],
+                  color: colors.primary.main,
                   fontWeight: 600,
                 }}
               >
@@ -501,8 +490,8 @@ const HomeLayout = () => {
               </Typography>
             </MenuItem>
           </Menu>
-        </Toolbar>
-      </AppBar>
+        </Box>
+      </Box>
 
       {/* Main Content */}
       <Box
@@ -511,191 +500,14 @@ const HomeLayout = () => {
           flexGrow: 1,
           bgcolor: colors.background.secondary,
           minHeight: "calc(100vh - 160px)",
-          pt: "80px", // Add padding-top for fixed header
+          pt: "100px", // Add padding-top for fixed header
         }}
       >
         <Outlet />
       </Box>
 
-      {/* Enhanced Footer */}
-      <Box
-        component="footer"
-        sx={{
-          background: colors.background.gradient.dark,
-          color: "white",
-          pt: 6,
-          pb: 4,
-          mt: "auto",
-        }}
-      >
-        <Container maxWidth="xl">
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", md: "row" },
-              justifyContent: "space-between",
-              alignItems: { xs: "center", md: "flex-start" },
-              gap: { xs: 4, md: 6 },
-            }}
-          >
-            {/* Logo and Description */}
-            <Box
-              sx={{
-                textAlign: { xs: "center", md: "left" },
-                flex: 1,
-                order: { xs: 1, md: 1 },
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  mb: 2,
-                  justifyContent: { xs: "center", md: "flex-start" },
-                }}
-              >
-                <img
-                  src={Logoweb}
-                  alt="EduHubVN Logo"
-                  style={{ height: 32, marginRight: 12 }}
-                />
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    fontWeight: 700,
-                    color: colors.accent.blue,
-                  }}
-                >
-                  EduHubVN
-                </Typography>
-              </Box>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontFamily: "'Inter', sans-serif",
-                  opacity: 0.9,
-                  lineHeight: 1.6,
-                  maxWidth: 400,
-                  mx: { xs: "auto", md: 0 },
-                }}
-              >
-                Nền tảng giáo dục trực tuyến hàng đầu Việt Nam, kết nối giảng
-                viên và học viên với cơ hội học tập và phát triển nghề nghiệp.
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontFamily: "'Inter', sans-serif",
-                  opacity: 0.7,
-                  mt: 2,
-                }}
-              >
-                © {new Date().getFullYear()} EduHub Vietnam. Tất cả quyền được
-                bảo lưu.
-              </Typography>
-            </Box>
-
-            {/* Quick Links */}
-            <Box sx={{ flex: 1, order: { xs: 2, md: 2 } }}>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 600,
-                  mb: 2,
-                  color: colors.accent.blue,
-                  textAlign: { xs: "center", md: "left" },
-                }}
-              >
-                Liên kết nhanh
-              </Typography>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: { xs: "row", md: "column" },
-                  flexWrap: { xs: "wrap", md: "nowrap" },
-                  gap: { xs: 2, md: 1 },
-                  justifyContent: { xs: "center", md: "flex-start" },
-                }}
-              >
-                {[
-                  "Điều khoản sử dụng",
-                  "Chính sách bảo mật",
-                  "Hỗ trợ khách hàng",
-                  "Câu hỏi thường gặp",
-                ].map((link) => (
-                  <Button
-                    key={link}
-                    sx={{
-                      fontFamily: "'Inter', sans-serif",
-                      color: "rgba(255,255,255,0.8)",
-                      textTransform: "none",
-                      fontWeight: 400,
-                      p: 0,
-                      minWidth: "auto",
-                      justifyContent: { xs: "center", md: "flex-start" },
-                      "&:hover": {
-                        color: colors.accent.blue,
-                        backgroundColor: "transparent",
-                      },
-                    }}
-                  >
-                    {link}
-                  </Button>
-                ))}
-              </Box>
-            </Box>
-
-            {/* Contact Info & User Account */}
-            <Box sx={{ flex: 1, order: { xs: 3, md: 3 }, width: "100%" }}>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 600,
-                  mb: 2,
-                  color: colors.accent.blue,
-                  textAlign: { xs: "center", md: "left" },
-                }}
-              >
-                Liên hệ
-              </Typography>
-              <Box sx={{ textAlign: { xs: "center", md: "left" } }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    opacity: 0.8,
-                    mb: 1,
-                  }}
-                >
-                  📧 support@eduhubvn.com
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    opacity: 0.8,
-                    mb: 1,
-                  }}
-                >
-                  📞 (+84) 123 456 789
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    opacity: 0.8,
-                  }}
-                >
-                  📍 123 Đường ABC, Quận 1, TP.HCM
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-        </Container>
-      </Box>
+      {/* Footer */}
+      <Footer />
       
       {/* EduHub Speed Dial */}
       <EduHubSpeedDial 

@@ -11,6 +11,7 @@ import {
   InputAdornment,
   Chip,
   Alert,
+  Tooltip,
 } from "@mui/material";
 import {
   Email,
@@ -18,14 +19,17 @@ import {
   Visibility,
   VisibilityOff,
   ArrowForward,
+  ArrowBack,
   Security,
   CheckCircle,
 } from "@mui/icons-material";
 import { API } from "../../utils/Fetch";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import Logoweb from "../../assets/eduhub-02.png";
-import { colors, hexToRgba } from "../../theme/colors";
+import Logoweb from "../../assets/Eduhub_logo_new.png";
+import { useColors } from "../../hooks/useColors";
+import { alpha } from "@mui/material/styles";
+import ThemeToggle from "../../components/ThemeToggle";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -40,6 +44,7 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingOtp, setLoadingOtp] = useState(false);
+  const colors = useColors();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -147,7 +152,7 @@ const Register = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: colors.background.gradient.primary,
+        background: colors.isDark ? colors.gradients.primary : "white",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -176,22 +181,74 @@ const Register = () => {
         },
       }}
     >
+      {/* Back Button */}
+      <Box
+        sx={{
+          position: "fixed",
+          top: 24,
+          left: 24,
+          zIndex: 1000,
+        }}
+      >
+        <Tooltip title="Quay lại trang chủ" placement="right">
+          <IconButton
+            onClick={() => navigate("/guest")}
+            sx={{
+              backgroundColor: colors.isDark
+                ? "rgba(255,255,255,0.1)"
+                : "rgba(0,0,0,0.05)",
+              color: colors.isDark ? "white" : colors.text.primary,
+              backdropFilter: "blur(10px)",
+              border: colors.isDark
+                ? "1px solid rgba(255,255,255,0.1)"
+                : "1px solid rgba(0,0,0,0.1)",
+              "&:hover": {
+                backgroundColor: colors.isDark
+                  ? "rgba(255,255,255,0.2)"
+                  : "rgba(0,0,0,0.1)",
+                transform: "translateX(-2px)",
+              },
+              transition: "all 0.3s ease",
+            }}
+          >
+            <ArrowBack />
+          </IconButton>
+        </Tooltip>
+      </Box>
+
+      {/* Theme Toggle */}
+      <Box
+        sx={{
+          position: "fixed",
+          top: 24,
+          right: 24,
+          zIndex: 1000,
+        }}
+      >
+        <ThemeToggle />
+      </Box>
+
       <Container maxWidth="sm" sx={{ position: "relative", zIndex: 2 }}>
         <Card
           elevation={0}
           sx={{
-            borderRadius: 5,
+            borderRadius: 1,
             overflow: "hidden",
-            boxShadow: "0 25px 80px rgba(0,0,0,0.15)",
-            border: `1px solid ${colors.border.light}`,
+            boxShadow: colors.isDark
+              ? "0 25px 80px rgba(0,0,0,0.4)"
+              : "0 25px 80px rgba(0,0,0,0.15)",
+            border: colors.isDark
+              ? `1px solid ${alpha(colors.text.primary, 0.1)}`
+              : `1px solid ${colors.border.light}`,
             backdropFilter: "blur(20px)",
-            background: "rgba(255,255,255,0.98)",
+            background: colors.isDark
+              ? "rgba(30,30,30,0.95)"
+              : "rgba(255,255,255,0.98)",
           }}
         >
-          {/* Header Section */}
           <Box
             sx={{
-              background: colors.background.gradient.dark,
+              background: colors.gradients.primary,
               color: "white",
               py: 5,
               px: 4,
@@ -224,75 +281,29 @@ const Register = () => {
                   alignItems: "center",
                   justifyContent: "center",
                   mb: 3,
+                  position: "relative",
                 }}
               >
                 <Box
                   sx={{
-                    width: 60,
-                    height: 60,
-                    borderRadius: "50%",
-                    background: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.indigo})`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    mb: 2,
-                    boxShadow: "0 8px 25px rgba(6, 182, 212, 0.3)",
-                    position: "relative",
-                    "&::before": {
-                      content: '""',
-                      position: "absolute",
-                      inset: -2,
-                      borderRadius: "50%",
-                      background: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.indigo})`,
-                      opacity: 0.3,
-                      filter: "blur(6px)",
-                    },
                   }}
                 >
                   <img
                     src={Logoweb}
                     alt="EduHubVN Logo"
                     style={{
-                      height: 30,
-                      filter: "brightness(0) invert(1)",
+                      height: 60,
+                      filter: colors.isDark
+                        ? "brightness(0) invert(1)"
+                        : "none",
                       position: "relative",
                       zIndex: 1,
                     }}
                   />
                 </Box>
-              </Box>
-
-              {/* Brand Info */}
-              <Box sx={{ mb: 2 }}>
-                <Typography
-                  variant="h4"
-                  sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    fontWeight: 800,
-                    letterSpacing: "-0.02em",
-                    mb: 0.5,
-                    background: `linear-gradient(135deg, #ffffff, ${colors.accent.blue})`,
-                    backgroundClip: "text",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
-                  EduHubVN
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    display: "block",
-                    opacity: 0.9,
-                    fontSize: "0.75rem",
-                    fontWeight: 500,
-                    letterSpacing: "1px",
-                    fontFamily: "'Inter', sans-serif",
-                    color: colors.accent.blue,
-                  }}
-                >
-                  EDUCATION PLATFORM
-                </Typography>
               </Box>
 
               {/* Welcome Text */}
@@ -302,28 +313,22 @@ const Register = () => {
                   sx={{
                     fontFamily: "'Inter', sans-serif",
                     fontWeight: 600,
-                    mb: 1,
                     fontSize: { xs: "1.3rem", md: "1.5rem" },
+                    color: colors.text.primary,
                   }}
                 >
-                  Tạo tài khoản mới
+                  Chào mừng đến với EduhubVN!
                 </Typography>
-                {/* <Typography
-                  variant="body2"
-                  sx={{
-                    opacity: 0.85,
-                    fontFamily: "'Inter', sans-serif",
-                    fontWeight: 400
-                  }}
-                >
-                  Bắt đầu hành trình học tập cùng chúng tôi
-                </Typography> */}
               </Box>
             </Box>
           </Box>
 
           {/* Form Section */}
-          <CardContent sx={{ p: { xs: 4, md: 6 } }}>
+          <CardContent
+            sx={{
+              p: { xs: 4, md: 6 },
+            }}
+          >
             <Box component="form" onSubmit={handleRegister}>
               {/* Email Field */}
               <Box sx={{ mb: 4 }}>
@@ -343,8 +348,8 @@ const Register = () => {
                     sx={{
                       width: 20,
                       height: 20,
-                      borderRadius: "50%",
-                      background: `linear-gradient(135deg, ${colors.accent.indigo}, ${colors.accent.blue})`,
+                      borderRadius: 1,
+                      background: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.blue})`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -365,21 +370,27 @@ const Register = () => {
                   error={!!error && error.includes("email")}
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 4,
+                      borderRadius: 1,
                       fontFamily: "'Inter', sans-serif",
-                      backgroundColor: colors.background.secondary,
+                      backgroundColor: colors.isDark
+                        ? alpha(colors.background.primary, 0.5)
+                        : colors.background.secondary,
                       fontSize: "1rem",
                       transition: "all 0.3s ease",
                       "& fieldset": {
-                        borderColor: colors.border.light,
+                        borderColor: colors.isDark
+                          ? alpha(colors.text.primary, 0.2)
+                          : colors.border.light,
                         borderWidth: 2,
                       },
                       "&:hover fieldset": {
-                        borderColor: colors.border.medium,
+                        borderColor: colors.isDark
+                          ? alpha(colors.text.primary, 0.3)
+                          : colors.border.medium,
                       },
                       "&.Mui-focused fieldset": {
-                        borderColor: colors.primary[600],
-                        boxShadow: `0 0 0 3px ${colors.primary[50]}`,
+                        borderColor: colors.primary.main,
+                        boxShadow: `0 0 0 3px ${colors.primary.light}`,
                       },
                     },
                     "& .MuiInputBase-input": {
@@ -435,9 +446,9 @@ const Register = () => {
                           onClick={() => setShowPassword(!showPassword)}
                           edge="end"
                           sx={{
-                            color: colors.primary[600],
+                            color: colors.primary.main,
                             "&:hover": {
-                              backgroundColor: colors.primary[50],
+                              backgroundColor: colors.primary.light,
                             },
                           }}
                         >
@@ -448,21 +459,27 @@ const Register = () => {
                   }}
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 4,
+                      borderRadius: 1,
                       fontFamily: "'Inter', sans-serif",
-                      backgroundColor: colors.background.secondary,
+                      backgroundColor: colors.isDark
+                        ? alpha(colors.background.primary, 0.5)
+                        : colors.background.secondary,
                       fontSize: "1rem",
                       transition: "all 0.3s ease",
                       "& fieldset": {
-                        borderColor: colors.border.light,
+                        borderColor: colors.isDark
+                          ? alpha(colors.text.primary, 0.2)
+                          : colors.border.light,
                         borderWidth: 2,
                       },
                       "&:hover fieldset": {
-                        borderColor: colors.border.medium,
+                        borderColor: colors.isDark
+                          ? alpha(colors.text.primary, 0.3)
+                          : colors.border.medium,
                       },
                       "&.Mui-focused fieldset": {
-                        borderColor: colors.primary[600],
-                        boxShadow: `0 0 0 3px ${colors.primary[50]}`,
+                        borderColor: colors.primary.main,
+                        boxShadow: `0 0 0 3px ${colors.primary.light}`,
                       },
                     },
                     "& .MuiInputBase-input": {
@@ -484,7 +501,7 @@ const Register = () => {
                     >
                       <Typography
                         variant="caption"
-                        sx={{ color: colors.text.tertiary }}
+                        sx={{ color: colors.text.secondary }}
                       >
                         Độ mạnh mật khẩu:
                       </Typography>
@@ -567,9 +584,9 @@ const Register = () => {
                           }
                           edge="end"
                           sx={{
-                            color: colors.primary[600],
+                            color: colors.primary.main,
                             "&:hover": {
-                              backgroundColor: colors.primary[50],
+                              backgroundColor: colors.primary.light,
                             },
                           }}
                         >
@@ -584,21 +601,27 @@ const Register = () => {
                   }}
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 4,
+                      borderRadius: 1,
                       fontFamily: "'Inter', sans-serif",
-                      backgroundColor: colors.background.secondary,
+                      backgroundColor: colors.isDark
+                        ? alpha(colors.background.primary, 0.5)
+                        : colors.background.secondary,
                       fontSize: "1rem",
                       transition: "all 0.3s ease",
                       "& fieldset": {
-                        borderColor: colors.border.light,
+                        borderColor: colors.isDark
+                          ? alpha(colors.text.primary, 0.2)
+                          : colors.border.light,
                         borderWidth: 2,
                       },
                       "&:hover fieldset": {
-                        borderColor: colors.border.medium,
+                        borderColor: colors.isDark
+                          ? alpha(colors.text.primary, 0.3)
+                          : colors.border.medium,
                       },
                       "&.Mui-focused fieldset": {
-                        borderColor: colors.primary[600],
-                        boxShadow: `0 0 0 3px ${colors.primary[50]}`,
+                        borderColor: colors.primary.main,
+                        boxShadow: `0 0 0 3px ${colors.primary.light}`,
                       },
                     },
                     "& .MuiInputBase-input": {
@@ -652,20 +675,26 @@ const Register = () => {
                     variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 4,
+                        borderRadius: 1,
                         fontFamily: "'Inter', sans-serif",
-                        backgroundColor: colors.background.secondary,
+                        backgroundColor: colors.isDark
+                          ? alpha(colors.background.primary, 0.5)
+                          : colors.background.secondary,
                         fontSize: "1rem",
                         "& fieldset": {
-                          borderColor: colors.border.light,
+                          borderColor: colors.isDark
+                            ? alpha(colors.text.primary, 0.2)
+                            : colors.border.light,
                           borderWidth: 2,
                         },
                         "&:hover fieldset": {
-                          borderColor: colors.border.medium,
+                          borderColor: colors.isDark
+                            ? alpha(colors.text.primary, 0.3)
+                            : colors.border.medium,
                         },
                         "&.Mui-focused fieldset": {
-                          borderColor: colors.primary[600],
-                          boxShadow: `0 0 0 3px ${colors.primary[50]}`,
+                          borderColor: colors.primary.main,
+                          boxShadow: `0 0 0 3px ${colors.primary.light}`,
                         },
                       },
                       "& .MuiInputBase-input": {
@@ -679,17 +708,17 @@ const Register = () => {
                     disabled={secondsLeft > 0 || loadingOtp || !email}
                     sx={{
                       fontFamily: "'Inter', sans-serif",
-                      borderColor: colors.primary[500],
-                      color: colors.primary[600],
+                      borderColor: colors.primary.main,
+                      color: colors.primary.main,
                       borderWidth: 2,
                       px: 3,
-                      borderRadius: 4,
+                      borderRadius: 1,
                       textTransform: "none",
                       fontWeight: 600,
                       minWidth: 120,
                       "&:hover": {
-                        borderColor: colors.primary[600],
-                        backgroundColor: colors.primary[50],
+                        borderColor: colors.primary.main,
+                        backgroundColor: colors.primary.light,
                       },
                       "&:disabled": {
                         borderColor: colors.neutral[300],
@@ -749,21 +778,30 @@ const Register = () => {
                 endIcon={!loading && <ArrowForward />}
                 sx={{
                   fontFamily: "'Inter', sans-serif",
-                  background: colors.background.gradient.secondary,
+                  background: colors.isDark
+                    ? colors.gradients.primary
+                    : colors.gradients.secondary,
                   py: 2.5,
                   fontSize: "1.1rem",
                   fontWeight: 600,
-                  borderRadius: 4,
+                  borderRadius: 1,
                   textTransform: "none",
-                  boxShadow: `0 8px 25px ${hexToRgba(colors.primary[500], 0.3)}`,
+                  color: "white",
+                  boxShadow: `0 8px 25px ${alpha(colors.primary.main, 0.3)}`,
                   "&:hover": {
-                    background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
+                    background: colors.isDark
+                      ? colors.gradients.secondary
+                      : `linear-gradient(135deg, ${colors.primary.main} 0%, ${colors.secondary.dark} 100%)`,
                     transform: "translateY(-2px)",
-                    boxShadow: `0 12px 35px ${hexToRgba(colors.primary[500], 0.4)}`,
+                    boxShadow: `0 12px 35px ${alpha(colors.primary.main, 0.4)}`,
                   },
                   "&:disabled": {
-                    background: colors.neutral[300],
-                    color: colors.neutral[500],
+                    background: colors.isDark
+                      ? alpha(colors.text.primary, 0.1)
+                      : colors.neutral[300],
+                    color: colors.isDark
+                      ? alpha(colors.text.primary, 0.3)
+                      : colors.neutral[500],
                     transform: "none",
                     boxShadow: "none",
                   },
@@ -777,16 +815,20 @@ const Register = () => {
           {/* Footer Section */}
           <Box
             sx={{
-              borderTop: `1px solid ${colors.border.light}`,
+              borderTop: colors.isDark
+                ? `1px solid ${alpha(colors.text.primary, 0.1)}`
+                : `1px solid ${colors.border.light}`,
               p: 4,
               textAlign: "center",
-              background: colors.background.tertiary,
+              background: colors.isDark
+                ? colors.background.secondary
+                : colors.background.primary,
             }}
           >
             <Typography
               variant="body2"
               sx={{
-                color: colors.text.tertiary,
+                color: colors.text.secondary,
                 fontFamily: "'Inter', sans-serif",
                 mb: 3,
               }}
@@ -798,21 +840,23 @@ const Register = () => {
               onClick={() => navigate("/login")}
               sx={{
                 fontFamily: "'Inter', sans-serif",
-                borderColor: colors.primary[500],
-                color: colors.primary[600],
+                borderColor: colors.primary.main,
+                color: colors.isDark ? "white" : colors.primary.main,
                 borderWidth: 2,
                 px: 6,
                 py: 2,
-                borderRadius: 4,
+                borderRadius: 1,
                 textTransform: "none",
                 fontWeight: 600,
                 transition: "all 0.3s ease",
                 "&:hover": {
-                  borderColor: colors.primary[600],
-                  color: colors.primary[700],
-                  backgroundColor: colors.primary[50],
+                  borderColor: colors.primary.main,
+                  color: colors.isDark ? "white" : colors.primary.dark,
+                  backgroundColor: colors.isDark
+                    ? alpha(colors.primary.main, 0.2)
+                    : colors.primary.light,
                   transform: "translateY(-1px)",
-                  boxShadow: `0 4px 12px ${hexToRgba(colors.primary[500], 0.2)}`,
+                  boxShadow: `0 4px 12px ${alpha(colors.primary.main, 0.2)}`,
                 },
               }}
             >
@@ -826,7 +870,9 @@ const Register = () => {
           <Typography
             variant="caption"
             sx={{
-              color: "rgba(255,255,255,0.8)",
+              color: colors.isDark
+                ? "rgba(255,255,255,0.8)"
+                : "rgba(0,0,0,0.6)",
               fontFamily: "'Inter', sans-serif",
               lineHeight: 1.6,
             }}

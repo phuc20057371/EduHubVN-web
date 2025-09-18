@@ -34,9 +34,12 @@ import {
 } from "@mui/material";
 import React from "react";
 import { useSelector } from "react-redux";
-import { colors } from "../../theme/colors";
+import { getColors } from "../../theme/colors";
+import { useTheme } from "@mui/material/styles";
 
 const LecturerPage = () => {
+  const theme = useTheme();
+  const colors = getColors(theme.palette.mode as any);
   const lecturerProfile = useSelector((state: any) => state.lecturerProfile);
   // const userProfile = useSelector((state: any) => state.userProfile);
 
@@ -57,7 +60,7 @@ const LecturerPage = () => {
       change: "+1",
       changeType: "increase",
       icon: <Assignment />,
-      color: colors.accent.lightBlue,
+      color: colors.secondary[500],
       background: colors.secondary[50],
     },
     {

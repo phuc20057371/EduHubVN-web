@@ -31,11 +31,11 @@ import {
   LockReset as LockResetIcon,
 } from "@mui/icons-material";
 import { API } from "../../utils/Fetch";
-import { colors } from "../../theme/colors";
 import { useDispatch, useSelector } from "react-redux";
 import { setSubAdmins } from "../../redux/slice/SubAdminSlice";
 import PermissionDialog from "../../components/admin-dialog/PermissionDialog";
 import CreateSubAdminDialog from "../../components/admin-dialog/CreateSubAdminDialog";
+import { useColors } from "../../hooks/useColors"; // Thay thế import colors
 
 interface SubAdmin {
   id: string;
@@ -67,6 +67,7 @@ const SubAdminPage = () => {
   const [resetting, setResetting] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const dispatch = useDispatch();
+  const colors = useColors(); // Sử dụng hook màu mới
 
   useEffect(() => {
     const fetchSubAdmins = async () => {
@@ -243,7 +244,7 @@ const SubAdminPage = () => {
         alignItems="center"
         mb={3}
       >
-        <Typography variant="h4" fontWeight="bold" color={colors.primary[600]}>
+        <Typography variant="h4" fontWeight="bold" color={colors.primary.main}>
           Quản lý MOD
         </Typography>
         <Button
@@ -251,8 +252,8 @@ const SubAdminPage = () => {
           startIcon={<AddIcon />}
           onClick={handleAddNew}
           sx={{
-            bgcolor: colors.primary[500],
-            "&:hover": { bgcolor: colors.primary[600] },
+            bgcolor: colors.primary.main,
+            "&:hover": { bgcolor: colors.primary.dark },
           }}
         >
           Thêm MOD
@@ -263,7 +264,7 @@ const SubAdminPage = () => {
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
-              <TableRow sx={{ bgcolor: colors.neutral[50] }}>
+              <TableRow sx={{ bgcolor: colors.background.secondary }}>
                 <TableCell>
                   <Typography fontWeight="bold">Tên đăng nhập</Typography>
                 </TableCell>
@@ -288,7 +289,7 @@ const SubAdminPage = () => {
                   <TableRow
                     key={subAdmin.id}
                     hover
-                    sx={{ "&:hover": { bgcolor: colors.neutral[50] } }}
+                    sx={{ "&:hover": { bgcolor: colors.background.secondary } }}
                   >
                     <TableCell>
                       <Typography variant="body2" fontWeight="medium">
@@ -322,8 +323,8 @@ const SubAdminPage = () => {
                               size="small"
                               variant="outlined"
                               sx={{
-                                borderColor: colors.primary[300],
-                                color: colors.primary[600],
+                                borderColor: colors.primary.light,
+                                color: colors.primary.main,
                               }}
                             />
                           ))
@@ -343,7 +344,7 @@ const SubAdminPage = () => {
                           <IconButton
                             size="small"
                             onClick={() => handlePermissions(subAdmin)}
-                            sx={{ color: colors.info[500] }}
+                            sx={{ color: colors.secondary.main }}
                           >
                             <SecurityIcon />
                           </IconButton>
@@ -361,7 +362,7 @@ const SubAdminPage = () => {
                           <IconButton
                             size="small"
                             onClick={() => handleDelete(subAdmin)}
-                            sx={{ color: colors.error[500] }}
+                            sx={{ color: colors.primary.dark }}
                           >
                             <DeleteIcon />
                           </IconButton>

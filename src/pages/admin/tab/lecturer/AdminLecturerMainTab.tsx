@@ -21,6 +21,7 @@ import {
   TextField,
   Tooltip,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 import SearchIcon from "@mui/icons-material/Search";
@@ -119,6 +120,8 @@ interface EnhancedTableProps {
 
 function EnhancedTableHead(props: EnhancedTableProps) {
   const { order, orderBy, onRequestSort } = props;
+  const theme = useTheme();
+  
   const createSortHandler =
     (property: keyof Lecturer) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
@@ -131,7 +134,9 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           position: "sticky",
           top: 0,
           zIndex: 2,
-          backgroundColor: "#1976d2",
+          backgroundColor: theme.palette.mode === 'dark' 
+            ? theme.palette.primary.dark 
+            : theme.palette.primary.main,
         }}
       >
         {headCells.map((headCell) => (
@@ -141,17 +146,38 @@ function EnhancedTableHead(props: EnhancedTableProps) {
             padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
             sx={{
-              backgroundColor: "#1976d2",
-              color: "#fff",
+              backgroundColor: theme.palette.mode === 'dark' 
+                ? theme.palette.primary.dark 
+                : theme.palette.primary.main,
+              color: theme.palette.mode === 'dark'
+                ? theme.palette.primary.contrastText
+                : "#fff",
               position: "sticky",
               top: 0,
               zIndex: 2,
+              fontWeight: 600,
             }}
           >
             <TableSortLabel
               active={orderBy === headCell.id}
               direction={orderBy === headCell.id ? order : "asc"}
               onClick={createSortHandler(headCell.id)}
+              sx={{
+                color: theme.palette.mode === 'dark'
+                  ? theme.palette.primary.contrastText
+                  : "#fff !important",
+                fontSize: '0.875rem', // 14px - smaller header text
+                '&.Mui-active': {
+                  color: theme.palette.mode === 'dark'
+                    ? theme.palette.primary.contrastText
+                    : "#fff !important",
+                },
+                '& .MuiTableSortLabel-icon': {
+                  color: theme.palette.mode === 'dark'
+                    ? theme.palette.primary.contrastText
+                    : "#fff !important",
+                },
+              }}
             >
               {headCell.label}
               {orderBy === headCell.id ? (
@@ -186,6 +212,8 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
   onRefresh,
   onLecturerDeleted,
 }) => {
+  const theme = useTheme();
+  
   // Local state for filters and table
   const [searchTerm, setSearchTerm] = React.useState("");
   const [academicRankFilter, setAcademicRankFilter] = React.useState("");
@@ -340,9 +368,13 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
         sx={{
           p: 3,
           mb: 3,
-          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-          borderRadius: 3,
-          border: "1px solid rgba(255,255,255,0.8)",
+          background: theme.palette.mode === 'dark' 
+            ? "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)"
+            : "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+          borderRadius: 1,
+          border: theme.palette.mode === 'dark'
+            ? "1px solid rgba(255,255,255,0.1)"
+            : "1px solid rgba(255,255,255,0.8)",
         }}
       >
         <Box
@@ -359,7 +391,9 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
             <Avatar
               sx={{
                 bgcolor: "primary.main",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: theme.palette.mode === 'dark'
+                  ? "linear-gradient(135deg, #00B2FF 0%, #0099e6 100%)"
+                  : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 width: 56,
                 height: 56,
               }}
@@ -371,11 +405,24 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
             <Box>
               <Typography
                 variant="h5"
-                sx={{ fontWeight: 700, color: "#2c3e50", mb: 0.5 }}
+                sx={{ 
+                  fontWeight: 700, 
+                  color: theme.palette.mode === 'dark' 
+                    ? theme.palette.text.primary 
+                    : "#2c3e50", 
+                  mb: 0.5 
+                }}
               >
                 Quản lý hồ sơ Giảng viên
               </Typography>
-              <Typography variant="body2" sx={{ color: "#6c757d" }}>
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: theme.palette.mode === 'dark' 
+                    ? theme.palette.text.secondary 
+                    : "#6c757d" 
+                }}
+              >
                 {searchTerm || academicRankFilter || statusFilter !== "APPROVED"
                   ? `Đã lọc ${filteredLecturers?.length || 0} giảng viên`
                   : `Tổng cộng ${filteredLecturers?.length || 0} giảng viên`}
@@ -446,8 +493,10 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                 label="Học hàm"
                 onChange={(e) => setAcademicRankFilter(e.target.value)}
                 sx={{
-                  bgcolor: "white",
-                  borderRadius: 2,
+                  bgcolor: theme.palette.mode === 'dark' 
+                    ? theme.palette.background.paper 
+                    : "white",
+                  borderRadius: 1,
                 }}
               >
                 <MenuItem value="">
@@ -470,8 +519,10 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                 label="Trạng thái"
                 onChange={(e) => setStatusFilter(e.target.value)}
                 sx={{
-                  bgcolor: "white",
-                  borderRadius: 2,
+                  bgcolor: theme.palette.mode === 'dark' 
+                    ? theme.palette.background.paper 
+                    : "white",
+                  borderRadius: 1,
                 }}
               >
                 <MenuItem value="">Tất cả</MenuItem>
@@ -491,8 +542,10 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               sx={{
-                bgcolor: "white",
-                borderRadius: 2,
+                bgcolor: theme.palette.mode === 'dark' 
+                  ? theme.palette.background.paper 
+                  : "white",
+                borderRadius: 1,
               }}
               InputProps={{
                 startAdornment: (
@@ -521,11 +574,15 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                 sx={{
                   textTransform: "none",
                   fontWeight: 600,
-                  borderRadius: 2,
-                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  borderRadius: 1,
+                  background: theme.palette.mode === 'dark'
+                    ? "linear-gradient(135deg, #00B2FF 0%, #0099e6 100%)"
+                    : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                   "&:hover": {
-                    background: "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                    background: theme.palette.mode === 'dark'
+                      ? "linear-gradient(135deg, #33c1ff 0%, #00B2FF 100%)"
+                      : "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
                     transform: "translateY(-1px)",
                     boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
                   },
@@ -549,7 +606,15 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
               alignItems: "center",
             }}
           >
-            <Typography variant="body2" sx={{ color: "#6c757d", mr: 1 }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                color: theme.palette.mode === 'dark' 
+                  ? theme.palette.text.secondary 
+                  : "#6c757d", 
+                mr: 1 
+              }}
+            >
               Bộ lọc đang áp dụng:
             </Typography>
 
@@ -601,9 +666,14 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
       <Paper
         sx={{
           width: "100%",
-          borderRadius: 3,
+          borderRadius: 1,
           overflow: "hidden",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+          boxShadow: theme.palette.mode === 'dark'
+            ? "0 4px 20px rgba(0,0,0,0.3)"
+            : "0 4px 20px rgba(0,0,0,0.08)",
+          backgroundColor: theme.palette.mode === 'dark'
+            ? theme.palette.background.paper
+            : theme.palette.background.default,
         }}
       >
         <TableContainer
@@ -641,42 +711,50 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                     sx={{
                       cursor: "pointer",
                       "&:hover": {
-                        backgroundColor: "#bbdefb !important",
+                        backgroundColor: theme.palette.mode === 'dark' 
+                          ? "rgba(144, 202, 249, 0.16) !important"
+                          : "rgba(187, 222, 251, 0.8) !important",
                       },
                       "&.Mui-selected": {
-                        backgroundColor: "#64b5f6 !important",
+                        backgroundColor: theme.palette.mode === 'dark' 
+                          ? "rgba(100, 181, 246, 0.24) !important" 
+                          : "rgba(100, 181, 246, 0.8) !important",
                         "&:hover": {
-                          backgroundColor: "#42a5f5 !important",
+                          backgroundColor: theme.palette.mode === 'dark' 
+                            ? "rgba(66, 165, 245, 0.32) !important" 
+                            : "rgba(66, 165, 245, 0.9) !important",
                         },
                       },
                     }}
                   >
-                    <TableCell>{row.fullName}</TableCell>
-                    <TableCell>
+                    <TableCell sx={{ fontSize: '0.875rem' }}>{row.fullName}</TableCell>
+                    <TableCell sx={{ fontSize: '0.875rem' }}>
                       <Chip
                         label={getAcademicRank(row.academicRank)}
                         size="small"
                         variant="outlined"
                         color="primary"
+                        sx={{ fontSize: '0.75rem' }}
                       />
                     </TableCell>
-                    <TableCell>{row.specialization}</TableCell>
-                    <TableCell align="right">{row.experienceYears}</TableCell>
-                    <TableCell>{row.jobField}</TableCell>
-                    <TableCell>
+                    <TableCell sx={{ fontSize: '0.875rem' }}>{row.specialization}</TableCell>
+                    <TableCell align="right" sx={{ fontSize: '0.875rem' }}>{row.experienceYears}</TableCell>
+                    <TableCell sx={{ fontSize: '0.875rem' }}>{row.jobField}</TableCell>
+                    <TableCell sx={{ fontSize: '0.875rem' }}>
                       {row.dateOfBirth
                         ? new Date(row.dateOfBirth).toLocaleDateString("vi-VN")
                         : ""}
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ fontSize: '0.875rem' }}>
                       <Chip
                         label={row.gender ? "Nam" : "Nữ"}
                         size="small"
                         color={row.gender ? "info" : "secondary"}
+                        sx={{ fontSize: '0.75rem' }}
                       />
                     </TableCell>
-                    <TableCell>{row.phoneNumber}</TableCell>
-                    <TableCell>
+                    <TableCell sx={{ fontSize: '0.875rem' }}>{row.phoneNumber}</TableCell>
+                    <TableCell sx={{ fontSize: '0.875rem' }}>
                       <Chip
                         label={getStatus(row.status)}
                         size="small"
@@ -686,9 +764,10 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                             : (getStatusColor(row.status) as any)
                         }
                         variant="filled"
+                        sx={{ fontSize: '0.75rem' }}
                       />
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="center" sx={{ fontSize: '0.875rem' }}>
                       <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
                         <Button
                           variant="outlined"
@@ -698,7 +777,10 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                             e.stopPropagation();
                             window.open(`/lecturer-info/${row.id}`, "_blank");
                           }}
-                          sx={{ minWidth: 50 }}
+                          sx={{ 
+                            minWidth: 50,
+                            fontSize: '0.75rem'
+                          }}
                         >
                           CV
                         </Button>
@@ -711,7 +793,10 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                             setSelectedLecturerUpdate({ lecturer: row });
                             setOpenUpdateDialog(true);
                           }}
-                          sx={{ minWidth: 70 }}
+                          sx={{ 
+                            minWidth: 70,
+                            fontSize: '0.75rem'
+                          }}
                         >
                           Hồ sơ
                         </Button>

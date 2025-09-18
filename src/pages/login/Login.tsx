@@ -1,5 +1,6 @@
 import {
   ArrowForward,
+  ArrowBack,
   Email,
   Lock,
   Visibility,
@@ -15,19 +16,23 @@ import {
   InputAdornment,
   TextField,
   Typography,
+  Tooltip,
 } from "@mui/material";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import Logoweb from "../../assets/eduhub-02.png";
+import Logoweb from "../../assets/Eduhub_logo_new.png";
+import { useColors } from "../../hooks/useColors";
 import { API } from "../../utils/Fetch";
-import { colors, hexToRgba } from "../../theme/colors";
+import ThemeToggle from "../../components/ThemeToggle";
+import { alpha } from "@mui/material";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const colors = useColors();
   const navigate = useNavigate();
 
   const handleClickShowPassword = () => {
@@ -64,7 +69,7 @@ const Login = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: colors.background.gradient.dark,
+        background: colors.background.primary,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -93,22 +98,71 @@ const Login = () => {
         },
       }}
     >
+      {/* Back Button */}
+      <Box
+        sx={{
+          position: "fixed",
+          top: 24,
+          left: 24,
+          zIndex: 1000,
+        }}
+      >
+        <Tooltip title="Quay lại trang chủ" placement="right">
+          <IconButton
+            onClick={() => navigate("/guest")}
+            sx={{
+              backgroundColor: colors.isDark
+                ? "rgba(255,255,255,0.1)"
+                : "rgba(0,0,0,0.05)",
+              color: colors.isDark ? "white" : colors.text.primary,
+              backdropFilter: "blur(10px)",
+              border: colors.isDark
+                ? "1px solid rgba(255,255,255,0.1)"
+                : "1px solid rgba(0,0,0,0.1)",
+              "&:hover": {
+                backgroundColor: colors.isDark
+                  ? "rgba(255,255,255,0.2)"
+                  : "rgba(0,0,0,0.1)",
+                transform: "translateX(-2px)",
+              },
+              transition: "all 0.3s ease",
+            }}
+          >
+            <ArrowBack />
+          </IconButton>
+        </Tooltip>
+      </Box>
+
+      {/* Theme Toggle */}
+      <Box
+        sx={{
+          position: "fixed",
+          top: 24,
+          right: 24,
+          zIndex: 1000,
+        }}
+      >
+        <ThemeToggle showLabels={true} />
+      </Box>
+
       <Container maxWidth="sm" sx={{ position: "relative", zIndex: 2 }}>
         <Card
           elevation={0}
           sx={{
-            borderRadius: 5,
+            borderRadius: 1,
             overflow: "hidden",
             boxShadow: "0 25px 80px rgba(0,0,0,0.15)",
             border: `1px solid ${colors.border.light}`,
             backdropFilter: "blur(20px)",
-            background: "rgba(255,255,255,0.98)",
+           
           }}
         >
           {/* Enhanced Header Section */}
           <Box
             sx={{
-              background: colors.background.gradient.primary,
+              background: colors.isDark
+                ? colors.gradients.primary
+                : colors.primary.main,
               color: "white",
               py: 5,
               px: 4,
@@ -146,71 +200,24 @@ const Login = () => {
               >
                 <Box
                   sx={{
-                    width: 60,
-                    height: 60,
-                    borderRadius: "50%",
-                    background: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.indigo})`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    mb: 2,
-                    boxShadow: "0 8px 25px rgba(6, 182, 212, 0.3)",
-                    position: "relative",
-                    "&::before": {
-                      content: '""',
-                      position: "absolute",
-                      inset: -2,
-                      borderRadius: "50%",
-                      background: `linear-gradient(135deg, ${colors.accent.blue}, ${colors.accent.indigo})`,
-                      opacity: 0.3,
-                      filter: "blur(6px)",
-                    },
                   }}
                 >
                   <img
                     src={Logoweb}
                     alt="EduHubVN Logo"
                     style={{
-                      height: 30,
-                      filter: "brightness(0) invert(1)",
+                      height: 60,
+                      filter: colors.isDark
+                        ? "brightness(0) invert(1)"
+                        : "none",
                       position: "relative",
                       zIndex: 1,
                     }}
                   />
                 </Box>
-              </Box>
-
-              {/* Brand Info */}
-              <Box sx={{ mb: 2 }}>
-                <Typography
-                  variant="h4"
-                  sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    fontWeight: 800,
-                    letterSpacing: "-0.02em",
-                    mb: 0.5,
-                    background: "white",
-                    backgroundClip: "text",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
-                  EduHubVN
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    display: "block",
-                    opacity: 0.9,
-                    fontSize: "0.75rem",
-                    fontWeight: 500,
-                    letterSpacing: "1px",
-                    fontFamily: "'Inter', sans-serif",
-                    color: colors.accent.blue,
-                  }}
-                >
-                  EDUCATION PLATFORM
-                </Typography>
               </Box>
 
               {/* Welcome Text */}
@@ -239,7 +246,7 @@ const Login = () => {
                   sx={{
                     fontFamily: "'Inter', sans-serif",
                     fontWeight: 600,
-                    color: colors.text.secondary,
+                    color: colors.text.primary,
                     mb: 1.5,
                     display: "flex",
                     alignItems: "center",
@@ -250,14 +257,14 @@ const Login = () => {
                     sx={{
                       width: 20,
                       height: 20,
-                      borderRadius: "50%",
-                      background: `linear-gradient(135deg, ${colors.accent.indigo}, ${colors.accent.blue})`,
+                      borderRadius: 1,
+
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                     }}
                   >
-                    <Email sx={{ fontSize: 12, color: "white" }} />
+                    <Email sx={{ fontSize: 12, color: colors.text.primary }} />
                   </Box>
                   Địa chỉ email
                 </Typography>
@@ -271,7 +278,7 @@ const Login = () => {
                   variant="outlined"
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 4,
+                      borderRadius: 1,
                       fontFamily: "'Inter', sans-serif",
                       backgroundColor: colors.background.secondary,
                       fontSize: "1rem",
@@ -284,8 +291,8 @@ const Login = () => {
                         borderColor: colors.border.medium,
                       },
                       "&.Mui-focused fieldset": {
-                        borderColor: colors.primary[600],
-                        boxShadow: `0 0 0 3px ${colors.primary[50]}`,
+                        borderColor: colors.primary.dark,
+                        boxShadow: `0 0 0 3px ${alpha(colors.primary.light, 0.3)}`,
                       },
                     },
                     "& .MuiInputBase-input": {
@@ -313,14 +320,14 @@ const Login = () => {
                     sx={{
                       width: 20,
                       height: 20,
-                      borderRadius: "50%",
-                      background: `linear-gradient(135deg, ${colors.accent.indigo}, ${colors.accent.blue})`,
+                      borderRadius: 1,
+
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                     }}
                   >
-                    <Lock sx={{ fontSize: 12, color: "white" }} />
+                    <Lock sx={{ fontSize: 12, color: colors.text.primary }} />
                   </Box>
                   Mật khẩu
                 </Typography>
@@ -341,9 +348,9 @@ const Login = () => {
                           onMouseDown={handleMouseDownPassword}
                           edge="end"
                           sx={{
-                            color: colors.primary[600],
+                            color: colors.primary.dark,
                             "&:hover": {
-                              backgroundColor: colors.primary[50],
+                              backgroundColor: alpha(colors.primary.light, 0.3),
                             },
                           }}
                         >
@@ -354,7 +361,7 @@ const Login = () => {
                   }}
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 4,
+                      borderRadius: 1,
                       fontFamily: "'Inter', sans-serif",
                       backgroundColor: colors.background.secondary,
                       fontSize: "1rem",
@@ -367,8 +374,8 @@ const Login = () => {
                         borderColor: colors.border.medium,
                       },
                       "&.Mui-focused fieldset": {
-                        borderColor: colors.primary[600],
-                        boxShadow: `0 0 0 3px ${colors.primary[50]}`,
+                        borderColor: colors.primary.dark,
+                        boxShadow: `0 0 0 3px ${alpha(colors.primary.light, 0.3)}`,
                       },
                     },
                     "& .MuiInputBase-input": {
@@ -387,13 +394,14 @@ const Login = () => {
                 endIcon={!loading && <ArrowForward />}
                 sx={{
                   fontFamily: "'Inter', sans-serif",
-                  background: colors.background.gradient.secondary,
+                  background: colors.isDark ? colors.gradients.primary : "none",
+                  color: colors.isDark ? "white" : "black",
                   py: 2.5,
                   fontSize: "1.1rem",
                   fontWeight: 600,
-                  borderRadius: 4,
+                  borderRadius: 1,
                   textTransform: "none",
-                  boxShadow: `0 8px 25px ${hexToRgba(colors.primary[500], 0.3)}`,
+                  boxShadow: `0 8px 25px ${alpha(colors.primary.main, 0.3)}`,
                   border: "none",
                   position: "relative",
                   overflow: "hidden",
@@ -410,9 +418,9 @@ const Login = () => {
                     transition: "transform 0.6s ease",
                   },
                   "&:hover": {
-                    background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
+                    background: `linear-gradient(135deg, ${colors.primary.dark} 0%, ${colors.secondary.dark} 100%)`,
                     transform: "translateY(-2px)",
-                    boxShadow: `0 12px 35px ${hexToRgba(colors.primary[500], 0.4)}`,
+                    boxShadow: `0 12px 35px ${alpha(colors.primary.main, 0.4)}`,
                     "&::before": {
                       transform: "translateX(100%)",
                     },
@@ -433,7 +441,7 @@ const Login = () => {
                 <Typography
                   variant="body2"
                   sx={{
-                    color: colors.text.tertiary,
+                    color: colors.text.secondary,
                     fontFamily: "'Inter', sans-serif",
                   }}
                 >
@@ -441,14 +449,14 @@ const Login = () => {
                   <Box
                     component="span"
                     sx={{
-                      color: colors.primary[600],
+                      color: colors.primary.dark,
                       fontWeight: 600,
                       cursor: "pointer",
                       textDecoration: "none",
                       borderBottom: `1px solid transparent`,
                       transition: "border-color 0.3s ease",
                       "&:hover": {
-                        borderBottomColor: colors.primary[600],
+                        borderBottomColor: colors.primary.dark,
                       },
                     }}
                   >
@@ -465,13 +473,15 @@ const Login = () => {
               borderTop: `1px solid ${colors.border.light}`,
               p: 4,
               textAlign: "center",
-              background: colors.background.tertiary,
+              background: colors.isDark
+                ? colors.gradients.secondary
+                : colors.background.secondary,
             }}
           >
             <Typography
               variant="body2"
               sx={{
-                color: colors.text.tertiary,
+                color: colors.text.secondary,
                 fontFamily: "'Inter', sans-serif",
                 mb: 3,
               }}
@@ -483,21 +493,21 @@ const Login = () => {
               onClick={() => navigate("/register")}
               sx={{
                 fontFamily: "'Inter', sans-serif",
-                borderColor: colors.primary[500],
-                color: colors.primary[600],
+                borderColor: colors.primary.main,
+                color: colors.primary.dark,
                 borderWidth: 2,
                 px: 6,
                 py: 2,
-                borderRadius: 4,
+                borderRadius: 1,
                 textTransform: "none",
                 fontWeight: 600,
                 transition: "all 0.3s ease",
                 "&:hover": {
-                  borderColor: colors.primary[600],
-                  color: colors.primary[700],
-                  backgroundColor: colors.primary[50],
+                  borderColor: colors.primary.dark,
+                  color: colors.primary.dark,
+                  backgroundColor: alpha(colors.primary.light, 0.3),
                   transform: "translateY(-1px)",
-                  boxShadow: `0 4px 12px ${hexToRgba(colors.primary[500], 0.2)}`,
+                  boxShadow: `0 4px 12px ${alpha(colors.primary.main, 0.2)}`,
                 },
               }}
             >
@@ -511,7 +521,7 @@ const Login = () => {
           <Typography
             variant="caption"
             sx={{
-              color: "rgba(255,255,255,0.8)",
+              color: colors.isDark ? "#ccc" : "#666",
               fontFamily: "'Inter', sans-serif",
               lineHeight: 1.6,
             }}

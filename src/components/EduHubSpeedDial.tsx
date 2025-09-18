@@ -1,6 +1,5 @@
 import Box from '@mui/material/Box';
 import SpeedDial from '@mui/material/SpeedDial';
-import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -8,6 +7,7 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
+import { useTheme } from '@mui/material/styles';
 import MessageIcon from '@mui/icons-material/Message';
 
 interface EduHubSpeedDialProps {
@@ -18,6 +18,7 @@ export default function EduHubSpeedDial({
   userRole = 'admin'
 }: EduHubSpeedDialProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const theme = useTheme();
 
   const handleDialogOpen = () => {
     setDialogOpen(true);
@@ -36,13 +37,20 @@ export default function EduHubSpeedDial({
     }}>
       <SpeedDial
         ariaLabel={`EduHub ${userRole} messages`}
-        icon={<SpeedDialIcon openIcon={<MessageIcon />} />}
+        icon={<MessageIcon />}
         onClick={handleDialogOpen}
         sx={{
           '& .MuiSpeedDial-fab': {
-            backgroundColor: '#1976d2',
+            backgroundColor: theme.palette.mode === 'dark' 
+              ? '#000000'
+              : '#ffffff',
+            color: theme.palette.mode === 'dark'
+              ? '#ffffff'
+              : '#000000',
             '&:hover': {
-              backgroundColor: '#1565c0',
+              backgroundColor: theme.palette.mode === 'dark'
+                ? theme.palette.primary.main
+                : theme.palette.primary.dark,
             },
           },
         }}

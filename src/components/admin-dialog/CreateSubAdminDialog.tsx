@@ -19,7 +19,7 @@ import {
   Person as PersonIcon,
   Lock as LockIcon,
 } from '@mui/icons-material';
-import { colors } from '../../theme/colors';
+import { useColors } from '../../hooks/useColors';
 
 interface CreateSubAdminDialogProps {
   open: boolean;
@@ -43,6 +43,7 @@ const CreateSubAdminDialog: React.FC<CreateSubAdminDialogProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const colors = useColors();
 
   const validateForm = () => {
     const newErrors = {
@@ -142,8 +143,8 @@ const CreateSubAdminDialog: React.FC<CreateSubAdminDialogProps> = ({
     >
       <DialogTitle 
         sx={{ 
-          bgcolor: colors.primary[50], 
-          color: colors.primary[700],
+          bgcolor: colors.primary.light, 
+          color: colors.primary.dark,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -182,17 +183,17 @@ const CreateSubAdminDialog: React.FC<CreateSubAdminDialogProps> = ({
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <PersonIcon sx={{ color: colors.primary[500] }} />
+                  <PersonIcon sx={{ color: colors.primary.main }} />
                 </InputAdornment>
               ),
             }}
             sx={{
               '& .MuiOutlinedInput-root': {
                 '&:hover fieldset': {
-                  borderColor: colors.primary[400],
+                  borderColor: colors.primary.light,
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: colors.primary[500],
+                  borderColor: colors.primary.main,
                 },
               },
             }}
@@ -210,7 +211,7 @@ const CreateSubAdminDialog: React.FC<CreateSubAdminDialogProps> = ({
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <LockIcon sx={{ color: colors.primary[500] }} />
+                  <LockIcon sx={{ color: colors.primary.main }} />
                 </InputAdornment>
               ),
               endAdornment: (
@@ -228,17 +229,17 @@ const CreateSubAdminDialog: React.FC<CreateSubAdminDialogProps> = ({
             sx={{
               '& .MuiOutlinedInput-root': {
                 '&:hover fieldset': {
-                  borderColor: colors.primary[400],
+                  borderColor: colors.primary.light,
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: colors.primary[500],
+                  borderColor: colors.primary.main,
                 },
               },
             }}
           />
         </Box>
 
-        <Box sx={{ mt: 3, p: 2, bgcolor: colors.neutral[50], borderRadius: 1 }}>
+        <Box sx={{ mt: 3, p: 2, bgcolor: colors.background.secondary, borderRadius: 1 }}>
           <Typography variant="body2" color={colors.text.secondary}>
             <strong>Lưu ý:</strong> MOD được tạo sẽ chưa có quyền hạn nào. 
             Bạn cần thiết lập quyền hạn cụ thể sau khi tạo tài khoản.
@@ -246,17 +247,17 @@ const CreateSubAdminDialog: React.FC<CreateSubAdminDialogProps> = ({
         </Box>
       </DialogContent>
       
-      <DialogActions sx={{ p: 3, bgcolor: colors.neutral[50] }}>
+      <DialogActions sx={{ p: 3, bgcolor: colors.background.secondary }}>
         <Button 
           onClick={handleClose} 
           variant="outlined"
           disabled={loading}
           sx={{ 
-            color: colors.neutral[600],
-            borderColor: colors.neutral[300],
+            color: colors.text.secondary,
+            borderColor: colors.primary.light,
             '&:hover': {
-              borderColor: colors.neutral[400],
-              bgcolor: colors.neutral[50],
+              borderColor: colors.primary.main,
+              bgcolor: colors.background.secondary,
             }
           }}
         >
@@ -267,9 +268,9 @@ const CreateSubAdminDialog: React.FC<CreateSubAdminDialogProps> = ({
           variant="contained"
           disabled={loading}
           sx={{
-            bgcolor: colors.primary[500],
+            bgcolor: colors.primary.main,
             '&:hover': {
-              bgcolor: colors.primary[600],
+              bgcolor: colors.primary.dark,
             },
             minWidth: '120px',
           }}
