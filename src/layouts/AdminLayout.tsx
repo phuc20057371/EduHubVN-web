@@ -248,14 +248,14 @@ const AdminLayout = () => {
                 borderRadius: 1,
                 minHeight: 56,
                 backgroundColor: isActivePath(item.path)
-                  ? colors.background.tertiary
+                  ? colors.background.primary
                   : "transparent",
                 border: isActivePath(item.path)
                   ? `1px solid ${colors.border.medium}`
                   : "1px solid transparent",
                 "&:hover": {
                   backgroundColor: isActivePath(item.path)
-                    ? colors.background.tertiary
+                    ? colors.background.primary
                     : colors.isDark ? colors.background.primary : colors.background.secondary,
                   transform: "translateX(4px)",
                   transition: "all 0.2s ease-in-out",
@@ -269,7 +269,7 @@ const AdminLayout = () => {
             >
               <ListItemIcon
                 sx={{
-                  minWidth: 44,
+                  minWidth: 50,
                   color: isActivePath(item.path)
                     ? colors.primary.main
                     : colors.text.secondary,
@@ -318,7 +318,7 @@ const AdminLayout = () => {
       <Box sx={{ px: 3, py: 2, mt: "auto" }}>
         <Card
           sx={{
-            background: `linear-gradient(135deg, ${colors.accent.blue} 0%, ${colors.accent.light} 100%)`,
+            background: `linear-gradient(135deg, ${colors.accent.blue} 0%, ${colors.accent.indigo} 100%)`,
             color: "white",
             textAlign: "center",
             py: 2,
@@ -387,7 +387,7 @@ const AdminLayout = () => {
               >
                 <img
                   src={LogoWeb}
-                  style={{ width: "auto", height: "80px" }}
+                  style={{ width: "auto", height: "50px" }}
                   alt="EduHubVN"
                 />
               </Box>
@@ -437,20 +437,7 @@ const AdminLayout = () => {
 
             {/* Right side actions */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              {/* Search Button */}
-              {/* <IconButton 
-                color="inherit"
-                sx={{
-                  bgcolor: alpha("#fff", 0.1),
-                  "&:hover": {
-                    bgcolor: alpha("#fff", 0.2),
-                  }
-                }}
-              >
-                <Search />
-              </IconButton> */}
-
-              {/* Theme Toggle */}
+             
               <ThemeToggle />
 
               {/* Notifications */}
@@ -561,7 +548,7 @@ const AdminLayout = () => {
                   </Typography>
                   <Typography
                     variant="caption"
-                    sx={{ color: colors.text.tertiary }}
+                    
                   >
                     {userProfile?.email || "admin@eduhubvn.com"}
                   </Typography>
@@ -572,7 +559,7 @@ const AdminLayout = () => {
                   sx={{
                     py: 1.5,
                     "&:hover": {
-                      bgcolor: colors.background.tertiary,
+                      bgcolor: colors.background.secondary,
                     },
                   }}
                 >
@@ -589,7 +576,7 @@ const AdminLayout = () => {
                     sx={{
                       py: 1.5,
                       "&:hover": {
-                        bgcolor: colors.background.tertiary,
+                        bgcolor: colors.background.secondary,
                       },
                     }}
                   >
@@ -647,7 +634,7 @@ const AdminLayout = () => {
           flexGrow: 1,
           background: colors.isDark 
             ? colors.gradients.secondary 
-            : `linear-gradient(180deg, ${colors.background.tertiary} 0%, ${colors.background.secondary} 100%)`,
+            : `linear-gradient(180deg, ${colors.background.primary} 0%, ${colors.background.secondary} 100%)`,
           minHeight: "calc(100vh - 140px)",
           position: "relative",
           paddingTop: "70px", // Add padding to account for fixed header

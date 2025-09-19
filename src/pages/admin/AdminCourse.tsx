@@ -193,7 +193,7 @@ const CourseTableRow = memo(
         <Box sx={{ display: "flex", gap: 2 }}>
           <Avatar
             src={row.course.thumbnailUrl}
-            sx={{ width: 60, height: 60, borderRadius: 2 }}
+            sx={{ width: 60, height: 60, borderRadius: 1 }}
           >
             <School />
           </Avatar>
@@ -299,7 +299,7 @@ const CourseTableRow = memo(
             variant="outlined"
             size="small"
             startIcon={<People />}
-            sx={{ borderRadius: 2, textTransform: "none" }}
+            sx={{ borderRadius: 1, textTransform: "none" }}
             onClick={(e) => {
               e.stopPropagation();
               onViewMembers(row.members || [], row.course);
@@ -321,7 +321,7 @@ const CourseTableRow = memo(
             onEditCourse(row.course);
           }}
           sx={{
-            borderRadius: 2,
+            borderRadius: 1,
             textTransform: "none",
             background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
           }}
@@ -652,7 +652,7 @@ const AdminCourse = () => {
           p: 3,
           mb: 3,
           background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-          borderRadius: 3,
+          borderRadius: 1,
           border: "1px solid rgba(255,255,255,0.8)",
         }}
       >
@@ -703,7 +703,7 @@ const AdminCourse = () => {
               startIcon={<Add />}
               onClick={() => setCreateCourseDialogOpen(true)}
               sx={{
-                borderRadius: 3,
+                borderRadius: 1,
                 textTransform: "none",
                 background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 px: 3,
@@ -780,7 +780,7 @@ const AdminCourse = () => {
                 onChange={(e) => setCourseTypeFilter(e.target.value)}
                 sx={{
                   bgcolor: "white",
-                  borderRadius: 2,
+                  borderRadius: 1,
                 }}
               >
                 {courseTypes.map((type) => (
@@ -801,7 +801,7 @@ const AdminCourse = () => {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 sx={{
                   bgcolor: "white",
-                  borderRadius: 2,
+                  borderRadius: 1,
                 }}
               >
                 {statusOptions.map((status) => (
@@ -826,9 +826,9 @@ const AdminCourse = () => {
               }}
               sx={{
                 bgcolor: "white",
-                borderRadius: 2,
+                borderRadius: 1,
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
+                  borderRadius: 1,
                 },
               }}
             />
@@ -846,9 +846,9 @@ const AdminCourse = () => {
               }}
               sx={{
                 bgcolor: "white",
-                borderRadius: 2,
+                borderRadius: 1,
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
+                  borderRadius: 1,
                 },
               }}
             />
@@ -883,7 +883,7 @@ const AdminCourse = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               sx={{
                 bgcolor: "white",
-                borderRadius: 2,
+                borderRadius: 1,
               }}
               InputProps={{
                 startAdornment: (
@@ -990,7 +990,7 @@ const AdminCourse = () => {
       {/* Table */}
       <Paper
         sx={{
-          borderRadius: 3,
+          borderRadius: 1,
           overflow: "hidden",
           boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
         }}

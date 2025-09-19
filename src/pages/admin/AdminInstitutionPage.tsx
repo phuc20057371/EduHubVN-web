@@ -10,11 +10,7 @@ import { setInstitutionPendingCreate } from "../../redux/slice/InstitutionPendin
 import { setInstitutionPendingUpdate } from "../../redux/slice/InstitutionPendingUpdateSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { createSelector } from "@reduxjs/toolkit";
-import {
-  Chip,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Chip, Paper, Typography } from "@mui/material";
 import { setInstitutions } from "../../redux/slice/InstitutionSlice";
 import { Business, Add, Update } from "@mui/icons-material";
 import InstitutionTab from "./tab/institution/InstitutionTab";
@@ -38,7 +34,6 @@ const selectInstitutions = createSelector(
   (state: any) => state.institution,
   (institution) => (Array.isArray(institution) ? institution : []),
 );
-
 
 const AdminInstitutionPage = () => {
   // PERMISSION CHECKS FIRST
@@ -102,7 +97,13 @@ const AdminInstitutionPage = () => {
     if (value !== currentTab) {
       setValue(currentTab);
     }
-  }, [canViewInstitutionTab, canViewApprovalTabs, canEditInstitution, canDeleteInstitution, canCreateInstitution]);
+  }, [
+    canViewInstitutionTab,
+    canViewApprovalTabs,
+    canEditInstitution,
+    canDeleteInstitution,
+    canCreateInstitution,
+  ]);
 
   const institutionPendingCreate = useSelector(selectInstitutionPendingCreate);
   const institutionPendingUpdate = useSelector(selectInstitutionPendingUpdate);
@@ -126,7 +127,8 @@ const AdminInstitutionPage = () => {
           if (userProfile.permissions.includes("SCHOOL_APPROVE")) {
             const response = await API.admin.getInstitutionPendingCreate();
             dispatch(setInstitutionPendingCreate(response.data.data));
-            const updateResponse = await API.admin.getInstitutionPendingUpdate();
+            const updateResponse =
+              await API.admin.getInstitutionPendingUpdate();
             dispatch(setInstitutionPendingUpdate(updateResponse.data.data));
           }
         }
@@ -134,7 +136,7 @@ const AdminInstitutionPage = () => {
         console.error("Error initializing AdminInstitutionPage:", error);
       }
     };
-    
+
     // Chỉ chạy fetchData khi userProfile đã có và có role
     if (userProfile && userProfile.role) {
       fetchData();
@@ -154,8 +156,11 @@ const AdminInstitutionPage = () => {
   const handleCreateInstitutionSuccess = async () => {
     // Refresh institutions list after creating new institution
     try {
-      if (userProfile.role === "ADMIN" || 
-          (userProfile.role === "SUB_ADMIN" && userProfile.permissions?.includes("SCHOOL_READ"))) {
+      if (
+        userProfile.role === "ADMIN" ||
+        (userProfile.role === "SUB_ADMIN" &&
+          userProfile.permissions?.includes("SCHOOL_READ"))
+      ) {
         const res = await API.admin.getAllInstitutions();
         dispatch(setInstitutions(res.data.data));
       }
@@ -181,15 +186,13 @@ const AdminInstitutionPage = () => {
                 size="small"
                 label={institutions.length}
                 sx={{
-                  bgcolor: "primary.main",
-                  color: "white",
                   fontWeight: 600,
                 }}
               />
             </Box>
           }
           value="1"
-        />
+        />,
       );
     }
 
@@ -206,8 +209,6 @@ const AdminInstitutionPage = () => {
                 size="small"
                 label={institutionPendingCreate.length}
                 sx={{
-                  bgcolor: "success.main",
-                  color: "white",
                   fontWeight: 600,
                 }}
               />
@@ -225,32 +226,38 @@ const AdminInstitutionPage = () => {
                 size="small"
                 label={institutionPendingUpdate.length}
                 sx={{
-                  bgcolor: "warning.main",
-                  color: "white",
                   fontWeight: 600,
                 }}
               />
             </Box>
           }
           value="3"
-        />
+        />,
       );
     }
 
     return tabs;
-  }, [canViewInstitutionTab, canViewApprovalTabs, institutions.length, institutionPendingCreate.length, institutionPendingUpdate.length]);
+  }, [
+    canViewInstitutionTab,
+    canViewApprovalTabs,
+    institutions.length,
+    institutionPendingCreate.length,
+    institutionPendingUpdate.length,
+  ]);
 
   return (
     <Box
       sx={{
         width: "100%",
         minHeight: "fix-content",
-        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
         p: 3,
       }}
     >
       {/* If user has no permissions, show access denied message */}
-      {userProfile && userProfile.role === "SUB_ADMIN" && !canViewInstitutionTab && !canViewApprovalTabs ? (
+      {userProfile &&
+      userProfile.role === "SUB_ADMIN" &&
+      !canViewInstitutionTab &&
+      !canViewApprovalTabs ? (
         <Box
           sx={{
             width: "100%",
@@ -284,7 +291,6 @@ const AdminInstitutionPage = () => {
               mb: 3,
               borderRadius: 3,
               overflow: "hidden",
-              background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
               border: "1px solid rgba(255,255,255,0.8)",
             }}
           >
@@ -292,7 +298,6 @@ const AdminInstitutionPage = () => {
               sx={{
                 borderBottom: 1,
                 borderColor: "divider",
-                bgcolor: "rgba(255,255,255,0.9)",
                 backdropFilter: "blur(10px)",
                 position: "relative",
               }}
@@ -318,8 +323,8 @@ const AdminInstitutionPage = () => {
           {/* TAB PANELS */}
           {canViewInstitutionTab && (
             <TabPanel value="1" sx={{ p: 0 }}>
-              <InstitutionTab 
-                institutions={institutions} 
+              <InstitutionTab
+                institutions={institutions}
                 canEdit={canEditInstitution}
                 canDelete={canDeleteInstitution}
                 canCreate={canCreateInstitution}
@@ -330,18 +335,22 @@ const AdminInstitutionPage = () => {
 
           {canViewApprovalTabs && (
             <TabPanel value="2" sx={{ p: 0 }}>
-              <CreateInstitutionTab institutionPendingCreate={institutionPendingCreate} />
+              <CreateInstitutionTab
+                institutionPendingCreate={institutionPendingCreate}
+              />
             </TabPanel>
           )}
 
           {canViewApprovalTabs && (
             <TabPanel value="3" sx={{ p: 0 }}>
-              <UpdateInstitutionTab institutionPendingUpdate={institutionPendingUpdate} />
+              <UpdateInstitutionTab
+                institutionPendingUpdate={institutionPendingUpdate}
+              />
             </TabPanel>
           )}
         </TabContext>
       )}
-      
+
       {/* Create Institution Dialog */}
       <CreateInstitutionDialog
         open={createDialogOpen}

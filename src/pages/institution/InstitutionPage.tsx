@@ -1,44 +1,27 @@
-import { useEffect, useState } from "react";
+import {
+  Assignment,
+  HandshakeOutlined,
+  Notifications,
+  Person,
+  TrendingUp,
+} from "@mui/icons-material";
 import {
   Box,
-  Container,
-  Typography,
-  TextField,
-  Paper,
-  Avatar,
-  Chip,
   Button,
-  InputAdornment,
-  IconButton,
-  List,
-  ListItem,
-  Divider,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Card,
   CardContent,
-  Collapse,
-  Stack,
+  Chip,
+  Container,
+  Divider,
+  List,
+  ListItem,
+  Paper,
+  Typography,
 } from "@mui/material";
-import {
-  Search,
-  Clear,
-  Person,
-  Assignment,
-  TrendingUp,
-  Notifications,
-  ExpandMore,
-  ExpandLess,
-  Add,
-  HandshakeOutlined,
-  FindInPage,
-} from "@mui/icons-material";
-import { API } from "../../utils/Fetch";
-import { setLecturers } from "../../redux/slice/LecturerSlice";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import * as React from "react";
+import { setLecturers } from "../../redux/slice/LecturerSlice";
+import { API } from "../../utils/Fetch";
 
 // Define the Lecturer type
 interface Lecturer {
@@ -55,10 +38,6 @@ interface Lecturer {
 }
 
 const InstitutionPage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedAcademicRank, setSelectedAcademicRank] = useState("");
-  const [showLecturerSearch, setShowLecturerSearch] = useState(false);
-
   const dispatch = useDispatch();
   const lecturers = useSelector(
     (state: any) => (state.lecturer as Lecturer[]) || [],
@@ -77,71 +56,10 @@ const InstitutionPage = () => {
     fetchData();
   }, [dispatch]);
 
-  const academicRanks = [
-    { value: "", label: "Tất cả học vị" },
-    { value: "CN", label: "Cử nhân" },
-    { value: "ThS", label: "Thạc sĩ" },
-    { value: "TS", label: "Tiến sĩ" },
-    { value: "PGS", label: "Phó Giáo sư" },
-    { value: "GS", label: "Giáo sư" },
-  ];
-
   // Calculate statistics
   const approvedLecturers = lecturers.filter(
     (lecturer: Lecturer) => lecturer.status === "APPROVED",
   );
-
-  // Filtered search results
-  const searchResults = React.useMemo(() => {
-    if (!searchQuery.trim() && !selectedAcademicRank) {
-      return [];
-    }
-
-    let filtered = approvedLecturers;
-
-    if (searchQuery.trim()) {
-      const searchTerm = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (lecturer: Lecturer) =>
-          lecturer.id?.toString().includes(searchQuery) ||
-          lecturer.fullName?.toLowerCase().includes(searchTerm) ||
-          lecturer.specialization?.toLowerCase().includes(searchTerm) ||
-          lecturer.jobField?.toLowerCase().includes(searchTerm) ||
-          lecturer.phoneNumber?.includes(searchQuery) ||
-          lecturer.email?.toLowerCase().includes(searchTerm),
-      );
-    }
-
-    if (selectedAcademicRank) {
-      filtered = filtered.filter(
-        (lecturer: Lecturer) => lecturer.academicRank === selectedAcademicRank,
-      );
-    }
-
-    return filtered;
-  }, [approvedLecturers, searchQuery, selectedAcademicRank]);
-
-  const handleClearSearch = () => {
-    setSearchQuery("");
-    setSelectedAcademicRank("");
-  };
-
-  const getAcademicRankDisplay = (rank: string) => {
-    switch (rank) {
-      case "TS":
-        return "Tiến sĩ";
-      case "ThS":
-        return "Thạc sĩ";
-      case "CN":
-        return "Cử nhân";
-      case "PGS":
-        return "Phó Giáo sư";
-      case "GS":
-        return "Giáo sư";
-      default:
-        return rank || "***";
-    }
-  };
 
   // Mock data for projects and contracts
   const stats = [
@@ -214,9 +132,30 @@ const InstitutionPage = () => {
             </Card>
           ))}
         </Box>
-
-        {/* Main Actions */}
+        {/* Main Management Sections */}
         <Box sx={{ display: "flex", gap: 3, mb: 4, flexWrap: "wrap" }}>
+          {/* Lecturer Management */}
+          <Card sx={{ flex: 1, minWidth: 300 }}>
+            <CardContent>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
+              >
+                <Person color="info" />
+                <Typography variant="h6">Quản lý Giảng viên</Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Tìm kiếm, quản lý và tạo hợp đồng với giảng viên hợp tác
+              </Typography>
+              <Button 
+                variant="outlined" 
+                size="small"
+                onClick={() => window.location.href = '/institution/lecturers'}
+              >
+                Xem tất cả
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* Project Management */}
           <Card sx={{ flex: 1, minWidth: 300 }}>
             <CardContent>
@@ -227,16 +166,11 @@ const InstitutionPage = () => {
                 <Typography variant="h6">Quản lý Đề tài</Typography>
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Tạo mới, theo dõi tiến độ và quản lý các đề tài nghiên cứu
+                Theo dõi tiến độ và quản lý các đề tài nghiên cứu
               </Typography>
-              <Stack direction="row" spacing={1}>
-                <Button variant="contained" size="small" startIcon={<Add />}>
-                  Tạo đề tài mới
-                </Button>
-                <Button variant="outlined" size="small">
-                  Xem tất cả
-                </Button>
-              </Stack>
+              <Button variant="outlined" size="small">
+                Xem tất cả
+              </Button>
             </CardContent>
           </Card>
 
@@ -252,19 +186,9 @@ const InstitutionPage = () => {
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 Quản lý hợp đồng với giảng viên và theo dõi trạng thái
               </Typography>
-              <Stack direction="row" spacing={1}>
-                <Button
-                  variant="contained"
-                  size="small"
-                  color="success"
-                  startIcon={<Add />}
-                >
-                  Tạo hợp đồng
-                </Button>
-                <Button variant="outlined" size="small">
-                  Xem danh sách
-                </Button>
-              </Stack>
+              <Button variant="outlined" size="small">
+                Xem tất cả
+              </Button>
             </CardContent>
           </Card>
         </Box>
@@ -367,276 +291,6 @@ const InstitutionPage = () => {
               </Typography>
             </ListItem>
           </List>
-        </Paper>
-
-        {/* Lecturer Search Section */}
-        <Paper sx={{ p: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              mb: 2,
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <FindInPage color="primary" />
-              <Typography variant="h6">Tìm kiếm Giảng viên</Typography>
-            </Box>
-            <Button
-              variant="outlined"
-              onClick={() => setShowLecturerSearch(!showLecturerSearch)}
-              endIcon={showLecturerSearch ? <ExpandLess /> : <ExpandMore />}
-            >
-              {showLecturerSearch ? "Ẩn tìm kiếm" : "Tìm kiếm giảng viên"}
-            </Button>
-          </Box>
-
-          <Collapse in={showLecturerSearch}>
-            <Box sx={{ mb: 3 }}>
-              {/* Search Bar */}
-              <Box
-                sx={{ display: "flex", gap: 2, alignItems: "center", mb: 3 }}
-              >
-                <TextField
-                  fullWidth
-                  placeholder="Tìm kiếm giảng viên theo tên, chuyên môn, email, số điện thoại..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Search />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (searchQuery || selectedAcademicRank) && (
-                      <InputAdornment position="end">
-                        <IconButton onClick={handleClearSearch} size="small">
-                          <Clear />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <FormControl sx={{ minWidth: 180 }}>
-                  <InputLabel>Học vị</InputLabel>
-                  <Select
-                    value={selectedAcademicRank}
-                    onChange={(e) => setSelectedAcademicRank(e.target.value)}
-                    label="Học vị"
-                  >
-                    {academicRanks.map((rank) => (
-                      <MenuItem key={rank.value} value={rank.value}>
-                        {rank.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
-
-              {/* Search Results */}
-              {searchResults.length > 0 && (
-                <Box>
-                  <Typography variant="subtitle1" gutterBottom>
-                    Kết quả tìm kiếm ({searchResults.length} giảng viên)
-                  </Typography>
-                  <Box sx={{ maxHeight: 300, overflowY: "auto" }}>
-                    <List>
-                      {searchResults.map((lecturer, index) => (
-                        <Box key={lecturer.id}>
-                          <ListItem sx={{ px: 0, alignItems: "flex-start" }}>
-                            <Box
-                              sx={{ display: "flex", width: "100%", gap: 2 }}
-                            >
-                              <Avatar
-                                src={lecturer.avatarUrl || ""}
-                                sx={{ width: 64, height: 64, mt: 1 }}
-                              >
-                                <Person />
-                              </Avatar>
-                              <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 1,
-                                    mb: 1,
-                                  }}
-                                >
-                                  <Typography variant="body1" component="div">
-                                    {lecturer.fullName || "***"}
-                                  </Typography>
-                                  <Chip
-                                    label={getAcademicRankDisplay(
-                                      lecturer.academicRank || "",
-                                    )}
-                                    size="small"
-                                    color="primary"
-                                    variant="outlined"
-                                  />
-                                  {/* <Chip
-                                    label={lecturer.status === "APPROVED" ? "Đã duyệt" : lecturer.status}
-                                    size="small"
-                                    color={lecturer.status === "APPROVED" ? "success" : "default"}
-                                    variant="outlined"
-                                  /> */}
-                                </Box>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  <b>Chuyên ngành:</b>{" "}
-                                  {lecturer.specialization || "***"}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  <b>Email:</b> {lecturer.email || "***"}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  <b>SĐT:</b> {lecturer.phoneNumber || "***"}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  <b>Kinh nghiệm:</b>{" "}
-                                  {lecturer.experienceYears || "***"} năm trong
-                                  lĩnh vực {lecturer.jobField || "***"}
-                                </Typography>
-                              </Box>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: 1,
-                                }}
-                              >
-                                <Button
-                                  variant="contained"
-                                  size="small"
-                                  startIcon={<HandshakeOutlined />}
-                                >
-                                  Tạo hợp đồng
-                                </Button>
-                                <Button
-                                  variant="outlined"
-                                  size="small"
-                                  onClick={() =>
-                                    window.open(
-                                      `/lecturer-info/${lecturer.id}`,
-                                      "_blank",
-                                    )
-                                  }
-                                >
-                                  Xem hồ sơ
-                                </Button>
-                              </Box>
-                            </Box>
-                          </ListItem>
-                          {index < searchResults.length - 1 && <Divider />}
-                        </Box>
-                      ))}
-                    </List>
-                  </Box>
-                </Box>
-              )}
-
-              {/* No Results */}
-              {(searchQuery || selectedAcademicRank) &&
-                searchResults.length === 0 && (
-                  <Box sx={{ textAlign: "center", py: 3 }}>
-                    <Person
-                      sx={{ fontSize: 48, color: "text.secondary", mb: 1 }}
-                    />
-                    <Typography variant="body2" color="text.secondary">
-                      Không tìm thấy giảng viên phù hợp
-                    </Typography>
-                  </Box>
-                )}
-
-              {/* Empty State */}
-              {!searchQuery && !selectedAcademicRank && (
-                <Box sx={{ textAlign: "center", py: 3 }}>
-                  <Search
-                    sx={{ fontSize: 48, color: "text.secondary", mb: 1 }}
-                  />
-                  <Typography variant="body2" color="text.secondary">
-                    Nhập từ khóa hoặc chọn học vị để tìm kiếm giảng viên phù hợp
-                    cho đề tài
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          </Collapse>
-
-          {/* Quick Stats for Lecturers */}
-          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-            <Box
-              sx={{
-                textAlign: "center",
-                p: 2,
-                bgcolor: "primary.50",
-                borderRadius: 1,
-                minWidth: 150,
-              }}
-            >
-              <Typography variant="h5" color="primary.main">
-                {approvedLecturers.length}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Giảng viên khả dụng
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                textAlign: "center",
-                p: 2,
-                bgcolor: "success.50",
-                borderRadius: 1,
-                minWidth: 150,
-              }}
-            >
-              <Typography variant="h5" color="success.main">
-                {
-                  approvedLecturers.filter(
-                    (l) =>
-                      l.academicRank === "TS" ||
-                      l.academicRank === "PGS" ||
-                      l.academicRank === "GS",
-                  ).length
-                }
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Tiến sĩ trở lên
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                textAlign: "center",
-                p: 2,
-                bgcolor: "info.50",
-                borderRadius: 1,
-                minWidth: 150,
-              }}
-            >
-              <Typography variant="h5" color="info.main">
-                {Math.round(
-                  approvedLecturers.reduce(
-                    (sum, l) => sum + (l.experienceYears || 0),
-                    0,
-                  ) / approvedLecturers.length,
-                ) || 0}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Kinh nghiệm TB (năm)
-              </Typography>
-            </Box>
-          </Box>
         </Paper>
       </Box>
     </Container>
