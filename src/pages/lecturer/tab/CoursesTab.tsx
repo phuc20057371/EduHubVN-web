@@ -74,14 +74,14 @@ const CoursesTab = ({
 
     try {
       if (deleteType === 'owned') {
-        const response = await API.lecturer.deleteOwnedCourse(itemToDelete.id);
+        const response = await API.admin.deleteOwnedCourse(itemToDelete.id);
         if (response.data.success) {
           const response = await API.lecturer.getLecturerProfile();
           dispatch(setLecturerProfile(response.data.data));
           toast.success("Xóa khóa học sở hữu thành công");
         }
       } else {
-        const response = await API.lecturer.deleteAttendedCourse(itemToDelete.id);
+        const response = await API.admin.deleteAttendedCourse(itemToDelete.id);
         if (response.data.success) {
           const response = await API.lecturer.getLecturerProfile();
           dispatch(setLecturerProfile(response.data.data));

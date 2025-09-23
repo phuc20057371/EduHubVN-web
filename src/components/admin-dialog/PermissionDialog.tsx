@@ -67,7 +67,7 @@ const PermissionDialog: React.FC<PermissionDialogProps> = ({
       { key: 'COURSE_CREATE', label: 'Tạo mới' },
       { key: 'COURSE_UPDATE', label: 'Cập nhật' },
       { key: 'COURSE_DELETE', label: 'Xóa' },
-      { key: 'COURSE_APPROVE', label: 'Phê duyệt' },
+      // { key: 'COURSE_APPROVE', label: 'Phê duyệt' },
     ],
   };
 

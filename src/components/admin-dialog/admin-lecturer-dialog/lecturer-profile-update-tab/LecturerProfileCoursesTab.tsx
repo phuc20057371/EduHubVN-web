@@ -409,7 +409,7 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
                       background: "rgba(255,255,255,0.9)",
                       color: "#1976d2",
                       textTransform: "none",
-                      borderRadius: 2,
+                      borderRadius: 1,
                       fontSize: "0.75rem",
                       px: 2,
                       py: 0.5,
@@ -442,7 +442,7 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
                       background: "rgba(255,255,255,0.9)",
                       color: "#1976d2",
                       textTransform: "none",
-                      borderRadius: 2,
+                      borderRadius: 1,
                       fontSize: "0.75rem",
                       px: 2,
                       py: 0.5,
@@ -495,7 +495,7 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
                     minWidth: "auto",
                     width: 32,
                     height: 32,
-                    borderRadius: "8px",
+                    borderRadius: 1,
                     borderColor: colors.primary[500],
                     color: colors.primary[500],
                     "&:hover": {
@@ -521,7 +521,7 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
                     minWidth: "auto",
                     width: 32,
                     height: 32,
-                    borderRadius: "8px",
+                    borderRadius: 1,
                     borderColor: colors.error[500],
                     color: colors.error[500],
                     "&:hover": {
@@ -550,7 +550,7 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
                         maxWidth: "300px",
                         height: "180px",
                         objectFit: "cover",
-                        borderRadius: "8px",
+                        borderRadius: 1,
                         border: "1px solid #E5E7EB",
                       }}
                     />
@@ -1000,7 +1000,7 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
                           color: "white",
                           fontWeight: 600,
                           textTransform: "none",
-                          borderRadius: 2,
+                          borderRadius: 1,
                           "&:hover": {
                             transform: "translateY(-1px)",
                           },
@@ -1021,7 +1021,7 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
                           color: "white",
                           fontWeight: 600,
                           textTransform: "none",
-                          borderRadius: 2,
+                          borderRadius: 1,
                           "&:hover": {
                             transform: "translateY(-1px)",
                           },
@@ -1122,7 +1122,7 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
                 color: "white",
                 fontWeight: 600,
                 textTransform: "none",
-                borderRadius: 2,
+                borderRadius: 1,
                 "&:hover": {
                   transform: "translateY(-1px)",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
@@ -1167,7 +1167,7 @@ const LecturerProfileCoursesTab: React.FC<LecturerProfileCoursesTabProps> = ({
                 color: "white",
                 fontWeight: 600,
                 textTransform: "none",
-                borderRadius: 2,
+                borderRadius: 1,
                 "&:hover": {
                   transform: "translateY(-1px)",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.15)",

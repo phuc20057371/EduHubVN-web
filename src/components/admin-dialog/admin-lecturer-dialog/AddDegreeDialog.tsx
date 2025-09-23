@@ -1,14 +1,11 @@
-import { AttachFile, CloudUpload, School, Close } from "@mui/icons-material";
+import { AttachFile, CloudUpload, Close as CloseIcon } from "@mui/icons-material";
 import {
   Autocomplete,
   Box,
   Button,
   Chip,
   CircularProgress,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
+  Modal,
   TextField,
   Typography,
 } from "@mui/material";
@@ -22,6 +19,34 @@ import {
   degreeLevelsAutoComplete,
   majorsAutoComplete,
 } from "../../../utils/AutoComplete";
+
+// Modal style matching AddCertificationDialog
+const style = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: {
+    xs: "95vw", // Mobile: 95% of viewport width
+    sm: "90vw", // Small tablet: 90% of viewport width
+    md: 750, // Medium and up: fixed 750px
+    lg: 750,
+    xl: 750,
+  },
+  maxWidth: "750px",
+  maxHeight: {
+    xs: "90vh", // Mobile: 90% of viewport height
+    sm: "95vh", // Tablet and up: 95% of viewport height
+  },
+  overflow: "hidden",
+  bgcolor: "#ffffff",
+  borderRadius: {
+    xs: "12px",
+    sm: "16px",
+  },
+  boxShadow: "0 20px 60px rgba(0, 0, 0, 0.1)",
+  outline: "none",
+};
 
 interface AddDegreeDialogProps {
   open: boolean;
@@ -189,55 +214,99 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
   };
 
   return (
-    <Dialog
+    <Modal
       open={open}
-      onClose={onClose}
-      maxWidth="md"
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 3,
-          maxHeight: "90vh",
-        },
+      onClose={() => {
+        onClose();
+        setSelectedFile(null);
+        setForm({
+          referenceId: "",
+          name: "",
+          major: "",
+          institution: "",
+          startYear: 0,
+          graduationYear: 0,
+          level: "",
+          url: "",
+          description: "",
+        });
       }}
+      aria-labelledby="add-degree-modal-title"
+      aria-describedby="add-degree-modal-description"
     >
-      {/* Header */}
-      <DialogTitle
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          background:
-            "linear-gradient(135deg, #14b8a6 0%, #0d9488 50%, #0f766e 100%)",
-          color: "white",
-          py: 3,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <School />
-          <Box>
-            <Typography variant="h6" component="div">
-              {editMode ? "Chỉnh sửa bằng cấp" : "Thêm bằng cấp mới"}
-            </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>
-              {editMode ? `Chỉnh sửa bằng cấp cho ${lecturer?.fullName || "giảng viên"}` : `Thêm bằng cấp cho ${lecturer?.fullName}`}
-            </Typography>
-          </Box>
-        </Box>
-        <IconButton
-          onClick={onClose}
+      <Box sx={style}>
+        {/* Header with gradient background */}
+        <Box
           sx={{
+            background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%)",
             color: "white",
-            "&:hover": {
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-            },
+            p: 3,
+            position: "relative",
+            borderBottom: "1px solid rgba(255,255,255,0.1)",
           }}
         >
-          <Close />
-        </IconButton>
-      </DialogTitle>
+          <Typography
+            id="add-degree-modal-title"
+            variant="h5"
+            component="h2"
+            sx={{
+              fontWeight: 600,
+              fontSize: {
+                xs: "1.25rem",
+                sm: "1.5rem",
+              },
+              pr: 6,
+            }}
+          >
+            {editMode ? "Chỉnh sửa bằng cấp" : "Thêm bằng cấp mới"}
+          </Typography>
+          <Button
+            onClick={() => {
+              onClose();
+              setSelectedFile(null);
+              setForm({
+                referenceId: "",
+                name: "",
+                major: "",
+                institution: "",
+                startYear: 0,
+                graduationYear: 0,
+                level: "",
+                url: "",
+                description: "",
+              });
+            }}
+            sx={{
+              position: "absolute",
+              right: 16,
+              top: 16,
+              minWidth: "auto",
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              color: "white",
+              backgroundColor: "rgba(255,255,255,0.1)",
+              "&:hover": {
+                backgroundColor: "rgba(255,255,255,0.2)",
+              },
+            }}
+          >
+            <CloseIcon />
+          </Button>
+        </Box>
 
-      <DialogContent sx={{ p: 0 }}>
+        {/* Content area with scroll */}
+        <Box
+          sx={{
+            maxHeight: {
+              xs: "calc(90vh - 140px)",
+              sm: "calc(85vh - 140px)",
+              md: "calc(80vh - 140px)",
+            },
+            overflow: "auto",
+            p: 0,
+          }}
+        >
         <Box sx={{ p: 4 }}>
           <Stack spacing={3}>
             {/* Reference ID và Tên bằng cấp */}
@@ -258,7 +327,7 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
               />
               <TextField
                 fullWidth
-                label="Tên bằng cấp *"
+                label="Tên bằng cấp"
                 placeholder="VD: Bằng Cử nhân Công nghệ Thông tin"
                 value={form.name}
                 onChange={(e) => handleChange("name", e.target.value)}
@@ -285,7 +354,7 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Chuyên ngành *"
+                    label="Chuyên ngành"
                     placeholder="Chọn hoặc nhập chuyên ngành"
                     required
                   />
@@ -303,7 +372,7 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Trình độ *"
+                    label="Trình độ"
                     placeholder="Chọn trình độ bằng cấp"
                     required
                   />
@@ -315,7 +384,7 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
             {/* Trường/Tổ chức */}
             <TextField
               fullWidth
-              label="Trường/Tổ chức cấp bằng *"
+              label="Trường/Tổ chức cấp bằng"
               placeholder="VD: Đại học Bách khoa Hà Nội"
               value={form.institution}
               onChange={(e) => handleChange("institution", e.target.value)}
@@ -332,7 +401,7 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
             >
               <TextField
                 fullWidth
-                label="Năm bắt đầu *"
+                label="Năm bắt đầu"
                 type="number"
                 placeholder="VD: 2018"
                 value={form.startYear || ""}
@@ -346,7 +415,7 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
               />
               <TextField
                 fullWidth
-                label="Năm tốt nghiệp *"
+                label="Năm tốt nghiệp"
                 type="number"
                 placeholder="VD: 2022"
                 value={form.graduationYear || ""}
@@ -509,8 +578,9 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
             </Box>
           </Stack>
         </Box>
-      </DialogContent>
-    </Dialog>
+        </Box>
+      </Box>
+    </Modal>
   );
 };
 

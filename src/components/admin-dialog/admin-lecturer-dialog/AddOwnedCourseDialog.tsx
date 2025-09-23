@@ -274,7 +274,7 @@ const AddOwnedCourseDialog: React.FC<AddOwnedCourseDialogProps> = ({
       onClose={onClose}
       sx={{
         "& .MuiBackdrop-root": {
-          backgroundColor: "rgba(139, 92, 246, 0.4)",
+          
           backdropFilter: "blur(8px)",
         },
       }}

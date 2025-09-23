@@ -1,8 +1,27 @@
-import { useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
+import { Add, Business } from "@mui/icons-material";
+import ClearIcon from "@mui/icons-material/Clear";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import SearchIcon from "@mui/icons-material/Search";
 import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  FormControl,
   IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
+  Snackbar,
   Table,
   TableBody,
   TableCell,
@@ -10,43 +29,23 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
+  TextField,
   Tooltip,
   Typography,
-  TextField,
-  InputAdornment,
-  Button,
-  Chip,
-  Avatar,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Box,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  DialogContentText,
-  Snackbar,
-  Alert,
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from "@mui/icons-material/Clear";
-import { Business, Add } from "@mui/icons-material";
-import type { Institution } from "../../../../types/Institution";
+import { useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 import InstitutionProfileUpdateDialog from "../../../../components/admin-dialog/admin-institution-dialog/InstitutionProfileUpdateDialog";
-import { API } from "../../../../utils/Fetch";
 import { setInstitutions } from "../../../../redux/slice/InstitutionSlice";
+import type { Institution } from "../../../../types/Institution";
 import {
   getInstitutionType,
   getStatus,
   getStatusColor,
 } from "../../../../utils/ChangeText";
-import { toast } from "react-toastify";
-
+import { API } from "../../../../utils/Fetch";
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   const aValue = a[orderBy];
   const bValue = b[orderBy];
@@ -144,7 +143,11 @@ interface EnhancedTableProps {
   headCells: readonly HeadCell[];
 }
 
+import { useTheme } from "@mui/material/styles";
+import { setInstitutionPendingUpdate } from "../../../../redux/slice/InstitutionPendingUpdateSlice";
+
 function EnhancedTableHead(props: EnhancedTableProps) {
+  const theme = useTheme();
   const { order, orderBy, onRequestSort, headCells: propHeadCells } = props;
   const createSortHandler =
     (property: keyof Institution) => (event: React.MouseEvent<unknown>) => {
@@ -152,7 +155,17 @@ function EnhancedTableHead(props: EnhancedTableProps) {
     };
 
   return (
-    <TableHead>
+    <TableHead
+      sx={{
+        position: "sticky",
+        top: 0,
+        zIndex: 2,
+        backgroundColor:
+          theme.palette.mode === "dark"
+            ? theme.palette.primary.dark
+            : theme.palette.primary.main,
+      }}
+    >
       <TableRow>
         {propHeadCells.map((headCell) => (
           <TableCell
@@ -172,7 +185,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
               onClick={createSortHandler(headCell.id)}
               sx={{
                 fontWeight: 700,
-               
+
                 "&.MuiTableSortLabel-root:hover": {
                   color: "#1976d2",
                 },
@@ -543,6 +556,13 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({
         (inst) => inst.id !== institutionToDelete.id,
       );
       dispatch(setInstitutions(updatedInstitutions));
+
+      // const cons1 = await API.admin.getInstitutionPendingCreate();
+      // dispatch(setInstitutionPendingCreate(cons1.data.data));
+      const cons2 = await API.admin.getInstitutionPendingUpdate();
+      dispatch(setInstitutionPendingUpdate(cons2.data.data));
+
+
     } catch (error) {
       console.error("Error deleting institution:", error);
       setSnackbar({

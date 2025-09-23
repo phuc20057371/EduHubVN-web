@@ -7,7 +7,6 @@ import {
   CardContent,
   Button,
   Avatar,
-  Chip,
   LinearProgress,
   Alert,
 } from "@mui/material";
@@ -18,33 +17,23 @@ import {
   School,
   Business,
   MenuBook,
-  CheckCircle,
-  Warning,
-  Error as ErrorIcon,
-  Info,
+  LibraryBooks,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { API } from "../../utils/Fetch";
 import { setLecturers } from "../../redux/slice/LecturerSlice";
 import { setInstitutions } from "../../redux/slice/InstitutionSlice";
 import { setPartner } from "../../redux/slice/PartnerSlice";
+import { setCourse } from "../../redux/slice/CourseSilce";
 
 interface StatCard {
   title: string;
   value: string | number;
+  lastMonthValue: string | number;
   icon: React.ReactNode;
   color: string;
   change: string;
   trend: "up" | "down" | "stable";
-}
-
-interface RecentActivity {
-  id: number;
-  type: "lecturer" | "institution" | "partner" | "course";
-  title: string;
-  description: string;
-  timestamp: string;
-  status: "pending" | "approved" | "rejected";
 }
 
 interface QuickAction {
@@ -64,7 +53,7 @@ const AdminPage = () => {
   const lecturers = useSelector((state: any) => state.lecturer || []);
   const institutions = useSelector((state: any) => state.institution || []);
   const partners = useSelector((state: any) => state.partner || []);
-
+  const courses = useSelector((state: any) => state.courses || []);
   const userProfile = useSelector((state: any) => state.userProfile);
 
   // Thêm useEffect riêng để debug userProfile changes
@@ -88,6 +77,8 @@ const AdminPage = () => {
             dispatch(setInstitutions(res2.data.data));
             const res3 = await API.admin.getAllPartners();
             dispatch(setPartner(res3.data.data));
+            const res4 = await API.admin.getAllCourses();
+            dispatch(setCourse(res4.data.data));
           } else if (userProfile.role === "SUB_ADMIN") {
             if (
               userProfile.permissions &&
@@ -118,6 +109,15 @@ const AdminPage = () => {
             } else {
               console.log("No ORGANIZATION_READ permission");
             }
+            if (
+              userProfile.permissions &&
+              userProfile.permissions.includes("COURSE_READ")
+            ) {
+              const res = await API.admin.getAllCourses();
+              dispatch(setCourse(res.data.data));
+            } else {
+              console.log("No COURSE_READ permission");
+            }
           }
         } catch (error) {
           console.error("Error initializing AdminPage:", error);
@@ -132,6 +132,7 @@ const AdminPage = () => {
     lecturers.length,
     institutions.length,
     partners.length,
+    courses.length,
     dispatch,
   ]);
 
@@ -145,14 +146,28 @@ const AdminPage = () => {
     const calculateChange = (
       items: any[],
       statusField: string | null = "status",
-    ): { percentChange: string; trend: "up" | "down" | "stable" } => {
+    ): {
+      currentCount: number;
+      lastMonthCount: number;
+      percentChange: string;
+      trend: "up" | "down" | "stable";
+    } => {
       if (!Array.isArray(items))
-        return { percentChange: "0%", trend: "stable" };
+        return {
+          currentCount: 0,
+          lastMonthCount: 0,
+          percentChange: "0%",
+          trend: "stable",
+        };
 
       const current = items.filter((item) => {
         const createdAt = new Date(item.createdAt);
+        const isMatch =
+          statusField === "isPublished"
+            ? item[statusField] === true
+            : !statusField || item[statusField] === "APPROVED";
         return (
-          (!statusField || item[statusField] === "APPROVED") &&
+          isMatch &&
           createdAt.getMonth() === currentMonth &&
           createdAt.getFullYear() === currentYear
         );
@@ -160,8 +175,12 @@ const AdminPage = () => {
 
       const last = items.filter((item) => {
         const createdAt = new Date(item.createdAt);
+        const isMatch =
+          statusField === "isPublished"
+            ? item[statusField] === true
+            : !statusField || item[statusField] === "APPROVED";
         return (
-          (!statusField || item[statusField] === "APPROVED") &&
+          isMatch &&
           createdAt.getMonth() === lastMonth &&
           createdAt.getFullYear() === lastMonthYear
         );
@@ -172,7 +191,12 @@ const AdminPage = () => {
       const trend: "up" | "down" | "stable" =
         diff > 0 ? "up" : diff < 0 ? "down" : "stable";
 
-      return { percentChange: `${percent}%`, trend };
+      return {
+        currentCount: current,
+        lastMonthCount: last,
+        percentChange: `${percent}%`,
+        trend,
+      };
     };
 
     // Check permissions for SUB_ADMIN
@@ -180,19 +204,58 @@ const AdminPage = () => {
     const isSubAdmin = userProfile?.role === "SUB_ADMIN";
     const permissions = userProfile?.permissions || [];
 
-    const hasLecturerRead = isAdmin || (isSubAdmin && permissions.includes("LECTURER_READ"));
-    const hasSchoolRead = isAdmin || (isSubAdmin && permissions.includes("SCHOOL_READ"));
-    const hasOrganizationRead = isAdmin || (isSubAdmin && permissions.includes("ORGANIZATION_READ"));
+    const hasLecturerRead =
+      isAdmin || (isSubAdmin && permissions.includes("LECTURER_READ"));
+    const hasSchoolRead =
+      isAdmin || (isSubAdmin && permissions.includes("SCHOOL_READ"));
+    const hasOrganizationRead =
+      isAdmin || (isSubAdmin && permissions.includes("ORGANIZATION_READ"));
+    const hasCourseRead =
+      isAdmin || (isSubAdmin && permissions.includes("COURSE_READ"));
 
-    const lecturerStats = hasLecturerRead ? calculateChange(lecturers, "status") : { percentChange: "0%", trend: "stable" as const };
-    const institutionStats = hasSchoolRead ? calculateChange(institutions, "status") : { percentChange: "0%", trend: "stable" as const };
-    const partnerStats = hasOrganizationRead ? calculateChange(partners, "status") : { percentChange: "0%", trend: "stable" as const };
+    const lecturerStats = hasLecturerRead
+      ? calculateChange(lecturers, "status")
+      : {
+          currentCount: 0,
+          lastMonthCount: 0,
+          percentChange: "0%",
+          trend: "stable" as const,
+        };
+    const institutionStats = hasSchoolRead
+      ? calculateChange(institutions, "status")
+      : {
+          currentCount: 0,
+          lastMonthCount: 0,
+          percentChange: "0%",
+          trend: "stable" as const,
+        };
+    const partnerStats = hasOrganizationRead
+      ? calculateChange(partners, "status")
+      : {
+          currentCount: 0,
+          lastMonthCount: 0,
+          percentChange: "0%",
+          trend: "stable" as const,
+        };
+
+    // For courses, use the new API structure - courses are returned directly
+    const courseStats = hasCourseRead
+      ? calculateChange(courses, "isPublished")
+      : {
+          currentCount: 0,
+          lastMonthCount: 0,
+          percentChange: "0%",
+          trend: "stable" as const,
+        };
 
     return [
       {
         title: "Tổng Giảng viên",
-        value: hasLecturerRead 
+        value: hasLecturerRead
           ? lecturers.filter((l: any) => l.status === "APPROVED").length
+          : "no_permission",
+        lastMonthValue: hasLecturerRead
+          ? lecturerStats.lastMonthCount
           : "no_permission",
         icon: <People sx={{ fontSize: 40 }} />,
         color: "#2e7d32",
@@ -201,8 +264,11 @@ const AdminPage = () => {
       },
       {
         title: "Trung tâm Đào tạo",
-        value: hasSchoolRead 
+        value: hasSchoolRead
           ? institutions.filter((i: any) => i.status === "APPROVED").length
+          : "no_permission",
+        lastMonthValue: hasSchoolRead
+          ? institutionStats.lastMonthCount
           : "no_permission",
         icon: <School sx={{ fontSize: 40 }} />,
         color: "#1976d2",
@@ -211,51 +277,32 @@ const AdminPage = () => {
       },
       {
         title: "Đối tác",
-        value: hasOrganizationRead 
+        value: hasOrganizationRead
           ? partners.filter((p: any) => p.status === "APPROVED").length
+          : "no_permission",
+        lastMonthValue: hasOrganizationRead
+          ? partnerStats.lastMonthCount
           : "no_permission",
         icon: <Business sx={{ fontSize: 40 }} />,
         color: "#ed6c02",
         change: partnerStats.percentChange,
         trend: partnerStats.trend,
       },
+      {
+        title: "Khóa học",
+        value: hasCourseRead
+          ? courses.filter((c: any) => c.course.isPublished === true).length
+          : "no_permission",
+        lastMonthValue: hasCourseRead
+          ? courseStats.lastMonthCount
+          : "no_permission",
+        icon: <LibraryBooks sx={{ fontSize: 40 }} />,
+        color: "#9c27b0",
+        change: courseStats.percentChange,
+        trend: courseStats.trend,
+      },
     ];
-  }, [lecturers, institutions, partners, userProfile]);
-
-  const recentActivities: RecentActivity[] = [
-    {
-      id: 1,
-      type: "lecturer",
-      title: "Nguyễn Văn A đăng ký làm giảng viên",
-      description: "Chuyên ngành: Khoa học máy tính",
-      timestamp: "2 phút trước",
-      status: "pending",
-    },
-    {
-      id: 2,
-      type: "institution",
-      title: "Trường Đại học XYZ yêu cầu hợp tác",
-      description: "Ngành: Công nghệ thông tin",
-      timestamp: "15 phút trước",
-      status: "approved",
-    },
-    {
-      id: 3,
-      type: "course",
-      title: "Khóa học React.js được tạo mới",
-      description: "Giảng viên: Trần Thị B",
-      timestamp: "1 giờ trước",
-      status: "approved",
-    },
-    {
-      id: 4,
-      type: "partner",
-      title: "Công ty ABC đăng ký đối tác",
-      description: "Lĩnh vực: Phần mềm",
-      timestamp: "3 giờ trước",
-      status: "pending",
-    },
-  ];
+  }, [lecturers, institutions, partners, courses, userProfile]);
 
   const quickActions: QuickAction[] = [
     {
@@ -295,65 +342,16 @@ const AdminPage = () => {
     const permissions = userProfile?.permissions || [];
 
     return {
-      lecturer: isAdmin || (isSubAdmin && permissions.includes("LECTURER_READ")),
+      lecturer:
+        isAdmin || (isSubAdmin && permissions.includes("LECTURER_READ")),
       school: isAdmin || (isSubAdmin && permissions.includes("SCHOOL_READ")),
-      organization: isAdmin || (isSubAdmin && permissions.includes("ORGANIZATION_READ")),
+      organization:
+        isAdmin || (isSubAdmin && permissions.includes("ORGANIZATION_READ")),
       course: isAdmin || (isSubAdmin && permissions.includes("COURSE_READ")),
     };
   };
 
   const actionPermissions = getActionPermissions();
-
-  const getStatusChip = (status: string) => {
-    switch (status) {
-      case "pending":
-        return (
-          <Chip
-            label="Chờ duyệt"
-            size="small"
-            color="warning"
-            icon={<Warning />}
-          />
-        );
-      case "approved":
-        return (
-          <Chip
-            label="Đã duyệt"
-            size="small"
-            color="success"
-            icon={<CheckCircle />}
-          />
-        );
-      case "rejected":
-        return (
-          <Chip
-            label="Từ chối"
-            size="small"
-            color="error"
-            icon={<ErrorIcon />}
-          />
-        );
-      default:
-        return (
-          <Chip label="Khác" size="small" color="default" icon={<Info />} />
-        );
-    }
-  };
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "lecturer":
-        return <People sx={{ color: "#2e7d32" }} />;
-      case "institution":
-        return <School sx={{ color: "#1976d2" }} />;
-      case "partner":
-        return <Business sx={{ color: "#ed6c02" }} />;
-      case "course":
-        return <MenuBook sx={{ color: "#9c27b0" }} />;
-      default:
-        return <Info />;
-    }
-  };
 
   if (loading) {
     return (
@@ -413,22 +411,35 @@ const AdminPage = () => {
                     {stat.title}
                   </Typography>
                   {typeof stat.value === "string" ? (
-                    <Alert 
-                      severity="info" 
-                      sx={{ 
+                    <Alert
+                      severity="info"
+                      sx={{
                         mb: 1,
-                        '& .MuiAlert-message': {
-                          fontSize: '0.875rem',
-                          fontWeight: 'medium'
-                        }
+                        "& .MuiAlert-message": {
+                          fontSize: "0.875rem",
+                          fontWeight: "medium",
+                        },
                       }}
                     >
                       Không có dữ liệu
                     </Alert>
                   ) : (
                     <>
-                      <Typography variant="h4" sx={{ fontWeight: "bold", mb: 1 }}>
+                      <Typography
+                        variant="h4"
+                        sx={{ fontWeight: "bold", mb: 0.5 }}
+                      >
                         {stat.value.toLocaleString()}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 1 }}
+                      >
+                        Tháng trước:{" "}
+                        {typeof stat.lastMonthValue === "string"
+                          ? "N/A"
+                          : stat.lastMonthValue.toLocaleString()}
                       </Typography>
                       <Box sx={{ display: "flex", alignItems: "center" }}>
                         <TrendingUp
@@ -460,186 +471,105 @@ const AdminPage = () => {
         ))}
       </Box>
 
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-        {/* Quick Actions */}
-        <Card sx={{ flex: { xs: "1 1 100%", lg: "1 1 calc(50% - 12px)" } }}>
-          <CardContent>
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{ fontWeight: "bold", mb: 3 }}
-            >
-              Thao tác nhanh
-            </Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {quickActions.map((action, index) => {
-                let hasPermission = true;
-                let disabledReason = "";
+      {/* Quick Actions - Full Width with 2 Columns */}
+      <Card sx={{ mb: 4 }}>
+        <CardContent>
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{ fontWeight: "bold", mb: 3 }}
+          >
+            Thao tác nhanh
+          </Typography>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              gap: 2,
+            }}
+          >
+            {quickActions.map((action, index) => {
+              let hasPermission = true;
+              let disabledReason = "";
 
-                // Check permissions based on action
-                if (action.title === "Quản lý Giảng viên") {
-                  hasPermission = actionPermissions.lecturer;
-                  disabledReason = "Không có quyền LECTURER_READ";
-                } else if (action.title === "Quản lý Trung tâm") {
-                  hasPermission = actionPermissions.school;
-                  disabledReason = "Không có quyền SCHOOL_READ";
-                } else if (action.title === "Quản lý Đối tác") {
-                  hasPermission = actionPermissions.organization;
-                  disabledReason = "Không có quyền ORGANIZATION_READ";
-                } else if (action.title === "Quản lý Khóa học") {
-                  hasPermission = actionPermissions.course;
-                  disabledReason = "Không có quyền COURSE_READ";
-                }
+              // Check permissions based on action
+              if (action.title === "Quản lý Giảng viên") {
+                hasPermission = actionPermissions.lecturer;
+                disabledReason = "Không có quyền LECTURER_READ";
+              } else if (action.title === "Quản lý Trung tâm") {
+                hasPermission = actionPermissions.school;
+                disabledReason = "Không có quyền SCHOOL_READ";
+              } else if (action.title === "Quản lý Đối tác") {
+                hasPermission = actionPermissions.organization;
+                disabledReason = "Không có quyền ORGANIZATION_READ";
+              } else if (action.title === "Quản lý Khóa học") {
+                hasPermission = actionPermissions.course;
+                disabledReason = "Không có quyền COURSE_READ";
+              }
 
-                return (
-                  <Card
-                    key={index}
-                    variant="outlined"
-                    sx={{
-                      cursor: hasPermission ? "pointer" : "not-allowed",
-                      transition: "all 0.3s ease",
-                      opacity: hasPermission ? 1 : 0.5,
-                      "&:hover": hasPermission ? {
-                        boxShadow: 2,
-                        transform: "translateY(-2px)",
-                      } : {},
-                    }}
-                    onClick={() => hasPermission && navigate(action.route)}
-                    title={!hasPermission ? disabledReason : ""}
-                  >
-                    <CardContent sx={{ p: 2 }}>
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Avatar 
-                          sx={{ 
-                            bgcolor: hasPermission ? action.color : "#999", 
-                            mr: 2 
-                          }}
-                        >
-                          {action.icon}
-                        </Avatar>
-                        <Box sx={{ flexGrow: 1 }}>
-                          <Typography
-                            variant="subtitle1"
-                            sx={{ fontWeight: "bold" }}
-                          >
-                            {action.title}
-                          </Typography>
-                          <Typography 
-                            variant="body2" 
-                            color={hasPermission ? "text.secondary" : "error.main"}
-                          >
-                            {hasPermission ? action.description : disabledReason}
-                          </Typography>
-                        </Box>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          disabled={!hasPermission}
-                          sx={{ 
-                            color: hasPermission ? action.color : "#999", 
-                            borderColor: hasPermission ? action.color : "#999" 
-                          }}
-                        >
-                          Xem
-                        </Button>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </Box>
-          </CardContent>
-        </Card>
-
-        {/* Recent Activities */}
-        <Card sx={{ flex: { xs: "1 1 100%", lg: "1 1 calc(50% - 12px)" } }}>
-          <CardContent>
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{ fontWeight: "bold", mb: 3 }}
-            >
-              Hoạt động gần đây
-            </Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {recentActivities.map((activity) => (
-                <Box
-                  key={activity.id}
-                  sx={{ p: 2, bgcolor: "background.default", borderRadius: 1 }}
+              return (
+                <Card
+                  key={index}
+                  variant="outlined"
+                  sx={{
+                    cursor: hasPermission ? "pointer" : "not-allowed",
+                    transition: "all 0.3s ease",
+                    opacity: hasPermission ? 1 : 0.5,
+                    "&:hover": hasPermission
+                      ? {
+                          boxShadow: 2,
+                          transform: "translateY(-2px)",
+                        }
+                      : {},
+                  }}
+                  onClick={() => hasPermission && navigate(action.route)}
+                  title={!hasPermission ? disabledReason : ""}
                 >
-                  <Box sx={{ display: "flex", alignItems: "start", gap: 2 }}>
-                    <Avatar sx={{ width: 40, height: 40 }}>
-                      {getActivityIcon(activity.type)}
-                    </Avatar>
-                    <Box sx={{ flexGrow: 1 }}>
-                      <Typography
-                        variant="subtitle2"
-                        sx={{ fontWeight: "bold" }}
-                      >
-                        {activity.title}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 1 }}
-                      >
-                        {activity.description}
-                      </Typography>
-                      <Box
+                  <CardContent sx={{ p: 2 }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Avatar
                         sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
+                          bgcolor: hasPermission ? action.color : "#999",
+                          mr: 2,
                         }}
                       >
-                        <Typography variant="caption" color="text.secondary">
-                          {activity.timestamp}
+                        {action.icon}
+                      </Avatar>
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ fontWeight: "bold" }}
+                        >
+                          {action.title}
                         </Typography>
-                        {getStatusChip(activity.status)}
+                        <Typography
+                          variant="body2"
+                          color={
+                            hasPermission ? "text.secondary" : "error.main"
+                          }
+                        >
+                          {hasPermission ? action.description : disabledReason}
+                        </Typography>
                       </Box>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        disabled={!hasPermission}
+                        sx={{
+                          color: hasPermission ? action.color : "#999",
+                          borderColor: hasPermission ? action.color : "#999",
+                        }}
+                      >
+                        Xem
+                      </Button>
                     </Box>
-                  </Box>
-                </Box>
-              ))}
-            </Box>
-          </CardContent>
-        </Card>
-      </Box>
-
-      {/* System Alerts */}
-      {/* <Box sx={{ mt: 4 }}>
-        <Typography
-          variant="h6"
-          gutterBottom
-          sx={{ fontWeight: "bold", mb: 2 }}
-        >
-          Thông báo hệ thống
-        </Typography>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <Alert
-            severity="info"
-            action={
-              <Button color="inherit" size="small">
-                Xem chi tiết
-              </Button>
-            }
-          >
-            <strong>Cập nhật hệ thống</strong> - Phiên bản 1.0 đã được triển
-            khai thành công
-          </Alert>
-          <Alert
-            severity="warning"
-            action={
-              <Button color="inherit" size="small">
-                Xử lý
-              </Button>
-            }
-          >
-            <strong>Cảnh báo</strong> - Có 15 đơn đăng ký giảng viên đang chờ
-            duyệt
-          </Alert>
-        </Box>
-      </Box> */}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </Box>
+        </CardContent>
+      </Card>
     </Box>
   );
 };

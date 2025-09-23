@@ -230,7 +230,7 @@ const AddCertificationDialog: React.FC<AddCertificationDialogProps> = ({
       onClose={onClose}
       sx={{
         "& .MuiBackdrop-root": {
-          backgroundColor: "rgba(15, 118, 110, 0.4)",
+          // backgroundColor: "rgba(15, 118, 110, 0.4)",
           backdropFilter: "blur(8px)",
         },
       }}
@@ -369,7 +369,7 @@ const AddCertificationDialog: React.FC<AddCertificationDialogProps> = ({
                   xs: "10px", // Mobile: smaller radius
                   md: "12px", // Desktop: larger radius
                 },
-                backgroundColor: "rgba(255, 255, 255, 0.15)",
+                // backgroundColor: "rgba(255, 255, 255, 0.15)",
                 backdropFilter: "blur(10px)",
                 display: "flex",
                 alignItems: "center",

@@ -1,35 +1,34 @@
-import React, { useEffect, useState } from "react";
 import {
-  Box,
-  Button,
-  Container,
-  TextField,
-  Typography,
-  Card,
-  CardContent,
-  IconButton,
-  InputAdornment,
-  Chip,
-  Alert,
-  Tooltip,
-} from "@mui/material";
-import {
+  ArrowBack,
+  ArrowForward,
+  CheckCircle,
   Email,
   Lock,
+  Security,
   Visibility,
   VisibilityOff,
-  ArrowForward,
-  ArrowBack,
-  Security,
-  CheckCircle,
 } from "@mui/icons-material";
-import { API } from "../../utils/Fetch";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import { alpha } from "@mui/material/styles";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Logoweb from "../../assets/Eduhub_logo_new.png";
 import { useColors } from "../../hooks/useColors";
-import { alpha } from "@mui/material/styles";
-import ThemeToggle from "../../components/ThemeToggle";
+import { API } from "../../utils/Fetch";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -217,7 +216,7 @@ const Register = () => {
       </Box>
 
       {/* Theme Toggle */}
-      <Box
+      {/* <Box
         sx={{
           position: "fixed",
           top: 24,
@@ -226,7 +225,7 @@ const Register = () => {
         }}
       >
         <ThemeToggle />
-      </Box>
+      </Box> */}
 
       <Container maxWidth="sm" sx={{ position: "relative", zIndex: 2 }}>
         <Card

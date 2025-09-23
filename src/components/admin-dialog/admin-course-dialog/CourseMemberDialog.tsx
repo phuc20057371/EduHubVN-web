@@ -52,6 +52,7 @@ interface CourseMemberDialogProps {
   members?: any[]; // Add members prop
   showSearch?: boolean;
   onMemberRoleChange?: (updatedMembers: any[]) => void;
+  canEdit?: boolean; // Add permission prop
 }
 
 const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
@@ -60,6 +61,7 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
   course,
   members, // Extract members from props
   onMemberRoleChange,
+  canEdit = true, // Default to true for backward compatibility
 }) => {
   const [localMembers, setLocalMembers] = useState(members || []);
   const [searchTerm, setSearchTerm] = useState("");
@@ -216,14 +218,14 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth={isSmallMobile ? "xs" : isMobile ? "md" : "xl"}
+      maxWidth={isSmallMobile ? "xs" : isMobile ? "md" : canEdit ? "lg" : "md"}
       fullWidth
       fullScreen={isSmallMobile}
       PaperProps={{
         sx: {
           height: isSmallMobile ? "100vh" : isMobile ? "95vh" : "90vh",
           maxHeight: isSmallMobile ? "100vh" : isMobile ? "95vh" : "90vh",
-          borderRadius: isSmallMobile ? 0 : 2,
+          borderRadius: isSmallMobile ? 0 : 1,
           boxShadow: isSmallMobile
             ? "none"
             : "0 24px 38px 3px rgba(0,0,0,0.14)",
@@ -322,32 +324,25 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
             </Box>
           </Stack>
 
-          <Badge
-            badgeContent={localMembers?.length || 0}
-            color="secondary"
+         
+          <IconButton
+            onClick={onClose}
             sx={{
-              alignSelf: { xs: "flex-start", sm: "center" },
-              "& .MuiBadge-badge": {
-                bgcolor: "white",
-                color: "primary.main",
-                fontWeight: "bold",
-                fontSize: { xs: "0.7rem", sm: "0.75rem" },
+              position: "absolute",
+              right: { xs: 4, sm: 8 },
+              top: { xs: 4, sm: 8 },
+              color: "rgba(255,255,255,0.8)",
+              bgcolor: "rgba(255,255,255,0.1)",
+              width: { xs: 36, sm: 40 },
+              height: { xs: 36, sm: 40 },
+              "&:hover": {
+                bgcolor: "rgba(255,255,255,0.2)",
+                color: "white",
               },
             }}
           >
-            <Chip
-              icon={<PersonIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />}
-              label="Thành viên"
-              size={isSmallMobile ? "small" : "medium"}
-              sx={{
-                bgcolor: "rgba(255,255,255,0.2)",
-                color: "white",
-                fontWeight: 600,
-                fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                "& .MuiChip-icon": { color: "white" },
-              }}
-            />
-          </Badge>
+            <CloseIcon fontSize={isSmallMobile ? "small" : "medium"} />
+          </IconButton>
 
           {isSmallMobile && (
             <IconButton
@@ -445,11 +440,11 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
                     },
                     "&::-webkit-scrollbar-track": {
                       bgcolor: "grey.100",
-                      borderRadius: "10px",
+                      borderRadius: 1,
                     },
                     "&::-webkit-scrollbar-thumb": {
                       bgcolor: "grey.400",
-                      borderRadius: "10px",
+                      borderRadius: 1,
                       "&:hover": {
                         bgcolor: "grey.600",
                       },
@@ -602,13 +597,16 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
                                             member?.courseRole || "ASSIGNED"
                                           }
                                           onChange={(e) => {
-                                            handleRoleChange(
-                                              member?.lecturer?.id,
-                                              e.target.value,
-                                            );
+                                            if (canEdit) {
+                                              handleRoleChange(
+                                                member?.lecturer?.id,
+                                                e.target.value,
+                                              );
+                                            }
                                           }}
+                                          disabled={!canEdit}
                                           sx={{
-                                            borderRadius: 2,
+                                            borderRadius: 1,
                                             fontSize: {
                                               xs: "0.8rem",
                                               sm: "0.875rem",
@@ -617,6 +615,12 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
                                               {
                                                 borderColor: "primary.light",
                                               },
+                                            ...(canEdit ? {} : {
+                                              bgcolor: "grey.100",
+                                              "& .MuiSelect-select": {
+                                                color: "text.disabled",
+                                              },
+                                            }),
                                           }}
                                         >
                                           {getRoleOptions().map((option) => (
@@ -629,38 +633,40 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
                                           ))}
                                         </Select>
                                       </FormControl>
-                                      <Tooltip title="Xóa giảng viên">
-                                        <IconButton
-                                          size={
-                                            isSmallMobile ? "small" : "medium"
-                                          }
-                                          color="error"
-                                          onClick={() =>
-                                            handleDeleteMember(
-                                              member?.lecturer?.id,
-                                            )
-                                          }
-                                          sx={{
-                                            bgcolor: "error.light",
-                                            color: "white",
-                                            alignSelf: {
-                                              xs: "center",
-                                              sm: "auto",
-                                            },
-                                            "&:hover": {
-                                              bgcolor: "error.main",
-                                              transform: "scale(1.1)",
-                                            },
-                                            transition: "all 0.2s ease",
-                                          }}
-                                        >
-                                          <DeleteIcon
-                                            fontSize={
+                                      {canEdit && (
+                                        <Tooltip title="Xóa giảng viên">
+                                          <IconButton
+                                            size={
                                               isSmallMobile ? "small" : "medium"
                                             }
-                                          />
-                                        </IconButton>
-                                      </Tooltip>
+                                            color="error"
+                                            onClick={() =>
+                                              handleDeleteMember(
+                                                member?.lecturer?.id,
+                                              )
+                                            }
+                                            sx={{
+                                              bgcolor: "error.light",
+                                              color: "white",
+                                              alignSelf: {
+                                                xs: "center",
+                                                sm: "auto",
+                                              },
+                                              "&:hover": {
+                                                bgcolor: "error.main",
+                                                transform: "scale(1.1)",
+                                              },
+                                              transition: "all 0.2s ease",
+                                            }}
+                                          >
+                                            <DeleteIcon
+                                              fontSize={
+                                                isSmallMobile ? "small" : "medium"
+                                              }
+                                            />
+                                          </IconButton>
+                                        </Tooltip>
+                                      )}
                                     </Stack>
                                   )}
                                 </Stack>
@@ -790,7 +796,7 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
                     bgcolor: "grey.50",
                     border: "2px dashed",
                     borderColor: "grey.300",
-                    borderRadius: 3,
+                    borderRadius: 1,
                   }}
                 >
                   <PersonIcon sx={{ fontSize: 64, color: "grey.400", mb: 2 }} />
@@ -798,7 +804,7 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
                     Chưa có giảng viên
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Thêm giảng viên từ danh sách bên phải
+                    {canEdit ? "Thêm giảng viên từ danh sách bên phải" : "Danh sách giảng viên trống"}
                   </Typography>
                 </Paper>
               )}
@@ -806,14 +812,15 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
           </Box>
 
           {/* Right side - Add Lecturers */}
-          <Box
-            sx={{
-              flex: 1,
-              p: { xs: 2, sm: 3 },
-              height: { xs: isSmallMobile ? "50vh" : "45vh", lg: "100%" },
-              bgcolor: "grey.50",
-            }}
-          >
+          {canEdit && (
+            <Box
+              sx={{
+                flex: 1,
+                p: { xs: 2, sm: 3 },
+                height: { xs: isSmallMobile ? "50vh" : "45vh", lg: "100%" },
+                bgcolor: "grey.50",
+              }}
+            >
             <Stack spacing={{ xs: 2, sm: 3 }} sx={{ height: "100%" }}>
               <Box>
                 <Typography
@@ -853,7 +860,7 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
                   label="Vai trò mặc định"
                   onChange={(e) => setDefaultNewRole(e.target.value)}
                   sx={{
-                    borderRadius: 2,
+                    borderRadius: 1,
                     bgcolor: "white",
                     fontSize: { xs: "0.8rem", sm: "0.875rem" },
                     maxWidth: { xs: "100%", sm: 200 },
@@ -886,7 +893,7 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
                   onChange={(e) => setSearchTerm(e.target.value)}
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
+                      borderRadius: 1,
                       bgcolor: "white",
                       fontSize: { xs: "0.8rem", sm: "0.875rem" },
                       transition: "all 0.3s ease",
@@ -938,7 +945,7 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
                     label="Học hàm"
                     onChange={(e) => setSelectedAcademicRank(e.target.value)}
                     sx={{
-                      borderRadius: 2,
+                      borderRadius: 1,
                       bgcolor: "white",
                       fontSize: { xs: "0.8rem", sm: "0.875rem" },
                     }}
@@ -970,11 +977,11 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
                     },
                     "&::-webkit-scrollbar-track": {
                       bgcolor: "grey.100",
-                      borderRadius: "10px",
+                      borderRadius: 1,
                     },
                     "&::-webkit-scrollbar-thumb": {
                       bgcolor: "grey.400",
-                      borderRadius: "10px",
+                      borderRadius: 1,
                       "&:hover": {
                         bgcolor: "grey.600",
                       },
@@ -1120,7 +1127,7 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
                               bgcolor: "info.light",
                               color: "info.contrastText",
                               mt: 2,
-                              borderRadius: 2,
+                              borderRadius: 1,
                             }}
                           >
                             <Typography
@@ -1178,6 +1185,7 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
               </Box>
             </Stack>
           </Box>
+          )}
         </Stack>
       </DialogContent>
 
@@ -1204,35 +1212,37 @@ const CourseMemberDialog: React.FC<CourseMemberDialogProps> = ({
             size={isMobile ? "medium" : "large"}
             sx={{
               minWidth: { xs: "100%", sm: 120 },
-              borderRadius: 2,
+              borderRadius: 1,
               textTransform: "none",
               fontWeight: 600,
               fontSize: { xs: "0.8rem", sm: "0.875rem" },
             }}
           >
-            Hủy bỏ
+            {canEdit ? "Hủy bỏ" : "Đóng"}
           </Button>
-          <Button
-            onClick={() => {
-              handleSaveMembers();
-              onClose();
-            }}
-            variant="contained"
-            size={isMobile ? "medium" : "large"}
-            sx={{
-              minWidth: { xs: "100%", sm: 120 },
-              borderRadius: 2,
-              textTransform: "none",
-              fontWeight: 600,
-              fontSize: { xs: "0.8rem", sm: "0.875rem" },
-              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-              "&:hover": {
-                boxShadow: "0 6px 20px rgba(0,0,0,0.2)",
-              },
-            }}
-          >
-            Lưu thay đổi
-          </Button>
+          {canEdit && (
+            <Button
+              onClick={() => {
+                handleSaveMembers();
+                onClose();
+              }}
+              variant="contained"
+              size={isMobile ? "medium" : "large"}
+              sx={{
+                minWidth: { xs: "100%", sm: 120 },
+                borderRadius: 1,
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                "&:hover": {
+                  boxShadow: "0 6px 20px rgba(0,0,0,0.2)",
+                },
+              }}
+            >
+              Lưu thay đổi
+            </Button>
+          )}
         </Stack>
       </DialogActions>
     </Dialog>

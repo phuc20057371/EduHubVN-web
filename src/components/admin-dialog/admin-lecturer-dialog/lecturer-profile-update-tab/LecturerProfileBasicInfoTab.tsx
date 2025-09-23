@@ -181,7 +181,7 @@ const LecturerProfileBasicInfoTab: React.FC<
         elevation={4}
         sx={{
           background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          borderRadius: 3,
+          borderRadius: 1,
           overflow: "hidden",
         }}
       >
@@ -352,7 +352,7 @@ const LecturerProfileBasicInfoTab: React.FC<
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setCitizenId(e.target.value)
                     }
-                    sx={{ flex: "0 0 150px" }}
+                    sx={{ flex: "0 0 180px" }}
                     variant="outlined"
                     disabled={!canUpdate}
                   />
@@ -380,7 +380,7 @@ const LecturerProfileBasicInfoTab: React.FC<
                     InputLabelProps={{
                       shrink: true,
                     }}
-                    sx={{ flex: "0 0 150px" }}
+                    sx={{ flex: "0 0 200px" }}
                     variant="outlined"
                     disabled={!canUpdate}
                   />
@@ -440,7 +440,10 @@ const LecturerProfileBasicInfoTab: React.FC<
             <CardContent>
               <Box display="flex" flexDirection="column" gap={2}>
                 <Box display="flex" gap={2}>
-                  <FormControl variant="outlined" sx={{ flex: "0 0 120px" }}>
+                  <FormControl
+                    variant="outlined"
+                    sx={{ flex: "0 0 180px"}}
+                  >
                     <InputLabel>Học vị</InputLabel>
                     <Select
                       value={academicRank}
@@ -560,15 +563,15 @@ const LecturerProfileBasicInfoTab: React.FC<
             color="primary"
             onClick={handleSave}
             sx={{
-              borderRadius: 2,
+              borderRadius: 1,
               px: 4,
               py: 1.5,
               fontSize: "1rem",
               fontWeight: 600,
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              "&:hover": {
-                background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
-              },
+              // background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              // "&:hover": {
+              //   background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
+              // },
             }}
           >
             Lưu

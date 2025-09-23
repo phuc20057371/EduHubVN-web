@@ -3,7 +3,6 @@ import {
   KeyboardArrowDown,
   Logout,
   Notifications,
-
 } from "@mui/icons-material";
 import {
   AppBar,
@@ -25,16 +24,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Logoweb from "../assets/Eduhub_logo_new.png";
+import EduHubSpeedDial from "../components/EduHubSpeedDial";
+import Footer from "../components/Footer";
+import { useColors } from "../hooks/useColors";
 import { setUserProfile } from "../redux/slice/userSlice";
 import { UserMessageHandler } from "../services/UserMessageHandler";
 import WebSocketService from "../services/WebSocketService";
-import { useColors } from "../hooks/useColors";
 import { getStatus, getStatusColor } from "../utils/ChangeText";
 import { API } from "../utils/Fetch";
 import { navigateToRole } from "../utils/navigationRole";
-import EduHubSpeedDial from "../components/EduHubSpeedDial";
-import ThemeToggle from "../components/ThemeToggle";
-import Footer from "../components/Footer";
 
 const PendingLayout = () => {
   const dispatch = useDispatch();
@@ -203,7 +201,7 @@ const PendingLayout = () => {
             </IconButton>
 
             {/* Theme Toggle */}
-            <ThemeToggle />
+            {/* <ThemeToggle /> */}
 
             {/* User Profile - HomeLayout Style */}
             <Paper
@@ -329,7 +327,7 @@ const PendingLayout = () => {
                     variant="body2"
                     sx={{
                       fontFamily: "'Inter', sans-serif",
-                      color: colors.text.tertiary,
+                      
                     }}
                   >
                     {userProfile?.email}
@@ -366,12 +364,8 @@ const PendingLayout = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          background: colors.isDark
-            ? colors.gradients.secondary
-            : `linear-gradient(135deg, ${colors.background.secondary} 0%, ${alpha(
-                colors.warning[50],
-                0.3,
-              )} 100%)`,
+          background: colors.background.primary,
+           
           py: 4,
           pt: "100px", // Add padding-top for fixed header (larger because it's bigger)
           position: "relative",

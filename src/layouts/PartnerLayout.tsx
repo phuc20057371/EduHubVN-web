@@ -160,13 +160,20 @@ const PartnerLayout = () => {
   ];
 
   const drawer = (
-    <Box sx={{ height: "100%", background: colors.isDark ? colors.background.primary : colors.background.secondary }}>
+    <Box
+      sx={{
+        height: "100%",
+        background: colors.isDark
+          ? colors.background.primary
+          : colors.background.secondary,
+      }}
+    >
       {/* Logo Section */}
       <Box
         sx={{
           p: 3,
-          background: colors.isDark 
-            ? colors.gradients.primary 
+          background: colors.isDark
+            ? colors.gradients.primary
             : `linear-gradient(135deg, ${colors.primary.main} 0%, ${colors.primary.dark} 100%)`,
           color: "white",
           textAlign: "center",
@@ -213,15 +220,21 @@ const PartnerLayout = () => {
                 borderRadius: 1,
                 minHeight: 56,
                 backgroundColor: isActivePath(item.path)
-                  ? colors.isDark ? colors.primary.dark : colors.primary.light
+                  ? colors.isDark
+                    ? colors.primary.dark
+                    : colors.primary.light
                   : "transparent",
                 border: isActivePath(item.path)
                   ? `1px solid ${colors.primary.main}`
                   : "1px solid transparent",
                 "&:hover": {
                   backgroundColor: isActivePath(item.path)
-                    ? colors.isDark ? colors.primary.main : colors.primary.light
-                    : colors.isDark ? `${colors.primary.main}20` : colors.neutral[50],
+                    ? colors.isDark
+                      ? colors.primary.main
+                      : colors.primary.light
+                    : colors.isDark
+                      ? `${colors.primary.main}20`
+                      : colors.neutral[50],
                   transform: "translateX(4px)",
                   transition: "all 0.2s ease-in-out",
                 },
@@ -237,7 +250,9 @@ const PartnerLayout = () => {
                   minWidth: 44,
                   color: isActivePath(item.path)
                     ? colors.primary.main
-                    : colors.isDark ? colors.text.primary : colors.neutral[600],
+                    : colors.isDark
+                      ? colors.text.primary
+                      : colors.neutral[600],
                   "& .MuiSvgIcon-root": { fontSize: "1.3rem" },
                 }}
               >
@@ -250,7 +265,9 @@ const PartnerLayout = () => {
                   "& .MuiListItemText-primary": {
                     color: isActivePath(item.path)
                       ? colors.primary.main
-                      : colors.isDark ? colors.text.primary : colors.neutral[800],
+                      : colors.isDark
+                        ? colors.text.primary
+                        : colors.neutral[800],
                     fontWeight: isActivePath(item.path) ? 600 : 500,
                     fontSize: "0.95rem",
                   },
@@ -280,8 +297,8 @@ const PartnerLayout = () => {
       <Box sx={{ px: 3, py: 2, mt: "auto" }}>
         <Card
           sx={{
-            background: colors.isDark 
-              ? colors.gradients.primary 
+            background: colors.isDark
+              ? colors.gradients.primary
               : `linear-gradient(135deg, ${colors.primary.main} 0%, ${colors.primary.dark} 100%)`,
             color: "white",
             textAlign: "center",
@@ -344,9 +361,7 @@ const PartnerLayout = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          background: colors.isDark 
-            ? colors.gradients.secondary 
-            : `linear-gradient(180deg, ${colors.background.tertiary} 0%, ${colors.background.secondary} 100%)`,
+          background: colors.background.primary,
           position: "relative",
           overflow: "auto",
           minHeight: 0,
@@ -363,11 +378,9 @@ const PartnerLayout = () => {
 
       {/* Footer */}
       <Footer />
-      
+
       {/* EduHub Speed Dial for Partner */}
-      <EduHubSpeedDial 
-        userRole="partner"
-      />
+      <EduHubSpeedDial userRole="partner" />
     </Box>
   );
 };

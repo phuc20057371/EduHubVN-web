@@ -21,6 +21,11 @@ import {
 } from "@mui/material";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import "dayjs/locale/vi";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PersonIcon from "@mui/icons-material/Person";
 import SchoolIcon from "@mui/icons-material/School";
@@ -54,7 +59,7 @@ const CreateLecturerDialog = ({
   const [jobField, setJobField] = useState("");
   const [experienceYears, setExperienceYears] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState<dayjs.Dayjs | null>(null);
   const [gender, setGender] = useState("");
   const [address, setAddress] = useState("");
   const [bio, setBio] = useState("");
@@ -118,6 +123,12 @@ const CreateLecturerDialog = ({
     }
 
     try {
+      // Convert dateOfBirth from dayjs to Date object
+      let dateOfBirthObj = null;
+      if (dateOfBirth && dateOfBirth.isValid()) {
+        dateOfBirthObj = dateOfBirth.toDate();
+      }
+
       const newLecturer: RequestLecturerFromAdmin = {
         email: email.trim(),
         password: password.trim(),
@@ -128,7 +139,7 @@ const CreateLecturerDialog = ({
         jobField: jobField.trim(),
         experienceYears: Number(experienceYears) || 0,
         phoneNumber: phoneNumber.trim(),
-        dateOfBirth: new Date(dateOfBirth),
+        dateOfBirth: dateOfBirthObj || new Date(),
         gender: gender === "true",
         address: address.trim(),
         bio: bio.trim(),
@@ -168,7 +179,7 @@ const CreateLecturerDialog = ({
     setJobField("");
     setExperienceYears("");
     setPhoneNumber("");
-    setDateOfBirth("");
+    setDateOfBirth(null);
     setGender("");
     setAddress("");
     setBio("");
@@ -188,7 +199,7 @@ const CreateLecturerDialog = ({
         fullWidth
         sx={{
           "& .MuiDialog-paper": {
-            borderRadius: 3,
+            borderRadius: 1,
             boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
           },
         }}
@@ -219,7 +230,7 @@ const CreateLecturerDialog = ({
         <DialogContent sx={{ p: 0 }}>
           <Box sx={{ p: 3 }}>
             {/* Account Information Card */}
-            <Card sx={{ mb: 3, borderRadius: 2, border: "1px solid #e0e0e0" }}>
+            <Card sx={{ mb: 3, borderRadius: 1, border: "1px solid #e0e0e0" }}>
               <CardHeader
                 avatar={
                   <Avatar sx={{ bgcolor: "secondary.main" }}>
@@ -266,7 +277,7 @@ const CreateLecturerDialog = ({
             </Card>
 
             {/* Personal Information Card */}
-            <Card sx={{ mb: 3, borderRadius: 2, border: "1px solid #e0e0e0" }}>
+            <Card sx={{ mb: 3, borderRadius: 1, border: "1px solid #e0e0e0" }}>
               <CardHeader
                 avatar={
                   <Avatar sx={{ bgcolor: "success.main" }}>
@@ -307,16 +318,21 @@ const CreateLecturerDialog = ({
                       variant="outlined"
                       size="small"
                     />
-                    <TextField
-                      fullWidth
-                      label="Ngày sinh"
-                      type="date"
-                      value={dateOfBirth}
-                      onChange={(e) => setDateOfBirth(e.target.value)}
-                      variant="outlined"
-                      size="small"
-                      InputLabelProps={{ shrink: true }}
-                    />
+                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
+                      <DatePicker
+                        label="Ngày sinh"
+                        value={dateOfBirth}
+                        onChange={(newValue) => setDateOfBirth(newValue as dayjs.Dayjs | null)}
+                        format="DD/MM/YYYY"
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            size: "small",
+                            variant: "outlined"
+                          }
+                        }}
+                      />
+                    </LocalizationProvider>
                   </Box>
 
                   <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
@@ -356,7 +372,7 @@ const CreateLecturerDialog = ({
             </Card>
 
             {/* Academic Information Card */}
-            <Card sx={{ mb: 3, borderRadius: 2, border: "1px solid #e0e0e0" }}>
+            <Card sx={{ mb: 3, borderRadius: 1, border: "1px solid #e0e0e0" }}>
               <CardHeader
                 avatar={
                   <Avatar sx={{ bgcolor: "warning.main" }}>

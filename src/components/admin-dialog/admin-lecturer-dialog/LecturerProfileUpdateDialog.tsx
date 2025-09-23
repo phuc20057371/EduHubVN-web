@@ -237,7 +237,7 @@ const LecturerProfileUpdateDialog = ({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth="lg"
       fullWidth
       sx={{
         "& .MuiDialog-paper": {

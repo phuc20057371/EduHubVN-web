@@ -171,6 +171,7 @@ export const API = {
   lecturer: {
     // Get
     getLecturerProfile: () => fetch.get("/api/v1/lecturer/lecturer-profile"),
+    getAllCourses: () => fetch.get("/api/v1/lecturer/get-all-courses"),
     // Lecturer
     updateProfile: (data: LecturerRequest) =>
       fetch.post("/api/v1/lecturer/update-profile", data),
@@ -388,6 +389,7 @@ export const API = {
       fetch.post("/api/v1/admin/create-course", data),
     updateCourse: (data: any) =>
       fetch.post("/api/v1/admin/update-course", data),
+    deleteCourse: (data: IdRequest) => fetch.post("/api/v1/admin/delete-course", data),
   },
   subadmin: {
     getAllSubAdmins: () => fetch.get("/api/v1/admin/sub-admin/all"),

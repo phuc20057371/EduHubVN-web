@@ -166,7 +166,7 @@ const ApproveOwnedCourseCreateDialog: React.FC<
               {/* Course Image */}
               <Card
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: 1,
                   overflow: "hidden",
                   boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
                   border: "1px solid rgba(255,255,255,0.8)",
@@ -188,7 +188,7 @@ const ApproveOwnedCourseCreateDialog: React.FC<
                       top: 16,
                       right: 16,
                       backgroundColor: "rgba(0,0,0,0.7)",
-                      borderRadius: 2,
+                      borderRadius: 1,
                       px: 2,
                       py: 0.5,
                     }}
@@ -252,7 +252,7 @@ const ApproveOwnedCourseCreateDialog: React.FC<
               {/* Links */}
               <Card
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: 1,
                   boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
                   border: "1px solid rgba(255,255,255,0.8)",
                 }}
@@ -275,7 +275,7 @@ const ApproveOwnedCourseCreateDialog: React.FC<
                       py: 1.5,
                       background:
                         "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                      borderRadius: 2,
+                      borderRadius: 1,
                       fontWeight: 600,
                       textTransform: "none",
                       boxShadow: "0 4px 20px rgba(102, 126, 234, 0.4)",
@@ -293,7 +293,7 @@ const ApproveOwnedCourseCreateDialog: React.FC<
               {/* Lecturer Info */}
               <Card
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: 1,
                   background:
                     "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
                   border: "1px solid rgba(99, 102, 241, 0.2)",
@@ -365,7 +365,7 @@ const ApproveOwnedCourseCreateDialog: React.FC<
               {/* Course Details */}
               <Card
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: 1,
                   boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
                   border: "1px solid rgba(255,255,255,0.8)",
                 }}
@@ -385,7 +385,7 @@ const ApproveOwnedCourseCreateDialog: React.FC<
                         gap: 2,
                         p: 2,
                         backgroundColor: "#f8fafc",
-                        borderRadius: 2,
+                        borderRadius: 1,
                         border: "1px solid #e2e8f0",
                       }}
                     >
@@ -439,7 +439,7 @@ const ApproveOwnedCourseCreateDialog: React.FC<
                       sx={{
                         p: 2,
                         backgroundColor: "#f8fafc",
-                        borderRadius: 2,
+                        borderRadius: 1,
                         border: "1px solid #e2e8f0",
                       }}
                     >
@@ -469,7 +469,7 @@ const ApproveOwnedCourseCreateDialog: React.FC<
                       sx={{
                         p: 2,
                         backgroundColor: "#f8fafc",
-                        borderRadius: 2,
+                        borderRadius: 1,
                         border: "1px solid #e2e8f0",
                       }}
                     >
@@ -505,7 +505,7 @@ const ApproveOwnedCourseCreateDialog: React.FC<
                         alignItems: "center",
                         p: 2,
                         backgroundColor: "#fef2f2",
-                        borderRadius: 2,
+                        borderRadius: 1,
                         border: "1px solid #fecaca",
                       }}
                     >
@@ -532,7 +532,7 @@ const ApproveOwnedCourseCreateDialog: React.FC<
               {/* Time & Schedule */}
               <Card
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: 1,
                   background:
                     "linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%)",
                   boxShadow: "0 8px 32px rgba(252, 211, 77, 0.3)",
@@ -631,7 +631,7 @@ const ApproveOwnedCourseCreateDialog: React.FC<
               backgroundColor: "#dc2626",
               fontWeight: 600,
               textTransform: "none",
-              borderRadius: 2,
+              borderRadius: 1,
               boxShadow: "0 4px 20px rgba(220, 38, 38, 0.3)",
               "&:hover": {
                 backgroundColor: "#b91c1c",
@@ -651,7 +651,7 @@ const ApproveOwnedCourseCreateDialog: React.FC<
               backgroundColor: "#059669",
               fontWeight: 600,
               textTransform: "none",
-              borderRadius: 2,
+              borderRadius: 1,
               boxShadow: "0 4px 20px rgba(5, 150, 105, 0.3)",
               "&:hover": {
                 backgroundColor: "#047857",

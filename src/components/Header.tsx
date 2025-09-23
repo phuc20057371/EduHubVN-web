@@ -1,32 +1,31 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import {
+  AccountCircle,
+  KeyboardArrowDown,
+  Logout,
+  Menu as MenuIcon,
+  Notifications,
+  Search,
+  Settings,
+} from "@mui/icons-material";
 import {
   AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Box,
-  Container,
   Avatar,
+  Badge,
+  Box,
+  Button,
+  Container,
+  Divider,
   IconButton,
   Menu,
   MenuItem,
-  Divider,
-  Badge,
+  Toolbar,
+  Typography,
   alpha,
 } from "@mui/material";
-import {
-  AccountCircle,
-  Settings,
-  Logout,
-  Notifications,
-  Menu as MenuIcon,
-  KeyboardArrowDown,
-  Search,
-} from "@mui/icons-material";
-import { useColors } from "../hooks/useColors";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import Logoweb from "../assets/Eduhub_logo_new.png";
-import ThemeToggle from "./ThemeToggle";
+import { useColors } from "../hooks/useColors";
 
 export interface MenuItem {
   text: string;
@@ -176,7 +175,7 @@ const Header: React.FC<HeaderProps> = ({
             </IconButton>
 
             {/* Theme Toggle */}
-            <ThemeToggle />
+            {/* <ThemeToggle /> */}
 
             {/* Notifications */}
             <IconButton
@@ -297,7 +296,7 @@ const Header: React.FC<HeaderProps> = ({
                 </Typography>
                 <Typography
                   variant="caption"
-                  sx={{ color: colors.text.tertiary }}
+                  
                 >
                   {profile?.email ||
                     userProfile?.email ||

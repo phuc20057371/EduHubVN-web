@@ -204,26 +204,36 @@ const AdminLecturerPage = () => {
       if (userProfile.role === "ADMIN") {
         const res = await API.admin.getAllLecturers();
         dispatch(setLecturers(res.data.data));
+        console.log("Refreshed all lecturers for ADMIN", res.data.data.length);
+        
 
         const resCreate = await API.admin.getLecturerPendingCreate();
         dispatch(setLecturerPendingCreate(resCreate.data.data));
+        console.log("Refreshed lecturer pending create requests for ADMIN", resCreate.data.data.length);
 
         const resUpdate = await API.admin.getLecturerPendingUpdate();
         dispatch(setLecturerPendingUpdate(resUpdate.data.data));
+        console.log("Refreshed lecturer pending update requests for ADMIN", resUpdate.data.data.length);
 
         const resDegree = await API.admin.getDegreeRequests();
         dispatch(setDegreeRequests(resDegree.data.data));
+        console.log("Refreshed degree requests for ADMIN", resDegree.data.data.length);
 
         const resCert = await API.admin.getCertificationRequests();
         dispatch(setCertificationRequests(resCert.data.data));
+        console.log("Refreshed certification requests for ADMIN", resCert.data.data.length);
 
         const resAttended = await API.admin.getAttendedCourseRequests();
-        const resOwned = await API.admin.getOwnedCourseRequests();
         dispatch(setAttendedCourseRequests(resAttended.data.data));
+        console.log("Refreshed attended course requests for ADMIN", resAttended.data.data.length);
+
+        const resOwned = await API.admin.getOwnedCourseRequests();
         dispatch(setOwnedCourseRequests(resOwned.data.data));
+        console.log("Refreshed owned course requests for ADMIN", resOwned.data.data.length);
 
         const resResearchProject = await API.admin.getResearchProjectRequests();
         dispatch(setResearchProjectRequests(resResearchProject.data.data));
+        console.log("Refreshed research project requests for ADMIN", resResearchProject.data.data.length);
       }
     } catch (error) {
       console.error("Error refreshing data:", error);
@@ -394,7 +404,7 @@ const AdminLecturerPage = () => {
           sx={{
             p: 4,
             textAlign: "center",
-            borderRadius: 3,
+            borderRadius: 1,
             boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
           }}
         >
@@ -414,7 +424,7 @@ const AdminLecturerPage = () => {
       sx={{
         width: "100%",
         typography: "body1",
-        bgcolor: "background.default",
+        // bgcolor: "background.default",
         minHeight: "100vh",
         p: 3,
       }}
@@ -424,7 +434,7 @@ const AdminLecturerPage = () => {
         <Paper
           sx={{
             mb: 3,
-            borderRadius: 3,
+            borderRadius: 1,
             overflow: "hidden",
             boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
           }}

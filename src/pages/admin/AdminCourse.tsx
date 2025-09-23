@@ -25,6 +25,15 @@ import {
   IconButton,
   Tooltip,
   Badge,
+  Card,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
+  Menu,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import {
   School,
@@ -36,7 +45,8 @@ import {
   Edit,
   Delete,
   DateRange,
-  Add, // Add this import
+  Add,
+  MoreVert,
 } from "@mui/icons-material";
 import { visuallyHidden } from "@mui/utils";
 import CourseMemberDialog from "../../components/admin-dialog/admin-course-dialog/CourseMemberDialog";
@@ -78,14 +88,20 @@ interface EnhancedTableProps {
   order: Order;
   orderBy: string;
   rowCount: number;
+  showActionsColumn: boolean;
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
-  const { order, orderBy, onRequestSort } = props;
+  const { order, orderBy, onRequestSort, showActionsColumn } = props;
   const createSortHandler =
     (property: string) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
     };
+
+  // Filter out actions column if no permissions
+  const visibleHeadCells = showActionsColumn 
+    ? headCells 
+    : headCells.filter(cell => cell.id !== 'actions');
 
   return (
     <TableHead>
@@ -97,7 +113,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         }}
       >
-        {headCells.map((headCell) => (
+        {visibleHeadCells.map((headCell) => (
           <TableCell
             key={headCell.id}
             align={headCell.numeric ? "right" : "left"}
@@ -148,11 +164,37 @@ const CourseTableRow = memo(
     onRowClick,
     onViewMembers,
     onEditCourse,
+    onDeleteCourse,
     courseTypeConfig,
     levelConfig,
     formatPrice,
     formatDate,
-  }: any) => (
+    canUpdate,
+    canDelete,
+  }: any) => {
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
+
+    const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+      event.stopPropagation();
+      setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+      setAnchorEl(null);
+    };
+
+    const handleEditClick = () => {
+      handleMenuClose();
+      onEditCourse(row.course);
+    };
+
+    const handleDeleteClick = () => {
+      handleMenuClose();
+      onDeleteCourse(row.course);
+    };
+
+    return (
     <TableRow
       hover
       onClick={(event) => onRowClick(event, row.course.id)}
@@ -311,31 +353,62 @@ const CourseTableRow = memo(
       </TableCell>
 
       {/* Actions */}
-      <TableCell align="center" sx={{ py: 2 }}>
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<Edit />}
-          onClick={(e) => {
-            e.stopPropagation();
-            onEditCourse(row.course);
-          }}
-          sx={{
-            borderRadius: 1,
-            textTransform: "none",
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          }}
-        >
-          Chỉnh sửa
-        </Button>
-      </TableCell>
+      {(canUpdate || canDelete) && (
+        <TableCell align="center" sx={{ py: 2 }}>
+          <>
+            <IconButton
+              onClick={handleMenuClick}
+              sx={{
+                color: "primary.main",
+                "&:hover": {
+                  bgcolor: "primary.light",
+                  color: "white",
+                },
+              }}
+            >
+              <MoreVert />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleMenuClose}
+              onClick={(e) => e.stopPropagation()}
+              PaperProps={{
+                sx: {
+                  mt: 1,
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                  borderRadius: 1,
+                },
+              }}
+            >
+              {canUpdate && (
+                <MenuItem onClick={handleEditClick}>
+                  <ListItemIcon>
+                    <Edit fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Chỉnh sửa</ListItemText>
+                </MenuItem>
+              )}
+              {canDelete && (
+                <MenuItem onClick={handleDeleteClick}>
+                  <ListItemIcon>
+                    <Delete fontSize="small" color="error" />
+                  </ListItemIcon>
+                  <ListItemText sx={{ color: "error.main" }}>Xóa</ListItemText>
+                </MenuItem>
+              )}
+            </Menu>
+          </>
+        </TableCell>
+      )}
     </TableRow>
-  ),
-);
+  );
+});
 
 const AdminCourse = () => {
   const dispatch = useDispatch();
   const courses = useSelector((state: any) => state.courses || []);
+  const userProfile = useSelector((state: any) => state.userProfile);
 
   const [order, setOrder] = useState<Order>("asc");
   const [orderBy, setOrderBy] = useState<string>("title");
@@ -351,9 +424,23 @@ const AdminCourse = () => {
   const [createCourseDialogOpen, setCreateCourseDialogOpen] = useState(false); // Add this state
   const [editCourseDialogOpen, setEditCourseDialogOpen] = useState(false);
   const [selectedCourseForEdit, setSelectedCourseForEdit] = useState<any>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState<any>(null);
+
+  // Check permissions
+  const isAdmin = userProfile?.role === "ADMIN";
+  const isSubAdmin = userProfile?.role === "SUB_ADMIN";
+  const permissions = userProfile?.permissions || [];
+
+  const canRead = isAdmin || (isSubAdmin && permissions.includes("COURSE_READ"));
+  const canCreate = isAdmin || (isSubAdmin && permissions.includes("COURSE_CREATE"));
+  const canUpdate = isAdmin || (isSubAdmin && permissions.includes("COURSE_UPDATE"));
+  const canDelete = isAdmin || (isSubAdmin && permissions.includes("COURSE_DELETE"));
 
   useEffect(() => {
     const fetchCourses = async () => {
+      if (!canRead) return;
+      
       try {
         const response = await API.admin.getAllCourses();
         dispatch(setCourse(response.data.data));
@@ -362,7 +449,7 @@ const AdminCourse = () => {
       }
     };
     fetchCourses();
-  }, [dispatch]);
+  }, [dispatch, canRead]);
 
   // Memoize heavy functions
   const getCourseTypeConfig = useCallback((type: string) => {
@@ -621,6 +708,36 @@ const AdminCourse = () => {
     [dispatch],
   );
 
+  const handleDeleteClick = useCallback((course: any) => {
+    setCourseToDelete(course);
+    setDeleteDialogOpen(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!courseToDelete) return;
+    
+    try {
+      // TODO: Gọi API xóa khóa học ở đây
+      await API.admin.deleteCourse({ id: courseToDelete.id });
+      
+      // Refresh courses list sau khi xóa thành công
+      const coursesResponse = await API.admin.getAllCourses();
+      dispatch(setCourse(coursesResponse.data.data));
+      
+      toast.success("Khóa học đã được xóa thành công!");
+      setDeleteDialogOpen(false);
+      setCourseToDelete(null);
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      toast.error("Có lỗi xảy ra khi xóa khóa học!");
+    }
+  }, [courseToDelete, dispatch]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteDialogOpen(false);
+    setCourseToDelete(null);
+  }, []);
+
   // const clearAllFilters = useCallback(() => {
   //   setSearchTerm("");
   //   setCourseTypeFilter("");
@@ -635,6 +752,34 @@ const AdminCourse = () => {
   };
 
   const hasDateFilters = startDateFilter || endDateFilter;
+
+  // If user doesn't have read permission, show access denied
+  if (!canRead) {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          minHeight: "400px",
+          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+          p: 3,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Card sx={{ p: 4, textAlign: "center", maxWidth: 500 }}>
+          <School sx={{ fontSize: 64, color: "text.secondary", mb: 2 }} />
+          <Typography variant="h5" gutterBottom>
+            Không có quyền truy cập
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Bạn không có quyền COURSE_READ để xem danh sách khóa học.
+            Vui lòng liên hệ quản trị viên để được cấp quyền.
+          </Typography>
+        </Card>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -697,67 +842,32 @@ const AdminCourse = () => {
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             {/* Create Course Button */}
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<Add />}
-              onClick={() => setCreateCourseDialogOpen(true)}
-              sx={{
-                borderRadius: 1,
-                textTransform: "none",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                px: 3,
-                py: 1.5,
-                fontWeight: 600,
-                fontSize: "1rem",
-                boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
-                "&:hover": {
-                  background:
-                    "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 6px 20px rgba(102, 126, 234, 0.6)",
-                },
-                transition: "all 0.3s ease",
-              }}
-            >
-              Thêm khóa học
-            </Button>
-
-            {selected && (
-              <>
-                <Tooltip title="Chỉnh sửa">
-                  <IconButton
-                    sx={{
-                      bgcolor: "primary.main",
-                      color: "white",
-                      width: 48,
-                      height: 48,
-                      "&:hover": {
-                        bgcolor: "primary.dark",
-                        transform: "scale(1.05)",
-                      },
-                    }}
-                  >
-                    <Edit />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Xóa">
-                  <IconButton
-                    sx={{
-                      bgcolor: "error.main",
-                      color: "white",
-                      width: 48,
-                      height: 48,
-                      "&:hover": {
-                        bgcolor: "error.dark",
-                        transform: "scale(1.05)",
-                      },
-                    }}
-                  >
-                    <Delete />
-                  </IconButton>
-                </Tooltip>
-              </>
+            {canCreate && (
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<Add />}
+                onClick={() => setCreateCourseDialogOpen(true)}
+                sx={{
+                  borderRadius: 1,
+                  textTransform: "none",
+                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  px: 3,
+                  py: 1.5,
+                  fontWeight: 600,
+                  fontSize: "1rem",
+                  boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
+                  "&:hover": {
+                    background:
+                      "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 6px 20px rgba(102, 126, 234, 0.6)",
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Thêm khóa học
+              </Button>
             )}
           </Box>
         </Box>
@@ -1002,6 +1112,7 @@ const AdminCourse = () => {
               orderBy={orderBy}
               onRequestSort={handleRequestSort}
               rowCount={filteredCourses?.length || 0}
+              showActionsColumn={canUpdate || canDelete}
             />
             <TableBody>
               {sortedCourses.map((row, _index) => {
@@ -1021,10 +1132,13 @@ const AdminCourse = () => {
                     onRowClick={handleClick}
                     onViewMembers={handleViewMembers}
                     onEditCourse={handleEditCourse}
+                    onDeleteCourse={handleDeleteClick}
                     courseTypeConfig={courseTypeConfig}
                     levelConfig={levelConfig}
                     formatPrice={formatPrice}
                     formatDate={formatDate}
+                    canUpdate={canUpdate}
+                    canDelete={canDelete}
                   />
                 );
               })}
@@ -1041,23 +1155,66 @@ const AdminCourse = () => {
         }}
         members={selectedCourseMembers}
         course={selectedCourse || undefined}
+        canEdit={canUpdate}
       />
 
-      <CreateCourseDialog
-        open={createCourseDialogOpen}
-        onClose={() => setCreateCourseDialogOpen(false)}
-        onSubmit={handleCreateCourse}
-      />
+      {canCreate && (
+        <CreateCourseDialog
+          open={createCourseDialogOpen}
+          onClose={() => setCreateCourseDialogOpen(false)}
+          onSubmit={handleCreateCourse}
+        />
+      )}
 
-      <EditCourseDialog
-        open={editCourseDialogOpen}
-        onClose={() => {
-          setEditCourseDialogOpen(false);
-          setSelectedCourseForEdit(null);
-        }}
-        onSubmit={handleUpdateCourse}
-        courseData={selectedCourseForEdit}
-      />
+      {canUpdate && (
+        <EditCourseDialog
+          open={editCourseDialogOpen}
+          onClose={() => {
+            setEditCourseDialogOpen(false);
+            setSelectedCourseForEdit(null);
+          }}
+          onSubmit={handleUpdateCourse}
+          courseData={selectedCourseForEdit}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ color: "error.main", fontWeight: 600 }}>
+          Xác nhận xóa khóa học
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Bạn có chắc chắn muốn xóa khóa học "{courseToDelete?.title}"?
+            <br />
+            <strong style={{ color: "red" }}>
+              Hành động này không thể hoàn tác!
+            </strong>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, gap: 1 }}>
+          <Button
+            onClick={handleDeleteCancel}
+            variant="outlined"
+            sx={{ textTransform: "none" }}
+          >
+            Hủy
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            variant="contained"
+            color="error"
+            sx={{ textTransform: "none" }}
+          >
+            Xóa khóa học
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

@@ -46,6 +46,7 @@ const PartnerUpdateTab: React.FC<PartnerUpdateTabProps> = ({
         const partnerUpdate = item.partnerOrganizationUpdate;
 
         return (
+          partner?.id?.toString().includes(updateSearchTerm) ||
           partner?.organizationName?.toLowerCase().includes(searchLower) ||
           partner?.representativeName?.toLowerCase().includes(searchLower) ||
           partner?.businessRegistrationNumber
@@ -161,7 +162,7 @@ const PartnerUpdateTab: React.FC<PartnerUpdateTabProps> = ({
               fullWidth
               variant="outlined"
               size="small"
-              placeholder="🔍 Tìm kiếm theo tên, địa chỉ, đại diện, ĐKKD..."
+              placeholder="🔍 Tìm kiếm theo ID, tên, địa chỉ, đại diện, ĐKKD..."
               value={updateSearchTerm}
               onChange={(e) => setUpdateSearchTerm(e.target.value)}
               sx={{

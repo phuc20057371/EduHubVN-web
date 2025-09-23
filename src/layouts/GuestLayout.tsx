@@ -1,9 +1,8 @@
-import { Outlet, useNavigate } from "react-router-dom";
-import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import { Outlet, useNavigate } from "react-router-dom";
 import Logo from "../assets/Eduhub_logo_new.png";
 import EduHubSpeedDial from "../components/EduHubSpeedDial";
-import ThemeToggle from "../components/ThemeToggle";
 import Footer from "../components/Footer";
 import { useColors } from "../hooks/useColors";
 
@@ -84,7 +83,7 @@ const GuestLayout = () => {
             }}
           >
             {/* Theme Toggle */}
-            <ThemeToggle />
+            {/* <ThemeToggle /> */}
 
             <Button
               variant="contained"

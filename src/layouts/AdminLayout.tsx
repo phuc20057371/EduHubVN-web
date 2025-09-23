@@ -1,52 +1,51 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { API } from "../utils/Fetch";
-import { setUserProfile } from "../redux/slice/userSlice";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Box,
-  Container,
-  Avatar,
-  IconButton,
-  Menu,
-  MenuItem,
-  Divider,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  ListItemButton,
-  Badge,
-  Chip,
-  Card,
-  CardContent,
-  alpha,
-} from "@mui/material";
 import {
   AccountCircle,
-  Settings,
-  Logout,
-  Dashboard,
-  School,
-  Business,
-  Person,
-  Notifications,
-  Menu as MenuIcon,
-  KeyboardArrowDown,
   AdminPanelSettings,
+  Business,
+  Dashboard,
+  KeyboardArrowDown,
+  Logout,
+  Menu as MenuIcon,
+  Notifications,
+  Person,
+  School,
+  Settings,
 } from "@mui/icons-material";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
+import {
+  AppBar,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Divider,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Toolbar,
+  Typography,
+  alpha,
+} from "@mui/material";
+import React, { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import LogoWeb from "../assets/Eduhub_logo_new.png";
-import { useColors } from "../hooks/useColors";
-import WebSocketService from "../services/WebSocketService";
-import { AdminMessageHandler } from "../services/AdminMessageHandler";
-import ThemeToggle from "../components/ThemeToggle";
 import Footer from "../components/Footer";
+import { useColors } from "../hooks/useColors";
+import { setUserProfile } from "../redux/slice/userSlice";
+import { AdminMessageHandler } from "../services/AdminMessageHandler";
+import WebSocketService from "../services/WebSocketService";
+import { API } from "../utils/Fetch";
 
 const AdminLayout = () => {
   const dispatch = useDispatch();
@@ -438,7 +437,7 @@ const AdminLayout = () => {
             {/* Right side actions */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
              
-              <ThemeToggle />
+              {/* <ThemeToggle /> */}
 
               {/* Notifications */}
               <IconButton
@@ -647,8 +646,8 @@ const AdminLayout = () => {
             left: 0,
             right: 0,
             height: "200px",
-            background: `radial-gradient(circle at 20% 20%, ${alpha(colors.primary.light, 0.3)} 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, ${alpha(colors.secondary.light, 0.3)} 0%, transparent 50%)`,
+            // background: `radial-gradient(circle at 20% 20%, ${alpha(colors.primary.light, 0.3)} 0%, transparent 50%),
+            //             radial-gradient(circle at 80% 80%, ${alpha(colors.secondary.light, 0.3)} 0%, transparent 50%)`,
             zIndex: 0,
           }}
         />

@@ -1,12 +1,13 @@
 import {
-  ArrowForward,
   ArrowBack,
+  ArrowForward,
   Email,
   Lock,
   Visibility,
   VisibilityOff,
 } from "@mui/icons-material";
 import {
+  alpha,
   Box,
   Button,
   Card,
@@ -15,8 +16,8 @@ import {
   IconButton,
   InputAdornment,
   TextField,
-  Typography,
   Tooltip,
+  Typography,
 } from "@mui/material";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,8 +25,6 @@ import { toast } from "react-toastify";
 import Logoweb from "../../assets/Eduhub_logo_new.png";
 import { useColors } from "../../hooks/useColors";
 import { API } from "../../utils/Fetch";
-import ThemeToggle from "../../components/ThemeToggle";
-import { alpha } from "@mui/material";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -134,7 +133,7 @@ const Login = () => {
       </Box>
 
       {/* Theme Toggle */}
-      <Box
+      {/* <Box
         sx={{
           position: "fixed",
           top: 24,
@@ -143,7 +142,7 @@ const Login = () => {
         }}
       >
         <ThemeToggle showLabels={true} />
-      </Box>
+      </Box> */}
 
       <Container maxWidth="sm" sx={{ position: "relative", zIndex: 2 }}>
         <Card

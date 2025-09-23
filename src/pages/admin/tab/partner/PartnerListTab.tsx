@@ -113,7 +113,11 @@ interface EnhancedTableProps {
   headCells: readonly HeadCell[];
 }
 
+import { useTheme } from "@mui/material/styles";
+import { setPartnerPendingUpdate } from "../../../../redux/slice/PartnerPendingUpdateSlice";
+
 function EnhancedTableHead(props: EnhancedTableProps) {
+  const theme = useTheme();
   const { order, orderBy, onRequestSort, headCells: propHeadCells } = props;
   const createSortHandler =
     (property: keyof Partner) => (event: React.MouseEvent<unknown>) => {
@@ -121,7 +125,17 @@ function EnhancedTableHead(props: EnhancedTableProps) {
     };
 
   return (
-    <TableHead>
+    <TableHead
+      sx={{
+        position: "sticky",
+        top: 0,
+        zIndex: 2,
+        backgroundColor:
+          theme.palette.mode === "dark"
+            ? theme.palette.primary.dark
+            : theme.palette.primary.main,
+      }}
+    >
       <TableRow
         sx={{
           position: "sticky",
@@ -209,7 +223,7 @@ function EnhancedTableToolbar({
       sx={{
         p: 3,
         background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-        borderRadius: 3,
+        borderRadius: 1,
         border: "1px solid rgba(255,255,255,0.8)",
         mb: 3,
       }}
@@ -310,7 +324,7 @@ function EnhancedTableToolbar({
               onChange={(e) => onStatusFilter(e.target.value)}
               sx={{
                 bgcolor: "white",
-                borderRadius: 2,
+                borderRadius: 1,
               }}
             >
               {statusOptions.map((status) => (
@@ -332,7 +346,7 @@ function EnhancedTableToolbar({
             onChange={(e) => onSearch(e.target.value)}
             sx={{
               bgcolor: "white",
-              borderRadius: 2,
+              borderRadius: 1,
             }}
             InputProps={{
               startAdornment: (
@@ -361,11 +375,12 @@ function EnhancedTableToolbar({
               sx={{
                 textTransform: "none",
                 fontWeight: 600,
-                borderRadius: 2,
+                borderRadius: 1,
                 background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                 "&:hover": {
-                  background: "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                  background:
+                    "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
                   transform: "translateY(-1px)",
                   boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
                 },
@@ -390,13 +405,13 @@ interface PartnerListTabProps {
   onCreateClick?: () => void;
 }
 
-const PartnerListTab: React.FC<PartnerListTabProps> = ({ 
-  partners, 
-  onEdit, 
-  canEdit = true, 
+const PartnerListTab: React.FC<PartnerListTabProps> = ({
+  partners,
+  onEdit,
+  canEdit = true,
   canDelete = true,
   canCreate = false,
-  onCreateClick
+  onCreateClick,
 }) => {
   const dispatch = useDispatch();
   const [order, setOrder] = useState<Order>("asc");
@@ -519,10 +534,16 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
 
     setIsDeleting(true);
     try {
-      await API.admin.deletePartner({ id: partnerToDelete.id });
+      const res = await API.admin.deletePartner({ id: partnerToDelete.id });
       dispatch(removePartner(partnerToDelete.id));
       setDeleteDialogOpen(false);
       setPartnerToDelete(null);
+      if( res.data.success){
+        const res1 = await API.admin.getPartnerPendingUpdate();
+        dispatch(setPartnerPendingUpdate(res1.data.data));
+      }
+
+
     } catch (error) {
       console.error("Error deleting partner:", error);
       // You might want to show an error message here
@@ -563,7 +584,10 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
   };
 
   const visibleRows = useMemo(
-    () => [...filteredPartners].sort(getComparator<Partner>(order, orderBy)).slice(),
+    () =>
+      [...filteredPartners]
+        .sort(getComparator<Partner>(order, orderBy))
+        .slice(),
     [filteredPartners, order, orderBy],
   );
 
@@ -575,7 +599,7 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
       return headCells;
     }
     // Filter out the actions column (last column)
-    return headCells.filter(cell => cell.id !== "createdAt");
+    return headCells.filter((cell) => cell.id !== "createdAt");
   }, [showActionsColumn]);
 
   return (
@@ -605,7 +629,7 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
           sx={{
             p: 2,
             mb: 3,
-            borderRadius: 2,
+            borderRadius: 1,
             bgcolor: "rgba(255,255,255,0.9)",
             backdropFilter: "blur(10px)",
           }}
@@ -632,7 +656,7 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
             )}
             {statusFilter !== "APPROVED" && (
               <Chip
-                label={`Trạng thái: ${statusOptions.find(s => s.value === statusFilter)?.label}`}
+                label={`Trạng thái: ${statusOptions.find((s) => s.value === statusFilter)?.label}`}
                 size="small"
                 onDelete={() => setStatusFilter("APPROVED")}
                 color="success"
@@ -652,7 +676,7 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
 
       <Paper
         sx={{
-          borderRadius: 3,
+          borderRadius: 1,
           overflow: "hidden",
           boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
         }}
@@ -677,11 +701,7 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
                 justifyContent: "center",
               }}
             >
-              <Typography
-                variant="h6"
-                color="text.secondary"
-                sx={{ mb: 1 }}
-              >
+              <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
                 Không tìm thấy kết quả
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -835,7 +855,13 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
                       </TableCell>
                       {showActionsColumn && (
                         <TableCell align="center" sx={{ py: 2 }}>
-                          <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 1,
+                              justifyContent: "center",
+                            }}
+                          >
                             {canEdit && (
                               <Tooltip title="Chỉnh sửa">
                                 <IconButton

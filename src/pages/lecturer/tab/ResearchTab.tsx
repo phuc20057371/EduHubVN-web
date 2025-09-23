@@ -64,7 +64,7 @@ const ResearchTab = ({
 
     try {
       // Note: Replace with actual delete API when available
-      await API.lecturer.deleteResearchProject(itemToDelete.id);
+      await API.admin.deleteResearchProject(itemToDelete.id);
       // For now, we'll just refresh the profile
       const response = await API.lecturer.getLecturerProfile();
       dispatch(setLecturerProfile(response.data.data));

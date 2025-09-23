@@ -232,7 +232,7 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
               color: "white",
               fontWeight: 600,
               textTransform: "none",
-              borderRadius: 2,
+              borderRadius: 1,
               "&:hover": {
                 transform: "translateY(-1px)",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
@@ -331,7 +331,7 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
                           background: "rgba(255,255,255,0.9)",
                           color: "#1976d2",
                           textTransform: "none",
-                          borderRadius: 2,
+                          borderRadius: 1,
                           fontSize: "0.75rem",
                           px: 2,
                           py: 0.5,
@@ -361,7 +361,7 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
                           background: "rgba(255,255,255,0.9)",
                           color: "#1976d2",
                           textTransform: "none",
-                          borderRadius: 2,
+                          borderRadius: 1,
                           fontSize: "0.75rem",
                           px: 2,
                           py: 0.5,
@@ -532,7 +532,7 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
                           color: "white",
                           fontWeight: 600,
                           textTransform: "none",
-                          borderRadius: 2,
+                          borderRadius: 1,
                           "&:hover": {
                             transform: "translateY(-1px)",
                           },
@@ -553,7 +553,7 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
                           color: "#3B82F6",
                           fontWeight: 600,
                           textTransform: "none",
-                          borderRadius: 2,
+                          borderRadius: 1,
                           "&:hover": {
                             borderColor: "#2563EB",
                             backgroundColor: "#EFF6FF",
@@ -576,7 +576,7 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
                           color: "#EF4444",
                           fontWeight: 600,
                           textTransform: "none",
-                          borderRadius: 2,
+                          borderRadius: 1,
                           "&:hover": {
                             borderColor: "#DC2626",
                             backgroundColor: "#FEF2F2",

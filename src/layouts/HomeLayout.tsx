@@ -1,36 +1,35 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Outlet, useNavigate } from "react-router-dom";
-import { setUserProfile } from "../redux/slice/userSlice";
-import { API } from "../utils/Fetch";
-import { navigateToRole } from "../utils/navigationRole";
 import {
-  Typography,
-  Box,
+  AccountCircle,
+  Help,
+  KeyboardArrowDown,
+  Language,
+  Logout,
+  Notifications,
+  Security,
+  Settings,
+} from "@mui/icons-material";
+import {
   Avatar,
+  Badge,
+  Box,
+  Chip,
+  Divider,
   IconButton,
   Menu,
   MenuItem,
-  Divider,
-  Badge,
-  Chip,
+  Typography,
 } from "@mui/material";
-import {
-  AccountCircle,
-  Settings,
-  Logout,
-  Notifications,
-  KeyboardArrowDown,
-  Help,
-  Security,
-  Language,
-} from "@mui/icons-material";
-import { useColors } from "../hooks/useColors";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Outlet, useNavigate } from "react-router-dom";
 import Logoweb from "../assets/Eduhub_logo_new.png";
-import WebSocketService from "../services/WebSocketService";
 import EduHubSpeedDial from "../components/EduHubSpeedDial";
-import ThemeToggle from "../components/ThemeToggle";
 import Footer from "../components/Footer";
+import { useColors } from "../hooks/useColors";
+import { setUserProfile } from "../redux/slice/userSlice";
+import WebSocketService from "../services/WebSocketService";
+import { API } from "../utils/Fetch";
+import { navigateToRole } from "../utils/navigationRole";
 
 const HomeLayout = () => {
   const dispatch = useDispatch();
@@ -196,7 +195,7 @@ const HomeLayout = () => {
           {/* User Profile luôn nằm phía bên phải */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             {/* Theme Toggle */}
-            <ThemeToggle />
+            {/* <ThemeToggle /> */}
             
             {/* Notifications */}
             <IconButton

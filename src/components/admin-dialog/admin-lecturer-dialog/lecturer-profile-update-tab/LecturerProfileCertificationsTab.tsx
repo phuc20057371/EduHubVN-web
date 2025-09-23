@@ -247,7 +247,7 @@ const LecturerProfileCertificationsTab: React.FC<
               color: "white",
               fontWeight: 600,
               textTransform: "none",
-              borderRadius: 2,
+              borderRadius: 1,
               "&:hover": {
                 transform: "translateY(-1px)",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
@@ -264,7 +264,7 @@ const LecturerProfileCertificationsTab: React.FC<
             key={item.original?.id || item.id}
             className="transition-all duration-300"
             sx={{
-              borderRadius: 3,
+              borderRadius: 1,
               border: `1px solid ${colors.primary[100]}`,
               boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
               "&:before": {
@@ -350,7 +350,7 @@ const LecturerProfileCertificationsTab: React.FC<
                           background: "rgba(255,255,255,0.9)",
                           color: "#1976d2",
                           textTransform: "none",
-                          borderRadius: 2,
+                          borderRadius: 1,
                           fontSize: "0.75rem",
                           px: 2,
                           py: 0.5,
@@ -380,7 +380,7 @@ const LecturerProfileCertificationsTab: React.FC<
                           background: "rgba(255,255,255,0.9)",
                           color: "#1976d2",
                           textTransform: "none",
-                          borderRadius: 2,
+                          borderRadius: 1,
                           fontSize: "0.75rem",
                           px: 2,
                           py: 0.5,
@@ -553,7 +553,7 @@ const LecturerProfileCertificationsTab: React.FC<
                         color: "white",
                         fontWeight: 600,
                         textTransform: "none",
-                        borderRadius: 2,
+                        borderRadius: 1,
                         "&:hover": {
                           transform: "translateY(-1px)",
                         },
@@ -574,7 +574,7 @@ const LecturerProfileCertificationsTab: React.FC<
                         color: "#3B82F6",
                         fontWeight: 600,
                         textTransform: "none",
-                        borderRadius: 2,
+                        borderRadius: 1,
                         "&:hover": {
                           borderColor: "#2563EB",
                           backgroundColor: "#EFF6FF",
@@ -597,7 +597,7 @@ const LecturerProfileCertificationsTab: React.FC<
                         color: "#EF4444",
                         fontWeight: 600,
                         textTransform: "none",
-                        borderRadius: 2,
+                        borderRadius: 1,
                         "&:hover": {
                           borderColor: "#DC2626",
                           backgroundColor: "#FEF2F2",

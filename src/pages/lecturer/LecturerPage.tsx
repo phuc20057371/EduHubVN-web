@@ -2,53 +2,79 @@ import {
   ArrowDownward,
   ArrowUpward,
   Assignment,
-  CalendarToday,
+  Group,
+  Link as LinkIcon,
   LocationOn,
   MenuBook,
   MoreVert,
-  PersonOutline,
-  PlayArrow,
-  Schedule,
   School,
-  Timeline,
   VideocamOutlined,
 } from "@mui/icons-material";
 import {
   Alert,
   alpha,
-  Avatar,
   Box,
   Button,
   Card,
   CardContent,
   Chip,
-  Divider,
   IconButton,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Stack,
-  Typography
+  Typography,
 } from "@mui/material";
-import React from "react";
-import { useSelector } from "react-redux";
-import { getColors } from "../../theme/colors";
 import { useTheme } from "@mui/material/styles";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setCoursesOfLecturer } from "../../redux/slice/CoursesOfLecturer";
+import { getColors } from "../../theme/colors";
+import { API } from "../../utils/Fetch";
+import { getCourseType } from "../../utils/ChangeText";
 
 const LecturerPage = () => {
   const theme = useTheme();
   const colors = getColors(theme.palette.mode as any);
   const lecturerProfile = useSelector((state: any) => state.lecturerProfile);
+  const coursesOfLecturer = useSelector(
+    (state: any) => state.coursesOfLecturer,
+  );
   // const userProfile = useSelector((state: any) => state.userProfile);
 
-  // Mock data - in real app, this would come from API
+  const dispatch = useDispatch();
+
+  // Calculate real stats from coursesOfLecturer data
+  const calculateStats = () => {
+    const courses = coursesOfLecturer?.courses || [];
+
+    // Count active courses (those that are currently ongoing)
+    const activeCourses = courses.filter((courseItem: any) => {
+      const course = courseItem.course;
+      const startDate = new Date(course.startDate);
+      const endDate = new Date(course.endDate);
+      const now = new Date();
+      return startDate <= now && now <= endDate;
+    }).length;
+
+    // This would be calculated from research projects API in real implementation
+    const researchProjects = lecturerProfile?.researchProjects?.length || 0;
+
+    // This would be calculated from blog posts/articles API in real implementation
+    const sharedArticles = 0; // Placeholder for now
+
+    return {
+      activeCourses,
+      researchProjects,
+      sharedArticles,
+    };
+  };
+
+  const stats = calculateStats();
+
+  // Dynamic dashboard stats based on real data
   const dashboardStats = [
     {
       title: "Khóa học đang dạy",
-      value: "8",
-      change: "+2",
+      value: stats.activeCourses.toString(),
+      change: "+0", // Would need historical data to calculate change
       changeType: "increase",
       icon: <School />,
       color: colors.primary[500],
@@ -56,8 +82,8 @@ const LecturerPage = () => {
     },
     {
       title: "Đề tài nghiên cứu",
-      value: "5",
-      change: "+1",
+      value: stats.researchProjects.toString(),
+      change: "+0", // Would need historical data to calculate change
       changeType: "increase",
       icon: <Assignment />,
       color: colors.secondary[500],
@@ -65,8 +91,8 @@ const LecturerPage = () => {
     },
     {
       title: "Bài viết chia sẻ",
-      value: "23",
-      change: "+3",
+      value: stats.sharedArticles.toString(),
+      change: "+0", // Would need historical data to calculate change
       changeType: "increase",
       icon: <MenuBook />,
       color: colors.warning[500],
@@ -74,101 +100,94 @@ const LecturerPage = () => {
     },
   ];
 
-  const recentCourses = [
-    {
-      id: 1,
-      title: "Lập trình React Advanced",
-      subject: "Công nghệ thông tin",
-      progress: 75,
-      status: "active",
-      nextClass: "2025-08-16 09:00",
-      type: "online",
-      weeklyHours: 6,
-    },
-    {
-      id: 2,
-      title: "JavaScript Fundamentals",
-      subject: "Lập trình cơ bản",
-      progress: 60,
-      status: "active",
-      nextClass: "2025-08-16 14:00",
-      type: "offline",
-      weeklyHours: 4,
-    },
-    {
-      id: 3,
-      title: "Node.js Backend Development",
-      subject: "Phát triển phần mềm",
-      progress: 45,
-      status: "active",
-      nextClass: "2025-08-17 10:00",
-      type: "online",
-      weeklyHours: 8,
-    },
-  ];
+  // Convert real course data to display format
+  const convertCoursesToDisplayFormat = () => {
+    const courses = coursesOfLecturer?.courses || [];
 
-  const upcomingSchedule = [
-    {
-      id: 1,
-      title: "React Advanced - Bài 8: Hooks nâng cao",
-      time: "09:00 - 11:00",
-      date: "16/08/2025",
-      type: "online",
-      room: "Zoom Meeting",
-      duration: "2 giờ",
-    },
-    {
-      id: 2,
-      title: "JavaScript Fundamentals - Bài 5: DOM Manipulation",
-      time: "14:00 - 16:00",
-      date: "16/08/2025",
-      type: "offline",
-      room: "Phòng A101",
-      duration: "2 giờ",
-    },
-    {
-      id: 3,
-      title: "Node.js Backend - Bài 3: Express Framework",
-      time: "10:00 - 12:00",
-      date: "17/08/2025",
-      type: "online",
-      room: "Google Meet",
-      duration: "2 giờ",
-    },
-  ];
+    return courses.map((courseItem: any) => {
+      const course = courseItem.course;
 
-  const recentActivities = [
-    {
-      id: 1,
-      action: "Chia sẻ bài viết mới",
-      course: "Kinh nghiệm giảng dạy React",
-      time: "2 giờ trước",
-      icon: <MenuBook />,
-    },
-    {
-      id: 2,
-      action: "Cập nhật đề tài nghiên cứu",
-      course: "Ứng dụng AI trong giáo dục",
-      time: "4 giờ trước",
-      icon: <Assignment />,
-    },
-    {
-      id: 3,
-      action: "Tạo bài giảng mới",
-      course: "Node.js Backend Development",
-      time: "6 giờ trước",
-      icon: <PlayArrow />,
-    },
-  ];
+      // Calculate progress based on dates
+      const startDate = new Date(course.startDate);
+      const endDate = new Date(course.endDate);
+      const now = new Date();
+
+      let progress = 0;
+      if (now >= endDate) {
+        progress = 100;
+      } else if (now >= startDate) {
+        const totalDuration = endDate.getTime() - startDate.getTime();
+        const elapsed = now.getTime() - startDate.getTime();
+        progress = Math.round((elapsed / totalDuration) * 100);
+      }
+
+      // Determine status
+      let status = "active";
+      if (now < startDate) status = "upcoming";
+      if (now > endDate) status = "completed";
+
+      return {
+        id: course.id,
+        title: course.title,
+        subject: course.topic,
+        progress: Math.max(0, Math.min(100, progress)),
+        status,
+        nextClass: course.startDate, // Using start date as next class for upcoming courses
+        endDate: course.endDate,
+        type: course.isOnline ? "online" : "offline",
+        weeklyHours: 6, // Default weekly hours - would need to be calculated from course schedule
+        level: course.level,
+        address: course.address,
+        description: course.description,
+        price: course.price,
+        members: courseItem.members,
+        thumbnailUrl: course.thumbnailUrl,
+        contentUrl: course.contentUrl,
+        language: course.language,
+        requirements: course.requirements,
+        isPublished: course.isPublished,
+        courseType: course.courseType,
+        createdAt: course.createdAt,
+        updatedAt: course.updatedAt,
+      };
+    });
+  };
+
+  const recentCourses = convertCoursesToDisplayFormat();
+
+  // Generate upcoming schedule from real course data
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await API.lecturer.getAllCourses();
+        console.log("✅ Courses fetched successfully:", response.data.data);
+        dispatch(setCoursesOfLecturer(response.data.data));
+      } catch (error) {
+        console.error("❌ Error fetching courses:", error);
+      }
+    };
+    fetchCourses();
+  }, [lecturerProfile, dispatch]);
 
   return (
     <Box sx={{ p: 0 }}>
+      {/* Debug Info - Remove in production */}
+      {/* {process.env.NODE_ENV === "development" && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <Typography variant="caption">
+            Debug: Đã load {coursesOfLecturer?.courses?.length || 0} khóa học từ
+            API
+          </Typography>
+        </Alert>
+      )} */}
+
       {/* Compact Lecturer Profile Banner */}
       {/* <Paper
         elevation={3}
         sx={{
           background: `linear-gradient(135deg, ${colors.primary[700]} 0%, ${colors.primary[900]} 100%)`,
-          borderRadius: 4,
+          borderRadius: 1,
           overflow: "hidden",
           position: "relative",
           mb: 4,
@@ -296,7 +315,7 @@ const LecturerPage = () => {
                   <Box
                     sx={{
                       p: 1.5,
-                      borderRadius: 2,
+                      borderRadius: 1,
                       bgcolor: alpha(stat.color, 0.1),
                       color: stat.color,
                       mr: 2,
@@ -370,7 +389,7 @@ const LecturerPage = () => {
         <Box sx={{ flex: { lg: "1 1 66%" } }}>
           <Stack spacing={3}>
             {/* Teaching Courses */}
-            <Card sx={{ borderRadius: 3 }}>
+            <Card sx={{ borderRadius: 1 }}>
               <CardContent sx={{ p: 3 }}>
                 <Box
                   sx={{
@@ -381,7 +400,7 @@ const LecturerPage = () => {
                   }}
                 >
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    Khóa học đang giảng dạy
+                    Danh sách khóa học
                   </Typography>
                   <Button
                     variant="outlined"
@@ -392,142 +411,321 @@ const LecturerPage = () => {
                   </Button>
                 </Box>
 
-                <Stack spacing={2}>
-                  {recentCourses.map((course) => (
-                    <Card
-                      key={course.id}
-                      sx={{
-                        border: `1px solid ${colors.border.light}`,
-                        "&:hover": {
-                          bgcolor: colors.background.tertiary,
-                        },
-                        transition: "all 0.2s ease-in-out",
-                      }}
-                    >
-                      <CardContent sx={{ p: 3 }}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "flex-start",
-                            mb: 2,
-                          }}
-                        >
-                          <Box sx={{ flex: 1 }}>
-                            <Typography
-                              variant="h6"
-                              sx={{ fontWeight: 600, mb: 1 }}
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
+                    gap: 3,
+                    "@media (min-width: 1200px)": {
+                      gridTemplateColumns: "repeat(2, 1fr)",
+                    },
+                  }}
+                >
+                  {recentCourses.length > 0 ? (
+                    recentCourses.map((course: any) => (
+                      <Card
+                        key={course.id}
+                        sx={{
+                          border: `1px solid ${colors.border.light}`,
+                          borderRadius: 1,
+                          overflow: "hidden",
+                          height: "100%",
+                          display: "flex",
+                          flexDirection: "column",
+                          "&:hover": {
+                            bgcolor: colors.background.tertiary,
+                            transform: "translateY(-2px)",
+                            boxShadow: `0 8px 24px ${alpha(colors.primary[500], 0.15)}`,
+                          },
+                          transition: "all 0.3s ease-in-out",
+                        }}
+                      >
+                        {/* Course Header with Thumbnail */}
+                        {course.thumbnailUrl && (
+                          <Box
+                            sx={{
+                              height: 160,
+                              backgroundImage: `url(${course.thumbnailUrl})`,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                              position: "relative",
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                position: "absolute",
+                                top: 12,
+                                right: 12,
+                                display: "flex",
+                                gap: 1,
+                              }}
                             >
-                              {course.title}
-                            </Typography>
-                            <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
                               <Chip
-                                icon={<PersonOutline sx={{ fontSize: 16 }} />}
-                                label={course.subject}
-                                size="small"
-                                variant="outlined"
-                              />
-                              <Chip
-                                icon={
-                                  course.type === "online" ? (
-                                    <VideocamOutlined sx={{ fontSize: 16 }} />
-                                  ) : (
-                                    <LocationOn sx={{ fontSize: 16 }} />
-                                  )
-                                }
                                 label={
-                                  course.type === "online"
-                                    ? "Trực tuyến"
-                                    : "Trực tiếp"
+                                  course.status === "active"
+                                    ? "Đang diễn ra"
+                                    : course.status === "upcoming"
+                                      ? "Sắp bắt đầu"
+                                      : "Đã kết thúc"
                                 }
                                 size="small"
                                 color={
-                                  course.type === "online"
-                                    ? "primary"
-                                    : "secondary"
+                                  course.status === "active"
+                                    ? "success"
+                                    : course.status === "upcoming"
+                                      ? "warning"
+                                      : "default"
                                 }
+                                sx={{ fontWeight: 600 }}
                               />
-                              <Chip
-                                icon={<Schedule sx={{ fontSize: 16 }} />}
-                                label={`${course.weeklyHours}h/tuần`}
-                                size="small"
-                                color="default"
-                              />
-                            </Stack>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                mb: 1,
-                              }}
-                            >
-                              <Typography
-                                variant="body2"
-                                sx={{ mr: 2, minWidth: "80px" }}
-                              >
-                                Tiến độ: {course.progress}%
-                              </Typography>
-                              <LinearProgress
-                                variant="determinate"
-                                value={course.progress}
-                                sx={{
-                                  flex: 1,
-                                  height: 6,
-                                  borderRadius: 3,
-                                  bgcolor: colors.neutral[200],
-                                  "& .MuiLinearProgress-bar": {
-                                    borderRadius: 3,
-                                    bgcolor: colors.primary[500],
-                                  },
-                                }}
-                              />
-                            </Box>
-                            <Typography
-                              variant="body2"
-                              sx={{ color: colors.text.secondary }}
-                            >
-                              Lớp tiếp theo:{" "}
-                              {new Date(course.nextClass).toLocaleDateString(
-                                "vi-VN",
-                              )}{" "}
-                              lúc{" "}
-                              {new Date(course.nextClass).toLocaleTimeString(
-                                "vi-VN",
-                                { hour: "2-digit", minute: "2-digit" },
+                              {course.isPublished !== undefined && (
+                                <Chip
+                                  label={
+                                    course.isPublished
+                                      ? "Đã xuất bản"
+                                      : "Chưa xuất bản"
+                                  }
+                                  size="small"
+                                  color={
+                                    course.isPublished ? "primary" : "secondary"
+                                  }
+                                  sx={{ fontWeight: 600 }}
+                                />
                               )}
-                            </Typography>
+                            </Box>
                           </Box>
-                          <IconButton size="small">
-                            <MoreVert />
-                          </IconButton>
-                        </Box>
-                        <Box sx={{ display: "flex", gap: 1 }}>
-                          <Button
-                            variant="contained"
-                            size="small"
-                            startIcon={<PlayArrow />}
-                            sx={{ textTransform: "none" }}
+                        )}
+
+                        <CardContent
+                          sx={{
+                            p: 3,
+                            flex: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "flex-start",
+                              mb: 2,
+                            }}
                           >
-                            Bắt đầu lớp học
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<Assignment />}
-                            sx={{ textTransform: "none" }}
+                            <Box sx={{ flex: 1 }}>
+                              {/* Course Title */}
+                              <Typography
+                                variant="h6"
+                                sx={{
+                                  fontWeight: 600,
+                                  mb: 1,
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: "vertical",
+                                  overflow: "hidden",
+                                }}
+                              >
+                                {course.title}
+                              </Typography>
+
+                              {/* Course Topic */}
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  color: colors.primary[600],
+                                  fontWeight: 600,
+                                  mb: 1,
+                                }}
+                              >
+                                📚 {course.subject}
+                              </Typography>
+
+                              {/* Course Description */}
+                              {course.description && (
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: colors.text.secondary,
+                                    mb: 2,
+                                    display: "-webkit-box",
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: "vertical",
+                                    overflow: "hidden",
+                                  }}
+                                >
+                                  {course.description}
+                                </Typography>
+                              )}
+
+                              {/* Course Info Chips */}
+                              <Stack
+                                direction="row"
+                                spacing={1}
+                                sx={{ mb: 2, flexWrap: "wrap", gap: 1 }}
+                              >
+                                {course.courseType && (
+                                  <Chip
+                                    label={getCourseType(course.courseType)}
+                                    size="small"
+                                    color="primary"
+                                  />
+                                )}
+                                <Chip
+                                  icon={
+                                    course.type === "online" ? (
+                                      <VideocamOutlined sx={{ fontSize: 16 }} />
+                                    ) : (
+                                      <LocationOn sx={{ fontSize: 16 }} />
+                                    )
+                                  }
+                                  label={
+                                    course.type === "online"
+                                      ? "Trực tuyến"
+                                      : "Trực tiếp"
+                                  }
+                                  size="small"
+                                  color={
+                                    course.type === "online"
+                                      ? "primary"
+                                      : "secondary"
+                                  }
+                                />
+                                {course.level && (
+                                  <Chip
+                                    label={course.level}
+                                    size="small"
+                                    color="info"
+                                  />
+                                )}
+                                {course.language && (
+                                  <Chip
+                                    label={course.language}
+                                    size="small"
+                                    variant="outlined"
+                                  />
+                                )}
+                              </Stack>
+
+                              {/* Course Schedule & Address */}
+                              <Box sx={{ mb: 2 }}>
+                                <Typography
+                                  variant="body2"
+                                  sx={{ color: colors.text.secondary, mb: 1 }}
+                                >
+                                  📅 <strong>Thời gian:</strong>{" "}
+                                  {new Date(
+                                    course.nextClass,
+                                  ).toLocaleDateString("vi-VN")}{" "}
+                                  -{" "}
+                                  {new Date(
+                                    course.endDate || course.nextClass,
+                                  ).toLocaleDateString("vi-VN")}
+                                </Typography>
+                                
+                                {/* Address for offline courses */}
+                                {course.address && (
+                                  <Typography
+                                    variant="body2"
+                                    sx={{ 
+                                      color: colors.text.secondary, 
+                                      mb: 1,
+                                      backgroundColor: alpha(colors.primary[500], 0.1),
+                                      padding: "4px 8px",
+                                      borderRadius: 1,
+                                      display: "inline-block"
+                                    }}
+                                  >
+                                    📍 <strong>Địa điểm:</strong>{" "}
+                                    {course.address}
+                                  </Typography>
+                                )}
+                                {course.requirements && (
+                                  <Typography
+                                    variant="body2"
+                                    sx={{ color: colors.text.secondary, mb: 1 }}
+                                  >
+                                    📋 <strong>Yêu cầu:</strong>{" "}
+                                    {course.requirements}
+                                  </Typography>
+                                )}
+                              </Box>
+
+                              {/* Members Info */}
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "flex-end",
+                                  alignItems: "center",
+                                  mb: 2,
+                                }}
+                              >
+                                {course.members &&
+                                  course.members.length > 0 && (
+                                    <Box
+                                      sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 1,
+                                      }}
+                                    >
+                                      <Group
+                                        sx={{
+                                          fontSize: 16,
+                                          color: colors.text.secondary,
+                                        }}
+                                      />
+                                      <Typography
+                                        variant="body2"
+                                        sx={{ color: colors.text.secondary }}
+                                      >
+                                        {course.members.length} giảng viên
+                                      </Typography>
+                                    </Box>
+                                  )}
+                              </Box>
+                            </Box>
+                            <IconButton size="small">
+                              <MoreVert />
+                            </IconButton>
+                          </Box>
+
+                          {/* Action Buttons */}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 1,
+                              flexWrap: "wrap",
+                              mt: "auto",
+                            }}
                           >
-                            Quản lý
-                          </Button>
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Stack>
+                            {course.contentUrl && (
+                              <Button
+                                variant="text"
+                                size="small"
+                                startIcon={<LinkIcon />}
+                                sx={{ textTransform: "none" }}
+                                onClick={() =>
+                                  window.open(course.contentUrl, "_blank")
+                                }
+                              >
+                                Nội dung
+                              </Button>
+                            )}
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <Alert severity="info" sx={{ mt: 2 }}>
+                      Chưa có khóa học nào. Hãy tạo khóa học đầu tiên của bạn!
+                    </Alert>
+                  )}
+                </Box>
               </CardContent>
             </Card>
 
             {/* Experience Sharing Section */}
-            <Card sx={{ borderRadius: 3 }}>
+            {/* <Card sx={{ borderRadius: 1 }}>
               <CardContent sx={{ p: 3 }}>
                 <Box
                   sx={{
@@ -638,10 +836,10 @@ const LecturerPage = () => {
                   </Box>
                 </Box>
               </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Research Topics Section - Suggested by System */}
-            <Card sx={{ borderRadius: 3 }}>
+            {/* <Card sx={{ borderRadius: 1 }}>
               <CardContent sx={{ p: 3 }}>
                 <Box
                   sx={{
@@ -894,116 +1092,14 @@ const LecturerPage = () => {
                   ))}
                 </Stack>
               </CardContent>
-            </Card>
+            </Card> */}
           </Stack>
         </Box>
 
         {/* Right Sidebar */}
         <Box sx={{ flex: { lg: "1 1 34%" } }}>
           <Stack spacing={3}>
-            {/* Upcoming Schedule */}
-            <Card sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                  <CalendarToday sx={{ mr: 1, color: colors.primary[500] }} />
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    Lịch giảng dạy
-                  </Typography>
-                </Box>
 
-                <Stack spacing={2}>
-                  {upcomingSchedule.map((schedule) => (
-                    <Box
-                      key={schedule.id}
-                      sx={{
-                        p: 2,
-                        border: `1px solid ${colors.border.light}`,
-                        borderRadius: 2,
-                        bgcolor: colors.background.secondary,
-                      }}
-                    >
-                      <Typography
-                        variant="subtitle2"
-                        sx={{ fontWeight: 600, mb: 1 }}
-                      >
-                        {schedule.title}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: colors.text.secondary, mb: 1 }}
-                      >
-                        {schedule.date} • {schedule.time}
-                      </Typography>
-                      <Stack direction="row" spacing={1}>
-                        <Chip
-                          size="small"
-                          label={
-                            schedule.type === "online"
-                              ? "Trực tuyến"
-                              : schedule.room
-                          }
-                          color={
-                            schedule.type === "online" ? "primary" : "secondary"
-                          }
-                        />
-                        <Chip
-                          size="small"
-                          label={schedule.duration}
-                          variant="outlined"
-                        />
-                      </Stack>
-                    </Box>
-                  ))}
-                </Stack>
-              </CardContent>
-            </Card>
-
-            {/* Recent Activities */}
-            <Card sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                  <Timeline sx={{ mr: 1, color: colors.primary[500] }} />
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    Hoạt động gần đây
-                  </Typography>
-                </Box>
-
-                <List sx={{ p: 0 }}>
-                  {recentActivities.map((activity, index) => (
-                    <React.Fragment key={activity.id}>
-                      <ListItem sx={{ px: 0 }}>
-                        <ListItemAvatar>
-                          <Avatar
-                            sx={{
-                              bgcolor: colors.primary[50],
-                              color: colors.primary[500],
-                              width: 40,
-                              height: 40,
-                            }}
-                          >
-                            {activity.icon}
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={activity.action}
-                          secondary={`${activity.course} • ${activity.time}`}
-                          sx={{
-                            "& .MuiListItemText-primary": {
-                              fontWeight: 600,
-                              fontSize: "0.9rem",
-                            },
-                            "& .MuiListItemText-secondary": {
-                              fontSize: "0.8rem",
-                            },
-                          }}
-                        />
-                      </ListItem>
-                      {index < recentActivities.length - 1 && <Divider />}
-                    </React.Fragment>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
           </Stack>
         </Box>
       </Box>

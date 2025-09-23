@@ -36,9 +36,7 @@ import { LecturerMessageHandler } from "../services/LecturerMessageHandler";
 import EduHubSpeedDial from "../components/EduHubSpeedDial";
 import Footer from "../components/Footer";
 import { Header } from "../components";
-import {
-  Divider,
-} from "@mui/material";
+import { Divider } from "@mui/material";
 
 const LecturerLayout = () => {
   const dispatch = useDispatch();
@@ -187,13 +185,18 @@ const LecturerLayout = () => {
   ];
 
   const drawer = (
-    <Box sx={{ height: "100%", background: colors.isDark ? colors.background.primary : "none" }}>
+    <Box
+      sx={{
+        height: "100%",
+        background: colors.isDark ? colors.background.primary : "none",
+      }}
+    >
       {/* Logo Section */}
       <Box
         sx={{
           p: 3,
-          background: colors.isDark 
-            ? colors.gradients.primary 
+          background: colors.isDark
+            ? colors.gradients.primary
             : `linear-gradient(135deg, ${colors.primary.main} 0%, ${colors.primary.dark} 100%)`,
           color: "white",
           textAlign: "center",
@@ -254,7 +257,7 @@ const LecturerLayout = () => {
                 "&:hover": {
                   backgroundColor: isActivePath(item.path)
                     ? colors.primary.light
-                    : colors.isDark 
+                    : colors.isDark
                       ? `${colors.primary.main}20`
                       : colors.neutral[50],
                   transform: "translateX(4px)",
@@ -318,7 +321,7 @@ const LecturerLayout = () => {
       <Box sx={{ px: 3, py: 2, mt: "auto" }}>
         <Card
           sx={{
-            background: `linear-gradient(135deg, ${colors.accent.blue} 0%, ${colors.accent.light} 100%)`,
+            background: `linear-gradient(135deg, ${colors.accent.blue} 0%, ${colors.accent.sky} 100%)`,
             color: "white",
             textAlign: "center",
             py: 2,
@@ -382,9 +385,7 @@ const LecturerLayout = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          background: colors.isDark 
-            ? colors.gradients.secondary 
-            : `linear-gradient(180deg, ${colors.background.tertiary} 0%, ${colors.background.secondary} 100%)`,
+          background: colors.background.primary,
           position: "relative",
           overflow: "auto",
           minHeight: 0, // Important for flex children to scroll properly
@@ -407,9 +408,7 @@ const LecturerLayout = () => {
       {/* Footer */}
       <Footer />
       {/* EduHub Speed Dial for Lecturer */}
-      <EduHubSpeedDial 
-        userRole="lecturer"
-      />
+      <EduHubSpeedDial userRole="lecturer" />
     </Box>
   );
 };
