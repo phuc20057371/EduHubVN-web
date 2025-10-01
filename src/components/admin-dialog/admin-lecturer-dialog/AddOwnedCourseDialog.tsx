@@ -272,12 +272,12 @@ const AddOwnedCourseDialog: React.FC<AddOwnedCourseDialogProps> = ({
     <Modal
       open={open}
       onClose={onClose}
-      sx={{
-        "& .MuiBackdrop-root": {
+      // sx={{
+      //   "& .MuiBackdrop-root": {
           
-          backdropFilter: "blur(8px)",
-        },
-      }}
+      //     backdropFilter: "blur(8px)",
+      //   },
+      // }}
     >
       <Box sx={style}>
         {/* Modern Header with Gradient */}
@@ -405,8 +405,8 @@ const AddOwnedCourseDialog: React.FC<AddOwnedCourseDialogProps> = ({
                   xs: "10px",
                   md: "12px",
                 },
-                backgroundColor: "rgba(255, 255, 255, 0.15)",
-                backdropFilter: "blur(10px)",
+                // backgroundColor: "rgba(255, 255, 255, 0.15)",
+                // backdropFilter: "blur(10px)",
               }}
             >
               <School

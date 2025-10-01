@@ -104,7 +104,7 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
           p: 3,
           mb: 3,
           background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-          borderRadius: 3,
+          borderRadius: 1,
           border: "1px solid rgba(255,255,255,0.8)",
         }}
       >
@@ -155,7 +155,7 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
                 onChange={(e) => setUpdateDateSort(e.target.value)}
                 sx={{
                   bgcolor: "white",
-                  borderRadius: 2,
+                  borderRadius: 1,
                 }}
               >
                 <MenuItem value="oldest">Cũ nhất trước</MenuItem>
@@ -174,7 +174,7 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
               onChange={(e) => setUpdateSearchTerm(e.target.value)}
               sx={{
                 bgcolor: "white",
-                borderRadius: 2,
+                borderRadius: 1,
               }}
               InputProps={{
                 startAdornment: (
@@ -269,7 +269,7 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
                     transition: "all 0.3s ease",
                     border: "2px solid",
                     borderColor: "warning.light",
-                    borderRadius: 3,
+                    borderRadius: 1,
                     background:
                       "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
                     "&:hover": {
@@ -398,7 +398,7 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
                       fullWidth
                       sx={{
                         mt: "auto",
-                        borderRadius: 2,
+                        borderRadius: 1,
                         textTransform: "none",
                         background:
                           "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)",
@@ -427,7 +427,7 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
           sx={{
             p: 4,
             textAlign: "center",
-            borderRadius: 3,
+            borderRadius: 1,
             background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
             boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
           }}

@@ -99,9 +99,9 @@ function EnhancedTableHead(props: EnhancedTableProps) {
     };
 
   // Filter out actions column if no permissions
-  const visibleHeadCells = showActionsColumn 
-    ? headCells 
-    : headCells.filter(cell => cell.id !== 'actions');
+  const visibleHeadCells = showActionsColumn
+    ? headCells
+    : headCells.filter((cell) => cell.id !== "actions");
 
   return (
     <TableHead>
@@ -195,215 +195,218 @@ const CourseTableRow = memo(
     };
 
     return (
-    <TableRow
-      hover
-      onClick={(event) => onRowClick(event, row.course.id)}
-      role="checkbox"
-      aria-checked={isItemSelected}
-      tabIndex={-1}
-      key={row.course.id}
-      selected={isItemSelected}
-      sx={{
-        cursor: "pointer",
-        "&:nth-of-type(odd)": {
-          bgcolor: isItemSelected
-            ? "rgba(25, 118, 210, 0.15)"
-            : "rgba(0, 0, 0, 0.02)",
-        },
-        "&:nth-of-type(even)": {
-          bgcolor: isItemSelected ? "rgba(25, 118, 210, 0.15)" : "white",
-        },
-        "&:hover": {
-          bgcolor: isItemSelected
-            ? "rgba(25, 118, 210, 0.2)"
-            : "rgba(25, 118, 210, 0.04)",
-          transform: "translateY(-1px)",
-          boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-        },
-        "&.Mui-selected": {
-          bgcolor: "rgba(25, 118, 210, 0.15)",
-          borderLeft: "4px solid #1976d2",
-          "&:hover": {
-            bgcolor: "rgba(25, 118, 210, 0.2)",
+      <TableRow
+        hover
+        onClick={(event) => onRowClick(event, row.course.id)}
+        role="checkbox"
+        aria-checked={isItemSelected}
+        tabIndex={-1}
+        key={row.course.id}
+        selected={isItemSelected}
+        sx={{
+          cursor: "pointer",
+          "&:nth-of-type(odd)": {
+            bgcolor: isItemSelected
+              ? "rgba(25, 118, 210, 0.15)"
+              : "rgba(0, 0, 0, 0.02)",
           },
-        },
-        transition: "all 0.2s ease-in-out",
-      }}
-    >
-      {/* Course Info */}
-      <TableCell sx={{ minWidth: 300, py: 2 }}>
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <Avatar
-            src={row.course.thumbnailUrl}
-            sx={{ width: 60, height: 60, borderRadius: 1 }}
-          >
-            <School />
-          </Avatar>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
-              {row.course.title}
-            </Typography>
-            <Typography variant="body2" sx={{ color: "#6c757d", mb: 1 }}>
-              {row.course.topic}
-            </Typography>
-            <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-              <Chip
-                label={row.course.language}
-                size="small"
-                icon={<Language sx={{ fontSize: 14 }} />}
-                sx={{ fontSize: "0.75rem", height: 24 }}
-              />
-              <Chip
-                label={row.course.isOnline ? "Trực tuyến" : "Tại lớp"}
-                size="small"
-                color={row.course.isOnline ? "success" : "info"}
-                icon={
-                  row.course.isOnline ? undefined : (
-                    <LocationOn sx={{ fontSize: 14 }} />
-                  )
-                }
-                sx={{ fontSize: "0.75rem", height: 24 }}
-              />
+          "&:nth-of-type(even)": {
+            bgcolor: isItemSelected ? "rgba(25, 118, 210, 0.15)" : "white",
+          },
+          "&:hover": {
+            bgcolor: isItemSelected
+              ? "rgba(25, 118, 210, 0.2)"
+              : "rgba(25, 118, 210, 0.04)",
+            transform: "translateY(-1px)",
+            boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+          },
+          "&.Mui-selected": {
+            bgcolor: "rgba(25, 118, 210, 0.15)",
+            borderLeft: "4px solid #1976d2",
+            "&:hover": {
+              bgcolor: "rgba(25, 118, 210, 0.2)",
+            },
+          },
+          transition: "all 0.2s ease-in-out",
+        }}
+      >
+        {/* Course Info */}
+        <TableCell sx={{ minWidth: 300, py: 2 }}>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <Avatar
+              src={row.course.thumbnailUrl}
+              sx={{ width: 60, height: 60, borderRadius: 1 }}
+            >
+              <School />
+            </Avatar>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                {row.course.title}
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#6c757d", mb: 1 }}>
+                {row.course.topic}
+              </Typography>
+              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                <Chip
+                  label={row.course.language}
+                  size="small"
+                  icon={<Language sx={{ fontSize: 14 }} />}
+                  sx={{ fontSize: "0.75rem", height: 24 }}
+                />
+                <Chip
+                  label={row.course.isOnline ? "Trực tuyến" : "Tại lớp"}
+                  size="small"
+                  color={row.course.isOnline ? "success" : "info"}
+                  icon={
+                    row.course.isOnline ? undefined : (
+                      <LocationOn sx={{ fontSize: 14 }} />
+                    )
+                  }
+                  sx={{ fontSize: "0.75rem", height: 24 }}
+                />
+              </Box>
             </Box>
           </Box>
-        </Box>
-      </TableCell>
+        </TableCell>
 
-      {/* Type & Level */}
-      <TableCell sx={{ py: 2, minWidth: 180 }}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-          }}
-        >
-          <Chip
-            label={`${courseTypeConfig.icon} ${courseTypeConfig.label}`}
-            size="small"
+        {/* Type & Level */}
+        <TableCell sx={{ py: 2, minWidth: 180 }}>
+          <Box
             sx={{
-              bgcolor: courseTypeConfig.bgColor,
-              color: courseTypeConfig.color,
-              fontWeight: 600,
-            }}
-          />
-          <Chip
-            label={`${levelConfig.icon} ${levelConfig.label}`}
-            size="small"
-            sx={{
-              bgcolor: levelConfig.bgColor,
-              color: levelConfig.color,
-              fontWeight: 600,
-            }}
-          />
-        </Box>
-      </TableCell>
-
-      {/* Price */}
-      <TableCell align="right" sx={{ py: 2 }}>
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 700,
-            color: row.course.price ? "#2e7d32" : "#ed6c02",
-          }}
-        >
-          {row.course.price ? formatPrice(row.course.price) : "Miễn phí"}
-        </Typography>
-      </TableCell>
-
-      {/* Schedule */}
-      <TableCell sx={{ py: 2 }}>
-        <Box>
-          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-            Từ: {formatDate(row.course.startDate)}
-          </Typography>
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            Đến: {formatDate(row.course.endDate)}
-          </Typography>
-        </Box>
-      </TableCell>
-
-      {/* Status */}
-      <TableCell sx={{ py: 2 }}>
-        <Chip
-          label={row.course.isPublished ? "Đã xuất bản" : "Chưa xuất bản"}
-          size="small"
-          color={row.course.isPublished ? "success" : "warning"}
-          variant="filled"
-        />
-      </TableCell>
-
-      {/* Members */}
-      <TableCell sx={{ py: 2 }}>
-        <Badge badgeContent={row.members?.length || 0} color="primary">
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<People />}
-            sx={{ borderRadius: 1, textTransform: "none" }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onViewMembers(row.members || [], row.course);
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
             }}
           >
-            Giảng viên
-          </Button>
-        </Badge>
-      </TableCell>
-
-      {/* Actions */}
-      {(canUpdate || canDelete) && (
-        <TableCell align="center" sx={{ py: 2 }}>
-          <>
-            <IconButton
-              onClick={handleMenuClick}
+            <Chip
+              label={`${courseTypeConfig.icon} ${courseTypeConfig.label}`}
+              size="small"
               sx={{
-                color: "primary.main",
-                "&:hover": {
-                  bgcolor: "primary.light",
-                  color: "white",
-                },
+                bgcolor: courseTypeConfig.bgColor,
+                color: courseTypeConfig.color,
+                fontWeight: 600,
               }}
-            >
-              <MoreVert />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={open}
-              onClose={handleMenuClose}
-              onClick={(e) => e.stopPropagation()}
-              PaperProps={{
-                sx: {
-                  mt: 1,
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                  borderRadius: 1,
-                },
+            />
+            <Chip
+              label={`${levelConfig.icon} ${levelConfig.label}`}
+              size="small"
+              sx={{
+                bgcolor: levelConfig.bgColor,
+                color: levelConfig.color,
+                fontWeight: 600,
               }}
-            >
-              {canUpdate && (
-                <MenuItem onClick={handleEditClick}>
-                  <ListItemIcon>
-                    <Edit fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText>Chỉnh sửa</ListItemText>
-                </MenuItem>
-              )}
-              {canDelete && (
-                <MenuItem onClick={handleDeleteClick}>
-                  <ListItemIcon>
-                    <Delete fontSize="small" color="error" />
-                  </ListItemIcon>
-                  <ListItemText sx={{ color: "error.main" }}>Xóa</ListItemText>
-                </MenuItem>
-              )}
-            </Menu>
-          </>
+            />
+          </Box>
         </TableCell>
-      )}
-    </TableRow>
-  );
-});
+
+        {/* Price */}
+        <TableCell align="right" sx={{ py: 2 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              color: row.course.price ? "#2e7d32" : "#ed6c02",
+            }}
+          >
+            {row.course.price ? formatPrice(row.course.price) : "Miễn phí"}
+          </Typography>
+        </TableCell>
+
+        {/* Schedule */}
+        <TableCell sx={{ py: 2 }}>
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+              Từ: {formatDate(row.course.startDate)}
+            </Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              Đến: {formatDate(row.course.endDate)}
+            </Typography>
+          </Box>
+        </TableCell>
+
+        {/* Status */}
+        <TableCell sx={{ py: 2 }}>
+          <Chip
+            label={row.course.isPublished ? "Đã xuất bản" : "Chưa xuất bản"}
+            size="small"
+            color={row.course.isPublished ? "success" : "warning"}
+            variant="filled"
+          />
+        </TableCell>
+
+        {/* Members */}
+        <TableCell sx={{ py: 2 }}>
+          <Badge badgeContent={row.members?.length || 0} color="primary">
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<People />}
+              sx={{ borderRadius: 1, textTransform: "none" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewMembers(row.members || [], row.course);
+              }}
+            >
+              Giảng viên
+            </Button>
+          </Badge>
+        </TableCell>
+
+        {/* Actions */}
+        {(canUpdate || canDelete) && (
+          <TableCell align="center" sx={{ py: 2 }}>
+            <>
+              <IconButton
+                onClick={handleMenuClick}
+                sx={{
+                  color: "primary.main",
+                  "&:hover": {
+                    bgcolor: "primary.light",
+                    color: "white",
+                  },
+                }}
+              >
+                <MoreVert />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleMenuClose}
+                onClick={(e) => e.stopPropagation()}
+                PaperProps={{
+                  sx: {
+                    mt: 1,
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                    borderRadius: 1,
+                  },
+                }}
+              >
+                {canUpdate && (
+                  <MenuItem onClick={handleEditClick}>
+                    <ListItemIcon>
+                      <Edit fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>Chỉnh sửa</ListItemText>
+                  </MenuItem>
+                )}
+                {canDelete && (
+                  <MenuItem onClick={handleDeleteClick}>
+                    <ListItemIcon>
+                      <Delete fontSize="small" color="error" />
+                    </ListItemIcon>
+                    <ListItemText sx={{ color: "error.main" }}>
+                      Xóa
+                    </ListItemText>
+                  </MenuItem>
+                )}
+              </Menu>
+            </>
+          </TableCell>
+        )}
+      </TableRow>
+    );
+  },
+);
 
 const AdminCourse = () => {
   const dispatch = useDispatch();
@@ -432,15 +435,19 @@ const AdminCourse = () => {
   const isSubAdmin = userProfile?.role === "SUB_ADMIN";
   const permissions = userProfile?.permissions || [];
 
-  const canRead = isAdmin || (isSubAdmin && permissions.includes("COURSE_READ"));
-  const canCreate = isAdmin || (isSubAdmin && permissions.includes("COURSE_CREATE"));
-  const canUpdate = isAdmin || (isSubAdmin && permissions.includes("COURSE_UPDATE"));
-  const canDelete = isAdmin || (isSubAdmin && permissions.includes("COURSE_DELETE"));
+  const canRead =
+    isAdmin || (isSubAdmin && permissions.includes("COURSE_READ"));
+  const canCreate =
+    isAdmin || (isSubAdmin && permissions.includes("COURSE_CREATE"));
+  const canUpdate =
+    isAdmin || (isSubAdmin && permissions.includes("COURSE_UPDATE"));
+  const canDelete =
+    isAdmin || (isSubAdmin && permissions.includes("COURSE_DELETE"));
 
   useEffect(() => {
     const fetchCourses = async () => {
       if (!canRead) return;
-      
+
       try {
         const response = await API.admin.getAllCourses();
         dispatch(setCourse(response.data.data));
@@ -715,15 +722,15 @@ const AdminCourse = () => {
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!courseToDelete) return;
-    
+
     try {
       // TODO: Gọi API xóa khóa học ở đây
       await API.admin.deleteCourse({ id: courseToDelete.id });
-      
+
       // Refresh courses list sau khi xóa thành công
       const coursesResponse = await API.admin.getAllCourses();
       dispatch(setCourse(coursesResponse.data.data));
-      
+
       toast.success("Khóa học đã được xóa thành công!");
       setDeleteDialogOpen(false);
       setCourseToDelete(null);
@@ -760,7 +767,7 @@ const AdminCourse = () => {
         sx={{
           width: "100%",
           minHeight: "400px",
-          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+          // background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
           p: 3,
           display: "flex",
           alignItems: "center",
@@ -773,8 +780,8 @@ const AdminCourse = () => {
             Không có quyền truy cập
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Bạn không có quyền COURSE_READ để xem danh sách khóa học.
-            Vui lòng liên hệ quản trị viên để được cấp quyền.
+            Bạn không có quyền COURSE_READ để xem danh sách khóa học. Vui lòng
+            liên hệ quản trị viên để được cấp quyền.
           </Typography>
         </Card>
       </Box>
@@ -786,7 +793,7 @@ const AdminCourse = () => {
       sx={{
         width: "100%",
         minHeight: "fix-content",
-        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+        // background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
         p: 3,
       }}
     >
@@ -796,7 +803,7 @@ const AdminCourse = () => {
         sx={{
           p: 3,
           mb: 3,
-          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+          // background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
           borderRadius: 1,
           border: "1px solid rgba(255,255,255,0.8)",
         }}
@@ -851,7 +858,8 @@ const AdminCourse = () => {
                 sx={{
                   borderRadius: 1,
                   textTransform: "none",
-                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                   px: 3,
                   py: 1.5,
                   fontWeight: 600,

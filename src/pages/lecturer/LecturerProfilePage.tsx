@@ -9,6 +9,8 @@ import {
   School,
   Science,
   WorkHistory,
+  CameraAlt,
+  CloudUpload,
 } from "@mui/icons-material";
 import {
   Alert,
@@ -20,6 +22,7 @@ import {
   Chip,
   Container,
   Typography,
+  Tooltip,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -68,6 +71,7 @@ const LecturerProfilePage = () => {
     useState<any>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   useEffect(() => {
     const fetchLecturerProfile = async () => {
@@ -81,6 +85,54 @@ const LecturerProfilePage = () => {
 
     fetchLecturerProfile();
   }, [dispatch]);
+
+  const handleAvatarClick = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = handleAvatarUpload;
+    input.click();
+  };
+
+  const handleAvatarUpload = async (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Vui lòng chọn file hình ảnh!");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File không được vượt quá 5MB!");
+      return;
+    }
+
+    try {
+      setIsUploadingAvatar(true);
+      
+      // Upload avatar using API from Fetch.ts
+      const response = await API.user.uploadAvatar(file);
+      
+      if (response.data.success) {
+        // Refresh lecturer profile to get updated avatar URL
+        const profileResponse = await API.lecturer.getLecturerProfile();
+        dispatch(setLecturerProfile(profileResponse.data.data));
+        toast.success("Cập nhật avatar thành công!");
+      } else {
+        toast.error("Có lỗi xảy ra khi cập nhật avatar!");
+      }
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      toast.error("Có lỗi xảy ra khi cập nhật avatar!");
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
 
   const handleAddAttendedCourse = () => {
     setIsEditMode(false);
@@ -381,7 +433,7 @@ const LecturerProfilePage = () => {
         <Card
           className="mb-8 overflow-hidden"
           sx={{
-            borderRadius: 4,
+            borderRadius: 1,
             boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
             background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
             color: "white",
@@ -411,19 +463,57 @@ const LecturerProfilePage = () => {
           >
             {/* Avatar */}
             <Box sx={{ position: "relative" }}>
-              <Avatar
-                src={lecturer.avatarUrl}
+              <Tooltip title="Click để thay đổi avatar" arrow>
+                <Avatar
+                  src={lecturer.avatarUrl}
+                  onClick={handleAvatarClick}
+                  sx={{
+                    width: 140,
+                    height: 140,
+                    border: "4px solid rgba(255,255,255,0.5)",
+                    boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
+                    fontSize: "3rem",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    "&:hover": {
+                      opacity: 0.8,
+                      transform: "scale(1.02)",
+                    },
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  {lecturer.fullName?.charAt(0)}
+                </Avatar>
+              </Tooltip>
+              
+              {/* Camera overlay on hover */}
+              <Box
                 sx={{
-                  width: 140,
-                  height: 140,
-                  border: "4px solid rgba(255,255,255,0.5)",
-                  boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
-                  fontSize: "3rem",
-                  fontWeight: 700,
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  borderRadius: "50%",
+                  background: "rgba(0,0,0,0.5)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: 0,
+                  cursor: "pointer",
+                  transition: "opacity 0.3s ease",
+                  "&:hover": {
+                    opacity: 1,
+                  },
                 }}
+                onClick={handleAvatarClick}
               >
-                {lecturer.fullName?.charAt(0)}
-              </Avatar>
+                {isUploadingAvatar ? (
+                  <CloudUpload sx={{ fontSize: "2rem", color: "white" }} />
+                ) : (
+                  <CameraAlt sx={{ fontSize: "2rem", color: "white" }} />
+                )}
+              </Box>
             </Box>
 
             {/* Info */}
@@ -469,7 +559,7 @@ const LecturerProfilePage = () => {
                         color: "#fff",
                         fontWeight: 600,
                         border: "none",
-                        borderRadius: "16px",
+                        borderRadius: 1,
                         boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
                       }}
                     />
@@ -502,7 +592,7 @@ const LecturerProfilePage = () => {
                         background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[600]} 100%)`,
                         color: "white",
                         fontWeight: 600,
-                        borderRadius: 3,
+                        borderRadius: 1,
                         textTransform: "none",
                         "&:hover": {
                           background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
@@ -520,7 +610,7 @@ const LecturerProfilePage = () => {
                         background: colors.background.gradient.secondary,
                         color: "white",
                         fontWeight: 600,
-                        borderRadius: 3,
+                        borderRadius: 1,
                         textTransform: "none",
                         "&:hover": {
                           background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
@@ -605,7 +695,7 @@ const LecturerProfilePage = () => {
             <Card
               className="sticky top-8"
               sx={{
-                borderRadius: 4,
+                borderRadius: 1,
                 boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
                 border: `1px solid ${colors.primary[100]}`,
                 overflow: "hidden",

@@ -91,7 +91,7 @@ const RegisterLecturer = () => {
   const [citizenId, setCitizenId] = useState(savedData.citizenId || "");
   const [phoneNumber, setPhoneNumber] = useState(savedData.phoneNumber || "");
   const [fullName, setFullName] = useState(savedData.fullName || "");
-  const [dateOfBirth, setDateOfBirth] = useState(savedData.dateOfBirth || "");
+  const [dateOfBirth, setDateOfBirth] = useState<Date | null>(savedData.dateOfBirth ? new Date(savedData.dateOfBirth) : new Date());
   const [gender, setGender] = useState(savedData.gender || "");
   const [bio, setBio] = useState(savedData.bio || "");
   const [address, setAddress] = useState(savedData.address || "");
@@ -136,7 +136,7 @@ const RegisterLecturer = () => {
     },
     {
       label: "Ngày sinh",
-      value: formatDate(dateOfBirth),
+      value: dateOfBirth ? formatDate(dateOfBirth.toISOString()) : "",
     },
     {
       label: "Giới tính",
@@ -240,7 +240,7 @@ const RegisterLecturer = () => {
         citizenId: citizenId || "",
         gender: gender || "",
         phoneNumber: phoneNumber || "",
-        dateOfBirth: dateOfBirth || "",
+        dateOfBirth: dateOfBirth ? dateOfBirth.toISOString() : "",
         academicRank: academicRank || "",
         specialization: specialization || "",
         experienceYears: experienceYears || "",
@@ -261,7 +261,7 @@ const RegisterLecturer = () => {
         citizenId: citizenId || "",
         phoneNumber: phoneNumber || "",
         fullName: fullName || "",
-        dateOfBirth: dateOfBirth || "",
+        dateOfBirth: dateOfBirth ? dateOfBirth.toISOString() : "",
         gender: gender === "male" ? true : false,
         bio: bio || "",
         address: address || "",
@@ -361,7 +361,7 @@ const RegisterLecturer = () => {
       citizenId: citizenId || "",
       phoneNumber: phoneNumber || "",
       fullName: fullName || "",
-      dateOfBirth: dateOfBirth || "",
+      dateOfBirth: dateOfBirth ? dateOfBirth.toISOString() : "",
       gender: gender || "",
       bio: bio || "",
       address: address || "",
@@ -391,7 +391,7 @@ const RegisterLecturer = () => {
         <Paper
           elevation={0}
           sx={{
-            borderRadius: 4,
+            borderRadius: 1,
             background: colors.background.primary,
             border: `1px solid ${colors.border.light}`,
             overflow: "hidden",
@@ -441,7 +441,7 @@ const RegisterLecturer = () => {
                 right: "-10%",
                 width: "200px",
                 height: "200px",
-                borderRadius: "50%",
+                borderRadius: 1,
                 background: "rgba(255,255,255,0.05)",
                 zIndex: 0,
               },
@@ -477,7 +477,7 @@ const RegisterLecturer = () => {
                     right: -10,
                     width: 20,
                     height: 20,
-                    borderRadius: "50%",
+                    borderRadius: 1,
                     background: "rgba(255,255,255,0.3)",
                     animation: "float 3s ease-in-out infinite",
                     "@keyframes float": {
@@ -493,7 +493,7 @@ const RegisterLecturer = () => {
                     left: -15,
                     width: 15,
                     height: 15,
-                    borderRadius: "50%",
+                    borderRadius: 1,
                     background: "rgba(255,255,255,0.2)",
                     animation: "float 3s ease-in-out infinite 1s",
                   }}
@@ -551,7 +551,7 @@ const RegisterLecturer = () => {
                     width: 4,
                     height: 40,
                     background: colors.background.gradient.primary,
-                    borderRadius: 2,
+                    borderRadius: 1,
                   },
                 }}
               >
@@ -559,7 +559,7 @@ const RegisterLecturer = () => {
                   sx={{
                     width: 56,
                     height: 56,
-                    borderRadius: 3,
+                    borderRadius: 1,
                     background: `
                       linear-gradient(135deg, ${alpha(colors.primary[500], 0.1)} 0%, ${alpha(colors.primary[300], 0.05)} 100%),
                       url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23${colors.primary[200].slice(1)}' fill-opacity='0.1'%3E%3Cpath d='M0 0h20v20H0V0zm10 18a8 8 0 100-16 8 8 0 000 16z'/%3E%3C/g%3E%3C/svg%3E")
@@ -611,7 +611,7 @@ const RegisterLecturer = () => {
                   variant="outlined"
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
+                      borderRadius: 1,
                       background: `
                         linear-gradient(135deg, ${colors.background.secondary} 0%, rgba(255,255,255,0.8) 100%),
                         url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23${colors.primary[100].slice(1)}' fill-opacity='0.03'%3E%3Cpath d='M20 20c0-11.046-8.954-20-20-20v20h20z'/%3E%3C/g%3E%3C/svg%3E")
@@ -651,7 +651,7 @@ const RegisterLecturer = () => {
                     variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         backgroundColor: colors.background.secondary,
                         transition: "all 0.3s ease",
                         border: `1px solid ${colors.border.light}`,
@@ -671,7 +671,7 @@ const RegisterLecturer = () => {
                     variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         backgroundColor: colors.background.secondary,
                         transition: "all 0.3s ease",
                         border: `1px solid ${colors.border.light}`,
@@ -698,7 +698,7 @@ const RegisterLecturer = () => {
                     <DatePicker
                       label="Ngày sinh"
                       value={dateOfBirth}
-                      onChange={(newValue) => setDateOfBirth(newValue)}
+                      onChange={(newValue) => setDateOfBirth(newValue as Date | null)}
                       format="dd/MM/yyyy"
                       slotProps={{
                         textField: {
@@ -708,7 +708,7 @@ const RegisterLecturer = () => {
                           InputLabelProps: { shrink: true },
                           sx: {
                             "& .MuiOutlinedInput-root": {
-                              borderRadius: 3,
+                              borderRadius: 1,
                               backgroundColor: "#f9f9f9",
                               border: `1px solid #ccc`,
                             },
@@ -727,7 +727,7 @@ const RegisterLecturer = () => {
                     variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         backgroundColor: colors.background.secondary,
                         border: `1px solid ${colors.border.light}`,
                       },
@@ -747,7 +747,7 @@ const RegisterLecturer = () => {
                   variant="outlined"
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
+                      borderRadius: 1,
                       backgroundColor: colors.background.secondary,
                       border: `1px solid ${colors.border.light}`,
                       "&:hover": {
@@ -767,7 +767,7 @@ const RegisterLecturer = () => {
                   sx={{
                     width: 56,
                     height: 56,
-                    borderRadius: 3,
+                    borderRadius: 1,
                     background: alpha(colors.secondary[500], 0.1),
                     display: "flex",
                     alignItems: "center",
@@ -819,7 +819,7 @@ const RegisterLecturer = () => {
                     variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         backgroundColor: colors.background.secondary,
                         border: `1px solid ${colors.border.light}`,
                       },
@@ -852,7 +852,7 @@ const RegisterLecturer = () => {
                         variant="outlined"
                         sx={{
                           "& .MuiOutlinedInput-root": {
-                            borderRadius: 3,
+                            borderRadius: 1,
                             backgroundColor: colors.background.secondary,
                             border: `1px solid ${colors.border.light}`,
                           },
@@ -885,7 +885,7 @@ const RegisterLecturer = () => {
                         variant="outlined"
                         sx={{
                           "& .MuiOutlinedInput-root": {
-                            borderRadius: 3,
+                            borderRadius: 1,
                             backgroundColor: colors.background.secondary,
                             border: `1px solid ${colors.border.light}`,
                           },
@@ -903,7 +903,7 @@ const RegisterLecturer = () => {
                     variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         backgroundColor: colors.background.secondary,
                         border: `1px solid ${colors.border.light}`,
                       },
@@ -920,7 +920,7 @@ const RegisterLecturer = () => {
                   sx={{
                     width: 56,
                     height: 56,
-                    borderRadius: 3,
+                    borderRadius: 1,
                     background: alpha(colors.accent.lightBlue, 0.1),
                     display: "flex",
                     alignItems: "center",
@@ -967,7 +967,7 @@ const RegisterLecturer = () => {
                 variant="outlined"
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    borderRadius: 3,
+                    borderRadius: 1,
                     backgroundColor: colors.background.secondary,
                     
                     transition: "all 0.3s ease",
@@ -1003,7 +1003,7 @@ const RegisterLecturer = () => {
           <Paper
             elevation={0}
             sx={{
-              borderRadius: 4,
+              borderRadius: 1,
               background: colors.background.primary,
               border: `1px solid ${colors.border.light}`,
               overflow: "hidden",
@@ -1039,7 +1039,7 @@ const RegisterLecturer = () => {
                   right: "-5%",
                   width: "100px",
                   height: "100px",
-                  borderRadius: "50%",
+                  borderRadius: 1,
                   background: "rgba(255,255,255,0.1)",
                   animation: "pulse 4s ease-in-out infinite",
                   "@keyframes pulse": {
@@ -1136,7 +1136,7 @@ const RegisterLecturer = () => {
                           variant="outlined"
                           className="relative transition-all duration-300 hover:shadow-xl"
                           sx={{
-                            borderRadius: 3,
+                            borderRadius: 1,
                             border: "2px solid #e5e7eb",
                             "&:hover": {
                               borderColor: "#3b82f6",
@@ -1216,7 +1216,7 @@ const RegisterLecturer = () => {
                               color="primary"
                               variant="filled"
                               className="font-medium"
-                              sx={{ borderRadius: 2 }}
+                              sx={{ borderRadius: 1 }}
                             />
                           </CardContent>
                         </Card>
@@ -1233,7 +1233,7 @@ const RegisterLecturer = () => {
                 fullWidth
                 size="large"
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: 1,
                   background: `
                     ${colors.background.gradient.primary},
                     url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M0 0h20v20H0V0zm10 17a7 7 0 100-14 7 7 0 000 14z'/%3E%3C/g%3E%3C/svg%3E")
@@ -1274,7 +1274,7 @@ const RegisterLecturer = () => {
           <Paper
             elevation={0}
             sx={{
-              borderRadius: 4,
+              borderRadius: 1,
               background: colors.background.primary,
               border: `1px solid ${colors.border.light}`,
               overflow: "hidden",
@@ -1310,7 +1310,7 @@ const RegisterLecturer = () => {
                   right: "-5%",
                   width: "100px",
                   height: "100px",
-                  borderRadius: "50%",
+                  borderRadius: 1,
                   background: "rgba(255,255,255,0.1)",
                   animation: "pulse 4s ease-in-out infinite",
                   "@keyframes pulse": {
@@ -1408,7 +1408,7 @@ const RegisterLecturer = () => {
                           variant="outlined"
                           className="relative transition-all duration-300 hover:shadow-xl"
                           sx={{
-                            borderRadius: 3,
+                            borderRadius: 1,
                             border: "2px solid #e5e7eb",
                             "&:hover": {
                               borderColor: "#93333ea",
@@ -1500,7 +1500,7 @@ const RegisterLecturer = () => {
                               color="secondary"
                               variant="filled"
                               className="font-medium"
-                              sx={{ borderRadius: 2 }}
+                              sx={{ borderRadius: 1 }}
                             />
                           </CardContent>
                         </Card>
@@ -1517,7 +1517,7 @@ const RegisterLecturer = () => {
                 fullWidth
                 size="large"
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: 1,
                   background: `
                     ${colors.background.gradient.secondary},
                     url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23${colors.primary[50].slice(1)}' fill-opacity='0.1'%3E%3Cpath d='M0 0h20v20H0V0zm10 17a7 7 0 100-14 7 7 0 000 14z'/%3E%3C/g%3E%3C/svg%3E")
@@ -1564,7 +1564,7 @@ const RegisterLecturer = () => {
         <Paper
           elevation={0}
           sx={{
-            borderRadius: 4,
+            borderRadius: 1,
             background: colors.background.primary,
             border: `1px solid ${colors.border.light}`,
             overflow: "hidden",
@@ -1602,7 +1602,7 @@ const RegisterLecturer = () => {
                 left: "10%",
                 width: "80px",
                 height: "80px",
-                borderRadius: "50%",
+                borderRadius: 1 ,
                 background: "rgba(255,255,255,0.08)",
                 animation: "float 6s ease-in-out infinite",
               },
@@ -1613,7 +1613,7 @@ const RegisterLecturer = () => {
                 right: "15%",
                 width: "60px",
                 height: "60px",
-                borderRadius: "50%",
+                borderRadius: 1,
                 background: "rgba(255,255,255,0.06)",
                 animation: "float 6s ease-in-out infinite 3s",
               },
@@ -1655,7 +1655,7 @@ const RegisterLecturer = () => {
                       left: `${10 + i * 30}%`,
                       width: 8,
                       height: 8,
-                      borderRadius: "50%",
+                      borderRadius: 1,
                       background: "rgba(255,255,255,0.4)",
                       animation: `sparkle 2s ease-in-out infinite ${i * 0.5}s`,
                       "@keyframes sparkle": {
@@ -1695,7 +1695,7 @@ const RegisterLecturer = () => {
               severity="warning"
               sx={{
                 mb: 6,
-                borderRadius: 3,
+                borderRadius: 1,
                 border: `1px solid ${colors.info[200]}`,
                 backgroundColor: colors.info[50],
               }}
@@ -1714,7 +1714,7 @@ const RegisterLecturer = () => {
                   elevation={2}
                   className="h-full p-8"
                   sx={{
-                    borderRadius: 3,
+                    borderRadius: 1,
                     background:
                       "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
                   }}
@@ -1776,7 +1776,7 @@ const RegisterLecturer = () => {
                   elevation={2}
                   className="p-8"
                   sx={{
-                    borderRadius: 3,
+                    borderRadius: 1,
                     background:
                       "linear-gradient(135deg, #ffffff 0%, #faf5ff 100%)",
                   }}
@@ -1850,7 +1850,7 @@ const RegisterLecturer = () => {
                     elevation={2}
                     className="p-8"
                     sx={{
-                      borderRadius: 3,
+                      borderRadius: 1,
                       background:
                         "linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)",
                     }}
@@ -1937,7 +1937,7 @@ const RegisterLecturer = () => {
           elevation={0}
           sx={{
             mb: 4,
-            borderRadius: 4,
+            borderRadius: 1,
             background: `
               ${colors.background.gradient.primary},
               url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M0 50c25 0 50-25 50-50H0v50zm50 0c0 25 25 50 50 50V50H50z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
@@ -2088,12 +2088,12 @@ const RegisterLecturer = () => {
               <Box sx={{ mt: 4 }}>
                 <LinearProgress
                   sx={{
-                    borderRadius: 2,
+                    borderRadius: 1,
                     height: 6,
                     backgroundColor: "rgba(255,255,255,0.3)",
                     "& .MuiLinearProgress-bar": {
                       backgroundColor: "#fff",
-                      borderRadius: 2,
+                      borderRadius: 1,
                     },
                   }}
                 />
@@ -2118,7 +2118,7 @@ const RegisterLecturer = () => {
           elevation={0}
           sx={{
             mt: 4,
-            borderRadius: 4,
+            borderRadius: 1,
             background: `
               ${colors.background.primary},
               url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23${colors.primary[50].slice(1)}' fill-opacity='0.1'%3E%3Cpath d='M20 20c11.046 0 20-8.954 20-20H20z'/%3E%3C/g%3E%3C/svg%3E")
@@ -2134,7 +2134,7 @@ const RegisterLecturer = () => {
               right: 0,
               height: 2,
               background: colors.background.gradient.primary,
-              borderRadius: "4px 4px 0 0",
+              borderRadius: 1,
             },
           }}
         >
@@ -2151,7 +2151,7 @@ const RegisterLecturer = () => {
               variant="outlined"
               size="large"
               sx={{
-                borderRadius: 3,
+                borderRadius: 1,
                 px: 4,
                 py: 1.5,
                 borderColor: colors.neutral[300],
@@ -2172,7 +2172,7 @@ const RegisterLecturer = () => {
                   onClick={handleSkip}
                   size="large"
                   sx={{
-                    borderRadius: 3,
+                    borderRadius: 1,
                     px: 4,
                     py: 1.5,
                     color: colors.text.tertiary,
@@ -2187,7 +2187,7 @@ const RegisterLecturer = () => {
                 size="large"
                 disabled={isSubmitting}
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: 1,
                   px: 6,
                   py: 1.5,
                   background: colors.background.gradient.primary,
@@ -2231,12 +2231,12 @@ const RegisterLecturer = () => {
               variant="determinate"
               value={((activeStep + 1) / steps.length) * 100}
               sx={{
-                borderRadius: 2,
+                borderRadius: 1,
                 height: 6,
                 backgroundColor: colors.neutral[200],
                 "& .MuiLinearProgress-bar": {
                   backgroundColor: colors.primary[500],
-                  borderRadius: 2,
+                  borderRadius: 1,
                 },
               }}
             />
@@ -2252,7 +2252,7 @@ const RegisterLecturer = () => {
           right: "5%",
           width: 150,
           height: 150,
-          borderRadius: "50%",
+          borderRadius: 1,
           background: `radial-gradient(circle, ${alpha(colors.primary[200], 0.1)} 0%, transparent 70%)`,
           animation: "float 8s ease-in-out infinite",
           zIndex: -1,
@@ -2265,7 +2265,7 @@ const RegisterLecturer = () => {
           left: "8%",
           width: 100,
           height: 100,
-          borderRadius: "50%",
+          borderRadius: 1,
           background: `radial-gradient(circle, ${alpha(colors.secondary[200], 0.1)} 0%, transparent 70%)`,
           animation: "float 6s ease-in-out infinite 2s",
           zIndex: -1,

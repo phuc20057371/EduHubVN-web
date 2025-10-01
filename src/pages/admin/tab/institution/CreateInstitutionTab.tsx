@@ -142,7 +142,7 @@ const CreateInstitutionTab: React.FC<CreateInstitutionTabProps> = ({
                 onChange={(e) => setCreateDateSort(e.target.value)}
                 sx={{
                   bgcolor: "white",
-                  borderRadius: 2,
+                  borderRadius: 1,
                 }}
               >
                 <MenuItem value="oldest">Cũ nhất trước</MenuItem>
@@ -161,7 +161,7 @@ const CreateInstitutionTab: React.FC<CreateInstitutionTabProps> = ({
               onChange={(e) => setCreateSearchTerm(e.target.value)}
               sx={{
                 bgcolor: "white",
-                borderRadius: 2,
+                borderRadius: 1,
               }}
               InputProps={{
                 startAdornment: (
@@ -251,7 +251,7 @@ const CreateInstitutionTab: React.FC<CreateInstitutionTabProps> = ({
                 transition: "all 0.3s ease",
                 border: "2px solid",
                 borderColor: "success.light",
-                borderRadius: 3,
+                borderRadius: 1,
                 background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
                 "&:hover": {
                   transform: "translateY(-8px)",
@@ -377,7 +377,7 @@ const CreateInstitutionTab: React.FC<CreateInstitutionTabProps> = ({
                   fullWidth
                   sx={{
                     mt: "auto",
-                    borderRadius: 2,
+                    borderRadius: 1,
                     textTransform: "none",
                     background:
                       "linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)",
@@ -400,7 +400,7 @@ const CreateInstitutionTab: React.FC<CreateInstitutionTabProps> = ({
           sx={{
             p: 4,
             textAlign: "center",
-            borderRadius: 3,
+            borderRadius: 1,
             background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
             boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
           }}

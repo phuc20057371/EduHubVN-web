@@ -5,7 +5,9 @@ import {
   Language,
   LocationOn,
   Phone,
-  School
+  School,
+  CameraAlt,
+  CloudUpload,
 } from "@mui/icons-material";
 import {
   Avatar,
@@ -17,6 +19,7 @@ import {
   CircularProgress,
   Container,
   LinearProgress,
+  Tooltip,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -44,6 +47,7 @@ const InstitutionProfilePage = () => {
   // Local state
   const [loading, setLoading] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,6 +91,54 @@ const InstitutionProfilePage = () => {
 
   const handleCloseEditDialog = () => {
     setEditDialogOpen(false);
+  };
+
+  const handleLogoClick = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = handleLogoUpload;
+    input.click();
+  };
+
+  const handleLogoUpload = async (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Vui lòng chọn file hình ảnh!");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File không được vượt quá 5MB!");
+      return;
+    }
+
+    try {
+      setIsUploadingLogo(true);
+      
+      // Upload logo using API from Fetch.ts
+      const response = await API.user.updateLogoInstitution(file);
+      
+      if (response.data.success) {
+        // Refresh institution profile to get updated logo URL
+        const profileResponse = await API.institution.getInstitutionProfile();
+        dispatch(setInstitutionProfile(profileResponse.data.data));
+        toast.success("Cập nhật logo thành công!");
+      } else {
+        toast.error("Có lỗi xảy ra khi cập nhật logo!");
+      }
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      toast.error("Có lỗi xảy ra khi cập nhật logo!");
+    } finally {
+      setIsUploadingLogo(false);
+    }
   };
 
   if (loading && !institutionProfile) {
@@ -143,21 +195,58 @@ const InstitutionProfilePage = () => {
           >
             {/* Logo */}
             <Box sx={{ position: "relative" }}>
-              <Avatar
-                src={institution.logoUrl}
-                sx={{
-                  width: 140,
-                  height: 140,
-                  border: "4px solid rgba(255,255,255,0.5)",
-                  boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
-                  fontSize: "3rem",
-                  fontWeight: 700,
-                  backgroundColor: colors.background.primary,
-                }}
-              >
-                <School sx={{ fontSize: "4rem", color: colors.primary[500] }} />
-              </Avatar>
+              <Tooltip title="Click để thay đổi logo" arrow>
+                <Avatar
+                  src={institution.logoUrl}
+                  onClick={handleLogoClick}
+                  sx={{
+                    width: 140,
+                    height: 140,
+                    border: "4px solid rgba(255,255,255,0.5)",
+                    boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
+                    fontSize: "3rem",
+                    fontWeight: 700,
+                    backgroundColor: colors.background.primary,
+                    cursor: "pointer",
+                    "&:hover": {
+                      opacity: 0.8,
+                      transform: "scale(1.02)",
+                    },
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  <School sx={{ fontSize: "4rem", color: colors.primary[500] }} />
+                </Avatar>
+              </Tooltip>
               
+              {/* Camera overlay on hover */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  borderRadius: "50%",
+                  background: "rgba(0,0,0,0.5)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: 0,
+                  cursor: "pointer",
+                  transition: "opacity 0.3s ease",
+                  "&:hover": {
+                    opacity: 1,
+                  },
+                }}
+                onClick={handleLogoClick}
+              >
+                {isUploadingLogo ? (
+                  <CloudUpload sx={{ fontSize: "2rem", color: "white" }} />
+                ) : (
+                  <CameraAlt sx={{ fontSize: "2rem", color: "white" }} />
+                )}
+              </Box>
             </Box>
 
             {/* Institution Info */}

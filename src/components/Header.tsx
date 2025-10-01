@@ -71,8 +71,8 @@ const Header: React.FC<HeaderProps> = ({
       position="fixed"
       elevation={0}
       sx={{
-        background: colors.isDark 
-          ? colors.gradients.primary 
+        background: colors.isDark
+          ? colors.gradients.primary
           : `linear-gradient(135deg, ${colors.primary.main} 0%, ${colors.primary.dark} 100%)`,
         borderBottom: `1px solid ${colors.border.light}`,
         backdropFilter: "blur(10px)",
@@ -92,7 +92,7 @@ const Header: React.FC<HeaderProps> = ({
               display: { md: "none" },
               bgcolor: alpha("#fff", 0.1),
               "&:hover": {
-                bgcolor: colors.isDark 
+                bgcolor: colors.isDark
                   ? alpha("#fff", 0.2)
                   : alpha("#000", 0.1),
               },
@@ -138,13 +138,13 @@ const Header: React.FC<HeaderProps> = ({
                     ? `1px solid ${alpha("#fff", 0.3)}`
                     : "1px solid transparent",
                   "&:hover": {
-                    backgroundColor: colors.isDark 
+                    backgroundColor: colors.isDark
                       ? alpha("#fff", 0.15)
                       : alpha("#000", 0.08),
                     transform: "translateY(-1px)",
-                    boxShadow: colors.isDark 
+                    boxShadow: colors.isDark
                       ? `0 4px 12px ${alpha("#000", 0.15)}`
-                      : `0 4px 12px ${alpha("#000", 0.10)}`,
+                      : `0 4px 12px ${alpha("#000", 0.1)}`,
                   },
                   transition: "all 0.2s ease-in-out",
                   textTransform: "none",
@@ -165,7 +165,7 @@ const Header: React.FC<HeaderProps> = ({
               sx={{
                 bgcolor: alpha("#fff", 0.1),
                 "&:hover": {
-                  bgcolor: colors.isDark 
+                  bgcolor: colors.isDark
                     ? alpha("#fff", 0.2)
                     : alpha("#000", 0.1),
                 },
@@ -183,7 +183,7 @@ const Header: React.FC<HeaderProps> = ({
               sx={{
                 bgcolor: alpha("#fff", 0.1),
                 "&:hover": {
-                  bgcolor: colors.isDark 
+                  bgcolor: colors.isDark
                     ? alpha("#fff", 0.2)
                     : alpha("#000", 0.1),
                 },
@@ -206,7 +206,7 @@ const Header: React.FC<HeaderProps> = ({
                 borderRadius: 1,
                 bgcolor: alpha("#fff", 0.1),
                 "&:hover": {
-                  bgcolor: colors.isDark 
+                  bgcolor: colors.isDark
                     ? alpha("#fff", 0.2)
                     : alpha("#000", 0.1),
                 },
@@ -214,13 +214,19 @@ const Header: React.FC<HeaderProps> = ({
               }}
             >
               <Avatar
-                alt={profile?.fullName || userProfile?.fullName || userRoleDisplay}
-                src={profile?.avatarUrl || userProfile?.avatarUrl}
+                alt={
+                  profile?.fullName || userProfile?.fullName || userRoleDisplay
+                }
+                src={
+                  profile?.lecturer?.avatarUrl ||
+                  profile?.educationInstitution?.logoUrl ||
+                  profile?.partnerOrganization?.logoUrl
+                }
                 sx={{
-                  width: 32,
-                  height: 32,
+                  width: 50,
+                  height: 50,
                   mr: 1,
-                  bgcolor: colors.secondary.main,
+                  border: `2px solid ${colors.border.light}`,
                   fontSize: "0.9rem",
                   fontWeight: 600,
                 }}
@@ -240,10 +246,10 @@ const Header: React.FC<HeaderProps> = ({
                   variant="body2"
                   sx={{ fontWeight: 600, lineHeight: 1.2 }}
                 >
-                  {profile?.lecturer?.fullName || 
-                   profile?.fullName || 
-                   userProfile?.fullName || 
-                   userRoleDisplay}
+                  {profile?.lecturer?.fullName ||
+                    profile?.fullName ||
+                    userProfile?.fullName ||
+                    userRoleDisplay}
                 </Typography>
                 <Typography
                   variant="caption"
@@ -294,10 +300,7 @@ const Header: React.FC<HeaderProps> = ({
                     userProfile?.fullName ||
                     userRoleDisplay}
                 </Typography>
-                <Typography
-                  variant="caption"
-                  
-                >
+                <Typography variant="caption">
                   {profile?.email ||
                     userProfile?.email ||
                     `${userRole}@eduhubvn.com`}
@@ -309,7 +312,7 @@ const Header: React.FC<HeaderProps> = ({
                 sx={{
                   py: 1.5,
                   "&:hover": {
-                    bgcolor: colors.isDark 
+                    bgcolor: colors.isDark
                       ? `${colors.primary.main}20`
                       : colors.primary.light,
                   },
@@ -324,7 +327,7 @@ const Header: React.FC<HeaderProps> = ({
                 sx={{
                   py: 1.5,
                   "&:hover": {
-                    bgcolor: colors.isDark 
+                    bgcolor: colors.isDark
                       ? `${colors.primary.main}20`
                       : colors.primary.light,
                   },
@@ -342,7 +345,7 @@ const Header: React.FC<HeaderProps> = ({
                   py: 1.5,
                   color: colors.error[600],
                   "&:hover": {
-                    bgcolor: colors.isDark 
+                    bgcolor: colors.isDark
                       ? alpha(colors.error[500], 0.2)
                       : colors.error[50],
                   },

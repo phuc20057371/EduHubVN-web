@@ -225,12 +225,12 @@ const AddResearchProjectDialog: React.FC<AddResearchProjectDialogProps> = ({
     <Modal
       open={open}
       onClose={onClose}
-      sx={{
-        "& .MuiBackdrop-root": {
-          backgroundColor: "rgba(19, 111, 180, 0.4)",
-          backdropFilter: "blur(8px)",
-        },
-      }}
+      // sx={{
+      //   "& .MuiBackdrop-root": {
+      //     backgroundColor: "rgba(19, 111, 180, 0.4)",
+      //     backdropFilter: "blur(8px)",
+      //   },
+      // }}
     >
       <Box sx={style}>
         {/* Header */}

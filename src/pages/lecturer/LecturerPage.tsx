@@ -5,10 +5,10 @@ import {
   Group,
   Link as LinkIcon,
   LocationOn,
-  MenuBook,
   MoreVert,
   School,
   VideocamOutlined,
+  Description,
 } from "@mui/icons-material";
 import {
   Alert,
@@ -45,19 +45,13 @@ const LecturerPage = () => {
   const calculateStats = () => {
     const courses = coursesOfLecturer?.courses || [];
 
-    // Count active courses (those that are currently ongoing)
-    const activeCourses = courses.filter((courseItem: any) => {
-      const course = courseItem.course;
-      const startDate = new Date(course.startDate);
-      const endDate = new Date(course.endDate);
-      const now = new Date();
-      return startDate <= now && now <= endDate;
-    }).length;
+    // Count total courses assigned to lecturer
+    const activeCourses = courses.length;
 
     // This would be calculated from research projects API in real implementation
-    const researchProjects = lecturerProfile?.researchProjects?.length || 0;
+    const researchProjects = 0; // Placeholder for now
 
-    // This would be calculated from blog posts/articles API in real implementation
+    // This would be calculated from contracts API in real implementation
     const sharedArticles = 0; // Placeholder for now
 
     return {
@@ -72,7 +66,7 @@ const LecturerPage = () => {
   // Dynamic dashboard stats based on real data
   const dashboardStats = [
     {
-      title: "Khóa học đang dạy",
+      title: "Khóa học",
       value: stats.activeCourses.toString(),
       change: "+0", // Would need historical data to calculate change
       changeType: "increase",
@@ -81,7 +75,7 @@ const LecturerPage = () => {
       background: colors.primary[50],
     },
     {
-      title: "Đề tài nghiên cứu",
+      title: "Đề tài",
       value: stats.researchProjects.toString(),
       change: "+0", // Would need historical data to calculate change
       changeType: "increase",
@@ -90,11 +84,11 @@ const LecturerPage = () => {
       background: colors.secondary[50],
     },
     {
-      title: "Bài viết chia sẻ",
+      title: "Hợp đồng",
       value: stats.sharedArticles.toString(),
       change: "+0", // Would need historical data to calculate change
       changeType: "increase",
-      icon: <MenuBook />,
+      icon: <Description />,
       color: colors.warning[500],
       background: colors.warning[50],
     },
@@ -377,19 +371,265 @@ const LecturerPage = () => {
         ))}
       </Box>
 
-      {/* Main Content Layout */}
+      {/* Research & Contracts Section - Top Row */}
       <Box
         sx={{
-          display: "flex",
-          flexDirection: { xs: "column", lg: "row" },
-          gap: { xs: 3, lg: 4 },
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+          gap: { xs: 3, md: 4 },
+          mb: { xs: 3, lg: 4 },
         }}
       >
-        {/* Main Content - Left Side */}
-        <Box sx={{ flex: { lg: "1 1 66%" } }}>
-          <Stack spacing={3}>
-            {/* Teaching Courses */}
-            <Card sx={{ borderRadius: 1 }}>
+        {/* Research Topics */}
+        <Card sx={{ borderRadius: 1 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                Đề tài nghiên cứu
+              </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<Assignment />}
+                sx={{ textTransform: "none" }}
+              >
+                Xem tất cả
+              </Button>
+            </Box>
+
+            <Alert severity="info" sx={{ mb: 3 }}>
+              <Typography variant="body2">
+                <strong>Gợi ý thông minh:</strong> Dựa trên{" "}
+                {lecturerProfile?.experienceYears || 22} năm kinh nghiệm
+                trong lĩnh vực{" "}
+                {lecturerProfile?.specialization || "Khoa học máy tính"}, hệ
+                thống đề xuất các đề tài phù hợp từ Trường/Trung tâm và đối
+                tác.
+              </Typography>
+            </Alert>
+
+            <Stack spacing={2}>
+              {[
+                {
+                  title:
+                    "Ứng dụng Machine Learning trong hệ thống quản lý học tập",
+                  institution: "Trường Đại học ABC",
+                  status: "Mở đăng ký",
+                  funding: "200 triệu VNĐ",
+                  deadline: "2025-09-30",
+                  matchScore: 95,
+                  color: colors.success[500],
+                },
+                {
+                  title:
+                    "Phát triển nền tảng giáo dục trực tuyến với AR/VR",
+                  institution: "Viện Nghiên cứu Giáo dục",
+                  status: "Sắp mở",
+                  funding: "150 triệu VNĐ",
+                  deadline: "2025-10-15",
+                  matchScore: 88,
+                  color: colors.primary[500],
+                },
+              ].slice(0, 2).map((topic, index) => (
+                <Card
+                  key={index}
+                  sx={{
+                    border: `1px solid ${alpha(topic.color, 0.2)}`,
+                    background: `linear-gradient(135deg, ${alpha(topic.color, 0.05)} 0%, ${alpha(topic.color, 0.08)} 100%)`,
+                    "&:hover": {
+                      boxShadow: `0 4px 12px ${alpha(topic.color, 0.15)}`,
+                      transform: "translateY(-1px)",
+                    },
+                    transition: "all 0.2s ease-in-out",
+                  }}
+                >
+                  <CardContent sx={{ p: 2 }}>
+                    <Box sx={{ mb: 2 }}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ fontWeight: 600, mb: 1, fontSize: "0.9rem" }}
+                      >
+                        {topic.title}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: colors.text.secondary, mb: 1 }}
+                      >
+                        {topic.institution}
+                      </Typography>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 2,
+                      }}
+                    >
+                      <Chip
+                        label={topic.status}
+                        size="small"
+                        sx={{
+                          bgcolor: alpha(topic.color, 0.1),
+                          color: topic.color,
+                          fontWeight: 600,
+                          fontSize: "0.75rem",
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 600, color: topic.color }}
+                      >
+                        Phù hợp {topic.matchScore}%
+                      </Typography>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        fontSize: "0.8rem",
+                      }}
+                    >
+                      <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                        Kinh phí: {topic.funding}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{ color: colors.text.secondary }}
+                      >
+                        Hạn: {topic.deadline}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              ))}
+            </Stack>
+          </CardContent>
+        </Card>
+
+        {/* Contracts */}
+        <Card sx={{ borderRadius: 1 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                Hợp đồng
+              </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<Description />}
+                sx={{ textTransform: "none" }}
+              >
+                Xem tất cả
+              </Button>
+            </Box>
+
+            <Stack spacing={2}>
+              {[
+                {
+                  title: "Hợp đồng giảng dạy CNTT cơ bản",
+                  institution: "Trường Đại học ABC",
+                  status: "Đang thực hiện",
+                  value: "50 triệu VNĐ",
+                  duration: "6 tháng",
+                  color: colors.primary[500],
+                },
+                {
+                  title: "Hợp đồng đào tạo lập trình viên",
+                  institution: "Công ty Tech XYZ",
+                  status: "Chờ ký",
+                  value: "120 triệu VNĐ",
+                  duration: "12 tháng",
+                  color: colors.warning[500],
+                },
+              ].map((contract, index) => (
+                <Card
+                  key={index}
+                  sx={{
+                    border: `1px solid ${alpha(contract.color, 0.2)}`,
+                    background: `linear-gradient(135deg, ${alpha(contract.color, 0.05)} 0%, ${alpha(contract.color, 0.08)} 100%)`,
+                    "&:hover": {
+                      boxShadow: `0 4px 12px ${alpha(contract.color, 0.15)}`,
+                      transform: "translateY(-1px)",
+                    },
+                    transition: "all 0.2s ease-in-out",
+                  }}
+                >
+                  <CardContent sx={{ p: 2 }}>
+                    <Box sx={{ mb: 2 }}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ fontWeight: 600, mb: 1, fontSize: "0.9rem" }}
+                      >
+                        {contract.title}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: colors.text.secondary, mb: 1 }}
+                      >
+                        {contract.institution}
+                      </Typography>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 2,
+                      }}
+                    >
+                      <Chip
+                        label={contract.status}
+                        size="small"
+                        sx={{
+                          bgcolor: alpha(contract.color, 0.1),
+                          color: contract.color,
+                          fontWeight: 600,
+                          fontSize: "0.75rem",
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 600, color: contract.color }}
+                      >
+                        {contract.value}
+                      </Typography>
+                    </Box>
+
+                    <Typography
+                      variant="caption"
+                      sx={{ color: colors.text.secondary }}
+                    >
+                      Thời hạn: {contract.duration}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              ))}
+            </Stack>
+          </CardContent>
+        </Card>
+      </Box>
+
+      {/* Courses Section - Full Width */}
+      <Card sx={{ borderRadius: 1 }}>
               <CardContent sx={{ p: 3 }}>
                 <Box
                   sx={{
@@ -621,18 +861,21 @@ const LecturerPage = () => {
                                     course.endDate || course.nextClass,
                                   ).toLocaleDateString("vi-VN")}
                                 </Typography>
-                                
+
                                 {/* Address for offline courses */}
                                 {course.address && (
                                   <Typography
                                     variant="body2"
-                                    sx={{ 
-                                      color: colors.text.secondary, 
+                                    sx={{
+                                      color: colors.text.secondary,
                                       mb: 1,
-                                      backgroundColor: alpha(colors.primary[500], 0.1),
+                                      backgroundColor: alpha(
+                                        colors.primary[500],
+                                        0.1,
+                                      ),
                                       padding: "4px 8px",
                                       borderRadius: 1,
-                                      display: "inline-block"
+                                      display: "inline-block",
                                     }}
                                   >
                                     📍 <strong>Địa điểm:</strong>{" "}
@@ -717,394 +960,15 @@ const LecturerPage = () => {
                     ))
                   ) : (
                     <Alert severity="info" sx={{ mt: 2 }}>
-                      Chưa có khóa học nào. Hãy tạo khóa học đầu tiên của bạn!
+                      Chưa có khóa học nào !
                     </Alert>
                   )}
                 </Box>
               </CardContent>
             </Card>
-
-            {/* Experience Sharing Section */}
-            {/* <Card sx={{ borderRadius: 1 }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 3,
-                  }}
-                >
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    Chia sẻ kinh nghiệm
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    startIcon={<MenuBook />}
-                    sx={{ textTransform: "none" }}
-                  >
-                    Viết bài mới
-                  </Button>
-                </Box>
-
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: { xs: "column", md: "row" },
-                    gap: { xs: 2, md: 3 },
-                  }}
-                >
-                  <Box sx={{ flex: { md: 1 } }}>
-                    <Card
-                      sx={{
-                        background: `linear-gradient(135deg, ${colors.primary[50]} 0%, ${colors.primary[100]} 100%)`,
-                        border: `1px solid ${colors.primary[200]}`,
-                      }}
-                    >
-                      <CardContent sx={{ p: 3 }}>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontWeight: 600,
-                            mb: 2,
-                            color: colors.primary[700],
-                          }}
-                        >
-                          Kinh nghiệm giảng dạy React
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{ color: colors.text.secondary, mb: 2 }}
-                        >
-                          Chia sẻ những phương pháp hiệu quả khi dạy React cho
-                          người mới bắt đầu...
-                        </Typography>
-                        <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-                          <Chip label="React" size="small" />
-                          <Chip label="Giảng dạy" size="small" />
-                          <Chip label="Tips" size="small" />
-                        </Stack>
-                        <Typography
-                          variant="caption"
-                          sx={{ color: colors.text.tertiary }}
-                        >
-                          Đăng 3 ngày trước • 142 lượt xem
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Box>
-
-                  <Box sx={{ flex: { md: 1 } }}>
-                    <Card
-                      sx={{
-                        background: `linear-gradient(135deg, ${colors.secondary[50]} 0%, ${colors.secondary[100]} 100%)`,
-                        border: `1px solid ${colors.secondary[200]}`,
-                      }}
-                    >
-                      <CardContent sx={{ p: 3 }}>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontWeight: 600,
-                            mb: 2,
-                            color: colors.secondary[700],
-                          }}
-                        >
-                          Phương pháp dạy trực tuyến hiệu quả
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{ color: colors.text.secondary, mb: 2 }}
-                        >
-                          Những bí quyết để tăng tương tác và hiệu quả trong các
-                          lớp học online...
-                        </Typography>
-                        <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-                          <Chip label="Online" size="small" />
-                          <Chip label="Tương tác" size="small" />
-                          <Chip label="Hiệu quả" size="small" />
-                        </Stack>
-                        <Typography
-                          variant="caption"
-                          sx={{ color: colors.text.tertiary }}
-                        >
-                          Đăng 1 tuần trước • 86 lượt xem
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card> */}
-
-            {/* Research Topics Section - Suggested by System */}
-            {/* <Card sx={{ borderRadius: 1 }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 3,
-                  }}
-                >
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    Đề tài nghiên cứu được gợi ý
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<Assignment />}
-                    sx={{ textTransform: "none" }}
-                  >
-                    Xem thêm gợi ý
-                  </Button>
-                </Box>
-
-                <Alert severity="info" sx={{ mb: 3 }}>
-                  <Typography variant="body2">
-                    <strong>Gợi ý thông minh:</strong> Dựa trên{" "}
-                    {lecturerProfile?.experienceYears || 22} năm kinh nghiệm
-                    trong lĩnh vực{" "}
-                    {lecturerProfile?.specialization || "Khoa học máy tính"}, hệ
-                    thống đề xuất các đề tài phù hợp từ Trường/Trung tâm và đối
-                    tác.
-                  </Typography>
-                </Alert>
-
-                <Stack spacing={3}>
-                  {[
-                    {
-                      title:
-                        "Ứng dụng Machine Learning trong hệ thống quản lý học tập",
-                      institution: "Trường Đại học ABC",
-                      partner: "Công ty công nghệ XYZ",
-                      status: "Mở đăng ký",
-                      funding: "200 triệu VNĐ",
-                      duration: "24 tháng",
-                      requirements: [
-                        "PhD Khoa học máy tính",
-                        "5+ năm kinh nghiệm AI/ML",
-                        "Có công bố quốc tế",
-                      ],
-                      deadline: "2025-09-30",
-                      matchScore: 95,
-                      color: colors.success[500],
-                    },
-                    {
-                      title:
-                        "Phát triển nền tảng giáo dục trực tuyến với AR/VR",
-                      institution: "Viện Nghiên cứu Giáo dục",
-                      partner: "Tập đoàn Giáo dục DEF",
-                      status: "Sắp mở",
-                      funding: "150 triệu VNĐ",
-                      duration: "18 tháng",
-                      requirements: [
-                        "Thạc sĩ CNTT",
-                        "3+ năm kinh nghiệm",
-                        "Kinh nghiệm giảng dạy",
-                      ],
-                      deadline: "2025-10-15",
-                      matchScore: 88,
-                      color: colors.primary[500],
-                    },
-                    {
-                      title:
-                        "Nghiên cứu phương pháp đánh giá năng lực lập trình tự động",
-                      institution: "Trường Đại học GHI",
-                      partner: "Startup EdTech",
-                      status: "Đang xét duyệt",
-                      funding: "80 triệu VNĐ",
-                      duration: "12 tháng",
-                      requirements: [
-                        "Cử nhân CNTT",
-                        "Kinh nghiệm giảng dạy lập trình",
-                        "Hiểu biết về testing",
-                      ],
-                      deadline: "2025-11-01",
-                      matchScore: 82,
-                      color: colors.warning[500],
-                    },
-                  ].map((topic, index) => (
-                    <Card
-                      key={index}
-                      sx={{
-                        border: `2px solid ${alpha(topic.color, 0.3)}`,
-                        background: `linear-gradient(135deg, ${alpha(topic.color, 0.05)} 0%, ${alpha(topic.color, 0.1)} 100%)`,
-                        "&:hover": {
-                          boxShadow: `0 8px 24px ${alpha(topic.color, 0.2)}`,
-                          transform: "translateY(-2px)",
-                        },
-                        transition: "all 0.3s ease-in-out",
-                      }}
-                    >
-                      <CardContent sx={{ p: 3 }}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "flex-start",
-                            mb: 2,
-                          }}
-                        >
-                          <Box sx={{ flex: 1 }}>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 2,
-                                mb: 2,
-                              }}
-                            >
-                              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                {topic.title}
-                              </Typography>
-                              <Chip
-                                label={`${topic.matchScore}% phù hợp`}
-                                size="small"
-                                sx={{
-                                  bgcolor: topic.color,
-                                  color: "white",
-                                  fontWeight: 600,
-                                }}
-                              />
-                            </Box>
-
-                            <Box
-                              sx={{
-                                display: "flex",
-                                flexDirection: { xs: "column", sm: "row" },
-                                gap: 2,
-                                mb: 2,
-                              }}
-                            >
-                              <Chip
-                                label={topic.status}
-                                size="small"
-                                sx={{
-                                  bgcolor: alpha(topic.color, 0.1),
-                                  color: topic.color,
-                                  fontWeight: 600,
-                                }}
-                              />
-                              <Chip
-                                label={`Kinh phí: ${topic.funding}`}
-                                size="small"
-                                variant="outlined"
-                              />
-                              <Chip
-                                label={`Thời gian: ${topic.duration}`}
-                                size="small"
-                                variant="outlined"
-                              />
-                            </Box>
-
-                            <Box sx={{ mb: 2 }}>
-                              <Typography
-                                variant="body2"
-                                sx={{ fontWeight: 600, mb: 1 }}
-                              >
-                                Đơn vị chủ trì: {topic.institution}
-                              </Typography>
-                              <Typography
-                                variant="body2"
-                                sx={{ color: colors.text.secondary, mb: 1 }}
-                              >
-                                Đối tác: {topic.partner}
-                              </Typography>
-                              <Typography
-                                variant="body2"
-                                sx={{ color: colors.text.secondary }}
-                              >
-                                Hạn nộp hồ sơ:{" "}
-                                {new Date(topic.deadline).toLocaleDateString(
-                                  "vi-VN",
-                                )}
-                              </Typography>
-                            </Box>
-
-                            <Box>
-                              <Typography
-                                variant="body2"
-                                sx={{ fontWeight: 600, mb: 1 }}
-                              >
-                                Yêu cầu:
-                              </Typography>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexWrap: "wrap",
-                                  gap: 1,
-                                }}
-                              >
-                                {topic.requirements.map((req, reqIndex) => (
-                                  <Chip
-                                    key={reqIndex}
-                                    label={req}
-                                    size="small"
-                                    sx={{
-                                      bgcolor: colors.neutral[100],
-                                      fontSize: "0.75rem",
-                                    }}
-                                  />
-                                ))}
-                              </Box>
-                            </Box>
-                          </Box>
-                          <IconButton size="small">
-                            <MoreVert />
-                          </IconButton>
-                        </Box>
-
-                        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                          <Button
-                            variant="contained"
-                            size="small"
-                            sx={{
-                              textTransform: "none",
-                              bgcolor: topic.color,
-                              "&:hover": {
-                                bgcolor: topic.color,
-                                opacity: 0.9,
-                              },
-                            }}
-                          >
-                            Đăng ký tham gia
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            sx={{ textTransform: "none" }}
-                          >
-                            Xem chi tiết
-                          </Button>
-                          <Button
-                            variant="text"
-                            size="small"
-                            sx={{ textTransform: "none" }}
-                          >
-                            Lưu để sau
-                          </Button>
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Stack>
-              </CardContent>
-            </Card> */}
-          </Stack>
-        </Box>
-
-        {/* Right Sidebar */}
-        <Box sx={{ flex: { lg: "1 1 34%" } }}>
-          <Stack spacing={3}>
-
-          </Stack>
-        </Box>
-      </Box>
     </Box>
   );
 };
 
 export default LecturerPage;
+          

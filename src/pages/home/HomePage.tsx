@@ -1,31 +1,27 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
+  ArrowForward,
+  Business,
+  CheckCircle,
+  Person,
+  School,
+  Star
+} from "@mui/icons-material";
+import {
+  Avatar,
   Box,
-  Container,
-  Typography,
+  Button,
   Card,
   CardContent,
-  Button,
-  Paper,
-  Avatar,
   Chip,
+  Container,
   Stack,
-  alpha,
+  Typography,
+  alpha
 } from "@mui/material";
-import {
-  School,
-  Person,
-  Business,
-  ArrowForward,
-  CheckCircle,
-  Groups,
-  Star,
-  TrendingUp,
-  Security,
-} from "@mui/icons-material";
-import { useColors } from "../../hooks/useColors";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import eduhubLogo from "../../assets/eduhub-03.png";
+import { useColors } from "../../hooks/useColors";
 
 interface ProfileOption {
   id: string;
@@ -50,7 +46,7 @@ const HomePage = () => {
     {
       id: "lecturer",
       title: "Giảng viên",
-      subtitle: "Chia sẻ kiến thức - Tạo thu nhập",
+      subtitle: "Chia sẻ kiến thức - Tạo dựng thương hiệu",
       description:
         "Nền tảng dành cho các chuyên gia muốn chia sẻ kiến thức và xây dựng thương hiệu cá nhân",
       icon: <Person sx={{ fontSize: 48 }} />,
@@ -65,12 +61,9 @@ const HomePage = () => {
         "Consultant",
       ],
       features: [
-        "Tạo và bán khóa học online",
         "Nhận lời mời giảng dạy từ doanh nghiệp",
-        "Quản lý học viên và tiến độ học tập",
         "Theo dõi doanh thu và thống kê chi tiết",
         "Xây dựng thương hiệu cá nhân",
-        "Hỗ trợ marketing và quảng bá",
       ],
     },
     {
@@ -78,7 +71,7 @@ const HomePage = () => {
       title: "Trường học",
       subtitle: "Đào tạo chất lượng - Hợp tác bền vững",
       description:
-        "Giải pháp toàn diện cho các trường học và trung tâm đào tạo muốn nâng cao chất lượng giáo dục",
+        "Tìm kiếm giảng viên và khóa học chất lượng cao cho sinh viên của bạn",
       icon: <School sx={{ fontSize: 48 }} />,
       gradient: `linear-gradient(135deg, ${colors.secondary.main} 0%, ${colors.secondary.dark} 100%)`,
       route: "/register-institution",
@@ -92,10 +85,7 @@ const HomePage = () => {
       features: [
         "Tìm kiếm giảng viên chất lượng cao",
         "Mua khóa học cho sinh viên với giá ưu đãi",
-        "Hợp tác phát triển chương trình đào tạo",
-        "Quản lý sinh viên và tiến độ học tập",
         "Báo cáo và thống kê chi tiết",
-        "Hỗ trợ kỹ thuật 24/7",
       ],
     },
     {
@@ -112,10 +102,7 @@ const HomePage = () => {
       targetAudience: ["Công ty công nghệ", "Tập đoàn", "Startup", "SME"],
       features: [
         "Tuyển dụng giảng viên cho dự án nội bộ",
-        "Đào tạo nhân viên với chương trình tùy chỉnh",
-        "Quản lý và theo dõi tiến độ đào tạo",
         "Phát triển chương trình đào tạo riêng",
-        "Báo cáo hiệu quả đào tạo chi tiết",
         "Tư vấn chiến lược phát triển nhân lực",
       ],
     },
@@ -175,7 +162,7 @@ const HomePage = () => {
                 sx={{
                   width: 80,
                   height: 80,
-                  borderRadius: 3,
+                  borderRadius: 1,
                   background: "rgba(255,255,255,0.2)",
                   backdropFilter: "blur(20px)",
                   display: "flex",
@@ -263,17 +250,6 @@ const HomePage = () => {
         >
           Chọn vai trò của bạn
         </Typography>
-        <Typography
-          variant="body1"
-          sx={{
-            textAlign: "center",
-            color: colors.text.primary,
-            mb: 6,
-            fontSize: "1.1rem",
-          }}
-        >
-          Mỗi vai trò đều có những tính năng và lợi ích riêng biệt
-        </Typography>
 
         {/* Profile Cards */}
         <Box
@@ -291,7 +267,7 @@ const HomePage = () => {
               sx={{
                 flex: 1,
                 position: "relative",
-                borderRadius: 4,
+                borderRadius: 1,
                 overflow: "hidden",
                 cursor: "pointer",
                 transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -402,7 +378,7 @@ const HomePage = () => {
                       justifyContent: "center",
                       gap: 1,
                       bgcolor: "rgba(255,255,255,0.2)",
-                      borderRadius: 2,
+                      borderRadius: 1,
                       px: 2,
                       py: 1,
                     }}
@@ -547,7 +523,7 @@ const HomePage = () => {
               fontWeight: 600,
               background:
                 selectedOption?.gradient || colors.gradients.primary,
-              borderRadius: 4,
+              borderRadius: 1,
               textTransform: "none",
               boxShadow: `0 8px 24px ${alpha(
                 selectedOption?.id === "lecturer"
@@ -575,90 +551,6 @@ const HomePage = () => {
             Bắt đầu với {selectedOption?.title}
           </Button>
         </Box>
-
-        {/* Why Choose Us Section */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: 6,
-            borderRadius: 4,
-            background: colors.gradients.secondary,
-            color: "white",
-            textAlign: "center",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <Typography
-            variant="h4"
-            sx={{
-              fontFamily: "'Inter', sans-serif",
-              fontWeight: 700,
-              mb: 4,
-            }}
-          >
-            Tại sao chọn EduHubVN?
-          </Typography>
-
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
-              gap: 4,
-              mt: 4,
-            }}
-          >
-            {[
-              {
-                icon: <Security sx={{ fontSize: 48 }} />,
-                title: "Bảo mật tuyệt đối",
-                description: "Dữ liệu được mã hóa và bảo vệ tối đa",
-              },
-              {
-                icon: <TrendingUp sx={{ fontSize: 48 }} />,
-                title: "Tăng trưởng nhanh",
-                description: "Hơn 90% người dùng đạt mục tiêu sau 6 tháng",
-              },
-              // {
-              //   icon: <AutoAwesome sx={{ fontSize: 48 }} />,
-              //   title: "Công nghệ tiên tiến",
-              //   description: "AI hỗ trợ tối ưu trải nghiệm học tập",
-              // },
-              {
-                icon: <Groups sx={{ fontSize: 48 }} />,
-                title: "Cộng đồng lớn",
-                description: "Kết nối với hàng nghìn chuyên gia",
-              },
-            ].map((item, index) => (
-              <Box key={index} sx={{ textAlign: "center" }}>
-                <Box
-                  sx={{
-                    bgcolor: "rgba(255,255,255,0.2)",
-                    width: 80,
-                    height: 80,
-                    borderRadius: 3,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    mx: "auto",
-                    mb: 2,
-                  }}
-                >
-                  {item.icon}
-                </Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                  {item.title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ opacity: 0.9, lineHeight: 1.5 }}
-                >
-                  {item.description}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-        </Paper>
       </Container>
     </Box>
   );

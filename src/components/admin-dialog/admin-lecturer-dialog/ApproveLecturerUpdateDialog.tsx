@@ -240,7 +240,7 @@ const ApproveLecturerUpdateDialog = ({
             sx={{
               background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
               color: "white",
-              borderRadius: 2,
+              borderRadius: 1,
               mb: 3,
             }}
           >
@@ -452,7 +452,7 @@ const ApproveLecturerUpdateDialog = ({
             sx={{
               textTransform: "none",
               fontWeight: "bold",
-              borderRadius: 2,
+              borderRadius: 1,
               px: 3,
             }}
           >
@@ -466,7 +466,7 @@ const ApproveLecturerUpdateDialog = ({
             sx={{
               textTransform: "none",
               fontWeight: "bold",
-              borderRadius: 2,
+              borderRadius: 1,
               px: 3,
             }}
           >

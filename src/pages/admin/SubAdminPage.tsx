@@ -23,12 +23,15 @@ import {
   DialogActions,
   DialogContentText,
   TextField,
+  InputAdornment,
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
   Add as AddIcon,
   Security as SecurityIcon,
   LockReset as LockResetIcon,
+  Search as SearchIcon,
+  Clear as ClearIcon,
 } from "@mui/icons-material";
 import { API } from "../../utils/Fetch";
 import { useDispatch, useSelector } from "react-redux";
@@ -66,6 +69,7 @@ const SubAdminPage = () => {
   const [subAdminToReset, setSubAdminToReset] = useState<SubAdmin | null>(null);
   const [resetting, setResetting] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const dispatch = useDispatch();
   const colors = useColors(); // Sử dụng hook màu mới
 
@@ -215,6 +219,19 @@ const SubAdminPage = () => {
     setCreateDialogOpen(true);
   };
 
+  // Lọc danh sách sub-admins theo từ khóa tìm kiếm
+  const filteredSubAdmins = subAdmins.filter((subAdmin: SubAdmin) =>
+    subAdmin.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const clearSearch = () => {
+    setSearchTerm("");
+  };
+
   if (loading) {
     return (
       <Box
@@ -260,6 +277,45 @@ const SubAdminPage = () => {
         </Button>
       </Box>
 
+      {/* Search Bar */}
+      <Box sx={{ mb: 3 }}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Tìm kiếm MOD theo tên đăng nhập..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: colors.text.secondary }} />
+              </InputAdornment>
+            ),
+            endAdornment: searchTerm && (
+              <InputAdornment position="end">
+                <IconButton
+                  size="small"
+                  onClick={clearSearch}
+                  sx={{ color: colors.text.secondary }}
+                >
+                  <ClearIcon />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: colors.primary.main,
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: colors.primary.main,
+              },
+            },
+          }}
+        />
+      </Box>
+
       <Card>
         <TableContainer component={Paper}>
           <Table>
@@ -283,7 +339,7 @@ const SubAdminPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {subAdmins
+              {filteredSubAdmins
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((subAdmin: SubAdmin) => (
                   <TableRow
@@ -371,7 +427,16 @@ const SubAdminPage = () => {
                     </TableCell>
                   </TableRow>
                 ))}
-              {subAdmins.length === 0 && (
+              {filteredSubAdmins.length === 0 && searchTerm && (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                    <Typography color={colors.text.secondary}>
+                      Không tìm thấy MOD nào với từ khóa "{searchTerm}"
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+              {filteredSubAdmins.length === 0 && !searchTerm && (
                 <TableRow>
                   <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
                     <Typography color={colors.text.secondary}>
@@ -384,10 +449,10 @@ const SubAdminPage = () => {
           </Table>
         </TableContainer>
 
-        {subAdmins.length > 0 && (
+        {filteredSubAdmins.length > 0 && (
           <TablePagination
             component="div"
-            count={subAdmins.length}
+            count={filteredSubAdmins.length}
             page={page}
             onPageChange={handleChangePage}
             rowsPerPage={rowsPerPage}

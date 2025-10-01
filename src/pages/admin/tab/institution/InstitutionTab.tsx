@@ -1,4 +1,4 @@
-import { Add, Business } from "@mui/icons-material";
+import { Add, Business, MoreVert } from "@mui/icons-material";
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -18,6 +18,9 @@ import {
   IconButton,
   InputAdornment,
   InputLabel,
+  ListItemIcon,
+  ListItemText,
+  Menu,
   MenuItem,
   Paper,
   Select,
@@ -212,33 +215,23 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 interface EnhancedTableToolbarProps {
-  // numSelected: number;
-  // onEdit?: () => void;
-  // onDelete?: () => void;
   onSearch: (value: string) => void;
   searchTerm: string;
   onTypeFilter: (value: string) => void;
   typeFilter: string;
   onStatusFilter: (value: string) => void;
   statusFilter: string;
-  // canEdit?: boolean;
-  // canDelete?: boolean;
   canCreate?: boolean;
   onCreateClick?: () => void;
 }
 
 function EnhancedTableToolbar({
-  // numSelected,
-  // onEdit,
-  // onDelete,
   onSearch,
   searchTerm,
   onTypeFilter,
   typeFilter,
   onStatusFilter,
   statusFilter,
-  // canEdit = true,
-  // canDelete = true,
   canCreate = false,
   onCreateClick,
 }: EnhancedTableToolbarProps) {
@@ -277,7 +270,7 @@ function EnhancedTableToolbar({
               Quản lý Cơ sở Giáo dục
             </Typography>
             <Typography variant="body2">
-              Quản lý thông tin các cơ sở giáo dục trong hệ thống
+              Quản lí, chỉnh sửa thông tin cơ sở giáo dục
             </Typography>
           </Box>
         </Box>
@@ -373,11 +366,11 @@ function EnhancedTableToolbar({
                 textTransform: "none",
                 fontWeight: 600,
                 borderRadius: 1,
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                // background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                 "&:hover": {
-                  background:
-                    "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                  // background:
+                  //   "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
                   transform: "translateY(-1px)",
                   boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
                 },
@@ -409,6 +402,8 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({
 }) => {
   const dispatch = useDispatch();
   const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [menuRow, setMenuRow] = useState<Institution | null>(null);
 
   // Check if actions column should be shown
   const showActionsColumn = canEdit || canDelete;
@@ -561,8 +556,6 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({
       // dispatch(setInstitutionPendingCreate(cons1.data.data));
       const cons2 = await API.admin.getInstitutionPendingUpdate();
       dispatch(setInstitutionPendingUpdate(cons2.data.data));
-
-
     } catch (error) {
       console.error("Error deleting institution:", error);
       setSnackbar({
@@ -584,6 +577,37 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({
 
   const handleSnackbarClose = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
+  };
+
+  // Menu handlers
+  const handleMenuClick = (
+    event: React.MouseEvent<HTMLElement>,
+    row: Institution,
+  ) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setMenuRow(row);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setMenuRow(null);
+  };
+
+  const handleEditClick = () => {
+    if (menuRow) {
+      setSelectedInstitution({ institution: menuRow });
+      setOpenEditDialog(true);
+    }
+    handleMenuClose();
+  };
+
+  const handleDeleteClick = () => {
+    if (menuRow) {
+      setInstitutionToDelete(menuRow);
+      setOpenDeleteDialog(true);
+    }
+    handleMenuClose();
   };
 
   return (
@@ -809,7 +833,11 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({
                         {row.website && (
                           <Tooltip title={row.website} arrow>
                             <a
-                              href={row.website}
+                              href={
+                                row.website.startsWith("http")
+                                  ? row.website
+                                  : `https://${row.website}`
+                              }
                               target="_blank"
                               rel="noopener noreferrer"
                               style={{
@@ -818,13 +846,12 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({
                                 fontWeight: 500,
                               }}
                             >
-                              {row.website.length > 25
-                                ? `${row.website.substring(0, 25)}...`
-                                : row.website}
+                              Link
                             </a>
                           </Tooltip>
                         )}
                       </TableCell>
+
                       <TableCell
                         sx={{
                           py: 2,
@@ -856,58 +883,18 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({
                       </TableCell>
                       {showActionsColumn && (
                         <TableCell align="center" sx={{ py: 2 }}>
-                          <Box
+                          <IconButton
+                            onClick={(e) => handleMenuClick(e, row)}
                             sx={{
-                              display: "flex",
-                              gap: 1,
-                              justifyContent: "center",
+                              color: "primary.main",
+                              "&:hover": {
+                                bgcolor: "primary.light",
+                                color: "white",
+                              },
                             }}
                           >
-                            {canEdit && (
-                              <Tooltip title="Chỉnh sửa">
-                                <IconButton
-                                  size="small"
-                                  color="primary"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedInstitution({
-                                      institution: row,
-                                    });
-                                    setOpenEditDialog(true);
-                                  }}
-                                  sx={{
-                                    bgcolor: "rgba(25, 118, 210, 0.1)",
-                                    "&:hover": {
-                                      bgcolor: "rgba(25, 118, 210, 0.2)",
-                                    },
-                                  }}
-                                >
-                                  <EditIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                            {canDelete && (
-                              <Tooltip title="Xóa">
-                                <IconButton
-                                  size="small"
-                                  color="error"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setInstitutionToDelete(row);
-                                    setOpenDeleteDialog(true);
-                                  }}
-                                  sx={{
-                                    bgcolor: "rgba(211, 47, 47, 0.1)",
-                                    "&:hover": {
-                                      bgcolor: "rgba(211, 47, 47, 0.2)",
-                                    },
-                                  }}
-                                >
-                                  <DeleteIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                          </Box>
+                            <MoreVert />
+                          </IconButton>
                         </TableCell>
                       )}
                       {/* <TableCell align="center" sx={{ py: 2 }}>
@@ -948,6 +935,38 @@ const InstitutionTab: React.FC<InstitutionTabProps> = ({
           )}
         </TableContainer>
       </Paper>
+
+      {/* Action Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        onClick={(e) => e.stopPropagation()}
+        PaperProps={{
+          sx: {
+            mt: 1,
+            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            borderRadius: 1,
+          },
+        }}
+      >
+        {canEdit && (
+          <MenuItem onClick={handleEditClick}>
+            <ListItemIcon>
+              <EditIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Chỉnh sửa</ListItemText>
+          </MenuItem>
+        )}
+        {canDelete && (
+          <MenuItem onClick={handleDeleteClick}>
+            <ListItemIcon>
+              <DeleteIcon fontSize="small" color="error" />
+            </ListItemIcon>
+            <ListItemText sx={{ color: "error.main" }}>Xóa</ListItemText>
+          </MenuItem>
+        )}
+      </Menu>
 
       {/* Edit Dialog */}
       <InstitutionProfileUpdateDialog

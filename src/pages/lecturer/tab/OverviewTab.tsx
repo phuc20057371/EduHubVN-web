@@ -23,7 +23,7 @@ const OverviewTab = ({ lecturer }: OverviewTabProps) => {
           </Typography>
           <Card
             sx={{
-              borderRadius: 3,
+              borderRadius: 1,
               boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
               border: `1px solid ${colors.primary[100]}`,
             }}
@@ -56,7 +56,7 @@ const OverviewTab = ({ lecturer }: OverviewTabProps) => {
         </Typography>
         <Card
           sx={{
-            borderRadius: 3,
+            borderRadius: 1,
             boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
             border: `1px solid ${colors.primary[100]}`,
           }}

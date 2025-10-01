@@ -216,7 +216,7 @@ const EditCourseDialog: React.FC<EditCourseDialogProps> = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: 1,
           maxHeight: "90vh",
         },
       }}
@@ -371,7 +371,7 @@ const EditCourseDialog: React.FC<EditCourseDialogProps> = ({
                           width: 60,
                           height: 60,
                           objectFit: "cover",
-                          borderRadius: 8,
+                          borderRadius: 1,
                           border: "1px solid #ddd",
                         }}
                       />

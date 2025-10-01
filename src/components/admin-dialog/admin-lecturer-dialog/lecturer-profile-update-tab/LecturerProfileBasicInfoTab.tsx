@@ -440,10 +440,7 @@ const LecturerProfileBasicInfoTab: React.FC<
             <CardContent>
               <Box display="flex" flexDirection="column" gap={2}>
                 <Box display="flex" gap={2}>
-                  <FormControl
-                    variant="outlined"
-                    sx={{ flex: "0 0 180px"}}
-                  >
+                  <FormControl variant="outlined" sx={{ flex: "0 0 180px" }}>
                     <InputLabel>Học vị</InputLabel>
                     <Select
                       value={academicRank}
@@ -557,7 +554,7 @@ const LecturerProfileBasicInfoTab: React.FC<
 
       {/* Save Button */}
       {canUpdate && (
-        <Box display="flex" justifyContent="center" mt={3}>
+        <Box display="flex" justifyContent="flex-end" mt={3}>
           <Button
             variant="contained"
             color="primary"

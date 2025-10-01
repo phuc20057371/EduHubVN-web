@@ -10,6 +10,8 @@ import {
   Person,
   School,
   Settings,
+  ExpandLess,
+  ExpandMore,
 } from "@mui/icons-material";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import {
@@ -21,6 +23,7 @@ import {
   Card,
   CardContent,
   Chip,
+  Collapse,
   Container,
   Divider,
   Drawer,
@@ -55,12 +58,25 @@ const AdminLayout = () => {
   const userProfile = useSelector((state: any) => state.userProfile);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [profileMenuAnchor, setProfileMenuAnchor] = useState<null | HTMLElement>(null);
   const isAdmin = userProfile && (userProfile.role === "ADMIN");
-  const isActivePath = (path: string) => {
+  const isActivePath = (path: string | null) => {
+    if (!path) return false;
     if (path === "/admin") {
       return location.pathname === "/admin" || location.pathname === "/admin/";
     }
     return location.pathname.startsWith(path);
+  };
+
+  const isParentActive = (item: any) => {
+    if (item.path) {
+      return isActivePath(item.path);
+    }
+    if (item.subItems) {
+      return item.subItems.some((subItem: any) => isActivePath(subItem.path));
+    }
+    return false;
   };
 
   useEffect(() => {
@@ -137,25 +153,34 @@ const AdminLayout = () => {
         permissions: null, // Always visible
       },
       {
-        text: "Giảng viên",
+        text: "Quản lí hồ sơ",
         icon: <Person />,
-        path: "/admin/lecturers",
-        description: "Quản lý giảng viên",
-        permissions: ["LECTURER_READ", "LECTURER_APPROVE"],
-      },
-      {
-        text: "Trung tâm đào tạo",
-        icon: <School />,
-        path: "/admin/institutions",
-        description: "Quản lý trung tâm",
-        permissions: ["SCHOOL_READ", "SCHOOL_APPROVE"],
-      },
-      {
-        text: "Đơn vị tổ chức",
-        icon: <Business />,
-        path: "/admin/partners",
-        description: "Quản lý đối tác",
-        permissions: ["ORGANIZATION_READ", "ORGANIZATION_APPROVE"],
+        path: null, // No direct path - this is a parent menu
+        description: "Quản lý người dùng",
+        permissions: ["LECTURER_READ", "LECTURER_APPROVE", "SCHOOL_READ", "SCHOOL_APPROVE", "ORGANIZATION_READ", "ORGANIZATION_APPROVE"],
+        subItems: [
+          {
+            text: "Giảng viên",
+            icon: <Person />,
+            path: "/admin/lecturers",
+            description: "Quản lý giảng viên",
+            permissions: ["LECTURER_READ", "LECTURER_APPROVE"],
+          },
+          {
+            text: "Trung tâm đào tạo",
+            icon: <School />,
+            path: "/admin/institutions",
+            description: "Quản lý trung tâm",
+            permissions: ["SCHOOL_READ", "SCHOOL_APPROVE"],
+          },
+          {
+            text: "Đơn vị tổ chức",
+            icon: <Business />,
+            path: "/admin/partners",
+            description: "Quản lý đối tác",
+            permissions: ["ORGANIZATION_READ", "ORGANIZATION_APPROVE"],
+          },
+        ]
       },
       {
         text: "Khóa học",
@@ -241,75 +266,163 @@ const AdminLayout = () => {
       {/* Navigation Items */}
       <List sx={{ px: 2, py: 2 }}>
         {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
-            <ListItemButton
-              sx={{
-                borderRadius: 1,
-                minHeight: 56,
-                backgroundColor: isActivePath(item.path)
-                  ? colors.background.primary
-                  : "transparent",
-                border: isActivePath(item.path)
-                  ? `1px solid ${colors.border.medium}`
-                  : "1px solid transparent",
-                "&:hover": {
-                  backgroundColor: isActivePath(item.path)
-                    ? colors.background.primary
-                    : colors.isDark ? colors.background.primary : colors.background.secondary,
-                  transform: "translateX(4px)",
-                  transition: "all 0.2s ease-in-out",
-                },
-                transition: "all 0.2s ease-in-out",
-              }}
-              onClick={() => {
-                navigate(item.path);
-                handleDrawerToggle();
-              }}
-            >
-              <ListItemIcon
+          <Box key={item.text}>
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemButton
                 sx={{
-                  minWidth: 50,
-                  color: isActivePath(item.path)
-                    ? colors.primary.main
-                    : colors.text.secondary,
-                  "& .MuiSvgIcon-root": {
-                    fontSize: "1.3rem",
+                  borderRadius: 1,
+                  minHeight: 56,
+                  backgroundColor: isParentActive(item)
+                    ? colors.background.primary
+                    : "transparent",
+                  border: isParentActive(item)
+                    ? `1px solid ${colors.border.medium}`
+                    : "1px solid transparent",
+                  "&:hover": {
+                    backgroundColor: isParentActive(item)
+                      ? colors.background.primary
+                      : colors.isDark ? colors.background.primary : colors.background.secondary,
+                    transform: "translateX(4px)",
+                    transition: "all 0.2s ease-in-out",
                   },
+                  transition: "all 0.2s ease-in-out",
+                }}
+                onClick={() => {
+                  if (item.subItems) {
+                    setProfileMenuOpen(!profileMenuOpen);
+                  } else if (item.path) {
+                    navigate(item.path);
+                    handleDrawerToggle();
+                  }
                 }}
               >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText
-                primary={item.text}
-                secondary={item.description}
-                sx={{
-                  "& .MuiListItemText-primary": {
-                    color: isActivePath(item.path)
-                      ? colors.primary.dark
-                      : colors.text.primary,
-                    fontWeight: isActivePath(item.path) ? 600 : 500,
-                    fontSize: "0.95rem",
-                  },
-                  "& .MuiListItemText-secondary": {
-                    color: colors.text.secondary,
-                    fontSize: "0.75rem",
-                    marginTop: "2px",
-                  },
-                }}
-              />
-              {isActivePath(item.path) && (
-                <Box
+                <ListItemIcon
                   sx={{
-                    width: 4,
-                    height: 20,
-                    bgcolor: colors.primary.main,
-                    borderRadius: 1,
-                    ml: 1,
+                    minWidth: 50,
+                    color: isParentActive(item)
+                      ? colors.primary.main
+                      : colors.text.secondary,
+                    "& .MuiSvgIcon-root": {
+                      fontSize: "1.3rem",
+                    },
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.text}
+                  secondary={item.description}
+                  sx={{
+                    "& .MuiListItemText-primary": {
+                      color: isParentActive(item)
+                        ? colors.primary.dark
+                        : colors.text.primary,
+                      fontWeight: isParentActive(item) ? 600 : 500,
+                      fontSize: "0.95rem",
+                    },
+                    "& .MuiListItemText-secondary": {
+                      color: colors.text.secondary,
+                      fontSize: "0.75rem",
+                      marginTop: "2px",
+                    },
                   }}
                 />
-              )}
-            </ListItemButton>
-          </ListItem>
+                {item.subItems && (
+                  profileMenuOpen ? <ExpandLess /> : <ExpandMore />
+                )}
+                {isParentActive(item) && !item.subItems && (
+                  <Box
+                    sx={{
+                      width: 4,
+                      height: 20,
+                      bgcolor: colors.primary.main,
+                      borderRadius: 1,
+                      ml: 1,
+                    }}
+                  />
+                )}
+              </ListItemButton>
+            </ListItem>
+            
+            {/* Submenu for mobile */}
+            {item.subItems && (
+              <Collapse in={profileMenuOpen} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding sx={{ pl: 2 }}>
+                  {item.subItems.map((subItem: any) => (
+                    <ListItem key={subItem.path} disablePadding sx={{ mb: 1 }}>
+                      <ListItemButton
+                        sx={{
+                          borderRadius: 1,
+                          minHeight: 48,
+                          backgroundColor: isActivePath(subItem.path)
+                            ? colors.background.primary
+                            : "transparent",
+                          border: isActivePath(subItem.path)
+                            ? `1px solid ${colors.border.medium}`
+                            : "1px solid transparent",
+                          "&:hover": {
+                            backgroundColor: isActivePath(subItem.path)
+                              ? colors.background.primary
+                              : colors.isDark ? colors.background.primary : colors.background.secondary,
+                            transform: "translateX(4px)",
+                            transition: "all 0.2s ease-in-out",
+                          },
+                          transition: "all 0.2s ease-in-out",
+                        }}
+                        onClick={() => {
+                          navigate(subItem.path);
+                          handleDrawerToggle();
+                        }}
+                      >
+                        <ListItemIcon
+                          sx={{
+                            minWidth: 40,
+                            color: isActivePath(subItem.path)
+                              ? colors.primary.main
+                              : colors.text.secondary,
+                            "& .MuiSvgIcon-root": {
+                              fontSize: "1.1rem",
+                            },
+                          }}
+                        >
+                          {subItem.icon}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={subItem.text}
+                          secondary={subItem.description}
+                          sx={{
+                            "& .MuiListItemText-primary": {
+                              color: isActivePath(subItem.path)
+                                ? colors.primary.dark
+                                : colors.text.primary,
+                              fontWeight: isActivePath(subItem.path) ? 600 : 500,
+                              fontSize: "0.9rem",
+                            },
+                            "& .MuiListItemText-secondary": {
+                              color: colors.text.secondary,
+                              fontSize: "0.7rem",
+                              marginTop: "2px",
+                            },
+                          }}
+                        />
+                        {isActivePath(subItem.path) && (
+                          <Box
+                            sx={{
+                              width: 4,
+                              height: 20,
+                              bgcolor: colors.primary.main,
+                              borderRadius: 1,
+                              ml: 1,
+                            }}
+                          />
+                        )}
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </List>
+              </Collapse>
+            )}
+          </Box>
         ))}
       </List>
 
@@ -403,34 +516,110 @@ const AdminLayout = () => {
               }}
             >
               {menuItems.map((item) => (
-                <Button
-                  key={item.path}
-                  onClick={() => navigate(item.path)}
-                  startIcon={item.icon}
-                  sx={{
-                    color: "white",
-                    px: 2,
-                    py: 1,
-                    borderRadius: 1,
-                    backgroundColor: isActivePath(item.path)
-                      ? alpha("#fff", 0.2)
-                      : "transparent",
-                    border: isActivePath(item.path)
-                      ? `1px solid ${alpha("#fff", 0.3)}`
-                      : "1px solid transparent",
-                    "&:hover": {
-                      backgroundColor: alpha("#fff", 0.15),
-                      transform: "translateY(-1px)",
-                      boxShadow: `0 4px 12px ${alpha("#000", 0.15)}`,
-                    },
-                    transition: "all 0.2s ease-in-out",
-                    textTransform: "none",
-                    fontWeight: isActivePath(item.path) ? 600 : 500,
-                    fontSize: "0.9rem",
-                  }}
-                >
-                  {item.text}
-                </Button>
+                <Box key={item.text} sx={{ position: "relative" }}>
+                  {item.subItems ? (
+                    <>
+                      <Button
+                        onClick={(e) => {
+                          setProfileMenuAnchor(e.currentTarget);
+                          setProfileMenuOpen(!profileMenuOpen);
+                        }}
+                        startIcon={item.icon}
+                        endIcon={profileMenuOpen ? <ExpandLess /> : <ExpandMore />}
+                        sx={{
+                          color: "white",
+                          px: 2,
+                          py: 1,
+                          borderRadius: 1,
+                          backgroundColor: isParentActive(item)
+                            ? alpha("#fff", 0.2)
+                            : "transparent",
+                          border: isParentActive(item)
+                            ? `1px solid ${alpha("#fff", 0.3)}`
+                            : "1px solid transparent",
+                          "&:hover": {
+                            backgroundColor: alpha("#fff", 0.15),
+                            transform: "translateY(-1px)",
+                            boxShadow: `0 4px 12px ${alpha("#000", 0.15)}`,
+                          },
+                          transition: "all 0.2s ease-in-out",
+                          textTransform: "none",
+                          fontWeight: isParentActive(item) ? 600 : 500,
+                          fontSize: "0.9rem",
+                        }}
+                      >
+                        {item.text}
+                      </Button>
+                      <Menu
+                        anchorEl={profileMenuAnchor}
+                        open={profileMenuOpen}
+                        onClose={() => {
+                          setProfileMenuOpen(false);
+                          setProfileMenuAnchor(null);
+                        }}
+                        sx={{
+                          mt: 1,
+                          "& .MuiPaper-root": {
+                            borderRadius: 1,
+                            minWidth: 200,
+                            boxShadow: `0 8px 24px ${alpha("#000", 0.12)}`,
+                            border: `1px solid ${colors.border.light}`,
+                          },
+                        }}
+                      >
+                        {item.subItems.map((subItem: any) => (
+                          <MenuItem
+                            key={subItem.path}
+                            onClick={() => {
+                              navigate(subItem.path);
+                              setProfileMenuOpen(false);
+                              setProfileMenuAnchor(null);
+                            }}
+                            sx={{
+                              py: 1.5,
+                              "&:hover": {
+                                bgcolor: colors.background.secondary,
+                              },
+                            }}
+                          >
+                            <ListItemIcon sx={{ color: colors.primary.main }}>
+                              {subItem.icon}
+                            </ListItemIcon>
+                            <Typography>{subItem.text}</Typography>
+                          </MenuItem>
+                        ))}
+                      </Menu>
+                    </>
+                  ) : (
+                    <Button
+                      onClick={() => item.path && navigate(item.path)}
+                      startIcon={item.icon}
+                      sx={{
+                        color: "white",
+                        px: 2,
+                        py: 1,
+                        borderRadius: 1,
+                        backgroundColor: isActivePath(item.path)
+                          ? alpha("#fff", 0.2)
+                          : "transparent",
+                        border: isActivePath(item.path)
+                          ? `1px solid ${alpha("#fff", 0.3)}`
+                          : "1px solid transparent",
+                        "&:hover": {
+                          backgroundColor: alpha("#fff", 0.15),
+                          transform: "translateY(-1px)",
+                          boxShadow: `0 4px 12px ${alpha("#000", 0.15)}`,
+                        },
+                        transition: "all 0.2s ease-in-out",
+                        textTransform: "none",
+                        fontWeight: isActivePath(item.path) ? 600 : 500,
+                        fontSize: "0.9rem",
+                      }}
+                    >
+                      {item.text}
+                    </Button>
+                  )}
+                </Box>
               ))}
             </Box>
 

@@ -31,7 +31,7 @@ import type { RequestInstitutionFromAdmin } from "../types/RequestInstitutionFro
 import type { RequestPartnerFromAdmin } from "../types/RequestPartnerFromAdmin";
 
 const domain = window.location.hostname;
-const BASE_URL = `http://${domain}:8880`;
+const BASE_URL = `http://${domain}:8080`;
 
 const fetch = axios.create({
   baseURL: BASE_URL,
@@ -137,6 +137,11 @@ export const API = {
       fetch.get("/api/v1/user/pending-lecturer-profile"),
     updatePendingLecturer: (data: any) =>
       fetch.post("/api/v1/user/resubmit-lecturer", data),
+    uploadAvatar: (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      return fetch.post("/api/v1/lecturer/update-avatar", formData);
+    },
     // Institution
     registerInstitution: (data: InstitutionRequest) =>
       fetch.post("/api/v1/user/register-institution", data),
@@ -144,12 +149,22 @@ export const API = {
       fetch.post("/api/v1/user/update-institution", data),
     getPendingInstitution: () =>
       fetch.get("/api/v1/user/pending-institution-profile"),
+    updateLogoInstitution: (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      return fetch.post("/api/v1/institution/update-logo", formData);
+    },
     // Partner
     registerPartner: (data: PartnerRequest) =>
       fetch.post("/api/v1/user/register-partner", data),
     updatePartner: (data: PartnerRequest) =>
       fetch.post("/api/v1/user/update-partner", data),
     getPendingPartner: () => fetch.get("/api/v1/user/pending-partner-profile"),
+    updateLogoPartner: (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      return fetch.post("/api/v1/partner/update-logo", formData);
+    },
     // Degree
     createDegree: (data: any) => fetch.post("/api/v1/user/create-degree", data),
     updateDegree: (data: Degree) =>
@@ -389,7 +404,8 @@ export const API = {
       fetch.post("/api/v1/admin/create-course", data),
     updateCourse: (data: any) =>
       fetch.post("/api/v1/admin/update-course", data),
-    deleteCourse: (data: IdRequest) => fetch.post("/api/v1/admin/delete-course", data),
+    deleteCourse: (data: IdRequest) =>
+      fetch.post("/api/v1/admin/delete-course", data),
   },
   subadmin: {
     getAllSubAdmins: () => fetch.get("/api/v1/admin/sub-admin/all"),
@@ -401,6 +417,14 @@ export const API = {
       fetch.delete("/api/v1/admin/sub-admin/" + data.id),
     resetPassword: (data: ResetPasswordRequest) =>
       fetch.post("/api/v1/admin/sub-admin/reset-password", data),
+  },
+  public: {
+    getAllCourses: () => {
+      return fetch.get(`/public/all-courses`);
+    },
+    getTop7Lecturers: () => {
+      return fetch.get(`/public/top-7-lecturers`);
+    },
   },
   other: {
     getLecturerProfile: (id: string) => {
@@ -414,4 +438,3 @@ export const API = {
     },
   },
 };
-

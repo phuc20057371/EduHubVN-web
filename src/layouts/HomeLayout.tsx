@@ -1,12 +1,8 @@
 import {
-  AccountCircle,
   Help,
   KeyboardArrowDown,
-  Language,
   Logout,
-  Notifications,
-  Security,
-  Settings,
+  Notifications
 } from "@mui/icons-material";
 import {
   Avatar,
@@ -95,11 +91,6 @@ const HomeLayout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     navigate("/login");
-    handleMenuClose();
-  };
-
-  const handleProfile = () => {
-    navigate("/profile");
     handleMenuClose();
   };
 
@@ -229,7 +220,7 @@ const HomeLayout = () => {
                 border: colors.isDark
                   ? "1px solid rgba(255,255,255,0.2)"
                   : `1px solid ${colors.border.light}`,
-                borderRadius: 3,
+                borderRadius: 1,
                 cursor: "pointer",
                 transition: "all 0.3s ease",
                 "&:hover": {
@@ -299,12 +290,12 @@ const HomeLayout = () => {
               sx: {
                 mt: 1,
                 minWidth: 280,
-                borderRadius: 3,
+                borderRadius: 1,
                 boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
                 border: `1px solid ${colors.border.light}`,
                 "& .MuiMenuItem-root": {
                   fontFamily: "'Inter', sans-serif",
-                  borderRadius: 2,
+                  borderRadius: 1,
                   mx: 1,
                   my: 0.5,
                   "&:hover": {
@@ -364,7 +355,7 @@ const HomeLayout = () => {
               </Box>
             </Box>
 
-            <MenuItem onClick={handleProfile}>
+            {/* <MenuItem onClick={handleProfile}>
               <AccountCircle sx={{ mr: 2, color: colors.primary.main }} />
               <Typography>Hồ sơ cá nhân</Typography>
             </MenuItem>
@@ -382,7 +373,7 @@ const HomeLayout = () => {
             <MenuItem onClick={handleMenuClose}>
               <Language sx={{ mr: 2, color: colors.text.secondary }} />
               <Typography>Ngôn ngữ</Typography>
-            </MenuItem>
+            </MenuItem> */}
 
             <MenuItem onClick={handleMenuClose}>
               <Help sx={{ mr: 2, color: colors.text.secondary }} />
@@ -415,7 +406,7 @@ const HomeLayout = () => {
                 mt: 1,
                 minWidth: 350,
                 maxHeight: 400,
-                borderRadius: 3,
+                borderRadius: 1,
                 boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
                 border: `1px solid ${colors.border.light}`,
               },

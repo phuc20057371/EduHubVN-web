@@ -883,9 +883,6 @@ const Register = () => {
                 color: colors.accent.blue,
                 textDecoration: "underline",
                 cursor: "pointer",
-                "&:hover": {
-                  color: "white",
-                },
               }}
             >
               Điều khoản sử dụng
@@ -897,9 +894,6 @@ const Register = () => {
                 color: colors.accent.blue,
                 textDecoration: "underline",
                 cursor: "pointer",
-                "&:hover": {
-                  color: "white",
-                },
               }}
             >
               Chính sách bảo mật

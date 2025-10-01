@@ -212,12 +212,12 @@ const AddAttendedCourseDialog: React.FC<AddAttendedCourseDialogProps> = ({
     <Modal
       open={open}
       onClose={onClose}
-      sx={{
-        "& .MuiBackdrop-root": {
-          backgroundColor: "rgba(20, 184, 166, 0.4)",
-          backdropFilter: "blur(8px)",
-        },
-      }}
+      // sx={{
+      //   "& .MuiBackdrop-root": {
+      //     backgroundColor: "rgba(20, 184, 166, 0.4)",
+      //     backdropFilter: "blur(8px)",
+      //   },
+      // }}
     >
       <Box sx={style}>
         {/* Modern Header with Gradient */}

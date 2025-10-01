@@ -271,7 +271,7 @@ const AdminInstitutionPage = () => {
             sx={{
               p: 4,
               textAlign: "center",
-              borderRadius: 3,
+              borderRadius: 1,
               boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
             }}
           >
@@ -289,7 +289,7 @@ const AdminInstitutionPage = () => {
             elevation={0}
             sx={{
               mb: 3,
-              borderRadius: 3,
+              borderRadius: 1,
               overflow: "hidden",
               border: "1px solid rgba(255,255,255,0.8)",
             }}

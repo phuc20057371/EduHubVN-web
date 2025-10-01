@@ -198,3 +198,16 @@ export const getRelativeTime = (dateString: string): string => {
     return `${diffInYears} năm trước`;
   }
 };
+
+export const getCourseLevel = (level: string) => {
+  switch (level) {
+    case "BEGINNER":
+      return "Cơ bản";
+    case "INTERMEDIATE":
+      return "Trung bình";
+    case "ADVANCED":
+      return "Nâng cao";
+    default:
+      return level;
+  }
+};

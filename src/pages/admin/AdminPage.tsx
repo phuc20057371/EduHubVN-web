@@ -381,8 +381,19 @@ const AdminPage = () => {
       </Box>
 
       {/* Stats Cards */}
+      {(actionPermissions.lecturer || actionPermissions.school || 
+        actionPermissions.organization || actionPermissions.course) && (
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3, mb: 4 }}>
-        {statsData.map((stat, index) => (
+        {statsData
+          .filter((stat) => {
+            // Ẩn card nếu không có quyền
+            if (stat.title === "Tổng Giảng viên") return actionPermissions.lecturer;
+            if (stat.title === "Trung tâm Đào tạo") return actionPermissions.school;
+            if (stat.title === "Đối tác") return actionPermissions.organization;
+            if (stat.title === "Khóa học") return actionPermissions.course;
+            return true;
+          })
+          .map((stat, index) => (
           <Card
             key={index}
             sx={{
@@ -470,8 +481,27 @@ const AdminPage = () => {
           </Card>
         ))}
       </Box>
+      )}
+
+      {/* Thông báo khi không có quyền */}
+      {!(actionPermissions.lecturer || actionPermissions.school || 
+        actionPermissions.organization || actionPermissions.course) && (
+        <Card sx={{ mb: 4 }}>
+          <CardContent sx={{ textAlign: 'center', py: 4 }}>
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              Không có quyền truy cập
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Bạn không có quyền truy cập vào bất kỳ chức năng nào của hệ thống. 
+              Vui lòng liên hệ quản trị viên để được cấp quyền.
+            </Typography>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick Actions - Full Width with 2 Columns */}
+      {(actionPermissions.lecturer || actionPermissions.school || 
+        actionPermissions.organization || actionPermissions.course) && (
       <Card sx={{ mb: 4 }}>
         <CardContent>
           <Typography
@@ -488,7 +518,16 @@ const AdminPage = () => {
               gap: 2,
             }}
           >
-            {quickActions.map((action, index) => {
+            {quickActions
+              .filter((action) => {
+                // Ẩn action nếu không có quyền
+                if (action.title === "Quản lý Giảng viên") return actionPermissions.lecturer;
+                if (action.title === "Quản lý Trung tâm") return actionPermissions.school;
+                if (action.title === "Quản lý Đối tác") return actionPermissions.organization;
+                if (action.title === "Quản lý Khóa học") return actionPermissions.course;
+                return true;
+              })
+              .map((action, index) => {
               let hasPermission = true;
               let disabledReason = "";
 
@@ -570,6 +609,7 @@ const AdminPage = () => {
           </Box>
         </CardContent>
       </Card>
+      )}
     </Box>
   );
 };

@@ -1133,7 +1133,7 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
             !formData.description ||
             !formData.address
           }
-          className="bg-gradient-to-r from-indigo-500 to-purple-600 px-8"
+          className="px-8"
         >
           Tạo khóa học
         </Button>

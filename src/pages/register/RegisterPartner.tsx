@@ -236,7 +236,7 @@ const RegisterPartner = () => {
           elevation={3}
           className="rounded-xl p-8"
           sx={{
-            borderRadius: 3,
+            borderRadius: 1,
             background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
           }}
         >
@@ -273,7 +273,7 @@ const RegisterPartner = () => {
                     variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         backgroundColor: "rgba(255, 255, 255, 0.8)",
                         transition: "all 0.3s ease",
                         "&:hover": {
@@ -298,7 +298,7 @@ const RegisterPartner = () => {
                     inputProps={{ min: 1900, max: new Date().getFullYear() }}
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         backgroundColor: "rgba(255, 255, 255, 0.8)",
                         transition: "all 0.3s ease",
                         "&:hover": {
@@ -319,7 +319,7 @@ const RegisterPartner = () => {
                   variant="outlined"
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
+                      borderRadius: 1,
                       backgroundColor: "rgba(255, 255, 255, 0.8)",
                       transition: "all 0.3s ease",
                       "&:hover": {
@@ -349,7 +349,7 @@ const RegisterPartner = () => {
                       variant="outlined"
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          borderRadius: 3,
+                          borderRadius: 1,
                           backgroundColor: "rgba(255, 255, 255, 0.8)",
                           transition: "all 0.3s ease",
                           "&:hover": {
@@ -377,7 +377,7 @@ const RegisterPartner = () => {
                     variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         backgroundColor: "rgba(255, 255, 255, 0.8)",
                         transition: "all 0.3s ease",
                         "&:hover": {
@@ -400,7 +400,7 @@ const RegisterPartner = () => {
                     variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         backgroundColor: "rgba(255, 255, 255, 0.8)",
                         transition: "all 0.3s ease",
                         "&:hover": {
@@ -423,7 +423,7 @@ const RegisterPartner = () => {
                   rows={3}
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
+                      borderRadius: 1,
                       backgroundColor: "rgba(255, 255, 255, 0.8)",
                       transition: "all 0.3s ease",
                       "&:hover": {
@@ -467,7 +467,7 @@ const RegisterPartner = () => {
                   variant="outlined"
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
+                      borderRadius: 1,
                       backgroundColor: "rgba(255, 255, 255, 0.8)",
                       transition: "all 0.3s ease",
                       "&:hover": {
@@ -491,7 +491,7 @@ const RegisterPartner = () => {
                   variant="outlined"
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
+                      borderRadius: 1,
                       backgroundColor: "rgba(255, 255, 255, 0.8)",
                       transition: "all 0.3s ease",
                       "&:hover": {
@@ -535,7 +535,7 @@ const RegisterPartner = () => {
                 variant="outlined"
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    borderRadius: 3,
+                    borderRadius: 1,
                     backgroundColor: "rgba(255, 255, 255, 0.8)",
                     transition: "all 0.3s ease",
                     "&:hover": {
@@ -562,7 +562,7 @@ const RegisterPartner = () => {
                   py: 2,
                   background:
                     "linear-gradient(45deg, #9C27B0 30%, #3F51B5 90%)",
-                  borderRadius: 3,
+                  borderRadius: 1,
                   fontWeight: "bold",
                   textTransform: "none",
                   fontSize: "1.1rem",

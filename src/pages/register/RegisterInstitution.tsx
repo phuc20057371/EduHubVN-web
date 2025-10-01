@@ -227,7 +227,7 @@ const RegisterInstitution = () => {
           elevation={3}
           className="rounded-xl p-8"
           sx={{
-            borderRadius: 3,
+            borderRadius: 1,
             background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
           }}
         >
@@ -261,7 +261,7 @@ const RegisterInstitution = () => {
                     variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         backgroundColor: "rgba(255, 255, 255, 0.8)",
                         transition: "all 0.3s ease",
                         "&:hover": {
@@ -286,7 +286,7 @@ const RegisterInstitution = () => {
                     inputProps={{ min: 1900, max: new Date().getFullYear() }}
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         backgroundColor: "rgba(255, 255, 255, 0.8)",
                         transition: "all 0.3s ease",
                         "&:hover": {
@@ -308,7 +308,7 @@ const RegisterInstitution = () => {
                     variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         backgroundColor: "rgba(255, 255, 255, 0.8)",
                         transition: "all 0.3s ease",
                         "&:hover": {
@@ -337,7 +337,7 @@ const RegisterInstitution = () => {
                     variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         backgroundColor: "rgba(255, 255, 255, 0.8)",
                         transition: "all 0.3s ease",
                         "&:hover": {
@@ -383,7 +383,7 @@ const RegisterInstitution = () => {
                     variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         backgroundColor: "rgba(255, 255, 255, 0.8)",
                         transition: "all 0.3s ease",
                         "&:hover": {
@@ -406,7 +406,7 @@ const RegisterInstitution = () => {
                     variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         backgroundColor: "rgba(255, 255, 255, 0.8)",
                         transition: "all 0.3s ease",
                         "&:hover": {
@@ -429,7 +429,7 @@ const RegisterInstitution = () => {
                   rows={3}
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
+                      borderRadius: 1,
                       backgroundColor: "rgba(255, 255, 255, 0.8)",
                       transition: "all 0.3s ease",
                       "&:hover": {
@@ -477,7 +477,7 @@ const RegisterInstitution = () => {
                   variant="outlined"
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
+                      borderRadius: 1,
                       backgroundColor: "rgba(255, 255, 255, 0.8)",
                       transition: "all 0.3s ease",
                       "&:hover": {
@@ -501,7 +501,7 @@ const RegisterInstitution = () => {
                   variant="outlined"
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
+                      borderRadius: 1,
                       backgroundColor: "rgba(255, 255, 255, 0.8)",
                       transition: "all 0.3s ease",
                       "&:hover": {
@@ -549,7 +549,7 @@ const RegisterInstitution = () => {
                 variant="outlined"
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    borderRadius: 3,
+                    borderRadius: 1,
                     backgroundColor: "rgba(255, 255, 255, 0.8)",
                     transition: "all 0.3s ease",
                     "&:hover": {
@@ -576,7 +576,7 @@ const RegisterInstitution = () => {
                   py: 2,
                   background:
                     "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
-                  borderRadius: 3,
+                  borderRadius: 1,
                   fontWeight: "bold",
                   textTransform: "none",
                   fontSize: "1.1rem",

@@ -68,7 +68,7 @@ const LecturerBasicInfoEditDialog = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: 1,
           minHeight: "90vh",
         },
       }}
@@ -86,7 +86,7 @@ const LecturerBasicInfoEditDialog = ({
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <PersonIcon color="primary" />
           <Box>
-            <Typography variant="h6" component="div">
+            <Typography variant="h5" component="div">
               Chỉnh sửa thông tin cơ bản
             </Typography>
             <Typography variant="body1" component="div">

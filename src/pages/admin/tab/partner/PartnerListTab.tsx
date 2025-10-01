@@ -20,12 +20,15 @@ import {
   FormControl,
   InputLabel,
   IconButton,
-  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Alert,
+  Menu,
+  ListItemIcon,
+  ListItemText,
+  Tooltip,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { visuallyHidden } from "@mui/utils";
@@ -33,7 +36,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
-import { Domain, Add } from "@mui/icons-material";
+import { Domain, Add, MoreVert } from "@mui/icons-material";
 import type { Partner } from "../../../../types/Parner";
 import { removePartner } from "../../../../redux/slice/PartnerSlice";
 import { API } from "../../../../utils/Fetch";
@@ -115,6 +118,7 @@ interface EnhancedTableProps {
 
 import { useTheme } from "@mui/material/styles";
 import { setPartnerPendingUpdate } from "../../../../redux/slice/PartnerPendingUpdateSlice";
+import { getStatus, getStatusColor } from "../../../../utils/ChangeText";
 
 function EnhancedTableHead(props: EnhancedTableProps) {
   const theme = useTheme();
@@ -141,7 +145,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           position: "sticky",
           top: 0,
           zIndex: 2,
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          // background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         }}
       >
         {propHeadCells.map((headCell) => (
@@ -222,7 +226,7 @@ function EnhancedTableToolbar({
     <Box
       sx={{
         p: 3,
-        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+        // background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
         borderRadius: 1,
         border: "1px solid rgba(255,255,255,0.8)",
         mb: 3,
@@ -242,7 +246,7 @@ function EnhancedTableToolbar({
           <Avatar
             sx={{
               bgcolor: "primary.main",
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              // s
               width: 56,
               height: 56,
             }}
@@ -376,11 +380,11 @@ function EnhancedTableToolbar({
                 textTransform: "none",
                 fontWeight: 600,
                 borderRadius: 1,
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                // background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                 "&:hover": {
-                  background:
-                    "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                  // background:
+                  //   "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
                   transform: "translateY(-1px)",
                   boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
                 },
@@ -430,6 +434,10 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [partnerToDelete, setPartnerToDelete] = useState<Partner | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Menu states
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [menuRow, setMenuRow] = useState<Partner | null>(null);
 
   const statusOptions = [
     { value: "", label: "Tất cả" },
@@ -523,10 +531,34 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
     setStatusFilter("APPROVED");
   };
 
-  // Delete handlers
-  const handleDeleteClick = (partner: Partner) => {
-    setPartnerToDelete(partner);
-    setDeleteDialogOpen(true);
+  // Menu handlers
+  const handleMenuClick = (
+    event: React.MouseEvent<HTMLElement>,
+    partner: Partner,
+  ) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setMenuRow(partner);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setMenuRow(null);
+  };
+
+  const handleEditClick = () => {
+    if (menuRow) {
+      onEdit(menuRow);
+    }
+    handleMenuClose();
+  };
+
+  const handleDeleteMenuClick = () => {
+    if (menuRow) {
+      setPartnerToDelete(menuRow);
+      setDeleteDialogOpen(true);
+    }
+    handleMenuClose();
   };
 
   const handleDeleteConfirm = async () => {
@@ -538,12 +570,10 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
       dispatch(removePartner(partnerToDelete.id));
       setDeleteDialogOpen(false);
       setPartnerToDelete(null);
-      if( res.data.success){
+      if (res.data.success) {
         const res1 = await API.admin.getPartnerPendingUpdate();
         dispatch(setPartnerPendingUpdate(res1.data.data));
       }
-
-
     } catch (error) {
       console.error("Error deleting partner:", error);
       // You might want to show an error message here
@@ -555,32 +585,6 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
   const handleDeleteCancel = () => {
     setDeleteDialogOpen(false);
     setPartnerToDelete(null);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status?.toUpperCase()) {
-      case "PENDING":
-        return "warning";
-      case "APPROVED":
-        return "info";
-      case "REJECTED":
-        return "error";
-      default:
-        return "default";
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status?.toUpperCase()) {
-      case "PENDING":
-        return "Chờ duyệt";
-      case "APPROVED":
-        return "Đã duyệt";
-      case "REJECTED":
-        return "Đã từ chối";
-      default:
-        return status || "Không xác định";
-    }
   };
 
   const visibleRows = useMemo(
@@ -823,22 +827,27 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
                       </TableCell>
                       <TableCell sx={{ py: 2, maxWidth: 200 }}>
                         {row.website && (
-                          <a
-                            href={row.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              color: "#1976d2",
-                              textDecoration: "none",
-                              fontWeight: 500,
-                            }}
-                          >
-                            {row.website.length > 25
-                              ? `${row.website.substring(0, 25)}...`
-                              : row.website}
-                          </a>
+                          <Tooltip title={row.website} arrow>
+                            <a
+                              href={
+                                row.website.startsWith("http")
+                                  ? row.website
+                                  : `https://${row.website}`
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                color: "#1976d2",
+                                textDecoration: "none",
+                                fontWeight: 500,
+                              }}
+                            >
+                              Link
+                            </a>
+                          </Tooltip>
                         )}
                       </TableCell>
+
                       <TableCell sx={{ py: 2 }}>
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
                           {row.representativeName}
@@ -846,7 +855,7 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
                       </TableCell>
                       <TableCell sx={{ py: 2 }}>
                         <Chip
-                          label={getStatusLabel(row.status)}
+                          label={getStatus(row.status)}
                           size="small"
                           color={getStatusColor(row.status) as any}
                           variant="filled"
@@ -855,54 +864,18 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
                       </TableCell>
                       {showActionsColumn && (
                         <TableCell align="center" sx={{ py: 2 }}>
-                          <Box
+                          <IconButton
+                            size="small"
+                            onClick={(e) => handleMenuClick(e, row)}
                             sx={{
-                              display: "flex",
-                              gap: 1,
-                              justifyContent: "center",
+                              color: "text.secondary",
+                              "&:hover": {
+                                bgcolor: "rgba(0, 0, 0, 0.04)",
+                              },
                             }}
                           >
-                            {canEdit && (
-                              <Tooltip title="Chỉnh sửa">
-                                <IconButton
-                                  size="small"
-                                  color="primary"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onEdit(row);
-                                  }}
-                                  sx={{
-                                    bgcolor: "rgba(25, 118, 210, 0.1)",
-                                    "&:hover": {
-                                      bgcolor: "rgba(25, 118, 210, 0.2)",
-                                    },
-                                  }}
-                                >
-                                  <EditIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                            {canDelete && (
-                              <Tooltip title="Xóa">
-                                <IconButton
-                                  size="small"
-                                  color="error"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteClick(row);
-                                  }}
-                                  sx={{
-                                    bgcolor: "rgba(211, 47, 47, 0.1)",
-                                    "&:hover": {
-                                      bgcolor: "rgba(211, 47, 47, 0.2)",
-                                    },
-                                  }}
-                                >
-                                  <DeleteIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                          </Box>
+                            <MoreVert />
+                          </IconButton>
                         </TableCell>
                       )}
                     </TableRow>
@@ -922,6 +895,50 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
           )}
         </TableContainer>
       </Paper>
+
+      {/* Action Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        onClick={handleMenuClose}
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            overflow: "visible",
+            filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+            mt: 1.5,
+            "& .MuiAvatar-root": {
+              width: 32,
+              height: 32,
+              ml: -0.5,
+              mr: 1,
+            },
+          },
+        }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+      >
+        {canEdit && (
+          <MenuItem onClick={handleEditClick}>
+            <ListItemIcon>
+              <EditIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Chỉnh sửa</ListItemText>
+          </MenuItem>
+        )}
+        {canDelete && (
+          <MenuItem
+            onClick={handleDeleteMenuClick}
+            sx={{ color: "error.main" }}
+          >
+            <ListItemIcon>
+              <DeleteIcon fontSize="small" color="error" />
+            </ListItemIcon>
+            <ListItemText>Xóa</ListItemText>
+          </MenuItem>
+        )}
+      </Menu>
 
       {/* Delete Confirmation Dialog */}
       <Dialog

@@ -231,7 +231,7 @@ const AddCertificationDialog: React.FC<AddCertificationDialogProps> = ({
       sx={{
         "& .MuiBackdrop-root": {
           // backgroundColor: "rgba(15, 118, 110, 0.4)",
-          backdropFilter: "blur(8px)",
+          // backdropFilter: "blur(8px)",
         },
       }}
     >

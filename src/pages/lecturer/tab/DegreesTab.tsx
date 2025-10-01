@@ -147,7 +147,7 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
             color: "white",
             fontWeight: 600,
             textTransform: "none",
-            borderRadius: 2,
+            borderRadius: 1,
             "&:hover": {
               transform: "translateY(-1px)",
               boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
@@ -171,7 +171,7 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
             key={item.original.id}
             className="transition-all duration-300"
             sx={{
-              borderRadius: 3,
+              borderRadius: 1,
               border: `1px solid ${colors.primary[100]}`,
               boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
               "&:before": {
@@ -399,7 +399,7 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                         color: "white",
                         fontWeight: 600,
                         textTransform: "none",
-                        borderRadius: 2,
+                        borderRadius: 1,
                         "&:hover": {
                           transform: "translateY(-1px)",
                         },
@@ -419,7 +419,7 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                       color: colors.primary[500],
                       fontWeight: 600,
                       textTransform: "none",
-                      borderRadius: 2,
+                      borderRadius: 1,
                       "&:hover": {
                         borderColor: colors.primary[600],
                         backgroundColor: colors.primary[50],
@@ -440,7 +440,7 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                       color: "#EF4444",
                       fontWeight: 600,
                       textTransform: "none",
-                      borderRadius: 2,
+                      borderRadius: 1,
                       "&:hover": {
                         borderColor: "#DC2626",
                         backgroundColor: "#FEF2F2",
@@ -467,7 +467,7 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
         onClose={handleCancelDelete}
         PaperProps={{
           sx: {
-            borderRadius: 3,
+            borderRadius: 1,
             minWidth: 400,
           },
         }}
@@ -489,7 +489,7 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
               borderColor: colors.primary[300],
               color: colors.primary[600],
               fontWeight: 600,
-              borderRadius: 2,
+              borderRadius: 1,
               textTransform: "none",
               "&:hover": {
                 borderColor: colors.primary[400],
@@ -505,7 +505,7 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
             color="error"
             sx={{
               fontWeight: 600,
-              borderRadius: 2,
+              borderRadius: 1,
               textTransform: "none",
               "&:hover": {
                 backgroundColor: "#d32f2f",

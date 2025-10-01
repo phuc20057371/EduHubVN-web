@@ -2,15 +2,15 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import {
-  Facebook,
-  YouTube,
-  Instagram,
   Email,
   Phone,
   LocationOn,
 } from "@mui/icons-material";
-import ZaloIcon from "./icons/ZaloIcon";
 import Logo from "../assets/Eduhub_logo_new.png";
+import ZaloIconImg from "./icons/zalo_icon.png";
+import FacebookIconImg from "./icons/facebook_icon.png";
+import YouTubeIconImg from "./icons/youtube_icon.png";
+import InstagramIconImg from "./icons/intagram_icon.png";
 import { Container } from "@mui/system";
 import { useColors } from "../hooks/useColors";
 
@@ -63,30 +63,34 @@ const Footer = () => {
               }}
             >
               {[
-                { icon: Facebook, label: "Facebook" },
-                { icon: YouTube, label: "YouTube" },
-                { icon: ZaloIcon, label: "Zalo" },
-                { icon: Instagram, label: "Instagram" },
+                { icon: FacebookIconImg, label: "Facebook" },
+                { icon: YouTubeIconImg, label: "YouTube" },
+                { icon: ZaloIconImg, label: "Zalo" },
+                { icon: InstagramIconImg, label: "Instagram" },
               ].map((social, index) => (
                 <IconButton
                   key={index}
                   sx={{
-                    color: colors.isDark ? "white" : colors.primary.main,
-                    bgcolor: colors.isDark
-                      ? "rgba(255,255,255,0.1)"
-                      : "rgba(0, 178, 255, 0.1)",
+                    bgcolor: colors.primary.main,
                     width: 48,
                     height: 48,
                     "&:hover": {
-                      bgcolor: colors.primary.main,
-                      color: "white",
+                      bgcolor: colors.primary.dark || "#0056b3",
                       transform: "translateY(-2px)",
                     },
                     transition: "all 0.3s ease",
                   }}
                   aria-label={social.label}
                 >
-                  <social.icon />
+                  <img 
+                    src={social.icon} 
+                    alt={social.label} 
+                    style={{ 
+                      width: 24, 
+                      height: 24,
+                      filter: "brightness(0) invert(1)"
+                    }} 
+                  />
                 </IconButton>
               ))}
             </Box>
@@ -140,7 +144,7 @@ const Footer = () => {
                     lineHeight: 1.4,
                   }}
                 >
-                  (+84) 123 456 789
+                  028.3863.8239 - 08.5957.9939
                 </Typography>
               </Box>
 
@@ -167,7 +171,7 @@ const Footer = () => {
                     lineHeight: 1.4,
                   }}
                 >
-                  support@eduhubvn.com
+                  support@saigonlab.edu.vn
                 </Typography>
               </Box>
 
@@ -195,9 +199,7 @@ const Footer = () => {
                     lineHeight: 1.4, // Consistent line height
                   }}
                 >
-                  123 Đường ABC, Phường XYZ,
-                  <br />
-                  Quận 1, TP. Hồ Chí Minh
+                  28/61 Cư Xá Lữ Gia, phường Phú Thọ, Tp.Hồ Chí Minh
                 </Typography>
               </Box>
             </Box>

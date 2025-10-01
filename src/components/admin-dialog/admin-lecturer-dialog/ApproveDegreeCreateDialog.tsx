@@ -182,7 +182,7 @@ const ApproveDegreeCreateDialog: React.FC<ApproveDegreeCreateDialogProps> = ({
             {/* Lecturer Info Banner */}
             <Card
               variant="outlined"
-              sx={{ borderRadius: 2, bgcolor: "primary.50" }}
+              sx={{ borderRadius: 1, bgcolor: "primary.50" }}
             >
               <CardContent sx={{ py: 2 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -238,7 +238,7 @@ const ApproveDegreeCreateDialog: React.FC<ApproveDegreeCreateDialogProps> = ({
             </Card>
 
             {/* Basic Information */}
-            <Card variant="outlined" sx={{ borderRadius: 2 }}>
+            <Card variant="outlined" sx={{ borderRadius: 1 }}>
               <CardContent>
                 <Box
                   sx={{
@@ -297,7 +297,7 @@ const ApproveDegreeCreateDialog: React.FC<ApproveDegreeCreateDialogProps> = ({
             </Card>
 
             {/* Description */}
-            <Card variant="outlined" sx={{ borderRadius: 2 }}>
+            <Card variant="outlined" sx={{ borderRadius: 1 }}>
               <CardContent>
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
                   Mô tả
@@ -309,7 +309,7 @@ const ApproveDegreeCreateDialog: React.FC<ApproveDegreeCreateDialogProps> = ({
             </Card>
 
             {/* File Preview */}
-            <Card variant="outlined" sx={{ borderRadius: 2 }}>
+            <Card variant="outlined" sx={{ borderRadius: 1 }}>
               <CardContent>
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
                   Tài liệu đính kèm

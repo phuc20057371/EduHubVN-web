@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { Outlet, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Logo from "../assets/Eduhub_logo_new.png";
 import EduHubSpeedDial from "../components/EduHubSpeedDial";
 import Footer from "../components/Footer";
@@ -9,6 +10,41 @@ import { useColors } from "../hooks/useColors";
 const GuestLayout = () => {
   const navigate = useNavigate();
   const colors = useColors();
+  const [activeMenu, setActiveMenu] = useState<string>("");
+
+  // Function to scroll to section
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+      setActiveMenu(sectionId);
+    }
+  };
+
+  // Listen for scroll events to update active menu
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ['khoahoc', 'giangvien', 'truonghoc', 'doanhnghiep', 'tintuc', 'lienhe'];
+      const scrollPosition = window.scrollY + 100;
+
+      for (const sectionId of sections) {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          const { offsetTop, offsetHeight } = element;
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            setActiveMenu(sectionId);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -70,9 +106,142 @@ const GuestLayout = () => {
                 filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.3))",
               }}
             />
+           
           </Box>
 
-          {/* Nút bên phải */}
+          {/* Navigation Menu */}
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              gap: 3,
+              alignItems: "center",
+              flex: 1,
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              onClick={() => scrollToSection("khoahoc")}
+              sx={{
+                color: activeMenu === "khoahoc" ? colors.primary.main : colors.text.primary,
+                fontWeight: activeMenu === "khoahoc" ? 700 : 600,
+                fontSize: "0.95rem",
+                textTransform: "none",
+                backgroundColor: activeMenu === "khoahoc" ? `${colors.primary.main}15` : "transparent",
+                borderRadius: "8px",
+                px: 2,
+                py: 1,
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  backgroundColor: activeMenu === "khoahoc" ? `${colors.primary.main}25` : `${colors.primary.main}10`,
+                  color: colors.primary.main,
+                },
+              }}
+            >
+              Khóa học
+            </Button>
+            <Button
+              onClick={() => scrollToSection("giangvien")}
+              sx={{
+                color: activeMenu === "giangvien" ? colors.primary.main : colors.text.primary,
+                fontWeight: activeMenu === "giangvien" ? 700 : 600,
+                fontSize: "0.95rem",
+                textTransform: "none",
+                backgroundColor: activeMenu === "giangvien" ? `${colors.primary.main}15` : "transparent",
+                borderRadius: "8px",
+                px: 2,
+                py: 1,
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  backgroundColor: activeMenu === "giangvien" ? `${colors.primary.main}25` : `${colors.primary.main}10`,
+                  color: colors.primary.main,
+                },
+              }}
+            >
+              Giảng viên
+            </Button>
+            <Button
+              onClick={() => scrollToSection("truonghoc")}
+              sx={{
+                color: activeMenu === "truonghoc" ? colors.primary.main : colors.text.primary,
+                fontWeight: activeMenu === "truonghoc" ? 700 : 600,
+                fontSize: "0.95rem",
+                textTransform: "none",
+                backgroundColor: activeMenu === "truonghoc" ? `${colors.primary.main}15` : "transparent",
+                borderRadius: "8px",
+                px: 2,
+                py: 1,
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  backgroundColor: activeMenu === "truonghoc" ? `${colors.primary.main}25` : `${colors.primary.main}10`,
+                  color: colors.primary.main,
+                },
+              }}
+            >
+              Trường học
+            </Button>
+            <Button
+              onClick={() => scrollToSection("doanhnghiep")}
+              sx={{
+                color: activeMenu === "doanhnghiep" ? colors.primary.main : colors.text.primary,
+                fontWeight: activeMenu === "doanhnghiep" ? 700 : 600,
+                fontSize: "0.95rem",
+                textTransform: "none",
+                backgroundColor: activeMenu === "doanhnghiep" ? `${colors.primary.main}15` : "transparent",
+                borderRadius: "8px",
+                px: 2,
+                py: 1,
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  backgroundColor: activeMenu === "doanhnghiep" ? `${colors.primary.main}25` : `${colors.primary.main}10`,
+                  color: colors.primary.main,
+                },
+              }}
+            >
+              Doanh nghiệp
+            </Button>
+            <Button
+              onClick={() => scrollToSection("tintuc")}
+              sx={{
+                color: activeMenu === "tintuc" ? colors.primary.main : colors.text.primary,
+                fontWeight: activeMenu === "tintuc" ? 700 : 600,
+                fontSize: "0.95rem",
+                textTransform: "none",
+                backgroundColor: activeMenu === "tintuc" ? `${colors.primary.main}15` : "transparent",
+                borderRadius: "8px",
+                px: 2,
+                py: 1,
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  backgroundColor: activeMenu === "tintuc" ? `${colors.primary.main}25` : `${colors.primary.main}10`,
+                  color: colors.primary.main,
+                },
+              }}
+            >
+              Tin tức
+            </Button>
+            <Button
+              onClick={() => scrollToSection("lienhe")}
+              sx={{
+                color: activeMenu === "lienhe" ? colors.primary.main : colors.text.primary,
+                fontWeight: activeMenu === "lienhe" ? 700 : 600,
+                fontSize: "0.95rem",
+                textTransform: "none",
+                backgroundColor: activeMenu === "lienhe" ? `${colors.primary.main}15` : "transparent",
+                borderRadius: "8px",
+                px: 2,
+                py: 1,
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  backgroundColor: activeMenu === "lienhe" ? `${colors.primary.main}25` : `${colors.primary.main}10`,
+                  color: colors.primary.main,
+                },
+              }}
+            >
+              Liên hệ
+            </Button>
+          </Box>
+
+          {/* Right side buttons */}
           <Box
             sx={{
               display: "flex",
@@ -82,6 +251,22 @@ const GuestLayout = () => {
               width: { xs: "100%", sm: "auto" },
             }}
           >
+            {/* Search Icon */}
+            {/* <Button
+              sx={{
+                minWidth: "auto",
+                width: "44px",
+                height: "44px",
+                borderRadius: "12px",
+                backgroundColor: colors.background.secondary,
+                color: colors.text.primary,
+              }}
+            >
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </Button> */}
+
             {/* Theme Toggle */}
             {/* <ThemeToggle /> */}
 
@@ -90,7 +275,7 @@ const GuestLayout = () => {
               onClick={() => navigate("/register")}
               sx={{
                 fontFamily: "'Inter', sans-serif",
-                fontSize: "0.9rem", // Fixed font size
+                fontSize: "0.9rem",
                 bgcolor: colors.primary.main,
                 color: colors.isDark ? "black" : "white",
                 fontWeight: 600,
@@ -98,10 +283,11 @@ const GuestLayout = () => {
                 py: 1,
                 boxShadow: "0 6px 20px rgba(0, 178, 255, 0.4)",
                 transition: "all 0.3s ease",
-                width: { xs: "100%", sm: "150px" }, // Fixed width for consistency
+                width: { xs: "100%", sm: "120px" },
                 minWidth: "100px",
-                height: "44px", // Fixed height
+                height: "44px",
                 textTransform: "none",
+                borderRadius: "12px",
                 "&:hover": {
                   background: colors.isDark
                     ? `linear-gradient(45deg, ${colors.primary.dark} 30%, ${colors.primary.main} 90%)`
@@ -118,17 +304,18 @@ const GuestLayout = () => {
               onClick={() => navigate("/login")}
               sx={{
                 fontFamily: "'Inter', sans-serif",
-                fontSize: "0.9rem", // Fixed font size
+                fontSize: "0.9rem",
                 bgcolor: colors.secondary.main,
                 color: colors.isDark ? "black" : "white",
                 fontWeight: 700,
-                px: 3,
+                px: 2,
                 py: 1,
                 transition: "all 0.3s ease",
-                width: { xs: "100%", sm: "150px" }, // Fixed width for consistency
-                minWidth: "120px",
-                height: "44px", // Fixed height
+                width: { xs: "100%", sm: "120px" },
+                minWidth: "100px",
+                height: "44px",
                 textTransform: "none",
+                borderRadius: "12px",
                 "&:hover": {
                   borderColor: colors.primary.main,
                   backgroundColor: `rgba(0, 178, 255, 0.1)`,

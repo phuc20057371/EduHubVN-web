@@ -197,7 +197,7 @@ const AdminPartnerPage = () => {
       sx={{
         width: "100%",
         minHeight: "fix-content",
-        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+        // background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
         p: 3,
       }}
     >
@@ -208,7 +208,7 @@ const AdminPartnerPage = () => {
             mb: 3,
             borderRadius: 3,
             overflow: "hidden",
-            background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+            // background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
             border: "1px solid rgba(255,255,255,0.8)",
           }}
         >
