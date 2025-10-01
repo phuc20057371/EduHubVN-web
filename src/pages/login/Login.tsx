@@ -447,6 +447,7 @@ const Login = () => {
                   Quên mật khẩu?{" "}
                   <Box
                     component="span"
+                    onClick={() => navigate("/forgot-password")}
                     sx={{
                       color: colors.primary.dark,
                       fontWeight: 600,

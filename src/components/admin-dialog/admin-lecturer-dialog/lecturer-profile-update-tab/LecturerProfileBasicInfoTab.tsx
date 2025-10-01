@@ -1,6 +1,7 @@
 import EditIcon from "@mui/icons-material/Edit";
 import PersonIcon from "@mui/icons-material/Person";
 import WorkIcon from "@mui/icons-material/Work";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import {
   Avatar,
   Box,
@@ -9,6 +10,7 @@ import {
   CardContent,
   CardHeader,
   Chip,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   InputLabel,
@@ -59,8 +61,6 @@ const LecturerProfileBasicInfoTab: React.FC<
 
   // Lấy trực tiếp object giảng viên từ lecturerData
   const lecturer = lecturerData?.lecturer;
-  // Safe avatar url
-  const avatarUrl = lecturer?.avatarUrl || undefined;
 
   // Basic info states
   const [fullName, setFullName] = useState<string>("");
@@ -75,10 +75,13 @@ const LecturerProfileBasicInfoTab: React.FC<
   const [gender, setGender] = useState<string>("");
   const [address, setAddress] = useState<string>("");
   const [bio, setBio] = useState<string>("");
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [avatarPreview, setAvatarPreview] = useState<string>("");
 
   // Dialog states
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   // Initialize states from lecturer data
   useEffect(() => {
@@ -96,8 +99,49 @@ const LecturerProfileBasicInfoTab: React.FC<
       setGender(lecturer.gender ? "true" : "false");
       setAddress(lecturer.address || "");
       setBio(lecturer.bio || "");
+      setAvatarUrl(lecturer.avatarUrl || "");
+      setAvatarPreview(lecturer.avatarUrl || "");
     }
   }, [lecturer]);
+
+  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Vui lòng chọn file hình ảnh!");
+      return;
+    }
+
+    // Validate file size (max 20MB)
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error("File không được vượt quá 20MB!");
+      return;
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to server
+    try {
+      setIsUploadingAvatar(true);
+      const response = await API.user.uploadFileToServer(file);
+      setAvatarUrl(response.data);
+      toast.success("Tải lên avatar thành công!");
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      toast.error("Tải lên avatar thất bại!");
+      setAvatarPreview(lecturer?.avatarUrl || "");
+      setAvatarUrl(lecturer?.avatarUrl || "");
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
 
   const handleSave = () => {
     setConfirmOpen(true);
@@ -141,6 +185,7 @@ const LecturerProfileBasicInfoTab: React.FC<
         gender: gender === "true",
         address: address.trim(),
         bio: bio.trim(),
+        avatarUrl: avatarUrl || lecturer?.avatarUrl || "",
       };
 
       const response = await API.admin.updateLecturer(updateLecturerRequest);
@@ -187,19 +232,58 @@ const LecturerProfileBasicInfoTab: React.FC<
       >
         <CardContent sx={{ p: 3 }}>
           <Box display="flex" alignItems="center" gap={3}>
-            <Avatar
-              src={avatarUrl}
-              alt={lecturer?.fullName || ""}
-              sx={{
-                width: 80,
-                height: 80,
-                border: "3px solid rgba(255,255,255,0.9)",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
-                background: "linear-gradient(45deg, #f093fb 0%, #f5576c 100%)",
-              }}
-            >
-              <PersonIcon sx={{ fontSize: 40, color: "white" }} />
-            </Avatar>
+            <Box position="relative">
+              <Avatar
+                src={avatarPreview}
+                alt={lecturer?.fullName || ""}
+                sx={{
+                  width: 80,
+                  height: 80,
+                  border: "3px solid rgba(255,255,255,0.9)",
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
+                  background: "linear-gradient(45deg, #f093fb 0%, #f5576c 100%)",
+                }}
+              >
+                <PersonIcon sx={{ fontSize: 40, color: "white" }} />
+              </Avatar>
+              {canUpdate && (
+                <Button
+                  component="label"
+                  size="small"
+                  variant="contained"
+                  sx={{
+                    position: "absolute",
+                    bottom: -8,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    minWidth: 36,
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    p: 0,
+                    bgcolor: "white",
+                    color: "primary.main",
+                    boxShadow: 2,
+                    "&:hover": {
+                      bgcolor: "grey.100",
+                    },
+                  }}
+                  disabled={isUploadingAvatar}
+                >
+                  {isUploadingAvatar ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    <CloudUploadIcon fontSize="small" />
+                  )}
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                  />
+                </Button>
+              )}
+            </Box>
 
             <Box flex={1}>
               <Typography

@@ -569,11 +569,12 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                 label="Học hàm"
                 onChange={(e) => setAcademicRankFilter(e.target.value)}
                 sx={{
-                  bgcolor:
-                    theme.palette.mode === "dark"
-                      ? theme.palette.background.paper
-                      : "white",
+                  // bgcolor:
+                  //   theme.palette.mode === "dark"
+                  //     ? theme.palette.background.paper
+                  //     : "white",
                   borderRadius: 1,
+                  fontSize: "1.25rem",
                 }}
               >
                 <MenuItem value="">
@@ -602,6 +603,7 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                   //   ? theme.palette.background.paper
                   //   : "white",
                   borderRadius: 1,
+                  fontSize: "1.25rem",
                 }}
               >
                 <MenuItem value="">

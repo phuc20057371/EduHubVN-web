@@ -13,7 +13,6 @@ import {
   ExpandLess,
   ExpandMore,
 } from "@mui/icons-material";
-import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import {
   AppBar,
   Avatar,
@@ -182,13 +181,13 @@ const AdminLayout = () => {
           },
         ]
       },
-      {
-        text: "Khóa học",
-        icon: <AccountBalanceWalletIcon />,
-        path: "/admin/courses",
-        description: "Quản lý khóa học",
-        permissions: ["COURSE_READ"],
-      },
+      // {
+      //   text: "Khóa học",
+      //   icon: <AccountBalanceWalletIcon />,
+      //   path: "/admin/courses",
+      //   description: "Quản lý khóa học",
+      //   permissions: ["COURSE_READ"],
+      // },
     ];
 
     return getAllMenuItems().filter(item => {

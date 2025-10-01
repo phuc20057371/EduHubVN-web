@@ -49,6 +49,7 @@ import PartnerCoursePage from "../pages/partner/PartnerCoursePage";
 import PartnerLecturerPage from "../pages/partner/PartnerLecturerPage";
 import PartnerProjectPage from "../pages/partner/PartnerProjectPage";
 import SubAdminPage from "../pages/admin/SubAdminPage";
+import ForgotPassword from "../pages/login/ForgotPassword";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -147,6 +148,7 @@ export const router = createBrowserRouter(
       {/* Auth + Register */}
       <Route element={<BlankLayout />}>
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/register" element={<Register />} />
         <Route path="/register-lecturer" element={<RegisterLecturer />} />
         <Route path="/register-institution" element={<RegisterInstitution />} />

@@ -1393,7 +1393,7 @@ export default function EduHubMockV2() {
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans text-gray-900">
+    <div className="guest-page-font min-h-screen bg-white text-gray-900">
       {view === "home" && (
         <>
           <Hero onOpenRegister={() => {}} />

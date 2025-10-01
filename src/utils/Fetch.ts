@@ -1,34 +1,36 @@
 import axios from "axios";
-import type { LoginRequest } from "../types/LoginRequest";
 import type { InstitutionRequest } from "../types/InstitutionRequest";
+import type { LoginRequest } from "../types/LoginRequest";
 import type { PartnerRequest } from "../types/PartnerRequest";
 
 import { toast } from "react-toastify";
-import type { LecturerRequest } from "../types/LecturerRequest";
-import type { IdRequest } from "../types/IdRequest";
-import type { RejectRequest } from "../types/RejectRequest";
-import type { CertificationUpdateRequest } from "../types/CertificationUpdateRequest";
-import type { Lecturer } from "../types/Lecturer";
-import type { Institution } from "../types/Institution";
-import type { Partner } from "../types/Parner";
-import type { EmailSent } from "../types/EmailSent";
-import type { Degree } from "../types/Degree";
-import type { Certificate } from "../types/Certificate";
-import type { DegreeRequest } from "../types/DegreeRequest";
-import type { OwnedCourse, OwnedCourseRequest } from "../types/OwnedCourse";
+import type { AssignPermissionsRequest } from "../types/AssignPermissionsRequest";
 import type {
   AttendedCourse,
   AttendedCourseRequest,
 } from "../types/AttendedCourse";
+import type { Certificate } from "../types/Certificate";
+import type { CertificationUpdateRequest } from "../types/CertificationUpdateRequest";
+import type { Degree } from "../types/Degree";
+import type { DegreeRequest } from "../types/DegreeRequest";
+import type { EmailSent } from "../types/EmailSent";
+import type { IdRequest } from "../types/IdRequest";
+import type { Institution } from "../types/Institution";
+import type { Lecturer } from "../types/Lecturer";
+import type { LecturerRequest } from "../types/LecturerRequest";
+import type { OwnedCourse, OwnedCourseRequest } from "../types/OwnedCourse";
+import type { Partner } from "../types/Parner";
+import type { RejectRequest } from "../types/RejectRequest";
+import type { RequestInstitutionFromAdmin } from "../types/RequestInstitutionFromAdmin";
+import type { RequestLecturerFromAdmin } from "../types/RequestLecturerFromAdmin";
+import type { RequestPartnerFromAdmin } from "../types/RequestPartnerFromAdmin";
 import type {
   ResearchProject,
   ResearchProjectRequest,
 } from "../types/ResearchProject";
-import type { AssignPermissionsRequest } from "../types/AssignPermissionsRequest";
 import type { ResetPasswordRequest } from "../types/ResetPasswordRequest";
-import type { RequestLecturerFromAdmin } from "../types/RequestLecturerFromAdmin";
-import type { RequestInstitutionFromAdmin } from "../types/RequestInstitutionFromAdmin";
-import type { RequestPartnerFromAdmin } from "../types/RequestPartnerFromAdmin";
+import type { ForgotPasswordRequest } from "../types/ForgotPasswordRequest";
+import type { ResetPasswordRequestForUser } from "../types/ResetPasswordRequestForUser";
 
 const domain = window.location.hostname;
 const BASE_URL = `http://${domain}:8080`;
@@ -115,6 +117,10 @@ export const API = {
     refresh: (refreshToken: string) =>
       fetch.post("/api/v1/auth/refresh", { refreshToken }),
     logout: () => fetch.post("/api/v1/auth/logout"),
+    forgotPassword: (data: ForgotPasswordRequest) =>
+      fetch.post("/api/v1/auth/forgot-password", data),
+    resetPassword: (data: ResetPasswordRequestForUser) =>
+      fetch.post("/api/v1/auth/reset-password", data),
   },
   user: {
     uploadFile: (file: File) => {

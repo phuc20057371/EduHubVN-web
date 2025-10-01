@@ -3,13 +3,12 @@ import {
   Autocomplete,
   Avatar,
   Box,
-  Card,
-  CardContent,
-  CardHeader,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   FormControl,
   FormControlLabel,
   InputLabel,
@@ -27,8 +26,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import PersonIcon from "@mui/icons-material/Person";
-import SchoolIcon from "@mui/icons-material/School";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { API } from "../../../utils/Fetch";
@@ -65,10 +63,52 @@ const CreateLecturerDialog = ({
   const [bio, setBio] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState("");
 
   // UI states
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Vui lòng chọn file hình ảnh!");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error("File không được vượt quá 20MB!");
+      return;
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to server
+    try {
+      setIsUploadingAvatar(true);
+      const response = await API.user.uploadFileToServer(file);
+      setAvatarUrl(response.data);
+      toast.success("Tải lên avatar thành công!");
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      toast.error("Tải lên avatar thất bại!");
+      setAvatarPreview("");
+      setAvatarUrl("");
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
 
   const handleSave = () => {
     // Check email first
@@ -95,6 +135,20 @@ const CreateLecturerDialog = ({
       return;
     }
     setConfirmOpen(true);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    // Check if target is textarea or multiline input - allow Enter for new line
+    const target = event.target as HTMLElement;
+    if (target.tagName === "TEXTAREA") {
+      return;
+    }
+
+    // If Enter is pressed (without Shift) and not submitting, trigger save
+    if (event.key === "Enter" && !event.shiftKey && !isSubmitting) {
+      event.preventDefault();
+      handleSave();
+    }
   };
 
   const handleConfirm = async () => {
@@ -143,7 +197,7 @@ const CreateLecturerDialog = ({
         gender: gender === "true",
         address: address.trim(),
         bio: bio.trim(),
-        avatarUrl: "", // Default empty avatar URL
+        avatarUrl: avatarUrl || "", // Use uploaded avatar URL
       };
 
       const res = await API.admin.createLecturer(newLecturer);
@@ -185,8 +239,11 @@ const CreateLecturerDialog = ({
     setBio("");
     setPassword("");
     setConfirmPassword("");
+    setAvatarUrl("");
+    setAvatarPreview("");
     setConfirmOpen(false);
     setIsSubmitting(false);
+    setIsUploadingAvatar(false);
     onClose();
   };
 
@@ -200,266 +257,253 @@ const CreateLecturerDialog = ({
         sx={{
           "& .MuiDialog-paper": {
             borderRadius: 1,
-            boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
           },
         }}
       >
         <DialogTitle
           sx={{
-            bgcolor: "primary.main",
-            color: "white",
             display: "flex",
             alignItems: "center",
-            gap: 2,
-            p: 3,
+            gap: 1.5,
+            pb: 2,
           }}
         >
-          <Avatar sx={{ bgcolor: "primary.dark" }}>
-            <PersonAddIcon />
-          </Avatar>
+          <PersonAddIcon color="primary" sx={{ fontSize: 28 }} />
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
               Tạo mới tài khoản Giảng viên
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>
-              Nhập thông tin để tạo tài khoản giảng viên mới
+            <Typography variant="caption" color="text.secondary">
+              Điền thông tin bên dưới để tạo tài khoản mới
             </Typography>
           </Box>
         </DialogTitle>
 
-        <DialogContent sx={{ p: 0 }}>
-          <Box sx={{ p: 3 }}>
-            {/* Account Information Card */}
-            <Card sx={{ mb: 3, borderRadius: 1, border: "1px solid #e0e0e0" }}>
-              <CardHeader
-                avatar={
-                  <Avatar sx={{ bgcolor: "secondary.main" }}>
-                    <PersonIcon />
-                  </Avatar>
-                }
-                title="Thông tin tài khoản"
-                titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
-                sx={{ pb: 1 }}
+        <Divider />
+
+        <DialogContent sx={{ pt: 3 }} onKeyDown={handleKeyDown}>
+          {/* Account Information */}
+          <Typography variant="subtitle2" color="primary" sx={{ mb: 2, fontWeight: 600 }}>
+            Thông tin tài khoản
+          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}>
+            <TextField
+              fullWidth
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              size="small"
+            />
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                fullWidth
+                label="Mật khẩu"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                size="small"
               />
-              <CardContent sx={{ pt: 0 }}>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  <TextField
-                    fullWidth
-                    label="Email *"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    variant="outlined"
-                    size="small"
+              <TextField
+                fullWidth
+                label="Xác nhận mật khẩu"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                size="small"
+              />
+            </Box>
+          </Box>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* Personal Information */}
+          <Typography variant="subtitle2" color="primary" sx={{ mb: 2, fontWeight: 600 }}>
+            Thông tin cá nhân
+          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}>
+            {/* Avatar Upload */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Avatar
+                src={avatarPreview}
+                sx={{ width: 80, height: 80, bgcolor: "primary.light" }}
+              >
+                {!avatarPreview && <PersonAddIcon sx={{ fontSize: 40 }} />}
+              </Avatar>
+              <Box sx={{ flex: 1 }}>
+                <Button
+                  variant="outlined"
+                  component="label"
+                  startIcon={isUploadingAvatar ? <CircularProgress size={20} /> : <CloudUploadIcon />}
+                  disabled={isUploadingAvatar}
+                  size="small"
+                >
+                  {isUploadingAvatar ? "Đang tải lên..." : "Chọn ảnh đại diện"}
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={handleAvatarChange}
                   />
-                  <Box sx={{ display: "flex", gap: 2 }}>
-                    <TextField
-                      fullWidth
-                      label="Mật khẩu *"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      variant="outlined"
-                      size="small"
-                    />
-                    <TextField
-                      fullWidth
-                      label="Xác nhận mật khẩu *"
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      variant="outlined"
-                      size="small"
-                    />
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-
-            {/* Personal Information Card */}
-            <Card sx={{ mb: 3, borderRadius: 1, border: "1px solid #e0e0e0" }}>
-              <CardHeader
-                avatar={
-                  <Avatar sx={{ bgcolor: "success.main" }}>
-                    <PersonIcon />
-                  </Avatar>
-                }
-                title="Thông tin cá nhân"
-                titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
-                sx={{ pb: 1 }}
+                </Button>
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+                  Chọn ảnh JPG, PNG (tối đa 20MB)
+                </Typography>
+              </Box>
+            </Box>
+            
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                fullWidth
+                label="Họ và tên"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                size="small"
               />
-              <CardContent sx={{ pt: 0 }}>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  <Box sx={{ display: "flex", gap: 2 }}>
-                    <TextField
-                      fullWidth
-                      label="Họ và tên *"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      variant="outlined"
-                      size="small"
-                    />
-                    <TextField
-                      fullWidth
-                      label="CCCD/CMND"
-                      value={citizenId}
-                      onChange={(e) => setCitizenId(e.target.value)}
-                      variant="outlined"
-                      size="small"
-                    />
-                  </Box>
-
-                  <Box sx={{ display: "flex", gap: 2 }}>
-                    <TextField
-                      fullWidth
-                      label="Số điện thoại"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      variant="outlined"
-                      size="small"
-                    />
-                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
-                      <DatePicker
-                        label="Ngày sinh"
-                        value={dateOfBirth}
-                        onChange={(newValue) => setDateOfBirth(newValue as dayjs.Dayjs | null)}
-                        format="DD/MM/YYYY"
-                        slotProps={{
-                          textField: {
-                            fullWidth: true,
-                            size: "small",
-                            variant: "outlined"
-                          }
-                        }}
-                      />
-                    </LocalizationProvider>
-                  </Box>
-
-                  <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                    <Typography variant="body2" sx={{ minWidth: 80 }}>
-                      Giới tính:
-                    </Typography>
-                    <RadioGroup
-                      row
-                      value={gender}
-                      onChange={(e) => setGender(e.target.value)}
-                    >
-                      <FormControlLabel
-                        value="true"
-                        control={<Radio size="small" />}
-                        label="Nam"
-                      />
-                      <FormControlLabel
-                        value="false"
-                        control={<Radio size="small" />}
-                        label="Nữ"
-                      />
-                    </RadioGroup>
-                  </Box>
-
-                  <TextField
-                    fullWidth
-                    label="Địa chỉ"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    variant="outlined"
-                    size="small"
-                    multiline
-                    rows={2}
-                  />
-                </Box>
-              </CardContent>
-            </Card>
-
-            {/* Academic Information Card */}
-            <Card sx={{ mb: 3, borderRadius: 1, border: "1px solid #e0e0e0" }}>
-              <CardHeader
-                avatar={
-                  <Avatar sx={{ bgcolor: "warning.main" }}>
-                    <SchoolIcon />
-                  </Avatar>
-                }
-                title="Thông tin học thuật"
-                titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
-                sx={{ pb: 1 }}
+              <TextField
+                fullWidth
+                label="CCCD/CMND"
+                value={citizenId}
+                onChange={(e) => setCitizenId(e.target.value)}
+                size="small"
               />
-              <CardContent sx={{ pt: 0 }}>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Học hàm</InputLabel>
-                    <Select
-                      value={academicRank}
-                      label="Học hàm"
-                      onChange={(e) => setAcademicRank(e.target.value)}
-                    >
-                      <MenuItem value="CN">Cử nhân</MenuItem>
-                      <MenuItem value="THS">Thạc sĩ</MenuItem>
-                      <MenuItem value="TS">Tiến sĩ</MenuItem>
-                      <MenuItem value="PGS">Phó giáo sư</MenuItem>
-                      <MenuItem value="GS">Giáo sư</MenuItem>
-                    </Select>
-                  </FormControl>
-
-                  <Autocomplete
-                    fullWidth
-                    size="small"
-                    options={specializationAutoComplete}
-                    value={specialization}
-                    onChange={(_, newValue) =>
-                      setSpecialization(newValue || "")
+            </Box>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                fullWidth
+                label="Số điện thoại"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                size="small"
+              />
+              <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
+                <DatePicker
+                  label="Ngày sinh"
+                  value={dateOfBirth}
+                  onChange={(newValue) => setDateOfBirth(newValue as dayjs.Dayjs | null)}
+                  format="DD/MM/YYYY"
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      size: "small",
                     }
-                    renderInput={(params) => (
-                      <TextField {...params} label="Chuyên ngành" />
-                    )}
-                    freeSolo
-                  />
+                  }}
+                />
+              </LocalizationProvider>
+            </Box>
+            <FormControl component="fieldset" size="small">
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                Giới tính
+              </Typography>
+              <RadioGroup
+                row
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+              >
+                <FormControlLabel
+                  value="true"
+                  control={<Radio size="small" />}
+                  label="Nam"
+                />
+                <FormControlLabel
+                  value="false"
+                  control={<Radio size="small" />}
+                  label="Nữ"
+                />
+              </RadioGroup>
+            </FormControl>
+            <TextField
+              fullWidth
+              label="Địa chỉ"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              size="small"
+              multiline
+              rows={2}
+            />
+          </Box>
 
-                  <Autocomplete
-                    fullWidth
-                    size="small"
-                    options={jobFieldAutoComplete}
-                    value={jobField}
-                    onChange={(_, newValue) => setJobField(newValue || "")}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Lĩnh vực công việc" />
-                    )}
-                    freeSolo
-                  />
+          <Divider sx={{ my: 3 }} />
 
-                  <TextField
-                    fullWidth
-                    label="Số năm kinh nghiệm"
-                    type="number"
-                    value={experienceYears}
-                    onChange={(e) => setExperienceYears(e.target.value)}
-                    variant="outlined"
-                    size="small"
-                    inputProps={{ min: 0 }}
-                  />
-
-                  <TextField
-                    fullWidth
-                    label="Mô tả bản thân"
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    variant="outlined"
-                    size="small"
-                    multiline
-                    rows={3}
-                    placeholder="Giới thiệu ngắn về bản thân, kinh nghiệm làm việc..."
-                  />
-                </Box>
-              </CardContent>
-            </Card>
+          {/* Academic Information */}
+          <Typography variant="subtitle2" color="primary" sx={{ mb: 2, fontWeight: 600 }}>
+            Thông tin học thuật
+          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Học hàm</InputLabel>
+                <Select
+                  value={academicRank}
+                  label="Học hàm"
+                  onChange={(e) => setAcademicRank(e.target.value)}
+                >
+                  <MenuItem value="CN">Cử nhân</MenuItem>
+                  <MenuItem value="KS">Kỹ sư</MenuItem>
+                  <MenuItem value="THS">Thạc sĩ</MenuItem>
+                  <MenuItem value="TS">Tiến sĩ</MenuItem>
+                  <MenuItem value="PGS">Phó giáo sư</MenuItem>
+                  <MenuItem value="GS">Giáo sư</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                fullWidth
+                label="Số năm kinh nghiệm"
+                type="number"
+                value={experienceYears}
+                onChange={(e) => setExperienceYears(e.target.value)}
+                size="small"
+                inputProps={{ min: 0 }}
+              />
+            </Box>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <Autocomplete
+                fullWidth
+                size="small"
+                options={specializationAutoComplete}
+                value={specialization}
+                onChange={(_, newValue) => setSpecialization(newValue || "")}
+                renderInput={(params) => (
+                  <TextField {...params} label="Chuyên ngành" />
+                )}
+                freeSolo
+              />
+              <Autocomplete
+                fullWidth
+                size="small"
+                options={jobFieldAutoComplete}
+                value={jobField}
+                onChange={(_, newValue) => setJobField(newValue || "")}
+                renderInput={(params) => (
+                  <TextField {...params} label="Lĩnh vực công việc" />
+                )}
+                freeSolo
+              />
+            </Box>
+            <TextField
+              fullWidth
+              label="Mô tả bản thân"
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              size="small"
+              multiline
+              rows={3}
+              placeholder="Giới thiệu ngắn về bản thân, kinh nghiệm làm việc..."
+            />
           </Box>
         </DialogContent>
 
-        <DialogActions sx={{ p: 3, gap: 1 }}>
+        <Divider />
+
+        <DialogActions sx={{ px: 3, py: 2 }}>
           <Button
             onClick={handleClose}
             variant="outlined"
             disabled={isSubmitting}
-            sx={{ minWidth: 100 }}
           >
             Hủy
           </Button>
@@ -467,7 +511,7 @@ const CreateLecturerDialog = ({
             onClick={handleSave}
             variant="contained"
             disabled={isSubmitting}
-            sx={{ minWidth: 100 }}
+            startIcon={<PersonAddIcon />}
           >
             {isSubmitting ? "Đang tạo..." : "Tạo tài khoản"}
           </Button>
@@ -478,39 +522,41 @@ const CreateLecturerDialog = ({
       <Dialog
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
-        maxWidth="sm"
+        maxWidth="xs"
         fullWidth
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !isSubmitting) {
+            e.preventDefault();
+            handleConfirm();
+          }
+        }}
       >
-        <DialogTitle>
-          <Typography variant="h6" component="div">
-            Xác nhận tạo tài khoản
-          </Typography>
+        <DialogTitle sx={{ pb: 2 }}>
+          Xác nhận tạo tài khoản
         </DialogTitle>
         <DialogContent>
           <Alert severity="info" sx={{ mb: 2 }}>
-            <Typography variant="body2">
-              Bạn có chắc chắn muốn tạo tài khoản giảng viên với thông tin đã
-              nhập?
-            </Typography>
+            Bạn có chắc chắn muốn tạo tài khoản giảng viên với thông tin đã nhập?
           </Alert>
-          <Typography variant="body1">
-            Email: <strong>{email}</strong>
-          </Typography>
-          <Typography variant="body1">
-            Họ tên: <strong>{fullName}</strong>
-          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <Typography variant="body2">
+              <strong>Email:</strong> {email}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Họ tên:</strong> {fullName}
+            </Typography>
+          </Box>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button
             onClick={() => setConfirmOpen(false)}
-            color="inherit"
+            variant="outlined"
             disabled={isSubmitting}
           >
             Hủy
           </Button>
           <Button
             onClick={handleConfirm}
-            color="primary"
             variant="contained"
             disabled={isSubmitting}
           >
