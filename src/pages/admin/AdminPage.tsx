@@ -16,8 +16,6 @@ import {
   People,
   School,
   Business,
-  MenuBook,
-  LibraryBooks,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { API } from "../../utils/Fetch";
@@ -210,8 +208,8 @@ const AdminPage = () => {
       isAdmin || (isSubAdmin && permissions.includes("SCHOOL_READ"));
     const hasOrganizationRead =
       isAdmin || (isSubAdmin && permissions.includes("ORGANIZATION_READ"));
-    const hasCourseRead =
-      isAdmin || (isSubAdmin && permissions.includes("COURSE_READ"));
+    // const hasCourseRead =
+    //   isAdmin || (isSubAdmin && permissions.includes("COURSE_READ"));
 
     const lecturerStats = hasLecturerRead
       ? calculateChange(lecturers, "status")
@@ -239,14 +237,14 @@ const AdminPage = () => {
         };
 
     // For courses, use the new API structure - courses are returned directly
-    const courseStats = hasCourseRead
-      ? calculateChange(courses, "isPublished")
-      : {
-          currentCount: 0,
-          lastMonthCount: 0,
-          percentChange: "0%",
-          trend: "stable" as const,
-        };
+    // const courseStats = hasCourseRead
+    //   ? calculateChange(courses, "isPublished")
+    //   : {
+    //       currentCount: 0,
+    //       lastMonthCount: 0,
+    //       percentChange: "0%",
+    //       trend: "stable" as const,
+    //     };
 
     return [
       {
@@ -288,19 +286,19 @@ const AdminPage = () => {
         change: partnerStats.percentChange,
         trend: partnerStats.trend,
       },
-      {
-        title: "Khóa học",
-        value: hasCourseRead
-          ? courses.filter((c: any) => c.course.isPublished === true).length
-          : "no_permission",
-        lastMonthValue: hasCourseRead
-          ? courseStats.lastMonthCount
-          : "no_permission",
-        icon: <LibraryBooks sx={{ fontSize: 40 }} />,
-        color: "#9c27b0",
-        change: courseStats.percentChange,
-        trend: courseStats.trend,
-      },
+      // {
+      //   title: "Khóa học",
+      //   value: hasCourseRead
+      //     ? courses.filter((c: any) => c.course.isPublished === true).length
+      //     : "no_permission",
+      //   lastMonthValue: hasCourseRead
+      //     ? courseStats.lastMonthCount
+      //     : "no_permission",
+      //   icon: <LibraryBooks sx={{ fontSize: 40 }} />,
+      //   color: "#9c27b0",
+      //   change: courseStats.percentChange,
+      //   trend: courseStats.trend,
+      // },
     ];
   }, [lecturers, institutions, partners, courses, userProfile]);
 
@@ -326,13 +324,13 @@ const AdminPage = () => {
       color: "#ed6c02",
       route: "/admin/partners",
     },
-    {
-      title: "Quản lý Khóa học",
-      description: "Xem và quản lý tất cả khóa học",
-      icon: <MenuBook sx={{ fontSize: 32 }} />,
-      color: "#9c27b0",
-      route: "/admin/courses",
-    },
+    // {
+    //   title: "Quản lý Khóa học",
+    //   description: "Xem và quản lý tất cả khóa học",
+    //   icon: <MenuBook sx={{ fontSize: 32 }} />,
+    //   color: "#9c27b0",
+    //   route: "/admin/courses",
+    // },
   ];
 
   // Check permissions for quick actions

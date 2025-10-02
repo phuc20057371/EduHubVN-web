@@ -17,39 +17,40 @@ import AdminInstitutionPage from "../pages/admin/AdminInstitutionPage";
 import AdminLecturerPage from "../pages/admin/AdminLecturerPage";
 import AdminPage from "../pages/admin/AdminPage";
 import AdminPartner from "../pages/admin/AdminPartnerPage";
+import SubAdminPage from "../pages/admin/SubAdminPage";
 import GuestPage from "../pages/guest/GuestPage";
 import InstitutionPendingPage from "../pages/guest/InstitutionPendingPage";
 import LecturerPendingPage from "../pages/guest/LecturerPendingPage";
 import PartnerPendingPage from "../pages/guest/PartnerPendingPage";
 import HomePage from "../pages/home/HomePage";
+import InstitutionContractPage from "../pages/institution/InstitutionContractPage";
+import InstitutionCourse from "../pages/institution/InstitutionCourse";
+import InstitutionLecturerPage from "../pages/institution/InstitutionLecturerPage";
 import InstitutionPage from "../pages/institution/InstitutionPage";
 import InstitutionProfilePage from "../pages/institution/InstitutionProfilePage";
+import InstitutionProjectPage from "../pages/institution/InstitutionProjectPage";
 import LecturerContractPage from "../pages/lecturer/LecturerContractPage";
 import LecturerCoursePage from "../pages/lecturer/LecturerCoursePage";
 import LecturerPage from "../pages/lecturer/LecturerPage";
 import LecturerProfilePage from "../pages/lecturer/LecturerProfilePage";
 import LecturerProjectPage from "../pages/lecturer/LecturerProjectPage";
 import LecturerStatisticPage from "../pages/lecturer/LecturerStatisticPage";
+import ForgotPassword from "../pages/login/ForgotPassword";
 import Login from "../pages/login/Login";
 import LecturerInfoPage from "../pages/other/LecturerInfoPage";
+import PartnerContractPage from "../pages/partner/PartnerContractPage";
+import PartnerCoursePage from "../pages/partner/PartnerCoursePage";
+import PartnerLecturerPage from "../pages/partner/PartnerLecturerPage";
 import PartnerPage from "../pages/partner/PartnerPage";
+import PartnerProfilePage from "../pages/partner/PartnerProfilePage";
+import PartnerProjectPage from "../pages/partner/PartnerProjectPage";
 import Register from "../pages/register/Register";
 import RegisterInstitution from "../pages/register/RegisterInstitution";
 import RegisterLecturer from "../pages/register/RegisterLecturer";
 import RegisterPartner from "../pages/register/RegisterPartner";
-import ProtectedRoute from "../utils/ProtectedRoute";
 import AdminOnlyRoute from "../utils/AdminOnlyRoute";
-import InstitutionContractPage from "../pages/institution/InstitutionContractPage";
-import InstitutionCourse from "../pages/institution/InstitutionCourse";
-import InstitutionLecturerPage from "../pages/institution/InstitutionLecturerPage";
-import InstitutionProjectPage from "../pages/institution/InstitutionProjectPage";
-import PartnerProfilePage from "../pages/partner/PartnerProfilePage";
-import PartnerContractPage from "../pages/partner/PartnerContractPage";
-import PartnerCoursePage from "../pages/partner/PartnerCoursePage";
-import PartnerLecturerPage from "../pages/partner/PartnerLecturerPage";
-import PartnerProjectPage from "../pages/partner/PartnerProjectPage";
-import SubAdminPage from "../pages/admin/SubAdminPage";
-import ForgotPassword from "../pages/login/ForgotPassword";
+import ProtectedRoute from "../utils/ProtectedRoute";
+import AccountConfig from "../pages/other/AccountConfig";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -108,6 +109,7 @@ export const router = createBrowserRouter(
             element={<LecturerStatisticPage />}
           />
           <Route path="/lecturer/projects" element={<LecturerProjectPage />} />
+          <Route path="/account-config" element={<AccountConfig />} />
         </Route>
       </Route>
 
@@ -142,6 +144,13 @@ export const router = createBrowserRouter(
           <Route path="/partner/courses" element={<PartnerCoursePage />} />
           <Route path="/partner/lecturers" element={<PartnerLecturerPage />} />
           <Route path="/partner/projects" element={<PartnerProjectPage />} />
+        </Route>
+      </Route>
+
+      {/* Protected Account Config Route */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<BlankLayout />}>
+          
         </Route>
       </Route>
 

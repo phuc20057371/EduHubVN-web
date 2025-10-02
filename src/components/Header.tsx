@@ -323,7 +323,7 @@ const Header: React.FC<HeaderProps> = ({
               </MenuItem>
 
               <MenuItem
-                onClick={onMenuClose}
+                onClick={() => navigate("/account-config")}
                 sx={{
                   py: 1.5,
                   "&:hover": {

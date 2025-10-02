@@ -2,8 +2,13 @@ import axios from "axios";
 import type { InstitutionRequest } from "../types/InstitutionRequest";
 import type { LoginRequest } from "../types/LoginRequest";
 import type { PartnerRequest } from "../types/PartnerRequest";
+import type { ForgotPasswordRequest } from "./../types/ForgotPasswordRequest";
 
 import { toast } from "react-toastify";
+import type {
+  AddSubEmailRequest,
+  SendSubEmailOtpRequest,
+} from "../types/AddSubEmailRequest";
 import type { AssignPermissionsRequest } from "../types/AssignPermissionsRequest";
 import type {
   AttendedCourse,
@@ -11,6 +16,7 @@ import type {
 } from "../types/AttendedCourse";
 import type { Certificate } from "../types/Certificate";
 import type { CertificationUpdateRequest } from "../types/CertificationUpdateRequest";
+import type { ChangePasswordRequest } from "../types/ChangePasswordRequest";
 import type { Degree } from "../types/Degree";
 import type { DegreeRequest } from "../types/DegreeRequest";
 import type { EmailSent } from "../types/EmailSent";
@@ -29,11 +35,10 @@ import type {
   ResearchProjectRequest,
 } from "../types/ResearchProject";
 import type { ResetPasswordRequest } from "../types/ResetPasswordRequest";
-import type { ForgotPasswordRequest } from "../types/ForgotPasswordRequest";
 import type { ResetPasswordRequestForUser } from "../types/ResetPasswordRequestForUser";
 
 const domain = window.location.hostname;
-const BASE_URL = `http://${domain}:8080`;
+const BASE_URL = `http://${domain}:8880`;
 
 const fetch = axios.create({
   baseURL: BASE_URL,
@@ -134,6 +139,16 @@ export const API = {
       return fetch.post("/api/v1/user/uploads", formData);
     },
     getUserProfile: () => fetch.get("/api/v1/user/user-profile"),
+    sendOTPChangePassword: (data: ForgotPasswordRequest) =>
+      fetch.post("/api/v1/user/send-otp-change-password", data),
+    changePassword: (data: ChangePasswordRequest) =>
+      fetch.post("/api/v1/user/change-password", data),
+    sendSubEmailOtp: (data: SendSubEmailOtpRequest) =>
+      fetch.post("/api/v1/user/send-otp-add-subemail", data),
+    addSubEmail: (data: AddSubEmailRequest) =>
+      fetch.post("/api/v1/user/add-subemail", data),
+    removeSubEmail: (data: { email: string }) =>
+      fetch.post("/api/v1/user/remove-subemail", data),
     //Leccturer
     registerLecturer: (data: LecturerRequest) =>
       fetch.post("/api/v1/user/register-lecturer", data),

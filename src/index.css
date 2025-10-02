@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 /* Font Lexend chỉ áp dụng cho GuestPage */
-.guest-page-font {
+* {
     font-family: 'Lexend', sans-serif;
 }
 

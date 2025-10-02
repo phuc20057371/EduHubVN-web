@@ -4,7 +4,8 @@ export type UserProfile = {
     id: string;
     email: string;
     role: UserRole;
-    lastLogin: Date
+    lastLogin: Date;
+    subEmails?: string[];
 
     lecturer: Object | null;
     educationInstitution: Object | null;
