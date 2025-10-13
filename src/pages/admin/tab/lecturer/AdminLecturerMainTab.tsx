@@ -73,6 +73,7 @@ interface HeadCell {
 }
 
 const headCells: readonly HeadCell[] = [
+  { id: "lecturerId", numeric: false, disablePadding: false, label: "Mã GV" },
   { id: "fullName", numeric: false, disablePadding: false, label: "Họ tên" },
   {
     id: "academicRank",
@@ -267,6 +268,7 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
       filtered = filtered.filter(
         (lecturer: Lecturer) =>
           lecturer.id?.toString().includes(searchTerm) ||
+          lecturer.lecturerId?.toString().includes(searchTerm) ||
           lecturer.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           lecturer.specialization
             ?.toLowerCase()
@@ -813,6 +815,9 @@ const AdminLecturerMainTab: React.FC<AdminLecturerMainTabProps> = ({
                       },
                     }}
                   >
+                    <TableCell sx={{ fontSize: "0.875rem" }}>
+                      {row.lecturerId}
+                    </TableCell>
                     <TableCell sx={{ fontSize: "0.875rem" }}>
                       {row.fullName}
                     </TableCell>

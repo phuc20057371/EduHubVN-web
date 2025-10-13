@@ -323,7 +323,16 @@ const Header: React.FC<HeaderProps> = ({
               </MenuItem>
 
               <MenuItem
-                onClick={() => navigate("/account-config")}
+                onClick={() => {
+                  if (userProfile?.role === "LECTURER") {
+                    navigate("/account-config-lecturer");
+                  } else if (userProfile?.role === "ORGANIZATION") {
+                    navigate("/account-config-partner");
+                  } else if (userProfile?.role === "SCHOOL") {
+                    navigate("/account-config-institution");
+                  }
+                  onMenuClose();
+                }}
                 sx={{
                   py: 1.5,
                   "&:hover": {

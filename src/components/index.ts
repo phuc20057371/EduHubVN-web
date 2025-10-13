@@ -3,4 +3,6 @@ export { default as BasicSpeedDial } from './BasicSpeedDial';
 export { default as EduHubSpeedDial } from './EduHubSpeedDial';
 export { default as Footer } from './Footer';
 export { default as Header } from './Header';
+export { default as IntroductionDialog } from './IntroductionDialog';
+export { default as LecturerCarousel } from './LecturerCarousel';
 export { default as ThemeToggle } from './ThemeToggle';

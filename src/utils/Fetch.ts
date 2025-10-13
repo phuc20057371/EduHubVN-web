@@ -38,7 +38,7 @@ import type { ResetPasswordRequest } from "../types/ResetPasswordRequest";
 import type { ResetPasswordRequestForUser } from "../types/ResetPasswordRequestForUser";
 
 const domain = window.location.hostname;
-const BASE_URL = `http://${domain}:8880`;
+const BASE_URL = `http://${domain}:8080`;
 
 const fetch = axios.create({
   baseURL: BASE_URL,

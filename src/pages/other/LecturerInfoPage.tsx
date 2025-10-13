@@ -16,8 +16,6 @@ const LecturerInfoPage = () => {
   const lecturerProfile = useSelector((state: any) => state.lecturerProfile);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // const domain = window.location.hostname;
-  // const BASE_URL = `http://${domain}:8080`;
 
   useEffect(() => {
     const fetchLecturerData = async () => {

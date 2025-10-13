@@ -1,57 +1,63 @@
 import { motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GuestImage1 from "../../assets/guest1.png";
 import { getAcademicRank, getCourseLevel } from "../../utils/ChangeText";
 import { API } from "../../utils/Fetch";
-// import GuestImage2 from "../../assets/guest2.png";
+import GuestImage2 from "../../assets/guest2.png";
+import LecturerCarousel from "../../components/LecturerCarousel";
 
 // Mock data fallback — use API data when available
 const mockInstructors = [
   {
     id: "1",
     fullName: "TS. Nguyễn Văn A",
-    specialization: "Giảng viên ĐH Bách Khoa",
+    specialization: "Lĩnh Vực/ Chuyên Ngành",
     avatarUrl:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=240&h=240&fit=crop&crop=face",
     academicRank: "TS",
-    experienceYears: 10,
+    experienceYears: 15,
+    field: "ART",
   },
   {
     id: "2",
     fullName: "ThS. Nguyễn Văn B",
-    specialization: "Chuyên gia Data",
+    specialization: "Lĩnh Vực/ Chuyên Ngành",
     avatarUrl:
       "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=240&h=240&fit=crop&crop=face",
     academicRank: "ThS",
-    experienceYears: 8,
+    experienceYears: 12,
+    field: "SOFT SKILL",
   },
   {
     id: "3",
     fullName: "KS. Nguyễn Văn C",
-    specialization: "Kỹ sư DevOps",
+    specialization: "Lĩnh Vực/ Chuyên Ngành",
     avatarUrl:
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=240&h=240&fit=crop&crop=face",
     academicRank: "KS",
-    experienceYears: 7,
+    experienceYears: 10,
+    field: "CEH",
   },
   {
     id: "4",
     fullName: "MBA. Nguyễn Văn D",
-    specialization: "Chuyên gia Quản trị",
+    specialization: "Lĩnh Vực/ Chuyên Ngành",
     avatarUrl:
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=240&h=240&fit=crop&crop=face",
     academicRank: "MBA",
-    experienceYears: 10,
+    experienceYears: 8,
+    field: "DATA",
   },
   {
     id: "5",
     fullName: "PGS. Nguyễn Văn E",
-    specialization: "Giảng viên CNTT",
+    specialization: "Lĩnh Vực/ Chuyên Ngành",
     avatarUrl:
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=240&h=240&fit=crop&crop=face",
     academicRank: "PGS.TS",
-    experienceYears: 15,
+    experienceYears: 20,
+    field: "BUSINESS",
   },
   {
     id: "6",
@@ -291,14 +297,14 @@ function Hero({ onOpenRegister }: { onOpenRegister: () => void }) {
                 }
               }}
             >
-              Bắt đầu đăng ký
+              Tìm hiểu thêm
             </button>
-            <a
+            {/* <a
               href="#khoahoc"
               className="rounded-xl border border-white/30 bg-white/10 px-5 py-3 font-semibold"
             >
               Xem khóa học
-            </a>
+            </a> */}
           </div>
         </motion.div>
         <motion.div
@@ -332,7 +338,7 @@ function WhyChooseSection() {
             viewport={{ once: true }}
           >
             <img
-              src={GuestImage1}
+              src={GuestImage2}
               alt="Why Choose EduHubVN Illustration"
               className="h-auto w-full rounded-2xl"
             />
@@ -367,10 +373,10 @@ function WhyChooseSection() {
                   whileHover={{ scale: 1.02 }}
                   className="cursor-pointer rounded-xl border-2 border-blue-200 bg-blue-50 p-6 transition-all hover:border-blue-300"
                 >
-                  <h3 className="mb-3 font-semibold text-blue-800">
+                  <h3 className="mb-3 font-semibold">
                     Đề tài đa dạng
                   </h3>
-                  <p className="text-sm leading-relaxed text-blue-600">
+                  <p className="text-sm leading-relaxed ">
                     Kết nối với hàng nghìn giảng viên có kinh nghiệm và chuyên
                     môn cao
                   </p>
@@ -380,10 +386,10 @@ function WhyChooseSection() {
                   whileHover={{ scale: 1.02 }}
                   className="cursor-pointer rounded-xl border-2 border-blue-200 bg-blue-50 p-6 transition-all hover:border-blue-300"
                 >
-                  <h3 className="mb-3 font-semibold text-blue-800">
+                  <h3 className="mb-3 font-semibold">
                     Trường & Trung tâm
                   </h3>
-                  <p className="text-sm leading-relaxed text-blue-600">
+                  <p className="text-sm leading-relaxed ">
                     Kết nối với hàng nghìn giảng viên có kinh nghiệm và chuyên
                     môn cao
                   </p>
@@ -394,10 +400,10 @@ function WhyChooseSection() {
                 whileHover={{ scale: 1.02 }}
                 className="cursor-pointer rounded-xl border-2 border-blue-200 bg-blue-50 p-6 transition-all hover:border-blue-300"
               >
-                <h3 className="mb-3 font-semibold text-blue-800">
+                <h3 className="mb-3 font-semibold">
                   Giảng viên chuyên nghiệp
                 </h3>
-                <p className="text-sm leading-relaxed text-blue-600">
+                <p className="text-sm leading-relaxed ">
                   Kết nối với hàng nghìn giảng viên có kinh nghiệm và chuyên môn
                   cao
                 </p>
@@ -604,86 +610,21 @@ function HowItWorks() {
 }
 
 function InstructorsSlider() {
-  const scroller = useRef<HTMLDivElement>(null);
   const { lecturers, loading } = useTopLecturers();
-  const scrollBy = (dx: number) =>
-    scroller.current?.scrollBy({ left: dx, behavior: "smooth" });
 
-  if (loading) {
-    return (
-      <section
-        id="giangvien"
-        className="bg-gradient-to-b from-white to-white py-16"
-      >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-extrabold md:text-3xl">
-            Top Giảng viên
-          </h2>
-          <div className="mt-6 flex justify-center">
-            <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-indigo-600"></div>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  // Transform API data to match the new component format
+  const transformedLecturers = lecturers.map(lecturer => ({
+    ...lecturer,
+    field: lecturer.field || ['ART', 'SOFT SKILL', 'CEH', 'DATA', 'BUSINESS'][Math.floor(Math.random() * 5)],
+    specialization: lecturer.specialization || "Lĩnh Vực/ Chuyên Ngành"
+  }));
 
   return (
-    <section
-      id="giangvien"
-      className="bg-gradient-to-b from-white to-white py-16"
-    >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-extrabold md:text-3xl">
-            Top Giảng viên
-          </h2>
-          <div className="hidden gap-2 md:flex">
-            <button
-              onClick={() => scrollBy(-300)}
-              className="h-10 rounded-xl border px-3"
-            >
-              ←
-            </button>
-            <button
-              onClick={() => scrollBy(300)}
-              className="h-10 rounded-xl border px-3"
-            >
-              →
-            </button>
-          </div>
-        </div>
-        <div
-          ref={scroller}
-          className="mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
-        >
-          {lecturers.map((i) => (
-            <motion.div
-              whileHover={{ y: -4 }}
-              key={i.id}
-              className="min-w-[220px] snap-start overflow-hidden rounded-2xl bg-white shadow"
-            >
-              <img
-                src={i.avatarUrl || "https://via.placeholder.com/200x200"}
-                alt={i.fullName}
-                className="aspect-square w-full object-cover"
-              />
-              <div className="p-3">
-                <div className="text-sm font-semibold leading-tight">
-                  {i.fullName}
-                </div>
-                <div className="text-xs text-gray-600">
-                  {i.academicRank} • {i.specialization}
-                </div>
-                {i.experienceYears && (
-                  <div className="mt-1 text-xs text-gray-500">
-                    {i.experienceYears} năm kinh nghiệm
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+    <section id="giangvien">
+      <LecturerCarousel 
+        lecturers={transformedLecturers} 
+        loading={loading} 
+      />
     </section>
   );
 }
@@ -693,17 +634,22 @@ function CourseSearch({ openCourse }: { openCourse: (id: number) => void }) {
   const { courses, loading, error } = useCourses();
 
   const filtered = useMemo(
-    () =>
-      courses.filter((c) => {
-        // Chỉ hiển thị khóa học đã xuất bản
-        if (c.published !== true) return false;
+    () => {
+      // Lọc khóa học đã xuất bản
+      const publishedCourses = courses.filter((c) => c.published === true);
+      
+      // Nếu không có query tìm kiếm, hiển thị ngẫu nhiên 3 khóa học
+      if (!q || q.trim() === "") {
+        // Tạo bản sao để không ảnh hưởng đến mảng gốc
+        const shuffled = [...publishedCourses].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, 3);
+      }
 
-        // Tìm kiếm text nếu có query
-        if (!q) return true;
+      // Nếu có query tìm kiếm, hiển thị tất cả khóa học phù hợp
+      return publishedCourses.filter((c) => {
 
         const searchTerm = q.toLowerCase().trim();
-        if (!searchTerm) return true;
-
+        
         // Tìm trong tất cả các trường text của khóa học
         const searchableFields = [
           c.publicTitle || "",
@@ -763,7 +709,8 @@ function CourseSearch({ openCourse }: { openCourse: (id: number) => void }) {
           // Hoặc tìm thấy tất cả các từ trong query
           return searchWords.every((word) => fieldLower.includes(word));
         });
-      }),
+      });
+    },
     [courses, q],
   );
   // Loading state
@@ -817,8 +764,9 @@ function CourseSearch({ openCourse }: { openCourse: (id: number) => void }) {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h2 className="text-center text-2xl font-extrabold text-gray-900 md:text-3xl">
-          Khóa học nổi bật
+          {q && q.trim() ? `Tìm thấy ${filtered.length} khóa học` : "Khóa học nổi bật"}
         </h2>
+      
         <div className="mt-8">
           {/* Search Input */}
           <div className="relative">
@@ -953,76 +901,76 @@ function Testimonials() {
   );
 }
 
-function NewsSection() {
-  const newsItems = [
-    {
-      id: 1,
-      title: "EduHubVN ra mắt tính năng kết nối AI mới",
-      date: "15/12/2024",
-      excerpt:
-        "Nền tảng giáo dục EduHubVN vừa ra mắt tính năng kết nối AI giúp tối ưu hóa việc tìm kiếm giảng viên và khóa học phù hợp.",
-      image:
-        "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=250&fit=crop",
-    },
-    {
-      id: 2,
-      title: "Hội thảo 'Tương lai giáo dục số' tại Hà Nội",
-      date: "10/12/2024",
-      excerpt:
-        "Hội thảo quy tụ hơn 200 chuyên gia giáo dục và công nghệ để thảo luận về xu hướng giáo dục số trong tương lai.",
-      image:
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop",
-    },
-    {
-      id: 3,
-      title: "EduHubVN hợp tác với 50 trường đại học",
-      date: "05/12/2024",
-      excerpt:
-        "Nền tảng EduHubVN vừa ký kết hợp tác chiến lược với 50 trường đại học hàng đầu Việt Nam.",
-      image:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=250&fit=crop",
-    },
-  ];
+// function NewsSection() {
+//   const newsItems = [
+//     {
+//       id: 1,
+//       title: "EduHubVN ra mắt tính năng kết nối AI mới",
+//       date: "15/12/2024",
+//       excerpt:
+//         "Nền tảng giáo dục EduHubVN vừa ra mắt tính năng kết nối AI giúp tối ưu hóa việc tìm kiếm giảng viên và khóa học phù hợp.",
+//       image:
+//         "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=250&fit=crop",
+//     },
+//     {
+//       id: 2,
+//       title: "Hội thảo 'Tương lai giáo dục số' tại Hà Nội",
+//       date: "10/12/2024",
+//       excerpt:
+//         "Hội thảo quy tụ hơn 200 chuyên gia giáo dục và công nghệ để thảo luận về xu hướng giáo dục số trong tương lai.",
+//       image:
+//         "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop",
+//     },
+//     {
+//       id: 3,
+//       title: "EduHubVN hợp tác với 50 trường đại học",
+//       date: "05/12/2024",
+//       excerpt:
+//         "Nền tảng EduHubVN vừa ký kết hợp tác chiến lược với 50 trường đại học hàng đầu Việt Nam.",
+//       image:
+//         "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=250&fit=crop",
+//     },
+//   ];
 
-  return (
-    <section id="tintuc" className="bg-white py-16 font-sans">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h2 className="text-center text-2xl font-extrabold text-gray-900 md:text-3xl">
-          Tin tức & Sự kiện
-        </h2>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {newsItems.map((item) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="overflow-hidden rounded-2xl bg-white shadow-lg transition-shadow hover:shadow-xl"
-            >
-              <img
-                src={item.image}
-                alt={item.title}
-                className="aspect-video w-full object-cover"
-              />
-              <div className="p-6">
-                <div className="mb-2 text-sm text-gray-500">{item.date}</div>
-                <h3 className="mb-3 line-clamp-2 text-lg font-semibold text-gray-900">
-                  {item.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-gray-600">
-                  {item.excerpt}
-                </p>
-                <button className="mt-4 text-sm font-semibold text-blue-600 hover:text-blue-800">
-                  Đọc thêm →
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
+//   return (
+//     <section id="tintuc" className="bg-white py-16 font-sans">
+//       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+//         <h2 className="text-center text-2xl font-extrabold text-gray-900 md:text-3xl">
+//           Tin tức & Sự kiện
+//         </h2>
+//         <div className="mt-8 grid gap-6 md:grid-cols-3">
+//           {newsItems.map((item) => (
+//             <motion.div
+//               key={item.id}
+//               initial={{ opacity: 0, y: 20 }}
+//               whileInView={{ opacity: 1, y: 0 }}
+//               viewport={{ once: true }}
+//               className="overflow-hidden rounded-2xl bg-white shadow-lg transition-shadow hover:shadow-xl"
+//             >
+//               <img
+//                 src={item.image}
+//                 alt={item.title}
+//                 className="aspect-video w-full object-cover"
+//               />
+//               <div className="p-6">
+//                 <div className="mb-2 text-sm text-gray-500">{item.date}</div>
+//                 <h3 className="mb-3 line-clamp-2 text-lg font-semibold text-gray-900">
+//                   {item.title}
+//                 </h3>
+//                 <p className="text-sm leading-relaxed text-gray-600">
+//                   {item.excerpt}
+//                 </p>
+//                 <button className="mt-4 text-sm font-semibold  hover:text-blue-800">
+//                   Đọc thêm →
+//                 </button>
+//               </div>
+//             </motion.div>
+//           ))}
+//         </div>
+//       </div>
+//     </section>
+//   );
+// }
 
 /*
  * ContactSection component - Commented out as not needed
@@ -1403,7 +1351,7 @@ export default function EduHubMockV2() {
           <InstructorsSlider />
           <CourseSearch openCourse={openCourse} />
           <Testimonials />
-          <NewsSection />
+          {/* <NewsSection /> */}
         </>
       )}
       {view === "courseDetail" && courseId && (

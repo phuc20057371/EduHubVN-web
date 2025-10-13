@@ -204,36 +204,27 @@ const AdminLecturerPage = () => {
       if (userProfile.role === "ADMIN") {
         const res = await API.admin.getAllLecturers();
         dispatch(setLecturers(res.data.data));
-        console.log("Refreshed all lecturers for ADMIN", res.data.data.length);
         
-
         const resCreate = await API.admin.getLecturerPendingCreate();
         dispatch(setLecturerPendingCreate(resCreate.data.data));
-        console.log("Refreshed lecturer pending create requests for ADMIN", resCreate.data.data.length);
 
         const resUpdate = await API.admin.getLecturerPendingUpdate();
         dispatch(setLecturerPendingUpdate(resUpdate.data.data));
-        console.log("Refreshed lecturer pending update requests for ADMIN", resUpdate.data.data.length);
 
         const resDegree = await API.admin.getDegreeRequests();
         dispatch(setDegreeRequests(resDegree.data.data));
-        console.log("Refreshed degree requests for ADMIN", resDegree.data.data.length);
 
         const resCert = await API.admin.getCertificationRequests();
         dispatch(setCertificationRequests(resCert.data.data));
-        console.log("Refreshed certification requests for ADMIN", resCert.data.data.length);
 
         const resAttended = await API.admin.getAttendedCourseRequests();
         dispatch(setAttendedCourseRequests(resAttended.data.data));
-        console.log("Refreshed attended course requests for ADMIN", resAttended.data.data.length);
 
         const resOwned = await API.admin.getOwnedCourseRequests();
         dispatch(setOwnedCourseRequests(resOwned.data.data));
-        console.log("Refreshed owned course requests for ADMIN", resOwned.data.data.length);
 
         const resResearchProject = await API.admin.getResearchProjectRequests();
         dispatch(setResearchProjectRequests(resResearchProject.data.data));
-        console.log("Refreshed research project requests for ADMIN", resResearchProject.data.data.length);
       }
     } catch (error) {
       console.error("Error refreshing data:", error);

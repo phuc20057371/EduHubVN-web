@@ -50,7 +50,9 @@ import RegisterLecturer from "../pages/register/RegisterLecturer";
 import RegisterPartner from "../pages/register/RegisterPartner";
 import AdminOnlyRoute from "../utils/AdminOnlyRoute";
 import ProtectedRoute from "../utils/ProtectedRoute";
-import AccountConfig from "../pages/other/AccountConfig";
+import AccountConfigLecturer from "../pages/lecturer/AccountConfigLecturer";
+import AccountConfigInstitution from "../pages/institution/AccountConfigInstitution";
+import AccountConfigPartner from "../pages/partner/AccountConfigPartner";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -109,7 +111,7 @@ export const router = createBrowserRouter(
             element={<LecturerStatisticPage />}
           />
           <Route path="/lecturer/projects" element={<LecturerProjectPage />} />
-          <Route path="/account-config" element={<AccountConfig />} />
+          <Route path="/account-config-lecturer" element={<AccountConfigLecturer />} />
         </Route>
       </Route>
 
@@ -133,6 +135,7 @@ export const router = createBrowserRouter(
             path="/institution/projects"
             element={<InstitutionProjectPage />}
           />
+          <Route path="/account-config-institution" element={<AccountConfigInstitution />} />
         </Route>
       </Route>
 
@@ -144,6 +147,7 @@ export const router = createBrowserRouter(
           <Route path="/partner/courses" element={<PartnerCoursePage />} />
           <Route path="/partner/lecturers" element={<PartnerLecturerPage />} />
           <Route path="/partner/projects" element={<PartnerProjectPage />} />
+          <Route path="/account-config-partner" element={<AccountConfigPartner />} />
         </Route>
       </Route>
 

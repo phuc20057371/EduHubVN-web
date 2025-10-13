@@ -5,29 +5,66 @@ import { useState, useEffect } from "react";
 import Logo from "../assets/Eduhub_logo_new.png";
 import EduHubSpeedDial from "../components/EduHubSpeedDial";
 import Footer from "../components/Footer";
+import IntroductionDialog from "../components/IntroductionDialog";
 import { useColors } from "../hooks/useColors";
+// import { ThemeToggle } from "../components";
 
 const GuestLayout = () => {
   const navigate = useNavigate();
   const colors = useColors();
   const [activeMenu, setActiveMenu] = useState<string>("");
+  const [introDialogOpen, setIntroDialogOpen] = useState(false);
+
+  // Function to get menu button styles
+  const getMenuButtonStyles = (sectionId: string) => ({
+    color: activeMenu === sectionId ? "white" : colors.text.primary,
+    fontWeight: activeMenu === sectionId ? 700 : 600,
+    fontSize: "0.8rem",
+    textTransform: "none",
+    backgroundColor: activeMenu === sectionId ? colors.primary.main : "transparent",
+    borderRadius: "8px",
+    px: 1.2,
+    py: 0.6,
+    transition: "all 0.3s ease",
+    boxShadow: activeMenu === sectionId ? `0 2px 8px ${colors.primary.main}40` : "none",
+    transform: activeMenu === sectionId ? "translateY(-1px)" : "translateY(0)",
+    "&:hover": {
+      backgroundColor: activeMenu === sectionId ? colors.primary.dark : `${colors.primary.main}15`,
+      color: activeMenu === sectionId ? "white" : colors.primary.main,
+      transform: "translateY(-1px)",
+      boxShadow: `0 4px 12px ${colors.primary.main}30`,
+    },
+  });
 
   // Function to scroll to section
   const scrollToSection = (sectionId: string) => {
+    // Set active menu immediately for instant feedback
+    setActiveMenu(sectionId);
+    
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ 
         behavior: 'smooth',
         block: 'start'
       });
-      setActiveMenu(sectionId);
+    } else {
+      // If section doesn't exist, scroll to top for "TRANG CHỦ"
+      if (sectionId === 'trangchu') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
+  };
+
+  // Function to handle intro menu click
+  const handleIntroClick = () => {
+    setIntroDialogOpen(true);
+    setActiveMenu("gioithieu");
   };
 
   // Listen for scroll events to update active menu
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['khoahoc', 'giangvien', 'truonghoc', 'doanhnghiep', 'tintuc', 'lienhe'];
+      const sections = ['trangchu', 'gioithieu', 'giangvien', 'chuongtrinhdaotao', 'detainghiencuu', 'taikhoannguoidung', 'tintucsukien', 'hotro', 'lienhe'];
       const scrollPosition = window.scrollY + 100;
 
       for (const sectionId of sections) {
@@ -69,8 +106,6 @@ const GuestLayout = () => {
       >
         <Box
           sx={{
-            maxWidth: "1440px",
-            margin: "0 auto",
             position: "relative",
             zIndex: 1,
             display: "flex",
@@ -113,131 +148,66 @@ const GuestLayout = () => {
           <Box
             sx={{
               display: { xs: "none", md: "flex" },
-              gap: 3,
+              gap: 1,
               alignItems: "center",
               flex: 1,
               justifyContent: "center",
+              flexWrap: "wrap",
             }}
           >
             <Button
-              onClick={() => scrollToSection("khoahoc")}
-              sx={{
-                color: activeMenu === "khoahoc" ? colors.primary.main : colors.text.primary,
-                fontWeight: activeMenu === "khoahoc" ? 700 : 600,
-                fontSize: "0.95rem",
-                textTransform: "none",
-                backgroundColor: activeMenu === "khoahoc" ? `${colors.primary.main}15` : "transparent",
-                borderRadius: "8px",
-                px: 2,
-                py: 1,
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  backgroundColor: activeMenu === "khoahoc" ? `${colors.primary.main}25` : `${colors.primary.main}10`,
-                  color: colors.primary.main,
-                },
-              }}
+              onClick={() => scrollToSection("trangchu")}
+              sx={getMenuButtonStyles("trangchu")}
             >
-              Khóa học
+              TRANG CHỦ
+            </Button>
+            <Button
+              onClick={handleIntroClick}
+              sx={getMenuButtonStyles("gioithieu")}
+            >
+              GIỚI THIỆU
             </Button>
             <Button
               onClick={() => scrollToSection("giangvien")}
-              sx={{
-                color: activeMenu === "giangvien" ? colors.primary.main : colors.text.primary,
-                fontWeight: activeMenu === "giangvien" ? 700 : 600,
-                fontSize: "0.95rem",
-                textTransform: "none",
-                backgroundColor: activeMenu === "giangvien" ? `${colors.primary.main}15` : "transparent",
-                borderRadius: "8px",
-                px: 2,
-                py: 1,
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  backgroundColor: activeMenu === "giangvien" ? `${colors.primary.main}25` : `${colors.primary.main}10`,
-                  color: colors.primary.main,
-                },
-              }}
+              sx={getMenuButtonStyles("giangvien")}
             >
-              Giảng viên
+              GIẢNG VIÊN
             </Button>
             <Button
-              onClick={() => scrollToSection("truonghoc")}
-              sx={{
-                color: activeMenu === "truonghoc" ? colors.primary.main : colors.text.primary,
-                fontWeight: activeMenu === "truonghoc" ? 700 : 600,
-                fontSize: "0.95rem",
-                textTransform: "none",
-                backgroundColor: activeMenu === "truonghoc" ? `${colors.primary.main}15` : "transparent",
-                borderRadius: "8px",
-                px: 2,
-                py: 1,
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  backgroundColor: activeMenu === "truonghoc" ? `${colors.primary.main}25` : `${colors.primary.main}10`,
-                  color: colors.primary.main,
-                },
-              }}
+              onClick={() => scrollToSection("chuongtrinhdaotao")}
+              sx={getMenuButtonStyles("chuongtrinhdaotao")}
             >
-              Trường học
+              CHƯƠNG TRÌNH ĐÀO TẠO
             </Button>
             <Button
-              onClick={() => scrollToSection("doanhnghiep")}
-              sx={{
-                color: activeMenu === "doanhnghiep" ? colors.primary.main : colors.text.primary,
-                fontWeight: activeMenu === "doanhnghiep" ? 700 : 600,
-                fontSize: "0.95rem",
-                textTransform: "none",
-                backgroundColor: activeMenu === "doanhnghiep" ? `${colors.primary.main}15` : "transparent",
-                borderRadius: "8px",
-                px: 2,
-                py: 1,
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  backgroundColor: activeMenu === "doanhnghiep" ? `${colors.primary.main}25` : `${colors.primary.main}10`,
-                  color: colors.primary.main,
-                },
-              }}
+              onClick={() => scrollToSection("detainghiencuu")}
+              sx={getMenuButtonStyles("detainghiencuu")}
             >
-              Doanh nghiệp
+              ĐỀ TÀI NGHIÊN CỨU
             </Button>
             <Button
-              onClick={() => scrollToSection("tintuc")}
-              sx={{
-                color: activeMenu === "tintuc" ? colors.primary.main : colors.text.primary,
-                fontWeight: activeMenu === "tintuc" ? 700 : 600,
-                fontSize: "0.95rem",
-                textTransform: "none",
-                backgroundColor: activeMenu === "tintuc" ? `${colors.primary.main}15` : "transparent",
-                borderRadius: "8px",
-                px: 2,
-                py: 1,
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  backgroundColor: activeMenu === "tintuc" ? `${colors.primary.main}25` : `${colors.primary.main}10`,
-                  color: colors.primary.main,
-                },
-              }}
+              onClick={() => scrollToSection("taikhoannguoidung")}
+              sx={getMenuButtonStyles("taikhoannguoidung")}
             >
-              Tin tức
+              TÀI KHOẢN NGƯỜI DÙNG
+            </Button>
+            <Button
+              onClick={() => scrollToSection("tintucsukien")}
+              sx={getMenuButtonStyles("tintucsukien")}
+            >
+              TIN TỨC & SỰ KIỆN
+            </Button>
+            <Button
+              onClick={() => scrollToSection("hotro")}
+              sx={getMenuButtonStyles("hotro")}
+            >
+              HỖ TRỢ
             </Button>
             <Button
               onClick={() => scrollToSection("lienhe")}
-              sx={{
-                color: activeMenu === "lienhe" ? colors.primary.main : colors.text.primary,
-                fontWeight: activeMenu === "lienhe" ? 700 : 600,
-                fontSize: "0.95rem",
-                textTransform: "none",
-                backgroundColor: activeMenu === "lienhe" ? `${colors.primary.main}15` : "transparent",
-                borderRadius: "8px",
-                px: 2,
-                py: 1,
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  backgroundColor: activeMenu === "lienhe" ? `${colors.primary.main}25` : `${colors.primary.main}10`,
-                  color: colors.primary.main,
-                },
-              }}
+              sx={getMenuButtonStyles("lienhe")}
             >
-              Liên hệ
+              LIÊN HỆ
             </Button>
           </Box>
 
@@ -348,6 +318,12 @@ const GuestLayout = () => {
 
       {/* EduHub Speed Dial for Guest */}
       <EduHubSpeedDial userRole="partner" />
+
+      {/* Introduction Dialog */}
+      <IntroductionDialog 
+        open={introDialogOpen} 
+        onClose={() => setIntroDialogOpen(false)} 
+      />
     </div>
   );
 };

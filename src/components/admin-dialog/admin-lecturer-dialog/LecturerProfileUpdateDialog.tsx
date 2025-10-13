@@ -259,7 +259,7 @@ const LecturerProfileUpdateDialog = ({
           <Typography variant="h5" fontWeight="bold">
             Quản lý hồ sơ giảng viên
           </Typography>
-          <Typography variant="body2">ID: {lecturer?.id}</Typography>
+          <Typography variant="body2">ID: {lecturer?.lecturerId}</Typography>
         </Box>
 
         <IconButton onClick={onClose}>

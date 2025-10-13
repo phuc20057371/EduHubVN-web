@@ -1,5 +1,8 @@
 export function navigateToRole(user: any, navigate: Function) {
   console.log("Navigating to role:", user);
+  
+  // Set theme to light for all users
+  localStorage.setItem('eduHub-theme', 'light');
 
   if (user.role === "ADMIN" || user.role === "SUB_ADMIN") {
     navigate("/admin");

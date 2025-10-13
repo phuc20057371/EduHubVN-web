@@ -76,9 +76,6 @@ const ApproveLecturerCreateDialog: React.FC<
   } | null>(null);
   const [rejectNote, setRejectNote] = useState("");
   const [loading, setLoading] = useState(false);
-  // Load from localStorage on open
-  // const domain = window.location.hostname;
-  // const BASE_URL = `http://${domain}:8080`;
   useEffect(() => {
     if (!open) return;
     // Lecturer

@@ -334,15 +334,19 @@ export const EduHubThemeProvider: React.FC<EduHubThemeProviderProps> = ({ childr
   const [mode, setMode] = useState<ThemeMode>('light');
 
   // Load theme from localStorage on mount
+  // useEffect(() => {
+  //   const savedTheme = localStorage.getItem('eduHub-theme') as ThemeMode;
+  //   if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+  //     setMode(savedTheme);
+  //   } else {
+  //     // Detect system preference
+  //     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  //     setMode(prefersDark ? 'dark' : 'light');
+  //   }
+  // }, []);
   useEffect(() => {
-    const savedTheme = localStorage.getItem('eduHub-theme') as ThemeMode;
-    if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
-      setMode(savedTheme);
-    } else {
-      // Detect system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setMode(prefersDark ? 'dark' : 'light');
-    }
+    setMode('light');
+    localStorage.setItem('eduHub-theme', 'light');
   }, []);
 
   // Save theme to localStorage when changed

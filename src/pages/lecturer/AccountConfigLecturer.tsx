@@ -1,7 +1,7 @@
 import AccountSettingsComponent from '../../components/AccountSettingsComponent';
 
-const AccountConfig = () => {
+const AccountConfigLecturer = () => {
   return <AccountSettingsComponent />;
 };
 
-export default AccountConfig;
+export default AccountConfigLecturer;
