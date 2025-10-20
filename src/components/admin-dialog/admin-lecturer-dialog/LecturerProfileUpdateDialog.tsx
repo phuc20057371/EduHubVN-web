@@ -67,22 +67,14 @@ const LecturerProfileUpdateDialog = ({
 
   // Permission checks
   const isAdmin = userProfile?.role === "ADMIN";
-  const canCreateLecturer = isAdmin || userProfile?.permissions?.includes("LECTURER_CREATE") || false;
-  const canUpdateLecturer = isAdmin || userProfile?.permissions?.includes("LECTURER_UPDATE") || false;
-  const canApproveLecturer = isAdmin || userProfile?.permissions?.includes("LECTURER_APPROVE") || false;
-  const canDeleteLecturer = isAdmin || userProfile?.permissions?.includes("LECTURER_DELETE") || false;
-
-  // Debug permissions
-  console.log("🔍 Debug Permissions:", {
-    userProfile,
-    role: userProfile?.role,
-    isAdmin,
-    permissions: userProfile?.permissions,
-    canCreateLecturer,
-    canUpdateLecturer,
-    canApproveLecturer,
-    canDeleteLecturer
-  });
+  const canCreateLecturer =
+    isAdmin || userProfile?.permissions?.includes("LECTURER_CREATE") || false;
+  const canUpdateLecturer =
+    isAdmin || userProfile?.permissions?.includes("LECTURER_UPDATE") || false;
+  const canApproveLecturer =
+    isAdmin || userProfile?.permissions?.includes("LECTURER_APPROVE") || false;
+  const canDeleteLecturer =
+    isAdmin || userProfile?.permissions?.includes("LECTURER_DELETE") || false;
 
   // Tab state
   const [tabValue, setTabValue] = useState(0);
@@ -137,59 +129,28 @@ const LecturerProfileUpdateDialog = ({
   };
 
   // Placeholder handlers for future implementation
-  const handleAddDegree = () => {
-    console.log("Add degree");
-  };
+  const handleAddDegree = () => {};
 
-  const handleEditDegree = (degree: any) => {
-    console.log("Edit degree:", degree);
-  };
+  const handleEditDegree = (_degree: any) => {};
 
-  const handleDeleteDegree = (degree: any) => {
-    console.log("Delete degree:", degree);
-  };
+  const handleDeleteDegree = (_degree: any) => {};
 
-  const handleAddCertification = () => {
-    console.log("Add certification");
-  };
+  const handleAddCertification = () => {};
 
-  const handleEditCertification = (certification: any) => {
-    console.log("Edit certification:", certification);
-  };
+  const handleEditCertification = (_certification: any) => {};
 
-  const handleDeleteCertification = (certification: any) => {
-    console.log("Delete certification:", certification);
-  };
+  const handleDeleteCertification = (_certification: any) => {};
 
-  const handleAddOwnedCourse = () => {
-    console.log("Add owned course");
-    // TODO: Implement add owned course dialog
-  };
+  const handleAddOwnedCourse = () => {};
 
-  const handleAddAttendedCourse = () => {
-    console.log("Add attended course");
-    // TODO: Implement add attended course dialog
-  };
+  const handleAddAttendedCourse = () => {};
 
-  const handleEditOwnedCourse = (course: any) => {
-    console.log("Edit owned course:", course);
-    // TODO: Implement edit owned course dialog
-  };
+  const handleEditOwnedCourse = (_course: any) => {};
 
-  const handleEditAttendedCourse = (course: any) => {
-    console.log("Edit attended course:", course);
-    // TODO: Implement edit attended course dialog
-  };
+  const handleEditAttendedCourse = (_course: any) => {};
 
-  const handleDeleteOwnedCourse = async (course: any) => {
-    console.log("Delete owned course:", course);
+  const handleDeleteOwnedCourse = async (_course: any) => {
     try {
-      // TODO: Implement API call to delete owned course
-      // const response = await API.admin.deleteOwnedCourse(course.id);
-      // if (response.data.success) {
-      //   await fetchLecturerData();
-      //   toast.success("Xóa khóa học sở hữu thành công");
-      // }
       toast.info("Chức năng xóa khóa học sở hữu sẽ được triển khai sau");
     } catch (error) {
       console.error("Error deleting owned course:", error);
@@ -197,15 +158,8 @@ const LecturerProfileUpdateDialog = ({
     }
   };
 
-  const handleDeleteAttendedCourse = async (course: any) => {
-    console.log("Delete attended course:", course);
+  const handleDeleteAttendedCourse = async (_course: any) => {
     try {
-      // TODO: Implement API call to delete attended course
-      // const response = await API.admin.deleteAttendedCourse(course.id);
-      // if (response.data.success) {
-      //   await fetchLecturerData();
-      //   toast.success("Xóa khóa học đã tham gia thành công");
-      // }
       toast.info("Chức năng xóa khóa học đã tham gia sẽ được triển khai sau");
     } catch (error) {
       console.error("Error deleting attended course:", error);
@@ -213,25 +167,15 @@ const LecturerProfileUpdateDialog = ({
     }
   };
 
-  const handleAddResearchProject = () => {
-    console.log("Add research project");
-  };
+  const handleAddResearchProject = () => {};
 
-  const handleEditResearchProject = (project: any) => {
-    console.log("Edit research project:", project);
-  };
+  const handleEditResearchProject = (_project: any) => {};
 
-  const handleDeleteResearchProject = (project: any) => {
-    console.log("Delete research project:", project);
-  };
+  const handleDeleteResearchProject = (_project: any) => {};
 
-  const handleApproveResearchProjectUpdate = (projectData: any) => {
-    console.log("Approve research project update:", projectData);
-  };
+  const handleApproveResearchProjectUpdate = (_projectData: any) => {};
 
-  const handleRejectResearchProjectUpdate = (projectData: any) => {
-    console.log("Reject research project update:", projectData);
-  };
+  const handleRejectResearchProjectUpdate = (_projectData: any) => {};
 
   return (
     <Dialog
@@ -320,7 +264,7 @@ const LecturerProfileUpdateDialog = ({
         ) : (
           <>
             <TabPanel value={tabValue} index={0}>
-              <LecturerProfileBasicInfoTab 
+              <LecturerProfileBasicInfoTab
                 onRefreshData={handleRefreshData}
                 canUpdate={canUpdateLecturer}
                 canApproveLecturer={canApproveLecturer}
@@ -340,7 +284,9 @@ const LecturerProfileUpdateDialog = ({
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
               <LecturerProfileCertificationsTab
-                onAddCertification={canCreateLecturer ? handleAddCertification : undefined}
+                onAddCertification={
+                  canCreateLecturer ? handleAddCertification : undefined
+                }
                 onEditCertification={handleEditCertification}
                 onDeleteCertification={handleDeleteCertification}
                 canCreateLecturer={canCreateLecturer}
@@ -351,8 +297,12 @@ const LecturerProfileUpdateDialog = ({
             </TabPanel>
             <TabPanel value={tabValue} index={3}>
               <LecturerProfileCoursesTab
-                onAddOwnedCourse={canCreateLecturer ? handleAddOwnedCourse : undefined}
-                onAddAttendedCourse={canCreateLecturer ? handleAddAttendedCourse : undefined}
+                onAddOwnedCourse={
+                  canCreateLecturer ? handleAddOwnedCourse : undefined
+                }
+                onAddAttendedCourse={
+                  canCreateLecturer ? handleAddAttendedCourse : undefined
+                }
                 onEditOwnedCourse={handleEditOwnedCourse}
                 onEditAttendedCourse={handleEditAttendedCourse}
                 onDeleteOwnedCourse={handleDeleteOwnedCourse}
@@ -365,7 +315,9 @@ const LecturerProfileUpdateDialog = ({
             </TabPanel>
             <TabPanel value={tabValue} index={4}>
               <LecturerProfileResearchProjectsTab
-                onAddResearchProject={canCreateLecturer ? handleAddResearchProject : undefined}
+                onAddResearchProject={
+                  canCreateLecturer ? handleAddResearchProject : undefined
+                }
                 onEditResearchProject={handleEditResearchProject}
                 onDeleteResearchProject={handleDeleteResearchProject}
                 onApproveResearchProjectUpdate={

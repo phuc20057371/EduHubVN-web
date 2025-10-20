@@ -134,7 +134,7 @@ const PartnerLayout = () => {
       description: "Quản lý dự án hợp tác",
     },
     {
-      text: "Khóa học",
+      text: "Yêu cầu đào tạo",
       icon: <MenuBook />,
       path: "/partner/courses",
       description: "Quản lý khóa học hợp tác",

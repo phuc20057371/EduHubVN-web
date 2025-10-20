@@ -37,6 +37,7 @@ import {
   Toolbar,
   Typography,
   alpha,
+
 } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -183,11 +184,18 @@ const AdminLayout = () => {
       },
       // {
       //   text: "Khóa học",
-      //   icon: <AccountBalanceWalletIcon />,
+      //   icon: <Business />,
       //   path: "/admin/courses",
       //   description: "Quản lý khóa học",
       //   permissions: ["COURSE_READ"],
       // },
+      {
+        text: "Quản lí đào tạo",
+        icon: <School />,
+        path: "/admin/training-programs",
+        description: "Quản lý chương trình đào tạo",
+        permissions: ["TRAINING_PROGRAM_READ"],
+      },
     ];
 
     return getAllMenuItems().filter(item => {

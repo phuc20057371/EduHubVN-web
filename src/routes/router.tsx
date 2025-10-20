@@ -53,6 +53,7 @@ import ProtectedRoute from "../utils/ProtectedRoute";
 import AccountConfigLecturer from "../pages/lecturer/AccountConfigLecturer";
 import AccountConfigInstitution from "../pages/institution/AccountConfigInstitution";
 import AccountConfigPartner from "../pages/partner/AccountConfigPartner";
+import AdminTrainingProgram from "../pages/admin/AdminTrainingProgram";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -89,6 +90,7 @@ export const router = createBrowserRouter(
           />
           <Route path="/admin/partners" element={<AdminPartner />} />
           <Route path="/admin/courses" element={<AdminCourse />} />
+          <Route path="/admin/training-programs" element={<AdminTrainingProgram />} />
           
           {/* Protected route for ADMIN role only */}
           <Route element={<AdminOnlyRoute />}>

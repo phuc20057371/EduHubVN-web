@@ -213,8 +213,7 @@ const AddOwnedCourseDialog: React.FC<AddOwnedCourseDialogProps> = ({
   }, [selectedFile]);
 
   const handleSubmit = async () => {
-    console.log(form);
-    
+  
     const isValid = validateCourseForm(form);
     if (!isValid.success) {
       toast.error(isValid.error);

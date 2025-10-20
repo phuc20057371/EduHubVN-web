@@ -103,7 +103,6 @@ const LecturerProfileDegreesTab: React.FC<LecturerProfileDegreesTabProps> = (
     if (response.data.success) {
       dispatch(setLecturerProfileUpdate(response.data.data));
     }
-    console.log("after", lecturerProfileUpdate);
   };
 
   const handleSuccessAddDegree = async () => {

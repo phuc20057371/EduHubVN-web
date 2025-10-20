@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import GuestImage1 from "../../assets/guest1.png";
-import { getAcademicRank, getCourseLevel } from "../../utils/ChangeText";
-import { API } from "../../utils/Fetch";
 import GuestImage2 from "../../assets/guest2.png";
 import LecturerCarousel from "../../components/LecturerCarousel";
+import { setTrainingPrograms2 } from "../../redux/slice/TrainingProgramSlice2";
+import { getAcademicRank } from "../../utils/ChangeText";
+import { API } from "../../utils/Fetch";
 
 // Mock data fallback — use API data when available
 const mockInstructors = [
@@ -147,62 +149,6 @@ const mockCourses = [
   },
 ];
 
-// Custom hook để lấy dữ liệu khóa học từ API
-function useCourses() {
-  const [courses, setCourses] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await API.public.getAllCourses();
-        console.log("✅ API Response:", response);
-
-        // Xử lý response theo cấu trúc thực tế
-        let coursesData = [];
-
-        if (response.data) {
-          if (Array.isArray(response.data)) {
-            coursesData = response.data;
-          } else if (response.data.data && Array.isArray(response.data.data)) {
-            coursesData = response.data.data;
-          } else if (
-            response.data.courses &&
-            Array.isArray(response.data.courses)
-          ) {
-            coursesData = response.data.courses;
-          } else {
-            console.warn("⚠️ Cấu trúc response không mong đợi:", response.data);
-            coursesData = [];
-          }
-        }
-
-        console.log("📊 Courses data:", coursesData);
-
-        if (coursesData.length > 0) {
-          setCourses(coursesData);
-        } else {
-          console.warn("⚠️ Không có khóa học từ API, sử dụng mock data");
-          // Fallback to mock data nếu API không trả về gì
-          setCourses(mockCourses);
-        }
-      } catch (err: any) {
-        console.error("❌ Lỗi khi lấy dữ liệu khóa học:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCourses();
-  }, []);
-
-  return { courses, loading, error };
-}
-
 // Custom hook để lấy dữ liệu top 7 giảng viên từ API
 function useTopLecturers() {
   const [lecturers, setLecturers] = useState<any[]>([]);
@@ -265,7 +211,7 @@ function useTopLecturers() {
 function Hero({ onOpenRegister }: { onOpenRegister: () => void }) {
   const navigate = useNavigate();
   return (
-    <section className="relative font-sans text-white overflow-hidden">
+    <section className="relative overflow-hidden font-sans text-white">
       {/* Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#00b2ff] via-[#00b2ff] to-white/50"></div>
       <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 md:grid-cols-2 md:py-24 lg:px-8">
@@ -373,10 +319,8 @@ function WhyChooseSection() {
                   whileHover={{ scale: 1.02 }}
                   className="cursor-pointer rounded-xl border-2 border-blue-200 bg-blue-50 p-6 transition-all hover:border-blue-300"
                 >
-                  <h3 className="mb-3 font-semibold">
-                    Đề tài đa dạng
-                  </h3>
-                  <p className="text-sm leading-relaxed ">
+                  <h3 className="mb-3 font-semibold">Đề tài đa dạng</h3>
+                  <p className="text-sm leading-relaxed">
                     Kết nối với hàng nghìn giảng viên có kinh nghiệm và chuyên
                     môn cao
                   </p>
@@ -386,10 +330,8 @@ function WhyChooseSection() {
                   whileHover={{ scale: 1.02 }}
                   className="cursor-pointer rounded-xl border-2 border-blue-200 bg-blue-50 p-6 transition-all hover:border-blue-300"
                 >
-                  <h3 className="mb-3 font-semibold">
-                    Trường & Trung tâm
-                  </h3>
-                  <p className="text-sm leading-relaxed ">
+                  <h3 className="mb-3 font-semibold">Trường & Trung tâm</h3>
+                  <p className="text-sm leading-relaxed">
                     Kết nối với hàng nghìn giảng viên có kinh nghiệm và chuyên
                     môn cao
                   </p>
@@ -400,10 +342,8 @@ function WhyChooseSection() {
                 whileHover={{ scale: 1.02 }}
                 className="cursor-pointer rounded-xl border-2 border-blue-200 bg-blue-50 p-6 transition-all hover:border-blue-300"
               >
-                <h3 className="mb-3 font-semibold">
-                  Giảng viên chuyên nghiệp
-                </h3>
-                <p className="text-sm leading-relaxed ">
+                <h3 className="mb-3 font-semibold">Giảng viên chuyên nghiệp</h3>
+                <p className="text-sm leading-relaxed">
                   Kết nối với hàng nghìn giảng viên có kinh nghiệm và chuyên môn
                   cao
                 </p>
@@ -613,116 +553,127 @@ function InstructorsSlider() {
   const { lecturers, loading } = useTopLecturers();
 
   // Transform API data to match the new component format
-  const transformedLecturers = lecturers.map(lecturer => ({
+  const transformedLecturers = lecturers.map((lecturer) => ({
     ...lecturer,
-    field: lecturer.field || ['ART', 'SOFT SKILL', 'CEH', 'DATA', 'BUSINESS'][Math.floor(Math.random() * 5)],
-    specialization: lecturer.specialization || "Lĩnh Vực/ Chuyên Ngành"
+    field:
+      lecturer.field ||
+      ["ART", "SOFT SKILL", "CEH", "DATA", "BUSINESS"][
+        Math.floor(Math.random() * 5)
+      ],
+    specialization: lecturer.specialization || "Lĩnh Vực/ Chuyên Ngành",
   }));
 
   return (
     <section id="giangvien">
-      <LecturerCarousel 
-        lecturers={transformedLecturers} 
-        loading={loading} 
-      />
+      <LecturerCarousel lecturers={transformedLecturers} loading={loading} />
     </section>
   );
 }
 
-function CourseSearch({ openCourse }: { openCourse: (id: number) => void }) {
+function CourseSearch({
+  openCourse,
+  trainingPrograms,
+  loading,
+  error,
+}: {
+  openCourse: (id: string) => void;
+  trainingPrograms: any[];
+  loading: boolean;
+  error: string | null;
+}) {
   const [q, setQ] = useState("");
-  const { courses, loading, error } = useCourses();
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const filtered = useMemo(
-    () => {
-      // Lọc khóa học đã xuất bản
-      const publishedCourses = courses.filter((c) => c.published === true);
-      
-      // Nếu không có query tìm kiếm, hiển thị ngẫu nhiên 3 khóa học
-      if (!q || q.trim() === "") {
-        // Tạo bản sao để không ảnh hưởng đến mảng gốc
-        const shuffled = [...publishedCourses].sort(() => Math.random() - 0.5);
+  // Lấy tất cả tags unique từ training programs
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    trainingPrograms.forEach((program) => {
+      if (program.tags && Array.isArray(program.tags)) {
+        program.tags.forEach((tag: string) => tags.add(tag));
+      }
+    });
+    return Array.from(tags).sort();
+  }, [trainingPrograms]);
+
+  const filtered = useMemo(() => {
+    // Lọc chương trình đào tạo đã được publish
+    let filteredPrograms = trainingPrograms.filter(
+      (p) => p.programStatus === "PUBLISHED",
+    );
+
+    // Lọc theo selected tags
+    if (selectedTags.length > 0) {
+      filteredPrograms = filteredPrograms.filter((p) => {
+        if (!p.tags || !Array.isArray(p.tags)) return false;
+        return selectedTags.some((tag) => p.tags.includes(tag));
+      });
+    }
+
+    // Nếu không có query tìm kiếm, hiển thị ngẫu nhiên 3 chương trình (hoặc tất cả nếu có filter tags)
+    if (!q || q.trim() === "") {
+      if (selectedTags.length > 0) {
+        // Nếu có filter tags, hiển thị tất cả kết quả
+        return filteredPrograms;
+      } else {
+        // Nếu không có filter, hiển thị ngẫu nhiên 3 chương trình
+        const shuffled = [...filteredPrograms].sort(() => Math.random() - 0.5);
         return shuffled.slice(0, 3);
       }
+    }
 
-      // Nếu có query tìm kiếm, hiển thị tất cả khóa học phù hợp
-      return publishedCourses.filter((c) => {
+    // Nếu có query tìm kiếm, hiển thị tất cả chương trình phù hợp
+    return filteredPrograms.filter((p) => {
+      const searchTerm = q.toLowerCase().trim();
 
-        const searchTerm = q.toLowerCase().trim();
-        
-        // Tìm trong tất cả các trường text của khóa học
-        const searchableFields = [
-          c.publicTitle || "",
-          c.introduce || "",
-          c.publicDescription || "",
-          c.address || "",
-          getCourseLevel(c.level) || "",
-        ];
+      // Tìm trong tất cả các trường text của chương trình đào tạo
+      const searchableFields = [
+        p.title || "",
+        p.subTitle || "",
+        p.shortDescription || "",
+        p.description || "",
+        p.targetAudience || "",
+        p.requirements || "",
+        p.programMode || "",
+        p.programType || "",
+      ];
 
-        // Thêm giá vào search (convert to string)
-        if (c.price) {
-          searchableFields.push(c.price.toString());
-          searchableFields.push(c.price.toLocaleString("vi-VN"));
-        }
+      // Thêm giá vào search (convert to string)
+      if (p.publicPrice) {
+        searchableFields.push(p.publicPrice.toString());
+        searchableFields.push(p.publicPrice.toLocaleString("vi-VN"));
+      }
 
-        // Tìm trong knowledge array
-        if (c.knowledge && Array.isArray(c.knowledge)) {
-          searchableFields.push(...c.knowledge);
-        }
+      // Thêm tags vào search
+      if (p.tags && Array.isArray(p.tags)) {
+        searchableFields.push(...p.tags);
+      }
 
-        // Tìm trong requirements array
-        if (c.requirements && Array.isArray(c.requirements)) {
-          searchableFields.push(...c.requirements);
-        }
+      // Tìm kiếm fuzzy: kiểm tra từng từ trong query
+      const searchWords = searchTerm
+        .split(" ")
+        .filter((word) => word.length > 0);
 
-        // Tìm trong courseModules (title, description, lecturer info)
-        if (c.courseModules && Array.isArray(c.courseModules)) {
-          c.courseModules.forEach((module: any) => {
-            // Module title và description
-            if (module.title) searchableFields.push(module.title);
-            if (module.description) searchableFields.push(module.description);
-
-            // Thông tin giảng viên trong module
-            if (module.lecturer) {
-              const lecturer = module.lecturer;
-              if (lecturer.fullName) searchableFields.push(lecturer.fullName);
-              if (lecturer.academicRank)
-                searchableFields.push(lecturer.academicRank);
-              if (lecturer.specialization)
-                searchableFields.push(lecturer.specialization);
-              if (lecturer.jobField) searchableFields.push(lecturer.jobField);
-              if (lecturer.bio) searchableFields.push(lecturer.bio);
-            }
-          });
-        }
-
-        // Tìm kiếm fuzzy: kiểm tra từng từ trong query
-        const searchWords = searchTerm
-          .split(" ")
-          .filter((word) => word.length > 0);
-
-        // Kiểm tra xem có trường nào chứa search term không
-        return searchableFields.some((field) => {
-          const fieldLower = field.toLowerCase();
-          // Nếu tìm thấy toàn bộ query
-          if (fieldLower.includes(searchTerm)) return true;
-          // Hoặc tìm thấy tất cả các từ trong query
-          return searchWords.every((word) => fieldLower.includes(word));
-        });
+      // Kiểm tra xem có trường nào chứa search term không
+      return searchableFields.some((field) => {
+        const fieldLower = field.toLowerCase();
+        // Nếu tìm thấy toàn bộ query
+        if (fieldLower.includes(searchTerm)) return true;
+        // Hoặc tìm thấy tất cả các từ trong query
+        return searchWords.every((word) => fieldLower.includes(word));
       });
-    },
-    [courses, q],
-  );
+    });
+  }, [trainingPrograms, q, selectedTags]);
+
   // Loading state
   if (loading) {
     return (
       <section
         id="khoahoc"
-        className="bg-gradient-to-b from-white to-indigo-50 py-16 font-sans"
+        className="bg-gradient-to-b from-white via-[#2596be]/10 to-[#2596be]/80 py-16 font-sans"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="text-center text-2xl font-extrabold text-gray-900 md:text-3xl">
-            Khóa học nổi bật
+            Chương trình đào tạo nổi bật
           </h2>
           <div className="mt-8 flex justify-center">
             <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-indigo-600"></div>
@@ -737,11 +688,11 @@ function CourseSearch({ openCourse }: { openCourse: (id: number) => void }) {
     return (
       <section
         id="khoahoc"
-        className="bg-gradient-to-b from-white to-indigo-50 py-16 font-sans"
+        className="bg-gradient-to-b from-white via-[#2596be]/10 to-[#2596be]/80 py-16 font-sans"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="text-center text-2xl font-extrabold text-gray-900 md:text-3xl">
-            Khóa học nổi bật
+            Chương trình đào tạo nổi bật
           </h2>
           <div className="mt-8 text-center text-red-600">
             <p>{error}</p>
@@ -764,16 +715,18 @@ function CourseSearch({ openCourse }: { openCourse: (id: number) => void }) {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h2 className="text-center text-2xl font-extrabold text-gray-900 md:text-3xl">
-          {q && q.trim() ? `Tìm thấy ${filtered.length} khóa học` : "Khóa học nổi bật"}
+          {(q && q.trim()) || selectedTags.length > 0
+            ? `Tìm thấy ${filtered.length} chương trình đào tạo`
+            : "Chương trình đào tạo nổi bật"}
         </h2>
-      
+
         <div className="mt-8">
           {/* Search Input */}
           <div className="relative">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Tìm kiếm khóa học, giảng viên, chủ đề..."
+              placeholder="Tìm kiếm chương trình đào tạo, chủ đề..."
               className="h-12 w-full rounded-full border-2 border-gray-200 pl-4 pr-12 text-base text-gray-700 focus:border-blue-500 focus:outline-none"
             />
             <button className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 transform items-center justify-center rounded-full bg-blue-600">
@@ -792,49 +745,106 @@ function CourseSearch({ openCourse }: { openCourse: (id: number) => void }) {
               </svg>
             </button>
           </div>
+
+          {/* Tags Filter */}
+          {allTags.length > 0 && (
+            <div className="mt-4">
+              <div className="flex flex-wrap gap-2">
+                {allTags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => {
+                      if (selectedTags.includes(tag)) {
+                        setSelectedTags(selectedTags.filter((t) => t !== tag));
+                      } else {
+                        setSelectedTags([...selectedTags, tag]);
+                      }
+                    }}
+                    className={`rounded border px-3 py-1 text-sm font-medium transition-colors ${
+                      selectedTags.includes(tag)
+                        ? "border-blue-600 bg-blue-600 text-white"
+                        : "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                ))}
+                {/* {selectedTags.length > 0 && (
+                  <button
+                    onClick={() => setSelectedTags([])}
+                    className="rounded border border-red-300 bg-white px-3 py-1 text-sm font-medium text-red-600 hover:border-red-400 hover:bg-red-50"
+                  >
+                    ✕ Xóa tất cả
+                  </button>
+                )} */}
+              </div>
+            </div>
+          )}
         </div>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {filtered.length === 0 ? (
             <div className="col-span-3 py-8 text-center text-gray-500">
-              Không tìm thấy khóa học nào phù hợp
+              Không tìm thấy chương trình đào tạo nào phù hợp
             </div>
           ) : (
-            filtered.map((c) => (
+            filtered.map((program) => (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                key={c.id}
+                key={program.id}
                 className="overflow-hidden rounded-2xl bg-white shadow"
               >
                 <img
                   src={
-                    c.thumbnailUrl ||
-                    c.banner ||
-                    "https://via.placeholder.com/400x225"
+                    program.bannerUrl || "https://via.placeholder.com/400x225"
                   }
-                  alt={c.publicTitle || c.name}
+                  alt={program.title}
                   className="aspect-video w-full object-cover"
                 />
                 <div className="p-4">
                   <div className="line-clamp-2 text-lg font-semibold leading-tight">
-                    {c.publicTitle || c.name}
+                    {program.title}
                   </div>
-                  <div className="mt-1 text-sm text-gray-600">
-                    {c.courseModules?.length || 0} bài giảng •{" "}
-                    {getCourseLevel(c.level) || "Chưa xác định"}
+                  <div className="mt-2 line-clamp-2 text-sm text-gray-600">
+                    {program.shortDescription ||
+                      "Mô tả chương trình đào tạo..."}
+                  </div>
+                  <div className="mt-2 flex items-center gap-2">
+                    {program.rating && (
+                      <div className="flex items-center text-amber-500">
+                        <span className="text-sm">★</span>
+                        <span className="ml-1 text-sm font-medium">
+                          {program.rating.toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="text-sm text-gray-500">
+                      {program.durationHours
+                        ? `${program.durationHours} giờ`
+                        : ""}
+                      {program.durationSessions
+                        ? ` • ${program.durationSessions} buổi`
+                        : ""}
+                    </div>
                   </div>
                   <div className="mt-2 font-bold text-indigo-700">
-                    {c.price
-                      ? c.price.toLocaleString("vi-VN") + " đ"
+                    {program.publicPrice && program.priceVisible
+                      ? program.publicPrice.toLocaleString("vi-VN") + " đ"
                       : "Liên hệ"}
                   </div>
                   <div className="mt-4 flex items-center justify-between">
                     <button className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white">
-                      Đăng ký khóa học
+                      Đăng ký chương trình
                     </button>
                     <button
-                      onClick={() => openCourse(c.id)}
+                      onClick={() => {
+                        if (program.id && program.id.trim()) {
+                          openCourse(program.id);
+                        } else {
+                          console.error("Invalid program ID:", program.id);
+                        }
+                      }}
                       className="rounded-xl border px-4 py-2 text-sm"
                     >
                       Xem thêm
@@ -901,140 +911,71 @@ function Testimonials() {
   );
 }
 
-// function NewsSection() {
-//   const newsItems = [
-//     {
-//       id: 1,
-//       title: "EduHubVN ra mắt tính năng kết nối AI mới",
-//       date: "15/12/2024",
-//       excerpt:
-//         "Nền tảng giáo dục EduHubVN vừa ra mắt tính năng kết nối AI giúp tối ưu hóa việc tìm kiếm giảng viên và khóa học phù hợp.",
-//       image:
-//         "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=250&fit=crop",
-//     },
-//     {
-//       id: 2,
-//       title: "Hội thảo 'Tương lai giáo dục số' tại Hà Nội",
-//       date: "10/12/2024",
-//       excerpt:
-//         "Hội thảo quy tụ hơn 200 chuyên gia giáo dục và công nghệ để thảo luận về xu hướng giáo dục số trong tương lai.",
-//       image:
-//         "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop",
-//     },
-//     {
-//       id: 3,
-//       title: "EduHubVN hợp tác với 50 trường đại học",
-//       date: "05/12/2024",
-//       excerpt:
-//         "Nền tảng EduHubVN vừa ký kết hợp tác chiến lược với 50 trường đại học hàng đầu Việt Nam.",
-//       image:
-//         "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=250&fit=crop",
-//     },
-//   ];
-
-//   return (
-//     <section id="tintuc" className="bg-white py-16 font-sans">
-//       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-//         <h2 className="text-center text-2xl font-extrabold text-gray-900 md:text-3xl">
-//           Tin tức & Sự kiện
-//         </h2>
-//         <div className="mt-8 grid gap-6 md:grid-cols-3">
-//           {newsItems.map((item) => (
-//             <motion.div
-//               key={item.id}
-//               initial={{ opacity: 0, y: 20 }}
-//               whileInView={{ opacity: 1, y: 0 }}
-//               viewport={{ once: true }}
-//               className="overflow-hidden rounded-2xl bg-white shadow-lg transition-shadow hover:shadow-xl"
-//             >
-//               <img
-//                 src={item.image}
-//                 alt={item.title}
-//                 className="aspect-video w-full object-cover"
-//               />
-//               <div className="p-6">
-//                 <div className="mb-2 text-sm text-gray-500">{item.date}</div>
-//                 <h3 className="mb-3 line-clamp-2 text-lg font-semibold text-gray-900">
-//                   {item.title}
-//                 </h3>
-//                 <p className="text-sm leading-relaxed text-gray-600">
-//                   {item.excerpt}
-//                 </p>
-//                 <button className="mt-4 text-sm font-semibold  hover:text-blue-800">
-//                   Đọc thêm →
-//                 </button>
-//               </div>
-//             </motion.div>
-//           ))}
-//         </div>
-//       </div>
-//     </section>
-//   );
-// }
-
-/*
- * ContactSection component - Commented out as not needed
- * This section provides contact information including address, phone, email, and working hours
- * Uses gradient background and animated cards with icons
- */
-
-// Custom hook để lấy chi tiết khóa học từ danh sách đã có
-function useCourseDetail(courseId: number, courses: any[]) {
-  const [course, setCourse] = useState<any>(null);
+// Custom hook để lấy chi tiết training program từ danh sách đã có
+function useTrainingProgramDetail(programId: string, trainingPrograms: any[]) {
+  const [program, setProgram] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const findCourseDetail = () => {
+    const findProgramDetail = () => {
       try {
         setLoading(true);
         setError(null);
 
+        // Kiểm tra programId hợp lệ
+        if (!programId || !programId.trim()) {
+          console.error("❌ Invalid program ID:", programId);
+          setError("ID chương trình đào tạo không hợp lệ");
+          return;
+        }
+
         console.log(
-          "🔍 Finding course detail for ID:",
-          courseId,
-          "in courses:",
-          courses.length,
+          "🔍 Finding training program detail for ID:",
+          programId,
+          "in programs:",
+          trainingPrograms.length,
         );
 
-        // Tìm khóa học trong danh sách đã có
-        const foundCourse = courses.find((c) => c.id === courseId);
+        // Tìm training program trong danh sách đã có (so sánh string)
+        const foundProgram = trainingPrograms.find(
+          (p) => p.id === programId,
+        );
 
-        if (foundCourse) {
-          console.log(
-            "✅ Found course:",
-            foundCourse.publicTitle || foundCourse.name,
-          );
-          setCourse(foundCourse);
+        if (foundProgram) {
+          console.log("✅ Found training program:", foundProgram.title);
+          setProgram(foundProgram);
         } else {
           console.warn(
-            "⚠️ Không tìm thấy khóa học trong danh sách, sử dụng mock data",
+            "⚠️ Không tìm thấy chương trình đào tạo trong danh sách, sử dụng mock data",
           );
-          // Fallback to mock data nếu không tìm thấy
-          const mockCourse =
-            mockCourses.find((c) => c.id === courseId) || mockCourses[0];
-          setCourse(mockCourse);
+          // Fallback to mock data nếu không tìm thấy (tạm thời dùng mock course đầu tiên)
+          const mockCourse = mockCourses[0];
+          setProgram(mockCourse);
         }
       } catch (err: any) {
-        console.error("❌ Lỗi khi tìm khóa học:", err);
-        setError("Không thể tìm thấy khóa học");
+        console.error("❌ Lỗi khi tìm chương trình đào tạo:", err);
+        setError("Không thể tìm thấy chương trình đào tạo");
       } finally {
         setLoading(false);
       }
     };
 
-    if (courseId && courses.length > 0) {
-      findCourseDetail();
+    if (programId && trainingPrograms.length > 0) {
+      findProgramDetail();
     }
-  }, [courseId, courses]);
+  }, [programId, trainingPrograms]);
 
-  return { course, loading, error };
+  return { program, loading, error };
 }
 
 // ------------ New Pages ------------
-function CourseDetail({ id, back }: { id: number; back: () => void }) {
-  const { courses } = useCourses();
-  const { course, loading, error } = useCourseDetail(id, courses);
+function CourseDetail({ id, back }: { id: string; back: () => void }) {
+  const trainingPrograms = useSelector((state: any) => state.trainingProgram2);
+  const { program, loading, error } = useTrainingProgramDetail(
+    id,
+    trainingPrograms,
+  );
 
   if (loading) {
     return (
@@ -1056,7 +997,7 @@ function CourseDetail({ id, back }: { id: number; back: () => void }) {
     );
   }
 
-  if (error || !course) {
+  if (error || !program) {
     return (
       <main className="font-sans">
         <section className="bg-gradient-to-br from-indigo-700 to-sky-500 text-white">
@@ -1068,7 +1009,7 @@ function CourseDetail({ id, back }: { id: number; back: () => void }) {
               ← Quay lại
             </button>
             <div className="mt-6 text-center text-red-600">
-              <p>{error || "Không tìm thấy khóa học"}</p>
+              <p>{error || "Không tìm thấy chương trình đào tạo"}</p>
               <button
                 onClick={back}
                 className="mt-4 rounded-xl bg-white/20 px-4 py-2 text-white hover:bg-white/30"
@@ -1094,40 +1035,38 @@ function CourseDetail({ id, back }: { id: number; back: () => void }) {
           </button>
           <div className="mt-6 grid items-center gap-8 md:grid-cols-2">
             <img
-              src={course.thumbnailUrl || "https://via.placeholder.com/400x225"}
-              alt={course.publicTitle}
+              src={program.bannerUrl || "https://via.placeholder.com/400x225"}
+              alt={program.title}
               className="w-full rounded-2xl shadow-lg"
             />
             <div>
-              <h1 className="text-3xl font-extrabold">{course.publicTitle}</h1>
+              <h1 className="text-3xl font-extrabold">
+                {program.title || "Chương trình đào tạo"}
+              </h1>
               <p className="mt-3 text-white/90">
-                {course.publicDescription || course.introduce}
+                {program.shortDescription || program.description || "Mô tả chương trình đào tạo"}
               </p>
               <div className="mt-4 flex flex-wrap gap-3 text-sm">
                 <span className="rounded-full border border-white/30 bg-white/15 px-3 py-1">
-                  Mức: {getCourseLevel(course.level)}
+                  Thời lượng: {program.durationHours || 0} giờ
                 </span>
                 <span className="rounded-full border border-white/30 bg-white/15 px-3 py-1">
-                  Thời lượng:{" "}
-                  {course.courseModules?.reduce(
-                    (total: number, module: any) =>
-                      total + (module.duration || 0),
-                    0,
-                  ) || 0}{" "}
-                  giờ
+                  Buổi học: {program.durationSessions || 0} buổi
                 </span>
-                <span className="rounded-full border border-white/30 bg-white/15 px-3 py-1">
-                  Bài giảng: {course.courseModules?.length || 0}
-                </span>
+                {program.rating && (
+                  <span className="rounded-full border border-white/30 bg-white/15 px-3 py-1">
+                    ⭐ {program.rating.toFixed(2)}
+                  </span>
+                )}
               </div>
               <div className="mt-6 flex items-center gap-4">
                 <div className="text-2xl font-extrabold">
-                  {course.price
-                    ? course.price.toLocaleString("vi-VN") + " đ"
+                  {program.publicPrice && program.priceVisible
+                    ? program.publicPrice.toLocaleString("vi-VN") + " đ"
                     : "Liên hệ"}
                 </div>
                 <button className="h-11 rounded-xl bg-amber-500 px-5 font-semibold text-white">
-                  Đăng ký khóa học
+                  Đăng ký chương trình
                 </button>
               </div>
             </div>
@@ -1138,88 +1077,214 @@ function CourseDetail({ id, back }: { id: number; back: () => void }) {
       <section className="py-12">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 md:grid-cols-3 lg:px-8">
           <div className="md:col-span-2">
-            <h2 className="text-xl font-bold">Nội dung chi tiết</h2>
-            <ul className="mt-4 space-y-3 text-sm">
-              {course.courseModules && course.courseModules.length > 0 ? (
-                course.courseModules.map((module: any, index: number) => (
-                  <li
-                    key={module.id || index}
-                    className="rounded-xl border bg-white p-3 shadow"
-                  >
-                    <div className="font-semibold">{module.title}</div>
-                    <div className="mt-1 text-gray-600">
-                      {module.description}
-                    </div>
-                    <div className="mt-1 text-xs text-gray-500">
-                      Thời lượng: {module.duration} giờ
-                    </div>
-                  </li>
-                ))
-              ) : (
-                <>
-                  <li className="rounded-xl border bg-white p-3 shadow">
-                    Buổi 1–3: Tổng quan & kỹ năng nền tảng
-                  </li>
-                  <li className="rounded-xl border bg-white p-3 shadow">
-                    Buổi 4–8: Các tính năng nâng cao / bài tập thực chiến
-                  </li>
-                  <li className="rounded-xl border bg-white p-3 shadow">
-                    Buổi 9–12: Case study & dự án mini
-                  </li>
-                </>
-              )}
-            </ul>
+            <h2 className="text-xl font-bold">Danh sách bài học</h2>
+
+            {/* Danh sách units từ training program */}
+            {program.units && program.units.length > 0 ? (
+              <ul className="mt-4 space-y-3 text-sm">
+                {program.units
+                  .slice() // tạo bản sao để tránh mutate dữ liệu gốc
+                  .sort((a: any, b: any) => a.orderSection - b.orderSection)
+                  .map((unit: any, index: number) => (
+                    <li
+                      key={unit.id || index}
+                      className="rounded-xl border bg-white p-3 shadow"
+                    >
+                      <div className="font-semibold">
+                        {unit.orderSection}.{" "}
+                        {unit.title || unit.name || `Bài học ${index + 1}`}
+                      </div>
+                      {unit.description && (
+                        <div className="mt-1 text-gray-600">
+                          {unit.description}
+                        </div>
+                      )}
+                      <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                        {unit.durationHours && (
+                          <span className="rounded bg-blue-50 px-2 py-1 text-blue-700">
+                            ⏱️ {unit.durationHours} giờ
+                          </span>
+                        )}
+                        {unit.lecturer && (
+                          <span className="rounded bg-green-50 px-2 py-1 text-green-700">
+                            👨‍🏫 {unit.lecturer.fullName}
+                          </span>
+                        )}
+                        {unit.isLead && (
+                          <span className="rounded bg-amber-50 px-2 py-1 text-amber-700">
+                            ⭐ Bài học chính
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+              </ul>
+            ) : (
+              /* Fallback content nếu không có units */
+              <ul className="mt-4 space-y-3 text-sm">
+                <li className="rounded-xl border bg-white p-3 shadow">
+                  <div className="font-semibold">
+                    Bài 1: Giới thiệu tổng quan
+                  </div>
+                  <div className="mt-1 text-gray-600">
+                    Tìm hiểu về nền tảng và kiến thức cơ bản
+                  </div>
+                </li>
+                <li className="rounded-xl border bg-white p-3 shadow">
+                  <div className="font-semibold">
+                    Bài 2: Thực hành và ứng dụng
+                  </div>
+                  <div className="mt-1 text-gray-600">
+                    Áp dụng kiến thức vào các bài tập thực tế
+                  </div>
+                </li>
+                <li className="rounded-xl border bg-white p-3 shadow">
+                  <div className="font-semibold">Bài 3: Dự án cuối khóa</div>
+                  <div className="mt-1 text-gray-600">
+                    Hoàn thành dự án tổng hợp để đánh giá năng lực
+                  </div>
+                </li>
+              </ul>
+            )}
+
+            {/* Mô tả chi tiết - di chuyển xuống dưới */}
+            {program.description && (
+              <div className="mt-8">
+                <h3 className="mb-2 text-lg font-semibold">
+                  Mô tả chương trình
+                </h3>
+                <div className="whitespace-pre-line leading-relaxed text-gray-700">
+                  {program.description}
+                </div>
+              </div>
+            )}
+
+            {/* Nội dung đào tạo */}
+            {program.content && (
+              <div className="mt-6">
+                <h3 className="mb-2 text-lg font-semibold">Nội dung đào tạo</h3>
+                <div className="whitespace-pre-line leading-relaxed text-gray-700">
+                  {program.content}
+                </div>
+              </div>
+            )}
+
+            {/* Chuẩn đầu ra */}
+            {program.learningOutcomes && (
+              <div className="mt-6">
+                <h3 className="mb-2 text-lg font-semibold">Chuẩn đầu ra</h3>
+                <div className="whitespace-pre-line leading-relaxed text-gray-700">
+                  {program.learningOutcomes}
+                </div>
+              </div>
+            )}
           </div>
+
           <aside>
-            {/* <h3 className="text-xl font-bold">Thông tin khóa học</h3>
-            <ul className="mt-4 list-disc pl-5 text-sm text-gray-700 space-y-1">
-              <li>Địa chỉ: {course.address || 'Online'}</li>
-              <li>Loại hình: {course.isOnline ? 'Online' : 'Offline'}</li>
-              <li>Trạng thái: {course.published ? 'Đã xuất bản' : 'Chưa xuất bản'}</li>
-            </ul> */}
+            {/* Thông tin chương trình */}
+            <div className="rounded-xl border bg-gray-50 p-4">
+              <h3 className="mb-4 text-xl font-bold">Thông tin chương trình</h3>
+              <ul className="space-y-2 text-sm text-gray-700">
+                {program.programMode && (
+                  <li>
+                    <strong>Hình thức:</strong> {program.programMode}
+                  </li>
+                )}
 
-            {course.knowledge && course.knowledge.length > 0 && (
-              <div className="mt-8">
-                <h3 className="text-xl font-bold">Kiến thức đạt được</h3>
-                <ul className="mt-4 list-disc space-y-1 pl-5 text-sm text-gray-700">
-                  {course.knowledge.map((item: string, index: number) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
+                {program.startDate && (
+                  <li>
+                    <strong>Ngày bắt đầu:</strong> {new Date(program.startDate).toLocaleDateString("vi-VN")}
+                  </li>
+                )}
+
+                {program.endDate && (
+                  <li>
+                    <strong>Ngày kết thúc:</strong> {new Date(program.endDate).toLocaleDateString("vi-VN")}
+                  </li>
+                )}
+
+                {program.durationHours && (
+                  <li>
+                    <strong>Thời lượng:</strong> {program.durationHours} giờ
+                  </li>
+                )}
+                {program.durationSessions && (
+                  <li>
+                    <strong>Số buổi học:</strong> {program.durationSessions}{" "}
+                    buổi
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            {/* Đối tượng tham gia */}
+            {program.targetAudience && (
+              <div className="mt-6">
+                <h3 className="text-xl font-bold">Đối tượng tham gia</h3>
+                <div className="mt-4 whitespace-pre-line text-sm leading-relaxed text-gray-700">
+                  {program.targetAudience}
+                </div>
               </div>
             )}
 
-            {course.requirements && course.requirements.length > 0 && (
-              <div className="mt-8">
-                <h3 className="text-xl font-bold">Yêu cầu đầu vào</h3>
-                <ul className="mt-4 list-disc space-y-1 pl-5 text-sm text-gray-700">
-                  {course.requirements.map((item: string, index: number) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
+            {/* Yêu cầu */}
+            {program.requirements && (
+              <div className="mt-6">
+                <h3 className="text-xl font-bold">Yêu cầu</h3>
+                <div className="mt-4 whitespace-pre-line text-sm leading-relaxed text-gray-700">
+                  {program.requirements}
+                </div>
               </div>
             )}
-            {course.courseModules && course.courseModules.length > 0 && (
-              <>
-                <h3 className="mt-8 text-xl font-bold">Giảng viên</h3>
+
+            {/* Giảng viên */}
+            {program.units && program.units.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-xl font-bold">Giảng viên</h3>
                 <div className="mt-4 space-y-3">
                   {(() => {
-                    // Lọc các giảng viên không trùng lặp dựa trên id
-                    const uniqueLecturers = course.courseModules
-                      .filter((module: any) => module.lecturer)
-                      .map((module: any) => module.lecturer)
-                      .filter(
-                        (lecturer: any, index: number, self: any[]) =>
-                          index ===
-                          self.findIndex((l: any) => l.id === lecturer.id),
-                      );
-                    // .slice(0, 4);
+                    // Lọc và phân loại giảng viên từ các unit
+                    const lecturerMap = new Map();
+
+                    program.units.forEach((unit: any) => {
+                      if (unit.lecturer && unit.lecturer.id) {
+                        const lecturerId = unit.lecturer.id;
+                        const existingLecturer = lecturerMap.get(lecturerId);
+
+                        if (!existingLecturer) {
+                          // Thêm giảng viên mới
+                          lecturerMap.set(lecturerId, {
+                            ...unit.lecturer,
+                            isLead: unit.isLead || false,
+                            units: [unit.title || unit.name],
+                          });
+                        } else {
+                          // Cập nhật thông tin nếu là lead hoặc thêm unit
+                          existingLecturer.isLead =
+                            existingLecturer.isLead || unit.isLead || false;
+                          if (unit.title || unit.name) {
+                            existingLecturer.units.push(
+                              unit.title || unit.name,
+                            );
+                          }
+                        }
+                      }
+                    });
+
+                    // Chuyển thành array và sắp xếp (lead lecturer lên đầu)
+                    const uniqueLecturers = Array.from(
+                      lecturerMap.values(),
+                    ).sort((a, b) => {
+                      if (a.isLead && !b.isLead) return -1;
+                      if (!a.isLead && b.isLead) return 1;
+                      return 0;
+                    });
 
                     return uniqueLecturers.map(
                       (lecturer: any, index: number) => (
                         <div
                           key={lecturer.id || index}
-                          className="flex items-center gap-3 rounded-xl bg-white p-3 shadow"
+                          className="flex items-start gap-3 rounded-xl border-l-4 border-l-blue-500 bg-white p-3 shadow"
                         >
                           <img
                             src={
@@ -1227,25 +1292,54 @@ function CourseDetail({ id, back }: { id: number; back: () => void }) {
                               "https://via.placeholder.com/48x48"
                             }
                             alt={lecturer.fullName}
-                            className="h-12 w-12 rounded-lg object-cover"
+                            className="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
                           />
-                          <div>
-                            <div className="text-sm font-semibold">
-                              {lecturer.fullName}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <div className="truncate text-sm font-semibold">
+                                {lecturer.fullName}{" "}
+                              </div>
+                              {lecturer.isLead && (
+                                <span className="flex-shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                                  Giảng viên chính
+                                </span>
+                              )}
                             </div>
-                            <div className="text-xs text-gray-500">
+                            <div className="mt-1 text-xs text-gray-500">
                               {getAcademicRank(lecturer.academicRank)}
+                              {lecturer.specialization &&
+                                ` • ${lecturer.specialization}`}
                             </div>
-                            <div className="text-xs text-gray-500">
-                              {lecturer.specialization}
-                            </div>
+
+                            {lecturer.experienceYears && (
+                              <div className="mt-1 text-xs text-gray-500">
+                                {lecturer.experienceYears} năm KN {lecturer.jobField && `trong lĩnh vực ${lecturer.jobField}`}
+                              </div>
+                            )}
                           </div>
                         </div>
                       ),
                     );
                   })()}
                 </div>
-              </>
+              </div>
+            )}
+
+            {/* Tags */}
+            {program.tags && program.tags.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-xl font-bold">Tags</h3>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {program.tags.map((tag: string, index: number) => (
+                    <span
+                      key={index}
+                      className="rounded border border-blue-300 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
             )}
           </aside>
         </div>
@@ -1330,14 +1424,86 @@ function InstructorList({ back }: { back: () => void }) {
 
 // ------------ Root App ------------
 export default function EduHubMockV2() {
-  const [view, setView] = useState<"home" | "courseDetail" | "instructors">(
+  const [view, setView] = useState<"home" | "programDetail" | "instructors">(
     "home",
   );
-  const [courseId, setCourseId] = useState<number | null>(null);
+  const [programId, setProgramId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const openCourse = (id: number) => {
-    setCourseId(id);
-    setView("courseDetail");
+  // Redux
+  const dispatch = useDispatch();
+  const trainingPrograms = useSelector((state: any) => state.trainingProgram2);
+
+  // Fetch training programs data and dispatch to Redux
+  useEffect(() => {
+    const fetchTrainingPrograms = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        console.log("🔄 Fetching training programs from API...");
+        const response = await API.public.getAllPrograms();
+        console.log("✅ Training Programs API Response:", response);
+
+        // Xử lý response theo cấu trúc thực tế
+        let programsData = [];
+
+        if (response.data) {
+          if (Array.isArray(response.data)) {
+            programsData = response.data;
+          } else if (response.data.data && Array.isArray(response.data.data)) {
+            programsData = response.data.data;
+          } else if (
+            response.data.programs &&
+            Array.isArray(response.data.programs)
+          ) {
+            programsData = response.data.programs;
+          } else {
+            console.warn("⚠️ Cấu trúc response không mong đợi:", response.data);
+            programsData = [];
+          }
+        }
+
+        console.log("📊 Training Programs data:", programsData);
+
+        // Dispatch data vào Redux store
+        dispatch(setTrainingPrograms2(programsData));
+      } catch (err: any) {
+        console.error("❌ Lỗi khi lấy dữ liệu training programs:", err);
+        setError(err.message || "Không thể tải dữ liệu chương trình đào tạo");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Chỉ fetch nếu chưa có dữ liệu trong Redux store
+    if (!trainingPrograms || trainingPrograms.length === 0) {
+      fetchTrainingPrograms();
+    }
+  }, [dispatch, trainingPrograms]);
+
+  // Log training programs data for debugging
+  useEffect(() => {
+    if (trainingPrograms && trainingPrograms.length > 0) {
+      console.log("📚 Training Programs loaded:", trainingPrograms);
+    }
+    if (error) {
+      console.error("❌ Training Programs error:", error);
+    }
+  }, [trainingPrograms, error]);
+
+  const openProgram = (id: string) => {
+    // Validation ID trước khi mở
+    if (!id || !id.trim()) {
+      console.error("❌ Invalid program ID:", id);
+      alert("ID chương trình đào tạo không hợp lệ!");
+      return;
+    }
+
+    console.log("📖 Opening program detail for ID:", id);
+    setProgramId(id);
+    setView("programDetail");
   };
 
   return (
@@ -1349,14 +1515,19 @@ export default function EduHubMockV2() {
           <StatPills />
           <HowItWorks />
           <InstructorsSlider />
-          <CourseSearch openCourse={openCourse} />
+          <CourseSearch
+            openCourse={openProgram}
+            trainingPrograms={trainingPrograms}
+            loading={loading}
+            error={error}
+          />
           <Testimonials />
           {/* <NewsSection /> */}
         </>
       )}
-      {view === "courseDetail" && courseId && (
+      {view === "programDetail" && programId && (
         <>
-          <CourseDetail id={courseId} back={() => setView("home")} />
+          <CourseDetail id={programId} back={() => setView("home")} />
         </>
       )}
       {view === "instructors" && (

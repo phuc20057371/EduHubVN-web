@@ -155,7 +155,6 @@ const LecturerPage = () => {
     const fetchCourses = async () => {
       try {
         const response = await API.lecturer.getAllCourses();
-        console.log("✅ Courses fetched successfully:", response.data.data);
         dispatch(setCoursesOfLecturer(response.data.data));
       } catch (error) {
         console.error("❌ Error fetching courses:", error);

@@ -85,7 +85,6 @@ const LecturerProfileBasicInfoTab: React.FC<
 
   // Initialize states from lecturer data
   useEffect(() => {
-    console.log("Lecturer data loaded:", lecturerData);
     if (lecturer) {
       setFullName(lecturer.fullName || "");
       setCitizenId(lecturer.citizenId || "");

@@ -22,7 +22,7 @@ import { API } from "../../utils/Fetch";
 import { setLecturers } from "../../redux/slice/LecturerSlice";
 import { setInstitutions } from "../../redux/slice/InstitutionSlice";
 import { setPartner } from "../../redux/slice/PartnerSlice";
-import { setCourse } from "../../redux/slice/CourseSilce";
+
 
 interface StatCard {
   title: string;
@@ -43,7 +43,6 @@ interface QuickAction {
 }
 
 const AdminPage = () => {
-  console.log("AdminPage: Component is being rendered!");
 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -75,8 +74,7 @@ const AdminPage = () => {
             dispatch(setInstitutions(res2.data.data));
             const res3 = await API.admin.getAllPartners();
             dispatch(setPartner(res3.data.data));
-            const res4 = await API.admin.getAllCourses();
-            dispatch(setCourse(res4.data.data));
+          
           } else if (userProfile.role === "SUB_ADMIN") {
             if (
               userProfile.permissions &&
@@ -84,8 +82,6 @@ const AdminPage = () => {
             ) {
               const res = await API.admin.getAllLecturers();
               dispatch(setLecturers(res.data.data));
-            } else {
-              console.log("No LECTURER_READ permission");
             }
 
             if (
@@ -94,9 +90,7 @@ const AdminPage = () => {
             ) {
               const res = await API.admin.getAllInstitutions();
               dispatch(setInstitutions(res.data.data));
-            } else {
-              console.log("No SCHOOL_READ permission");
-            }
+            } 
 
             if (
               userProfile.permissions &&
@@ -104,18 +98,8 @@ const AdminPage = () => {
             ) {
               const res = await API.admin.getAllPartners();
               dispatch(setPartner(res.data.data));
-            } else {
-              console.log("No ORGANIZATION_READ permission");
             }
-            if (
-              userProfile.permissions &&
-              userProfile.permissions.includes("COURSE_READ")
-            ) {
-              const res = await API.admin.getAllCourses();
-              dispatch(setCourse(res.data.data));
-            } else {
-              console.log("No COURSE_READ permission");
-            }
+           
           }
         } catch (error) {
           console.error("Error initializing AdminPage:", error);

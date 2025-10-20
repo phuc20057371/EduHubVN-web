@@ -129,12 +129,8 @@ const SubAdminPage = () => {
       setResetPasswordDialogOpen(false);
       setSubAdminToReset(null);
       setNewPassword("");
-      
-      // TODO: Show success message to user
-      console.log("Password reset successfully for:", subAdminToReset.email);
     } catch (error) {
       console.error("Error resetting password:", error);
-      // TODO: Show error message to user
     } finally {
       setResetting(false);
     }

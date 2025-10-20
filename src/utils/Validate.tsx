@@ -221,16 +221,16 @@ export const validateLecturerInfo = (formData: any) => {
     error: "",
   };
 
-  if (formData.fullName === "" || formData.fullName.length > 30) {
+  if (formData.fullName === "" || formData.fullName.length > 300) {
     errors.success = false;
     errors.error =
-      "Họ và tên không được để trống hoặc quá dài (tối đa 30 ký tự)";
+      "Họ và tên không được để trống hoặc quá dài (tối đa 300 ký tự)";
     errors.errorField = "fullName";
     return errors;
   }
-  if (formData.citizenId === "" || formData.citizenId.length != 11) {
+  if (formData.citizenId === "" || formData.citizenId.length != 12) {
     errors.success = false;
-    errors.error = "Vui lòng nhập số CCCD/CMND hợp lệ (11 ký tự)";
+    errors.error = "Vui lòng nhập số CCCD/CMND hợp lệ (12 ký tự)";
     errors.errorField = "citizenId";
     return errors;
   }
@@ -278,9 +278,9 @@ export const validateLecturerInfo = (formData: any) => {
     errors.errorField = "academicRank";
     return errors;
   }
-  if (formData.specialization === "" || formData.specialization.length > 70) {
+  if (formData.specialization === "" || formData.specialization.length > 700) {
     errors.success = false;
-    errors.error = "Vui lòng nhập chuyên ngành hợp lệ (tối đa 70 ký tự)";
+    errors.error = "Vui lòng nhập chuyên ngành hợp lệ (tối đa 700 ký tự)";
     errors.errorField = "specialization";
     return errors;
   }
@@ -299,22 +299,22 @@ export const validateLecturerInfo = (formData: any) => {
     formData.jobField === "" ||
     formData.jobField === null ||
     formData.jobField === undefined ||
-    formData.jobField.length > 50
+    formData.jobField.length > 500
   ) {
     errors.success = false;
-    errors.error = "Vui lòng nhập lĩnh vực công việc hợp lệ (tối đa 50 ký tự)";
+    errors.error = "Vui lòng nhập lĩnh vực công việc hợp lệ (tối đa 500 ký tự)";
     errors.errorField = "jobField";
     return errors;
   }
-  if (formData.address === "" || formData.address.length > 60) {
+  if (formData.address === "" || formData.address.length > 500) {
     errors.success = false;
-    errors.error = "Vui lòng nhập địa chỉ hợp lệ (tối đa 60 ký tự)";
+    errors.error = "Vui lòng nhập địa chỉ hợp lệ (tối đa 500 ký tự)";
     errors.errorField = "address";
     return errors;
   }
-  if (formData.bio.length > 200) {
+  if (formData.bio.length > 1000) {
     errors.success = false;
-    errors.error = "Giới thiệu bản thân không được quá 200 ký tự";
+    errors.error = "Giới thiệu bản thân không được quá 1000 ký tự";
     errors.errorField = "bio";
     return errors;
   }

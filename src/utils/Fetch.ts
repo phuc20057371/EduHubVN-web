@@ -36,6 +36,7 @@ import type {
 } from "../types/ResearchProject";
 import type { ResetPasswordRequest } from "../types/ResetPasswordRequest";
 import type { ResetPasswordRequestForUser } from "../types/ResetPasswordRequestForUser";
+import type { TrainingProgramReq, TrainingProgramRequestReq } from "../types/TrainingProgram";
 
 const domain = window.location.hostname;
 const BASE_URL = `http://${domain}:8080`;
@@ -259,6 +260,9 @@ export const API = {
     // Partner
     updatePartnerProfile: (data: PartnerRequest) =>
       fetch.post("/api/v1/partner/update-profile", data),
+    getAllProgramRequests: () => fetch.get("/api/v1/partner/get-all-training-program-requests"),
+    createProgramRequest: (data: TrainingProgramRequestReq) =>
+      fetch.post("/api/v1/partner/create-training-program-request", data),
   },
   admin: {
     //Get
@@ -416,17 +420,17 @@ export const API = {
       fetch.post("/api/v1/admin/delete-research-project", data),
 
     // Course
-    getAllCourses: () => fetch.get("/api/v1/admin/get-all-courses"),
-    getCourseById: (id: number) => fetch.get(`/api/v1/admin/get-course/${id}`),
-    updateCourseMember: (data: any) =>
-      fetch.post("/api/v1/admin/update-course-member", data),
-    getOwnedCourses: () => fetch.get("/api/v1/admin/get-new-owned-courses"),
-    createCourse: (data: any) =>
-      fetch.post("/api/v1/admin/create-course", data),
-    updateCourse: (data: any) =>
-      fetch.post("/api/v1/admin/update-course", data),
-    deleteCourse: (data: IdRequest) =>
-      fetch.post("/api/v1/admin/delete-course", data),
+    // getAllCourses: () => fetch.get("/api/v1/admin/get-all-courses"),
+    // getCourseById: (id: number) => fetch.get(`/api/v1/admin/get-course/${id}`),
+    // updateCourseMember: (data: any) =>
+    //   fetch.post("/api/v1/admin/update-course-member", data),
+    // getOwnedCourses: () => fetch.get("/api/v1/admin/get-new-owned-courses"),
+    // createCourse: (data: any) =>
+    //   fetch.post("/api/v1/admin/create-course", data),
+    // updateCourse: (data: any) =>
+    //   fetch.post("/api/v1/admin/update-course", data),
+    // deleteCourse: (data: IdRequest) =>
+    //   fetch.post("/api/v1/admin/delete-course", data),
   },
   subadmin: {
     getAllSubAdmins: () => fetch.get("/api/v1/admin/sub-admin/all"),
@@ -439,6 +443,25 @@ export const API = {
     resetPassword: (data: ResetPasswordRequest) =>
       fetch.post("/api/v1/admin/sub-admin/reset-password", data),
   },
+  program: {
+    getAllPrograms: () => fetch.get("/api/v1/admin/get-all-training-programs"),
+    getAllProgramsPaginated: (page = 0, size = 10) =>
+      fetch.get(
+        `/api/v1/admin/get-all-training-programs-paginated?page=${page}&size=${size}`,
+      ),
+    getAllProgramRequestsPaginated: (page = 0, size = 10) =>
+      fetch.get(
+        `/api/v1/admin/get-training-program-requests?page=${page}&size=${size}`,
+      ),
+    getAllProgramRequests: () => fetch.get("api/v1/admin/get-all-program-requests"),
+
+    createProgram: (data: TrainingProgramReq) =>
+      fetch.post("/api/v1/admin/create-training-program", data),
+    // updateProgram: (id: string, data: any) =>
+    //   fetch.post(`/api/v1/admin/update-training-program/${id}`, data),
+    updateProgramUnits: (id: string, data: any) =>
+      fetch.post(`/api/v1/admin/update-training-program-units/${id}`, data),
+  },
   public: {
     getAllCourses: () => {
       return fetch.get(`/public/all-courses`);
@@ -446,6 +469,7 @@ export const API = {
     getTop7Lecturers: () => {
       return fetch.get(`/public/top-7-lecturers`);
     },
+    getAllPrograms: () => fetch.get("/public/get-all-training-programs"),
   },
   other: {
     getLecturerProfile: (id: string) => {

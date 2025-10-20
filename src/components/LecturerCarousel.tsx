@@ -46,7 +46,6 @@ const LecturerCarousel: React.FC<LecturerCarouselProps> = ({
   // }, [isAutoPlaying, lecturers.length, cardsToShow, maxSlides]);
 
   const nextSlide = () => {
-    console.log(currentSlide, maxSlides);
     if (currentSlide < -maxSlides + 1) {
       setCurrentSlide(0);
     } else {
@@ -55,7 +54,6 @@ const LecturerCarousel: React.FC<LecturerCarouselProps> = ({
   };
 
   const prevSlide = () => {
-    console.log(currentSlide, maxSlides);
     if (currentSlide > maxSlides - 1) {
       setCurrentSlide(maxSlides - 1);
     } else {

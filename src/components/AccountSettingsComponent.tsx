@@ -191,7 +191,6 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
       await API.user.sendSubEmailOtp(otpRequest);
       setPendingSubEmail(newSubEmail);
       setSubEmailOtpStep(1);
-      console.log('Pending email set to:', newSubEmail); // Debug log
       toast.success(`Mã OTP đã được gửi đến ${newSubEmail}!`);
     } catch (error: any) {
       setEmailError(error.response?.data?.message || 'Có lỗi xảy ra khi gửi OTP');
@@ -370,18 +369,11 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
         email: selectedEmailForOtp
       };
       
-      console.log('Sending change password OTP request:', otpRequest); // Debug log
-      console.log('Selected email for OTP:', selectedEmailForOtp); // Debug log
-      const response = await API.user.sendOTPChangePassword(otpRequest);
-      console.log('OTP Response:', response); // Debug log
+      await API.user.sendOTPChangePassword(otpRequest);
       setActiveStep(1);
       toast.success(`Mã OTP đã được gửi đến ${selectedEmailForOtp}!`);
     } catch (error: any) {
-      console.error('Send change password OTP error:', error); // Debug log
-      console.error('Error response:', error.response); // Debug log
-      console.error('Error response data:', error.response?.data); // Debug log
-      console.error('Error status:', error.response?.status); // Debug log
-      
+      console.error('Send change password OTP error:', error); // Debug log     
       const errorMessage = error.response?.data?.message || 'Có lỗi xảy ra khi gửi OTP';
       setPasswordError(errorMessage);
       toast.error(`Lỗi: ${errorMessage}`);
@@ -408,8 +400,6 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
         newPassword,
         confirmPassword
       };
-      console.log('Change password request:', changePasswordRequest);
-      
       await API.user.changePassword(changePasswordRequest);
       
       // Reset form

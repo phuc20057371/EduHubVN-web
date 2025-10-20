@@ -43,7 +43,6 @@ const AdminLecturerPage = () => {
   const userProfile = useSelector((state: any) => state.userProfile);
 
   const canViewLecturerTab = React.useMemo(() => {
-    console.log("Checking lecturer tab permission for user:", userProfile?.role, userProfile?.permissions);
     if (userProfile.role === "ADMIN") return true;
     if (userProfile.role === "SUB_ADMIN") {
       return userProfile.permissions?.includes("LECTURER_READ");
@@ -52,7 +51,6 @@ const AdminLecturerPage = () => {
   }, [userProfile]);
 
   const canViewApprovalTabs = React.useMemo(() => {
-    console.log("Checking approval tabs permission for user:", userProfile?.role, userProfile?.permissions);
     if (userProfile.role === "ADMIN") return true;
     if (userProfile.role === "SUB_ADMIN") {
       return userProfile.permissions?.includes("LECTURER_APPROVE");
@@ -98,9 +96,7 @@ const AdminLecturerPage = () => {
   // Update tab when permissions change
   useEffect(() => {
     const currentTab = getFirstAvailableTab();
-    console.log("useEffect - Current tab:", value, "First available:", currentTab);
     if (value !== currentTab) {
-      console.log("Updating tab from", value, "to", currentTab);
       setValue(currentTab);
     }
   }, [canViewLecturerTab, canViewApprovalTabs]); // Remove 'value' from dependencies to avoid loop
@@ -204,7 +200,7 @@ const AdminLecturerPage = () => {
       if (userProfile.role === "ADMIN") {
         const res = await API.admin.getAllLecturers();
         dispatch(setLecturers(res.data.data));
-        
+
         const resCreate = await API.admin.getLecturerPendingCreate();
         dispatch(setLecturerPendingCreate(resCreate.data.data));
 
@@ -287,7 +283,7 @@ const AdminLecturerPage = () => {
         console.error("Error initializing AdminLecturerPage:", error);
       }
     };
-    
+
     // Chỉ chạy fetchData khi userProfile đã có và có role
     if (userProfile && userProfile.role) {
       fetchData();
@@ -296,22 +292,13 @@ const AdminLecturerPage = () => {
 
   // EVENT HANDLERS
   const handleChange = (_event: SyntheticEvent, newValue: string) => {
-    console.log("=== TAB CHANGE EVENT ===");
-    console.log("Tab change requested:", newValue, "Current:", value);
-    console.log("Permissions:", { canViewLecturerTab, canViewApprovalTabs });
-    
     // Only allow switching to tabs user has permission for
     const tabNumber = parseInt(newValue);
     if (tabNumber === 1 && canViewLecturerTab) {
-      console.log("✅ Switching to lecturer tab");
       setValue(newValue);
     } else if (tabNumber >= 2 && tabNumber <= 6 && canViewApprovalTabs) {
-      console.log("✅ Switching to approval tab");
       setValue(newValue);
-    } else {
-      console.log("❌ Tab change blocked due to permissions");
     }
-    console.log("=== END TAB CHANGE ===");
   };
 
   const handleCreateSuccess = async () => {
@@ -326,60 +313,35 @@ const AdminLecturerPage = () => {
 
   // Create tabs array based on permissions
   const availableTabs = React.useMemo(() => {
-    console.log("Creating available tabs with permissions:", { canViewLecturerTab, canViewApprovalTabs });
     const tabs = [];
 
     // Tab 1 - Lecturer List
     if (canViewLecturerTab) {
-      console.log("Adding lecturer tab");
-      tabs.push(
-        <Tab
-          key="tab-1"
-          label="Giảng viên"
-          value="1"
-        />
-      );
+      tabs.push(<Tab key="tab-1" label="Giảng viên" value="1" />);
     }
 
     // Tabs 2-6 - Approval Tabs
     if (canViewApprovalTabs) {
-      console.log("Adding approval tabs");
       tabs.push(
-        <Tab
-          key="tab-2"
-          label="Tạo mới hồ sơ"
-          value="2"
-        />,
-        <Tab
-          key="tab-3"
-          label="Cập nhật hồ sơ"
-          value="3"
-        />,
-        <Tab
-          key="tab-4"
-          label="Chứng chỉ/Bằng cấp"
-          value="4"
-        />,
-        <Tab
-          key="tab-5"
-          label="Kinh nghiệm đào tạo"
-          value="5"
-        />,
-        <Tab
-          key="tab-6"
-          label="Kinh nghiệm nghiên cứu"
-          value="6"
-        />
+        <Tab key="tab-2" label="Tạo mới hồ sơ" value="2" />,
+        <Tab key="tab-3" label="Cập nhật hồ sơ" value="3" />,
+        <Tab key="tab-4" label="Chứng chỉ/Bằng cấp" value="4" />,
+        <Tab key="tab-5" label="Kinh nghiệm đào tạo" value="5" />,
+        <Tab key="tab-6" label="Kinh nghiệm nghiên cứu" value="6" />,
       );
     }
 
-    console.log("Total tabs created:", tabs.length);
     return tabs;
   }, [canViewLecturerTab, canViewApprovalTabs]); // Simplify dependencies to only permissions
 
   // RENDER COMPONENT
   // If user has no permissions, show access denied message
-  if (userProfile && userProfile.role === "SUB_ADMIN" && !canViewLecturerTab && !canViewApprovalTabs) {
+  if (
+    userProfile &&
+    userProfile.role === "SUB_ADMIN" &&
+    !canViewLecturerTab &&
+    !canViewApprovalTabs
+  ) {
     return (
       <Box
         sx={{
@@ -493,7 +455,7 @@ const AdminLecturerPage = () => {
                 </Box>
               }
             >
-              <AdminLecturerMainTab 
+              <AdminLecturerMainTab
                 lecturers={lecturers}
                 canEdit={canEditLecturer}
                 canDelete={canDeleteLecturer}

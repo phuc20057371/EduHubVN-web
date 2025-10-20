@@ -21,9 +21,6 @@ import {
   FormControl,
   InputLabel,
   Select,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 import AssignmentIcon from "@mui/icons-material/Assignment";
@@ -31,16 +28,17 @@ import { Add } from "@mui/icons-material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState, useMemo } from "react";
-import { setTrainingProgramsRequest2 } from "../../redux/slice/TrainingProgramRequestSlice2";
-import type { TrainingProgramRequest } from "../../types/TrainingProgram";
-import { formatDateToVietnamTime } from "../../utils/ChangeText";
-import { API } from "../../utils/Fetch";
-import TrainingProgramRequestCreateDialog from "../../components/parner-dialog/TrainingProgramRequestCreateDialog";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { API } from "../../../../utils/Fetch";
+import { setTrainingProgramsRequest2 } from "../../../../redux/slice/TrainingProgramRequestSlice2";
+import type { TrainingProgramRequest } from "../../../../types/TrainingProgram";
+import { formatDateToVietnamTime } from "../../../../utils/ChangeText";
+import TrainingProgramCreateDialog from "../../../../components/training-program-dialog/TrainingProgramCreateDialog";
+import AssignmentLecturerDialog from "../../../../components/assignment-lecturer-dialog/AssignmentLecturerDialog";
+import { toast } from "react-toastify";
+import { setTrainingPrograms } from "../../../../redux/slice/TrainingProgramSlice";
 
 type Order = "asc" | "desc";
 
@@ -78,6 +76,12 @@ const headCells: readonly HeadCell[] = [
     label: "Tiêu đề yêu cầu",
   },
   {
+    id: "partnerOrganization",
+    numeric: false,
+    disablePadding: false,
+    label: "Tổ chức",
+  },
+  {
     id: "status",
     numeric: false,
     disablePadding: false,
@@ -99,7 +103,7 @@ const headCells: readonly HeadCell[] = [
     id: "updatedAt",
     numeric: false,
     disablePadding: false,
-    label: "Thời gian cập nhật",
+    label: "Thời gian",
   },
   {
     id: "id",
@@ -125,7 +129,8 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   const theme = useTheme();
 
   const createSortHandler =
-    (property: keyof TrainingProgramRequest) => (event: React.MouseEvent<unknown>) => {
+    (property: keyof TrainingProgramRequest) =>
+    (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
     };
 
@@ -201,10 +206,10 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-const PartnerCoursePage = () => {
+const TrainingRequestTab = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
-  
+
   // State cho table
   const [order, setOrder] = useState<Order>("asc");
   const [orderBy, setOrderBy] = useState<keyof TrainingProgramRequest>("title");
@@ -212,62 +217,68 @@ const PartnerCoursePage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedMenuCourse, setSelectedMenuCourse] = useState<TrainingProgramRequest | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [selectedMenuRequest, setSelectedMenuRequest] =
+    useState<TrainingProgramRequest | null>(null);
+
+  // State cho dialog
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [selectedRequestForCreate, setSelectedRequestForCreate] =
+    useState<TrainingProgramRequest | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  // State cho AssignmentLecturerDialog
+  const [assignmentDialogOpen, setAssignmentDialogOpen] = useState(false);
+  const [selectedProgramForAssignment, setSelectedProgramForAssignment] =
+    useState<any>(null);
 
   // Lấy dữ liệu từ Redux
-  const courses = useSelector((state: any) => state.trainingProgramRequest2 || []);
-  const userProfile = useSelector((state: any) => state.userProfile || {});
-  
-  // Debug Redux state
-  useEffect(() => {
-    console.log("Redux courses updated:", courses);
-  }, [courses]);
+  const trainingRequests = useSelector(
+    (state: any) => state.trainingProgramRequest2 || [],
+  );
 
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchTrainingRequests = async () => {
       try {
         setLoading(true);
-        const response = await API.partner.getAllProgramRequests();
-        console.log("API response:", response.data);
-        
+        const response = await API.program.getAllProgramRequests();
         if (response.data.success && response.data.data) {
-          console.log("Dispatching data to Redux:", response.data.data);
           dispatch(setTrainingProgramsRequest2(response.data.data));
-        } else {
-          console.error("Failed to fetch courses:", response.data);
         }
       } catch (error) {
-        console.error("Error fetching courses:", error);
+        console.error("Error fetching training requests:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCourses();
+    fetchTrainingRequests();
   }, [dispatch]);
 
   // Filtered data logic
-  const filteredCourses = useMemo(() => {
-    let filtered = Array.isArray(courses) ? courses : [];
+  const filteredRequests = useMemo(() => {
+    let filtered = Array.isArray(trainingRequests) ? trainingRequests : [];
 
     if (searchTerm) {
       filtered = filtered.filter(
-        (course: TrainingProgramRequest) =>
-          course.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          course.description?.toLowerCase().includes(searchTerm.toLowerCase())
+        (request: TrainingProgramRequest) =>
+          request.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          request.description
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          request.partnerOrganization?.organizationName
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()),
       );
     }
 
     if (statusFilter) {
       filtered = filtered.filter(
-        (course: TrainingProgramRequest) => course.status === statusFilter
+        (request: TrainingProgramRequest) => request.status === statusFilter,
       );
     }
 
     return filtered;
-  }, [courses, searchTerm, statusFilter]);
+  }, [trainingRequests, searchTerm, statusFilter]);
 
   const handleRequestSort = (
     _event: React.MouseEvent<unknown>,
@@ -298,80 +309,119 @@ const PartnerCoursePage = () => {
   };
 
   const visibleRows = useMemo(
-    () => [...filteredCourses].sort(getComparator(order, orderBy)),
-    [filteredCourses, order, orderBy],
+    () => [...filteredRequests].sort(getComparator(order, orderBy)),
+    [filteredRequests, order, orderBy],
   );
 
   // Menu handlers
   const handleMenuClick = (
     event: React.MouseEvent<HTMLElement>,
-    course: TrainingProgramRequest,
+    request: TrainingProgramRequest,
   ) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
-    setSelectedMenuCourse(course);
+    setSelectedMenuRequest(request);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedMenuCourse(null);
+    setSelectedMenuRequest(null);
   };
 
-  const handleEditCourse = () => {
-    if (selectedMenuCourse) {
-      console.log("Edit course:", selectedMenuCourse);
-      // TODO: Implement edit course functionality
+  const handleCreateProgram = () => {
+    if (selectedMenuRequest) {
+      setSelectedRequestForCreate(selectedMenuRequest);
+      setCreateDialogOpen(true);
     }
     handleMenuClose();
   };
-
-  const handleDeleteCourse = () => {
-    if (selectedMenuCourse) {
-      console.log("Delete course:", selectedMenuCourse);
-      // TODO: Implement delete course API call
+  const handleRejectRequest = () => {
+    if (selectedMenuRequest) {
+      // TODO: Implement reject request API call
+      console.log("Reject request:", selectedMenuRequest);
+      // Ví dụ API call:
+      // API.program.rejectProgramRequest(selectedMenuRequest.id)
     }
     handleMenuClose();
-  };
-
-  const handleCreateCourse = () => {
-    setCreateDialogOpen(true);
-  };
-
-  const handleCreateSubmit = async (data: Partial<TrainingProgramRequest>) => {
-    try {
-      // TODO: Call API to create training program request
-      console.log("Creating training program request:", data);
-      
-      // For now, just add to Redux store
-      const newRequest: TrainingProgramRequest = {
-        id: `temp-${Date.now()}`,
-        title: data.title || "",
-        description: data.description || "",
-        status: data.status || "PENDING",
-        fileUrl: data.fileUrl || "",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        ...data,
-      } as TrainingProgramRequest;
-      
-      // Add to current courses array
-      const updatedCourses = Array.isArray(courses) ? [...courses, newRequest] : [newRequest];
-      dispatch(setTrainingProgramsRequest2(updatedCourses));
-      
-      // Refresh data from API
-      const response = await API.partner.getAllProgramRequests();
-      if (response.data.success && response.data.data) {
-        dispatch(setTrainingProgramsRequest2(response.data.data));
-      }
-      
-    } catch (error) {
-      console.error("Error creating training program request:", error);
-      throw error;
-    }
   };
 
   const handleCreateDialogClose = () => {
     setCreateDialogOpen(false);
+    setSelectedRequestForCreate(null);
+  };
+
+  const handleAssignmentDialogClose = () => {
+    setAssignmentDialogOpen(false);
+    setSelectedProgramForAssignment(null);
+  };
+  const refreshData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await API.program.getAllPrograms();
+      if (response.data && response.data.success) {
+        const programs = response.data.data || [];
+        dispatch(
+          setTrainingPrograms({
+            page: 0,
+            content: programs,
+            totalElements: programs.length,
+            totalPages: 1,
+          }),
+        );
+      }
+    } catch (error: any) {
+      console.error("Error refreshing training programs:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [dispatch]);
+
+  const handleSaveUnits = async (units: any[]) => {
+    try {
+      if (!selectedProgramForAssignment) return;
+
+      const res = await API.program.updateProgramUnits(
+        selectedProgramForAssignment?.id,
+        units,
+      );
+      if (res.data.success) {
+        toast.success("Cập nhật bài học thành công");
+      }
+
+      // Refresh all data after updating units
+      await refreshData();
+    } catch (error) {
+      console.error("Error saving units:", error);
+      throw error;
+    }
+  };
+
+  const handleProgramCreated = async (programData: any) => {
+    try {
+      // Tạo chương trình đào tạo
+      // console.log("data", programData);
+
+      const response = await API.program.createProgram(programData);
+
+      if (response.data.success) {
+        console.log("Program created successfully:", response.data.data);
+        toast.success("Tạo chương trình đào tạo thành công!");
+        // Refresh data sau khi tạo chương trình thành công
+        const refreshResponse = await API.program.getAllProgramRequests();
+        if (refreshResponse.data.success) {
+          dispatch(setTrainingProgramsRequest2(refreshResponse.data.data));
+          const newProgram = response.data.data;
+          setSelectedProgramForAssignment(newProgram);
+          setAssignmentDialogOpen(true);
+        }
+
+        handleCreateDialogClose();
+      } else {
+        console.error("Failed to create program:", response.data);
+      }
+    } catch (error) {
+      console.error("Error creating program:", error);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -382,8 +432,6 @@ const PartnerCoursePage = () => {
         return "success";
       case "REJECTED":
         return "error";
-      case "PUBLISHED":
-        return "info";
       default:
         return "default";
     }
@@ -397,8 +445,6 @@ const PartnerCoursePage = () => {
         return "Đã duyệt";
       case "REJECTED":
         return "Từ chối";
-      case "PUBLISHED":
-        return "Đã xuất bản";
       default:
         return status;
     }
@@ -458,7 +504,7 @@ const PartnerCoursePage = () => {
                   mb: 0.5,
                 }}
               >
-                Yêu cầu Chương trình Đào tạo
+                Quản lý Yêu cầu Đào tạo
               </Typography>
               <Typography
                 variant="body2"
@@ -469,17 +515,19 @@ const PartnerCoursePage = () => {
                       : "#6c757d",
                 }}
               >
-                Tổng cộng {courses.length} yêu cầu đào tạo
+                Tổng cộng {trainingRequests.length} yêu cầu đào tạo
               </Typography>
             </Box>
           </Box>
 
           {/* Create Button */}
-          <Box sx={{ flexShrink: 0 }}>
+          {/* <Box sx={{ flexShrink: 0 }}>
             <Button
               variant="contained"
               startIcon={<Add />}
-              onClick={handleCreateCourse}
+              onClick={() => {
+                console.log("Create training request");
+              }}
               sx={{
                 textTransform: "none",
                 fontWeight: 600,
@@ -494,7 +542,7 @@ const PartnerCoursePage = () => {
             >
               Tạo yêu cầu đào tạo mới
             </Button>
-          </Box>
+          </Box> */}
         </Box>
 
         {/* Search and Filters */}
@@ -543,7 +591,6 @@ const PartnerCoursePage = () => {
               <MenuItem value="PENDING">Chờ duyệt</MenuItem>
               <MenuItem value="APPROVED">Đã duyệt</MenuItem>
               <MenuItem value="REJECTED">Từ chối</MenuItem>
-              <MenuItem value="PUBLISHED">Đã xuất bản</MenuItem>
             </Select>
           </FormControl>
         </Box>
@@ -571,7 +618,7 @@ const PartnerCoursePage = () => {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={filteredCourses.length}
+              rowCount={filteredRequests.length}
             />
             <TableBody>
               {loading ? (
@@ -612,17 +659,17 @@ const PartnerCoursePage = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                visibleRows.map((course) => {
-                  const isItemSelected = selected === course.id;
+                visibleRows.map((request) => {
+                  const isItemSelected = selected === request.id;
 
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, course)}
+                      onClick={(event) => handleClick(event, request)}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
-                      key={course.id}
+                      key={request.id}
                       selected={isItemSelected}
                       sx={{
                         cursor: "pointer",
@@ -637,96 +684,52 @@ const PartnerCoursePage = () => {
                       {/* Tiêu đề */}
                       <TableCell>
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {course.title}
+                          {request.title}
+                        </Typography>
+                      </TableCell>
+
+                      {/* Tổ chức */}
+                      <TableCell>
+                        <Typography variant="body2">
+                          {request.partnerOrganization?.organizationName ||
+                            "N/A"}
                         </Typography>
                       </TableCell>
 
                       {/* Trạng thái */}
                       <TableCell>
                         <Chip
-                          label={getStatusText(course.status)}
-                          color={getStatusColor(course.status) as any}
+                          label={getStatusText(request.status)}
+                          color={getStatusColor(request.status) as any}
                           size="small"
                           sx={{ fontWeight: 600 }}
                         />
                       </TableCell>
 
                       {/* Mô tả */}
-                      <TableCell sx={{ minWidth: 180, maxWidth: 250 }}>
-                        {course.description ? (
-                          <Accordion 
-                            sx={{ 
-                              boxShadow: 'none',
-                              border: 'none',
-                              backgroundColor: 'transparent',
-                              '&:before': {
-                                display: 'none',
-                              },
-                              '& .MuiAccordionSummary-root': {
-                                minHeight: 'auto',
-                                padding: '4px 0',
-                                '& .MuiAccordionSummary-content': {
-                                  margin: '4px 0',
-                                },
-                              },
-                              '& .MuiAccordionDetails-root': {
-                                padding: '4px 0 8px 0',
-                              },
-                            }}
-                          >
-                            <AccordionSummary
-                              expandIcon={<ExpandMoreIcon sx={{ fontSize: 16 }} />}
-                              sx={{ 
-                                minHeight: 'auto',
-                                '& .MuiAccordionSummary-expandIconWrapper': {
-                                  transform: 'none',
-                                  '&.Mui-expanded': {
-                                    transform: 'rotate(180deg)',
-                                  },
-                                },
-                              }}
-                            >
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  fontSize: '0.85rem',
-                                  fontWeight: 500,
-                                  color: 'primary.main',
-                                }}
-                              >
-                                Mô tả chi tiết
-                              </Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  fontSize: '0.85rem',
-                                  lineHeight: 1.4,
-                                  color: 'text.secondary',
-                                  maxWidth: 240,
-                                }}
-                              >
-                                {course.description}
-                              </Typography>
-                            </AccordionDetails>
-                          </Accordion>
-                        ) : (
-                          <Typography variant="body2" color="text.secondary">
-                            Không có mô tả
-                          </Typography>
-                        )}
+                      <TableCell>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            maxWidth: 200,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {request.description || "Không có mô tả"}
+                        </Typography>
                       </TableCell>
 
                       {/* File đính kèm */}
                       <TableCell>
-                        {course.fileUrl ? (
+                        {request.fileUrl ? (
                           <Button
                             size="small"
                             variant="outlined"
                             onClick={(e) => {
                               e.stopPropagation();
-                              window.open(course.fileUrl, "_blank");
+                              window.open(request.fileUrl, "_blank");
                             }}
                           >
                             Xem file
@@ -741,8 +744,8 @@ const PartnerCoursePage = () => {
                       {/* Thời gian */}
                       <TableCell>
                         <Typography variant="body2" color="text.secondary">
-                          {course.updatedAt 
-                            ? formatDateToVietnamTime(course.updatedAt)
+                          {request.updatedAt
+                            ? formatDateToVietnamTime(request.updatedAt)
                             : "N/A"}
                         </Typography>
                       </TableCell>
@@ -750,7 +753,7 @@ const PartnerCoursePage = () => {
                       {/* Thao tác */}
                       <TableCell>
                         <IconButton
-                          onClick={(event) => handleMenuClick(event, course)}
+                          onClick={(event) => handleMenuClick(event, request)}
                           size="small"
                         >
                           <MoreVertIcon />
@@ -772,26 +775,41 @@ const PartnerCoursePage = () => {
           transformOrigin={{ horizontal: "right", vertical: "top" }}
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >
-          <MenuItem onClick={handleEditCourse}>
-            <EditIcon sx={{ mr: 1 }} />
-            Chỉnh sửa
-          </MenuItem>
-          <MenuItem onClick={handleDeleteCourse} sx={{ color: "error.main" }}>
+          {selectedMenuRequest?.status !== "APPROVED" && (
+            <MenuItem onClick={handleCreateProgram}>
+              <Add sx={{ mr: 1 }} />
+              Tạo CT
+            </MenuItem>
+          )}
+          <MenuItem onClick={handleRejectRequest} sx={{ color: "error.main" }}>
             <DeleteIcon sx={{ mr: 1 }} />
-            Xóa
+            Từ chối
           </MenuItem>
         </Menu>
       </Paper>
 
-      {/* Create Dialog */}
-      <TrainingProgramRequestCreateDialog
-        open={createDialogOpen}
-        onClose={handleCreateDialogClose}
-        onSubmit={handleCreateSubmit}
-        partner={userProfile.partnerOrganization}
-      />
+      {/* Training Program Create Dialog */}
+      {selectedRequestForCreate && (
+        <TrainingProgramCreateDialog
+          open={createDialogOpen}
+          onClose={handleCreateDialogClose}
+          onSave={handleProgramCreated}
+          partner={selectedRequestForCreate.partnerOrganization}
+          requestedProgram={selectedRequestForCreate}
+        />
+      )}
+
+      {/* Assignment Lecturer Dialog */}
+      {selectedProgramForAssignment && (
+        <AssignmentLecturerDialog
+          open={assignmentDialogOpen}
+          onClose={handleAssignmentDialogClose}
+          trainingProgram={selectedProgramForAssignment}
+          onSave={handleSaveUnits}
+        />
+      )}
     </>
   );
 };
 
-export default PartnerCoursePage;
+export default TrainingRequestTab;
