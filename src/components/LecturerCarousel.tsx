@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
-import { Box, IconButton, Typography } from "@mui/material";
-import { useColors } from "../hooks/useColors";
+import { Box, IconButton, Typography, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 interface LecturerCard {
   id: string;
@@ -12,6 +12,7 @@ interface LecturerCard {
   academicRank: string;
   experienceYears: number;
   jobField: string; 
+  rating?: number; // Thêm rating cho giảng viên
 }
 
 interface LecturerCarouselProps {
@@ -25,8 +26,8 @@ const LecturerCarousel: React.FC<LecturerCarouselProps> = ({
 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
-  const colors = useColors();
   // Calculate how many cards to show at once (max 5)
   const cardsToShow = Math.min(lecturers.length, 5);
   const maxSlides = Math.max(1, lecturers.length - cardsToShow + 1);
@@ -112,7 +113,7 @@ const LecturerCarousel: React.FC<LecturerCarouselProps> = ({
             mb: 6,
           }}
         >
-          Top Giảng Viên
+          Giảng Viên tiêu biểu
         </Typography>
 
         {/* Carousel Container */}
@@ -154,88 +155,188 @@ const LecturerCarousel: React.FC<LecturerCarouselProps> = ({
                     position: "relative",
                     cursor: "pointer",
                     transition: "transform 0.3s ease",
-                    backgroundImage: `url(${lecturer.avatarUrl || "https://via.placeholder.com/380x450"})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat",
+                    backgroundColor: "white",
                     "&:hover": {
                       transform: "scale(1.2)",
                     },
                   }}
                 >
-                  {/* Dark overlay for better text readability */}
+                  {/* Image section - 3/4 of the card */}
                   <Box
                     sx={{
                       position: "absolute",
                       top: 0,
                       left: 0,
                       right: 0,
-                      bottom: 0,
-                      background:
-                        "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%)",
-                      borderRadius: 2,
-                    }}
-                  />
-
-                  {/* Experience Banner - Left side at 3/4 position */}
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      left: -18,
-                      top: "75%",
-                      transform: "translateY(-50%)",
-                      background: colors.primary.main,
-                      color: "white",
-                      px: 2.5,
-                      py: 1.2,
-                      borderRadius: "25px",
-                      fontSize: "13px",
-                      fontWeight: "bold",
-                      whiteSpace: "nowrap",
-                      boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
-                      zIndex: 2,
+                      height: "75%", // 3/4 không gian cho hình ảnh
+                      backgroundImage: `url(${lecturer.avatarUrl || "https://via.placeholder.com/380x300"})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                      borderRadius: "12px 12px 0 0",
                     }}
                   >
-                    {lecturer.experienceYears}+ Năm Kinh Nghiệm
+                    {/* Dark overlay for better contrast */}
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background:
+                          "linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%)",
+                        borderRadius: "12px 12px 0 0",
+                      }}
+                    />
                   </Box>
 
-                  {/* Lecturer Info - Bottom */}
+                  {/* Lecturer Info - Bottom 1/4 with white background */}
                   <Box
                     sx={{
                       position: "absolute",
                       bottom: 0,
                       left: 0,
                       right: 0,
-
+                      height: "25%", // 1/4 không gian
+                      backgroundColor: "white",
                       borderRadius: "0 0 12px 12px",
-                      p: 1,
-                      textAlign: "flex-start",
-
+                      p: 2,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
                       zIndex: 2,
                     }}
                   >
-                    <Typography
-                      //   variant=""
+                    <Box>
+                      {/* Academic Rank và Full Name */}
+                      <Typography
+                        sx={{
+                          color: "black",
+                          fontWeight: "bold",
+                          fontSize: "14px",
+                          lineHeight: 1.2,
+                          mb: 0.3,
+                        }}
+                      >
+                        {lecturer.academicRank}. {lecturer.fullName}
+                      </Typography>
+                      
+                      {/* Experience Years */}
+                      <Typography
+                        sx={{
+                          color: "gray",
+                          fontSize: "11px",
+                          lineHeight: 1.2,
+                          mb: 0.3,
+                        }}
+                      >
+                        {lecturer.experienceYears} Năm Kinh Nghiệm
+                      </Typography>
+                      
+                      {/* Job Field */}
+                      <Typography
+                        sx={{
+                          color: "gray",
+                          fontSize: "11px",
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {lecturer.jobField}
+                      </Typography>
+                    </Box>
+                    
+                    {/* Rating */}
+                    <Box
                       sx={{
-                        color: "white",
-                        fontWeight: "bold",
-                        mb: 1,
-                        fontSize: "16px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        mt: 0.5,
                       }}
                     >
-                      {lecturer.academicRank}. {lecturer.fullName}
-                    </Typography>
-                    <Typography
-                      //   variant=""
-                      sx={{
-                        color: "white",
-                        // fontWeight: "bold",
-                        mb: 1,
-                        fontSize: "16px",
-                      }}
-                    >
-                      {lecturer.specialization}
-                    </Typography>
+                      {!lecturer.rating || lecturer.rating === 0 ? (
+                        // Hiển thị "Chưa có đánh giá" khi không có rating
+                        <Typography
+                          sx={{
+                            color: "gray",
+                            fontSize: "12px",
+                            fontStyle: "italic",
+                          }}
+                        >
+                          Chưa có đánh giá
+                        </Typography>
+                      ) : (
+                        <>
+                          <Typography
+                            sx={{
+                              color: "orange",
+                              fontSize: "12px",
+                              fontWeight: "bold",
+                              minWidth: "28px",
+                            }}
+                          >
+                            {lecturer.rating.toFixed(2)}
+                          </Typography>
+                          
+                          {/* 5 Stars Rating Display */}
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.1 }}>
+                            {[1, 2, 3, 4, 5].map((star) => {
+                              const rating = lecturer.rating || 0;
+                              let fillPercentage = 0;
+                              
+                              if (rating >= star) {
+                                // Ngôi sao được tô đầy hoàn toàn
+                                fillPercentage = 100;
+                              } else if (rating > star - 1) {
+                                // Ngôi sao được tô một phần dựa trên phần thập phân
+                                fillPercentage = (rating - (star - 1)) * 100;
+                              }
+                              
+                              return (
+                                <Box
+                                  key={star}
+                                  sx={{
+                                    position: "relative",
+                                    fontSize: "12px",
+                                    lineHeight: 1,
+                                  }}
+                                >
+                                  {/* Background star (gray) */}
+                                  <Typography
+                                    sx={{
+                                      color: "#e0e0e0",
+                                      fontSize: "12px",
+                                      lineHeight: 1,
+                                    }}
+                                  >
+                                    ★
+                                  </Typography>
+                                  
+                                  {/* Filled star overlay */}
+                                  {fillPercentage > 0 && (
+                                    <Typography
+                                      sx={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        color: "#ffa726",
+                                        fontSize: "12px",
+                                        lineHeight: 1,
+                                        overflow: "hidden",
+                                        width: `${fillPercentage}%`,
+                                      }}
+                                    >
+                                      ★
+                                    </Typography>
+                                  )}
+                                </Box>
+                              );
+                            })}
+                          </Box>
+                        </>
+                      )}
+                    </Box>
                   </Box>
                 </Box>
               </motion.div>
@@ -306,6 +407,37 @@ const LecturerCarousel: React.FC<LecturerCarouselProps> = ({
             >
               <ChevronRight />
             </IconButton>
+          </Box>
+
+          {/* View All Button */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              mt: 4,
+            }}
+          >
+            <Button
+              onClick={() => navigate("/guest/lecturers")}
+              variant="outlined"
+              sx={{
+                borderRadius: "25px",
+                px: 4,
+                py: 1.5,
+                fontWeight: "bold",
+                borderColor: "#1976d2",
+                color: "#1976d2",
+                "&:hover": {
+                  backgroundColor: "#1976d2",
+                  color: "white",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 4px 12px rgba(25, 118, 210, 0.3)",
+                },
+                transition: "all 0.3s ease",
+              }}
+            >
+              Xem tất cả giảng viên
+            </Button>
           </Box>
         </Box>
       </Box>

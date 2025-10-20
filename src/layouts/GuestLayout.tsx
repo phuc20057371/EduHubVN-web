@@ -306,7 +306,7 @@ const GuestLayout = () => {
           flex: 1,
           bgcolor: colors.background.primary,
           width: "100%",
-          pt: "80px", // Add padding-top for fixed header
+          pt: "90px", // Add padding-top for fixed header
           transition: "background-color 0.3s ease",
         }}
       >

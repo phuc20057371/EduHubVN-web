@@ -9,146 +9,6 @@ import { setTrainingPrograms2 } from "../../redux/slice/TrainingProgramSlice2";
 import { getAcademicRank } from "../../utils/ChangeText";
 import { API } from "../../utils/Fetch";
 
-// Mock data fallback — use API data when available
-const mockInstructors = [
-  {
-    id: "1",
-    fullName: "TS. Nguyễn Văn A",
-    specialization: "Lĩnh Vực/ Chuyên Ngành",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=240&h=240&fit=crop&crop=face",
-    academicRank: "TS",
-    experienceYears: 15,
-    field: "ART",
-  },
-  {
-    id: "2",
-    fullName: "ThS. Nguyễn Văn B",
-    specialization: "Lĩnh Vực/ Chuyên Ngành",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=240&h=240&fit=crop&crop=face",
-    academicRank: "ThS",
-    experienceYears: 12,
-    field: "SOFT SKILL",
-  },
-  {
-    id: "3",
-    fullName: "KS. Nguyễn Văn C",
-    specialization: "Lĩnh Vực/ Chuyên Ngành",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=240&h=240&fit=crop&crop=face",
-    academicRank: "KS",
-    experienceYears: 10,
-    field: "CEH",
-  },
-  {
-    id: "4",
-    fullName: "MBA. Nguyễn Văn D",
-    specialization: "Lĩnh Vực/ Chuyên Ngành",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=240&h=240&fit=crop&crop=face",
-    academicRank: "MBA",
-    experienceYears: 8,
-    field: "DATA",
-  },
-  {
-    id: "5",
-    fullName: "PGS. Nguyễn Văn E",
-    specialization: "Lĩnh Vực/ Chuyên Ngành",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=240&h=240&fit=crop&crop=face",
-    academicRank: "PGS.TS",
-    experienceYears: 20,
-    field: "BUSINESS",
-  },
-  {
-    id: "6",
-    fullName: "TS. Trần Văn F",
-    specialization: "Chuyên gia AI",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=240&h=240&fit=crop&crop=face",
-    academicRank: "TS",
-    experienceYears: 9,
-  },
-  {
-    id: "7",
-    fullName: "ThS. Lê Văn G",
-    specialization: "Chuyên gia Security",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=240&h=240&fit=crop&crop=face",
-    academicRank: "ThS",
-    experienceYears: 11,
-  },
-];
-
-const mockCourses = [
-  {
-    id: 101,
-    name: "MOS Word Master",
-    price: 990000,
-    rating: 4.8,
-    lectures: 22,
-    tags: ["MOS", "Word"],
-    banner:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=450&fit=crop",
-    level: "Cơ bản",
-    duration: "12 giờ",
-    overview: "Thành thạo Word phục vụ thi MOS và công việc.",
-  },
-  {
-    id: 102,
-    name: "Excel Nâng Cao",
-    price: 1490000,
-    rating: 4.7,
-    lectures: 30,
-    tags: ["MOS", "Excel"],
-    banner:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop",
-    level: "Nâng cao",
-    duration: "18 giờ",
-    overview: "Pivot, Power Query, Dashboard chuyên nghiệp.",
-  },
-  {
-    id: 103,
-    name: "PowerPoint Chuyên Nghiệp",
-    price: 1290000,
-    rating: 4.6,
-    lectures: 18,
-    tags: ["MOS", "PowerPoint"],
-    banner:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop",
-    level: "Cơ bản",
-    duration: "10 giờ",
-    overview: "Thiết kế slide thuyết phục & chuẩn thương hiệu.",
-  },
-  {
-    id: 104,
-    name: "Web Dev Cơ Bản",
-    price: 1990000,
-    rating: 4.5,
-    lectures: 40,
-    tags: ["WebDev"],
-    banner:
-      "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=800&h=450&fit=crop",
-    level: "Cơ bản",
-    duration: "24 giờ",
-    overview: "HTML/CSS/JS & tư duy lập trình nền tảng.",
-  },
-  {
-    id: 105,
-    name: "AI cho Doanh Nghiệp",
-    price: 2490000,
-    rating: 4.9,
-    lectures: 12,
-    tags: ["AI"],
-    banner:
-      "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=450&fit=crop",
-    level: "Chuyên đề",
-    duration: "8 giờ",
-    overview: "Ứng dụng AI vào quy trình & năng suất doanh nghiệp.",
-  },
-];
-
 // Custom hook để lấy dữ liệu top 7 giảng viên từ API
 function useTopLecturers() {
   const [lecturers, setLecturers] = useState<any[]>([]);
@@ -161,8 +21,8 @@ function useTopLecturers() {
         setLoading(true);
         setError(null);
 
-        const response = await API.public.getTop7Lecturers();
-        console.log("✅ Top 7 Lecturers API Response:", response);
+        const response = await API.public.getTop6Lecturers();
+        console.log("✅ Top 6 Lecturers API Response:", response);
 
         // Xử lý response theo cấu trúc thực tế
         let lecturersData = [];
@@ -189,13 +49,9 @@ function useTopLecturers() {
           setLecturers(lecturersData);
         } else {
           console.warn("⚠️ Không có giảng viên từ API, sử dụng mock data");
-          // Fallback to mock data nếu API không trả về gì
-          setLecturers(mockInstructors);
         }
       } catch (err: any) {
         console.error("❌ Lỗi khi lấy dữ liệu giảng viên:", err);
-        // Fallback to mock data khi có lỗi
-        setLecturers(mockInstructors);
       } finally {
         setLoading(false);
       }
@@ -938,20 +794,13 @@ function useTrainingProgramDetail(programId: string, trainingPrograms: any[]) {
         );
 
         // Tìm training program trong danh sách đã có (so sánh string)
-        const foundProgram = trainingPrograms.find(
-          (p) => p.id === programId,
-        );
+        const foundProgram = trainingPrograms.find((p) => p.id === programId);
 
         if (foundProgram) {
           console.log("✅ Found training program:", foundProgram.title);
           setProgram(foundProgram);
         } else {
-          console.warn(
-            "⚠️ Không tìm thấy chương trình đào tạo trong danh sách, sử dụng mock data",
-          );
-          // Fallback to mock data nếu không tìm thấy (tạm thời dùng mock course đầu tiên)
-          const mockCourse = mockCourses[0];
-          setProgram(mockCourse);
+          console.warn("⚠️ Không tìm thấy chương trình đào tạo trong danh sách, sử dụng mock data",);
         }
       } catch (err: any) {
         console.error("❌ Lỗi khi tìm chương trình đào tạo:", err);
@@ -1044,7 +893,9 @@ function CourseDetail({ id, back }: { id: string; back: () => void }) {
                 {program.title || "Chương trình đào tạo"}
               </h1>
               <p className="mt-3 text-white/90">
-                {program.shortDescription || program.description || "Mô tả chương trình đào tạo"}
+                {program.shortDescription ||
+                  program.description ||
+                  "Mô tả chương trình đào tạo"}
               </p>
               <div className="mt-4 flex flex-wrap gap-3 text-sm">
                 <span className="rounded-full border border-white/30 bg-white/15 px-3 py-1">
@@ -1193,13 +1044,15 @@ function CourseDetail({ id, back }: { id: string; back: () => void }) {
 
                 {program.startDate && (
                   <li>
-                    <strong>Ngày bắt đầu:</strong> {new Date(program.startDate).toLocaleDateString("vi-VN")}
+                    <strong>Ngày bắt đầu:</strong>{" "}
+                    {new Date(program.startDate).toLocaleDateString("vi-VN")}
                   </li>
                 )}
 
                 {program.endDate && (
                   <li>
-                    <strong>Ngày kết thúc:</strong> {new Date(program.endDate).toLocaleDateString("vi-VN")}
+                    <strong>Ngày kết thúc:</strong>{" "}
+                    {new Date(program.endDate).toLocaleDateString("vi-VN")}
                   </li>
                 )}
 
@@ -1313,7 +1166,9 @@ function CourseDetail({ id, back }: { id: string; back: () => void }) {
 
                             {lecturer.experienceYears && (
                               <div className="mt-1 text-xs text-gray-500">
-                                {lecturer.experienceYears} năm KN {lecturer.jobField && `trong lĩnh vực ${lecturer.jobField}`}
+                                {lecturer.experienceYears} năm KN{" "}
+                                {lecturer.jobField &&
+                                  `trong lĩnh vực ${lecturer.jobField}`}
                               </div>
                             )}
                           </div>

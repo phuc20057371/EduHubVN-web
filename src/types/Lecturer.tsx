@@ -1,3 +1,6 @@
+import type { Certificate } from "./Certificate";
+import type { Degree } from "./Degree";
+
 export type Lecturer = {
   id: string;
   lecturerId: string;
@@ -19,4 +22,24 @@ export type Lecturer = {
   updatedAt: string;
   email?: string;
   hidden?: boolean;
+}
+
+export type LecturerBasicPublic = {
+  id: String;
+  fullName: String;
+  gender: Boolean;
+  bio: String;
+  avatarUrl: String;
+  academicRank: String;
+  specialization: String;
+  experienceYears: Number;
+  jobField: String;
+  rating?: Number;
+  status: String;
+  createdAt: String;
+  updatedAt: String;
+
+  degrees?: Array<Degree>;
+  certifications?: Array<Certificate>;
+
 }

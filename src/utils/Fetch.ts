@@ -1,3 +1,4 @@
+
 import axios from "axios";
 import type { InstitutionRequest } from "../types/InstitutionRequest";
 import type { LoginRequest } from "../types/LoginRequest";
@@ -461,6 +462,7 @@ export const API = {
     //   fetch.post(`/api/v1/admin/update-training-program/${id}`, data),
     updateProgramUnits: (id: string, data: any) =>
       fetch.post(`/api/v1/admin/update-training-program-units/${id}`, data),
+    
   },
   public: {
     getAllCourses: () => {
@@ -470,6 +472,15 @@ export const API = {
       return fetch.get(`/public/top-7-lecturers`);
     },
     getAllPrograms: () => fetch.get("/public/get-all-training-programs"),
+    getTop6Lecturers: () => {
+      return fetch.get("/public/get-top-6-lecturers");
+    },
+    getAllPublicLecturers: () => {
+      return fetch.get("/public/get-all-lecturers-with-rating");
+    },
+    getLecturerbyId: (id: string) => {
+      return fetch.get(`/public/get-lecturer-by-id-with-rating?id=${id}`);
+    },
   },
   other: {
     getLecturerProfile: (id: string) => {
