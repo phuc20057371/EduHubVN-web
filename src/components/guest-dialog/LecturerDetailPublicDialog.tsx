@@ -42,17 +42,17 @@ const LecturerDetailPublicDialog: React.FC<LecturerDetailPublicDialogProps> = ({
         >
           {rating.toFixed(2)}
         </Typography>
-        
+
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.1 }}>
           {[1, 2, 3, 4, 5].map((star) => {
             let fillPercentage = 0;
-            
+
             if (rating >= star) {
               fillPercentage = 100;
             } else if (rating > star - 1) {
               fillPercentage = (rating - (star - 1)) * 100;
             }
-            
+
             return (
               <Box
                 key={star}
@@ -71,7 +71,7 @@ const LecturerDetailPublicDialog: React.FC<LecturerDetailPublicDialogProps> = ({
                 >
                   ★
                 </Typography>
-                
+
                 {fillPercentage > 0 && (
                   <Typography
                     sx={{
@@ -97,10 +97,10 @@ const LecturerDetailPublicDialog: React.FC<LecturerDetailPublicDialogProps> = ({
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="md" 
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
       fullWidth
       PaperProps={{
         sx: {
@@ -154,7 +154,7 @@ const LecturerDetailPublicDialog: React.FC<LecturerDetailPublicDialogProps> = ({
                 border: "4px solid #f0f0f0",
               }}
             />
-            
+
             {/* Rating */}
             <Box sx={{ mb: 2 }}>
               {!lecturer.rating || lecturer.rating === 0 ? (
@@ -175,7 +175,9 @@ const LecturerDetailPublicDialog: React.FC<LecturerDetailPublicDialogProps> = ({
 
             {/* Status */}
             <Chip
-              label={lecturer.status === "APPROVED" ? "Đã xác thực" : lecturer.status}
+              label={
+                lecturer.status === "APPROVED" ? "Đã xác thực" : lecturer.status
+              }
               color={lecturer.status === "APPROVED" ? "success" : "default"}
               size="small"
             />
@@ -203,15 +205,6 @@ const LecturerDetailPublicDialog: React.FC<LecturerDetailPublicDialogProps> = ({
             >
               <Box>
                 <Typography variant="subtitle2" color="text.secondary">
-                  Giới tính
-                </Typography>
-                <Typography variant="body1">
-                  {lecturer.gender ? "Nam" : "Nữ"}
-                </Typography>
-              </Box>
-
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">
                   Kinh nghiệm
                 </Typography>
                 <Typography variant="body1">
@@ -223,11 +216,16 @@ const LecturerDetailPublicDialog: React.FC<LecturerDetailPublicDialogProps> = ({
                 <Typography variant="subtitle2" color="text.secondary">
                   Lĩnh vực
                 </Typography>
+                <Typography variant="body1">{lecturer.jobField}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Giới tính
+                </Typography>
                 <Typography variant="body1">
-                  {lecturer.jobField}
+                  {lecturer.gender ? "Nam" : "Nữ"}
                 </Typography>
               </Box>
-
             </Box>
           </Box>
         </Box>

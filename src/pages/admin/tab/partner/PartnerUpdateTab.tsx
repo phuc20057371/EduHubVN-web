@@ -43,7 +43,7 @@ const PartnerUpdateTab: React.FC<PartnerUpdateTabProps> = ({
       const searchLower = updateSearchTerm.toLowerCase();
       filtered = filtered.filter((item: any) => {
         const partner = item.partnerOrganization;
-        const partnerUpdate = item.partnerOrganizationUpdate;
+        // const partnerUpdate = item.partnerOrganizationUpdate;
 
         return (
           partner?.id?.toString().includes(updateSearchTerm) ||
@@ -55,14 +55,15 @@ const PartnerUpdateTab: React.FC<PartnerUpdateTabProps> = ({
           partner?.address?.toLowerCase().includes(searchLower) ||
           partner?.description?.toLowerCase().includes(searchLower) ||
           partner?.phoneNumber?.includes(updateSearchTerm) ||
-          partner?.website?.toLowerCase().includes(searchLower) ||
-          partnerUpdate?.organizationName
-            ?.toLowerCase()
-            .includes(searchLower) ||
-          partnerUpdate?.representativeName
-            ?.toLowerCase()
-            .includes(searchLower) ||
-          partnerUpdate?.address?.toLowerCase().includes(searchLower)
+          partner?.website?.toLowerCase().includes(searchLower) 
+          // ||
+          // partnerUpdate?.organizationName
+          //   ?.toLowerCase()
+          //   .includes(searchLower) ||
+          // partnerUpdate?.representativeName
+          //   ?.toLowerCase()
+          //   .includes(searchLower) ||
+          // partnerUpdate?.address?.toLowerCase().includes(searchLower)
         );
       });
     }
@@ -366,7 +367,7 @@ const PartnerUpdateTab: React.FC<PartnerUpdateTabProps> = ({
                         sx={{ mb: 1 }}
                       >
                         <strong>Cập nhật:</strong>{" "}
-                        {getRelativeTime(partnerUpdate.updatedAt)}
+                        {getRelativeTime(partnerUpdate.updatedAt) || "Không có thông tin"}
                       </Typography>
                     </Box>
                     <Box sx={{ flexGrow: 1 }} />

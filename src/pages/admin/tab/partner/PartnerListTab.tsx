@@ -1,7 +1,28 @@
-import { useState, useMemo } from "react";
+import { Add, Domain, MoreVert } from "@mui/icons-material";
+import ClearIcon from "@mui/icons-material/Clear";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import SearchIcon from "@mui/icons-material/Search";
 import {
+  Alert,
+  Avatar,
   Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -9,36 +30,15 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
-  Typography,
   TextField,
-  InputAdornment,
-  Button,
-  Chip,
-  Avatar,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  Menu,
-  ListItemIcon,
-  ListItemText,
   Tooltip,
+  Typography,
 } from "@mui/material";
-import { useDispatch } from "react-redux";
 import { visuallyHidden } from "@mui/utils";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from "@mui/icons-material/Clear";
-import { Domain, Add, MoreVert } from "@mui/icons-material";
-import type { Partner } from "../../../../types/Parner";
+import { useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import { removePartner } from "../../../../redux/slice/PartnerSlice";
+import type { Partner } from "../../../../types/Parner";
 import { API } from "../../../../utils/Fetch";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -119,6 +119,7 @@ interface EnhancedTableProps {
 import { useTheme } from "@mui/material/styles";
 import { setPartnerPendingUpdate } from "../../../../redux/slice/PartnerPendingUpdateSlice";
 import { getStatus, getStatusColor } from "../../../../utils/ChangeText";
+import { setTrainingProgramsRequest2 } from "../../../../redux/slice/TrainingProgramRequestSlice2";
 
 function EnhancedTableHead(props: EnhancedTableProps) {
   const theme = useTheme();
@@ -269,44 +270,6 @@ function EnhancedTableToolbar({
           </Box>
         </Box>
 
-        {/* {numSelected > 0 && (
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Tooltip title="Chỉnh sửa">
-              <IconButton
-                onClick={onEdit}
-                sx={{
-                  bgcolor: "primary.main",
-                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  color: "white",
-                  width: 48,
-                  height: 48,
-                  "&:hover": {
-                    bgcolor: "primary.dark",
-                    transform: "scale(1.05)",
-                  },
-                }}
-              >
-                <EditIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Xóa">
-              <IconButton
-                sx={{
-                  bgcolor: "error.main",
-                  color: "white",
-                  width: 48,
-                  height: 48,
-                  "&:hover": {
-                    bgcolor: "error.dark",
-                    transform: "scale(1.05)",
-                  },
-                }}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        )} */}
       </Box>
 
       {/* Filter Controls */}
@@ -572,7 +535,9 @@ const PartnerListTab: React.FC<PartnerListTabProps> = ({
       setPartnerToDelete(null);
       if (res.data.success) {
         const res1 = await API.admin.getPartnerPendingUpdate();
-        dispatch(setPartnerPendingUpdate(res1.data.data));
+        dispatch(setPartnerPendingUpdate(res1.data.data));   
+        const res2 = await API.program.getAllProgramRequests();
+        dispatch(setTrainingProgramsRequest2(res2.data.data));
       }
     } catch (error) {
       console.error("Error deleting partner:", error);

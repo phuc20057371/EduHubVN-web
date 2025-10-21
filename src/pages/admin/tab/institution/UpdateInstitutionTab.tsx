@@ -51,7 +51,7 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
 
       filtered = filtered.filter((item: any) => {
         const edu = item.educationInstitution;
-        const eduUpdate = item.educationInstitutionUpdate;
+        // const eduUpdate = item.educationInstitutionUpdate;
 
         return (
           // Search by ID (exact match or partial match for UUID)
@@ -66,10 +66,11 @@ const UpdateInstitutionTab: React.FC<UpdateInstitutionTabProps> = ({
           edu?.address?.toLowerCase().includes(searchLower) ||
           edu?.description?.toLowerCase().includes(searchLower) ||
           edu?.phoneNumber?.includes(updateSearchTerm) ||
-          edu?.website?.toLowerCase().includes(searchLower) ||
-          eduUpdate?.institutionName?.toLowerCase().includes(searchLower) ||
-          eduUpdate?.representativeName?.toLowerCase().includes(searchLower) ||
-          eduUpdate?.address?.toLowerCase().includes(searchLower)
+          edu?.website?.toLowerCase().includes(searchLower) 
+          // ||
+          // eduUpdate?.institutionName?.toLowerCase().includes(searchLower) ||
+          // eduUpdate?.representativeName?.toLowerCase().includes(searchLower) ||
+          // eduUpdate?.address?.toLowerCase().includes(searchLower)
         );
       });
     }
