@@ -55,6 +55,8 @@ import AccountConfigInstitution from "../pages/institution/AccountConfigInstitut
 import AccountConfigPartner from "../pages/partner/AccountConfigPartner";
 import AdminTrainingProgram from "../pages/admin/AdminTrainingProgram";
 import GuestLecturerPage from "../pages/guest/GuestLecturerPage";
+import GuestTrainingProgramPage from "../pages/guest/GuestTrainingProgramPage";
+import GuestTPDetailPage from "../pages/guest/GuestTPDetailPage";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -69,6 +71,8 @@ export const router = createBrowserRouter(
       <Route element={<GuestLayout />}>
         <Route path="/guest" element={<GuestPage />} />
         <Route path="/guest/lecturers" element={<GuestLecturerPage />} />
+        <Route path="/guest/training-programs" element={<GuestTrainingProgramPage />} />
+        <Route path="/guest/training-programs/:id" element={<GuestTPDetailPage />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>

@@ -19,7 +19,7 @@ import lecturerProfileUpdateReducer from "./slice/LecturerProfileUpdateSlice";
 
 import lecturerProfileReducer from "./slice/LecturerProfileSlice";
 import lecturerRequestReducer from "./slice/LecturerRquestSlice";
-import CoursesOfLecturerReducer from "./slice/CoursesOfLecturer"
+import CoursesOfLecturerReducer from "./slice/CoursesOfLecturer";
 
 import requestDegreeReducer from "./slice/RequestDegreeSlice";
 import requestCertificationReducer from "./slice/RequestCertificationSlice";
@@ -33,6 +33,7 @@ import TrainingProgramReducer from "./slice/TrainingProgramSlice";
 import TrainingProgramReducer2 from "./slice/TrainingProgramSlice2";
 import trainingProgramRequestReducer from "./slice/TrainingProgramRequestSlice";
 import trainingProgramRequestReducer2 from "./slice/TrainingProgramRequestSlice2";
+import TrainingProgramPublicReducer from "./slice/TrainingProgramPublicSlice";
 
 export const store = configureStore({
   reducer: {
@@ -62,14 +63,13 @@ export const store = configureStore({
     trainingProgram2: TrainingProgramReducer2,
     trainingProgramRequest: trainingProgramRequestReducer,
     trainingProgramRequest2: trainingProgramRequestReducer2,
+    trainingProgramPublic: TrainingProgramPublicReducer,
 
     requestDegree: requestDegreeReducer,
     requestCertification: requestCertificationReducer,
     requestAttendedCourse: requestAttendedCourseReducer,
     requestOwnedCourse: requestOwnedCourseReducer,
     requestResearchProject: requestResearchProjectReducer,
-    
-
 
     subAdmin: subAdminReducer,
   },

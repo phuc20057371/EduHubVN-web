@@ -471,16 +471,20 @@ export const API = {
     getTop7Lecturers: () => {
       return fetch.get(`/public/top-7-lecturers`);
     },
-    getAllPrograms: () => fetch.get("/public/get-all-training-programs"),
+    getAllTrainingPrograms: () => fetch.get("/public/get-all-training-programs"),
     getTop6Lecturers: () => {
       return fetch.get("/public/get-top-6-lecturers");
     },
+
     getAllPublicLecturers: () => {
       return fetch.get("/public/get-all-lecturers-with-rating");
     },
     getLecturerbyId: (id: string) => {
       return fetch.get(`/public/get-lecturer-by-id-with-rating?id=${id}`);
     },
+    getTrainingProgrambyId: (id: string) => {
+      return fetch.get(`/public/get-training-program-by-id?id=${id}`);
+    }
   },
   other: {
     getLecturerProfile: (id: string) => {
