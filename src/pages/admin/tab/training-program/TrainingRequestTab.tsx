@@ -21,6 +21,9 @@ import {
   FormControl,
   InputLabel,
   Select,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 import AssignmentIcon from "@mui/icons-material/Assignment";
@@ -29,6 +32,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { API } from "../../../../utils/Fetch";
@@ -68,50 +73,57 @@ interface HeadCell {
   numeric: boolean;
 }
 
-const headCells: readonly HeadCell[] = [
-  {
-    id: "title",
-    numeric: false,
-    disablePadding: false,
-    label: "Tiêu đề yêu cầu",
-  },
-  {
-    id: "partnerOrganization",
-    numeric: false,
-    disablePadding: false,
-    label: "Tổ chức",
-  },
-  {
-    id: "status",
-    numeric: false,
-    disablePadding: false,
-    label: "Trạng thái",
-  },
-  {
-    id: "description",
-    numeric: false,
-    disablePadding: false,
-    label: "Mô tả",
-  },
-  {
-    id: "fileUrl",
-    numeric: false,
-    disablePadding: false,
-    label: "File đính kèm",
-  },
-  {
-    id: "updatedAt",
-    numeric: false,
-    disablePadding: false,
-    label: "Thời gian",
-  },
-  {
-    id: "id",
-    numeric: false,
-    disablePadding: false,
-    label: "Thao tác",
-  },
-];
+const getHeadCells = (hasActionPermission: boolean): readonly HeadCell[] => {
+  const baseCells = [
+    {
+      id: "title" as keyof TrainingProgramRequest,
+      numeric: false,
+      disablePadding: false,
+      label: "Tiêu đề yêu cầu",
+    },
+    {
+      id: "partnerOrganization" as keyof TrainingProgramRequest,
+      numeric: false,
+      disablePadding: false,
+      label: "Tổ chức",
+    },
+    {
+      id: "status" as keyof TrainingProgramRequest,
+      numeric: false,
+      disablePadding: false,
+      label: "Trạng thái",
+    },
+    {
+      id: "description" as keyof TrainingProgramRequest,
+      numeric: false,
+      disablePadding: false,
+      label: "Mô tả",
+    },
+    {
+      id: "fileUrl" as keyof TrainingProgramRequest,
+      numeric: false,
+      disablePadding: false,
+      label: "File đính kèm",
+    },
+    {
+      id: "updatedAt" as keyof TrainingProgramRequest,
+      numeric: false,
+      disablePadding: false,
+      label: "Thời gian",
+    },
+  ];
+
+  if (hasActionPermission) {
+    baseCells.push({
+      id: "id" as keyof TrainingProgramRequest,
+      numeric: false,
+      disablePadding: false,
+      label: "Thao tác",
+    });
+  }
+
+  return baseCells;
+};
 
 interface EnhancedTableProps {
   onRequestSort: (
@@ -122,10 +134,11 @@ interface EnhancedTableProps {
   order: Order;
   orderBy: string;
   rowCount: number;
+  headCells: readonly HeadCell[];
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
-  const { order, orderBy, onRequestSort } = props;
+  const { order, orderBy, onRequestSort, headCells } = props;
   const theme = useTheme();
 
   const createSortHandler =
@@ -235,6 +248,21 @@ const TrainingRequestTab = () => {
   const trainingRequests = useSelector(
     (state: any) => state.trainingProgramRequest2 || [],
   );
+  const userProfile = useSelector((state: any) => state.userProfile);
+
+  // Kiểm tra quyền hạn để hiển thị cột thao tác
+  const hasActionPermission = useMemo(() => {
+    return (
+      userProfile?.role === "ADMIN" ||
+      userProfile?.permissions?.includes("PROGRAM_CREATE") ||
+      userProfile?.permissions?.includes("PROGRAM_UPDATE")
+    );
+  }, [userProfile]);
+
+  // Tạo headCells động dựa trên quyền hạn
+  const headCells = useMemo(() => {
+    return getHeadCells(hasActionPermission);
+  }, [hasActionPermission]);
 
   useEffect(() => {
     const fetchTrainingRequests = async () => {
@@ -335,12 +363,52 @@ const TrainingRequestTab = () => {
     }
     handleMenuClose();
   };
-  const handleRejectRequest = () => {
+  const handleRejectRequest = async () => {
     if (selectedMenuRequest) {
-      // TODO: Implement reject request API call
-      console.log("Reject request:", selectedMenuRequest);
-      // Ví dụ API call:
-      // API.program.rejectProgramRequest(selectedMenuRequest.id)
+      try {
+        setLoading(true);
+        const response = await API.program.rejectProgramRequest({ id: selectedMenuRequest.id });
+        if (response.data.success) {
+          toast.success("Từ chối yêu cầu thành công!");
+          // Refresh data sau khi từ chối
+          const refreshResponse = await API.program.getAllProgramRequests();
+          if (refreshResponse.data.success) {
+            dispatch(setTrainingProgramsRequest2(refreshResponse.data.data));
+          }
+        } else {
+          toast.error("Từ chối yêu cầu thất bại!");
+        }
+      } catch (error) {
+        console.error("Error rejecting request:", error);
+        toast.error("Có lỗi xảy ra khi từ chối yêu cầu!");
+      } finally {
+        setLoading(false);
+      }
+    }
+    handleMenuClose();
+  };
+
+  const handleReconsiderRequest = async () => {
+    if (selectedMenuRequest) {
+      try {
+        setLoading(true);
+        const response = await API.program.unrejectProgramRequest({ id: selectedMenuRequest.id });
+        if (response.data.success) {
+          toast.success("Xem xét lại yêu cầu thành công!");
+          // Refresh data sau khi xem xét lại
+          const refreshResponse = await API.program.getAllProgramRequests();
+          if (refreshResponse.data.success) {
+            dispatch(setTrainingProgramsRequest2(refreshResponse.data.data));
+          }
+        } else {
+          toast.error("Xem xét lại yêu cầu thất bại!");
+        }
+      } catch (error) {
+        console.error("Error reconsidering request:", error);
+        toast.error("Có lỗi xảy ra khi xem xét lại yêu cầu!");
+      } finally {
+        setLoading(false);
+      }
     }
     handleMenuClose();
   };
@@ -619,6 +687,7 @@ const TrainingRequestTab = () => {
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={filteredRequests.length}
+              headCells={headCells}
             />
             <TableBody>
               {loading ? (
@@ -707,18 +776,50 @@ const TrainingRequestTab = () => {
                       </TableCell>
 
                       {/* Mô tả */}
-                      <TableCell>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            maxWidth: 200,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {request.description || "Không có mô tả"}
-                        </Typography>
+                      <TableCell sx={{ maxWidth: 500 }}>
+                        {request.description ? (
+                          <Accordion 
+                            elevation={0} 
+                            sx={{ 
+                              boxShadow: 'none',
+                              '&:before': { display: 'none' },
+                              minHeight: 'auto',
+                              padding: 1,
+                            }}
+                          >
+                            <AccordionSummary
+                              expandIcon={<ExpandMoreIcon />}
+                              sx={{ 
+                                minHeight: 'auto',
+                                '& .MuiAccordionSummary-content': { 
+                                  margin: '8px 0',
+                                },
+                                padding: 0,
+                              }}
+                            >
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  maxWidth: 200,
+                                }}
+                              >
+                                Xem mô tả
+                              </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ padding: '8px 0 0 0' }}>
+                              <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
+                                {request.description}
+                              </Typography>
+                            </AccordionDetails>
+                          </Accordion>
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">
+                            Không có mô tả
+                          </Typography>
+                        )}
                       </TableCell>
 
                       {/* File đính kèm */}
@@ -750,15 +851,28 @@ const TrainingRequestTab = () => {
                         </Typography>
                       </TableCell>
 
-                      {/* Thao tác */}
-                      <TableCell>
-                        <IconButton
-                          onClick={(event) => handleMenuClick(event, request)}
-                          size="small"
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
-                      </TableCell>
+                      {/* Thao tác - chỉ hiển thị nếu có quyền */}
+                      {hasActionPermission && (
+                        <TableCell>
+                          {/* Chỉ hiển thị nút thao tác nếu có ít nhất một quyền cho request này */}
+                          {((request.status === "PENDING" && 
+                            ((userProfile?.role === "ADMIN" || userProfile?.permissions?.includes("PROGRAM_CREATE")) ||
+                             (userProfile?.role === "ADMIN" || userProfile?.permissions?.includes("PROGRAM_UPDATE")))) ||
+                           (request.status === "REJECTED" && 
+                            (userProfile?.role === "ADMIN" || userProfile?.permissions?.includes("PROGRAM_UPDATE")))) ? (
+                            <IconButton
+                              onClick={(event) => handleMenuClick(event, request)}
+                              size="small"
+                            >
+                              <MoreVertIcon />
+                            </IconButton>
+                          ) : (
+                            <Typography variant="body2" color="text.secondary">
+                              -
+                            </Typography>
+                          )}
+                        </TableCell>
+                      )}
                     </TableRow>
                   );
                 })
@@ -775,16 +889,48 @@ const TrainingRequestTab = () => {
           transformOrigin={{ horizontal: "right", vertical: "top" }}
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >
-          {selectedMenuRequest?.status !== "APPROVED" && (
-            <MenuItem onClick={handleCreateProgram}>
-              <Add sx={{ mr: 1 }} />
-              Tạo CT
+          {selectedMenuRequest?.status === "PENDING" && (
+            <>
+              {(userProfile?.role === "ADMIN" || userProfile?.permissions?.includes("PROGRAM_CREATE")) && (
+                <MenuItem onClick={handleCreateProgram}>
+                  <Add sx={{ mr: 1 }} />
+                  Tạo CT
+                </MenuItem>
+              )}
+              {(userProfile?.role === "ADMIN" || userProfile?.permissions?.includes("PROGRAM_UPDATE")) && (
+                <MenuItem onClick={handleRejectRequest} sx={{ color: "error.main" }}>
+                  <DeleteIcon sx={{ mr: 1 }} />
+                  Từ chối
+                </MenuItem>
+              )}
+            </>
+          )}
+          {selectedMenuRequest?.status === "REJECTED" && 
+           (userProfile?.role === "ADMIN" || userProfile?.permissions?.includes("PROGRAM_UPDATE")) && (
+            <MenuItem onClick={handleReconsiderRequest} sx={{ color: "primary.main" }}>
+              <VisibilityIcon sx={{ mr: 1 }} />
+              Xem xét lại
             </MenuItem>
           )}
-          <MenuItem onClick={handleRejectRequest} sx={{ color: "error.main" }}>
-            <DeleteIcon sx={{ mr: 1 }} />
-            Từ chối
-          </MenuItem>
+          {selectedMenuRequest?.status === "APPROVED" && (
+            <MenuItem disabled>
+              <Typography variant="body2" color="text.secondary">
+                Không có thao tác
+              </Typography>
+            </MenuItem>
+          )}
+          {/* Hiển thị menu trống nếu không có quyền nào */}
+          {((selectedMenuRequest?.status === "PENDING" && 
+             !(userProfile?.role === "ADMIN" || userProfile?.permissions?.includes("PROGRAM_CREATE")) &&
+             !(userProfile?.role === "ADMIN" || userProfile?.permissions?.includes("PROGRAM_UPDATE"))) ||
+            (selectedMenuRequest?.status === "REJECTED" && 
+             !(userProfile?.role === "ADMIN" || userProfile?.permissions?.includes("PROGRAM_UPDATE")))) && (
+            <MenuItem disabled>
+              <Typography variant="body2" color="text.secondary">
+                Không có quyền thực hiện thao tác
+              </Typography>
+            </MenuItem>
+          )}
         </Menu>
       </Paper>
 

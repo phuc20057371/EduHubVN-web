@@ -4,10 +4,10 @@ import {
   Close as CloseIcon,
   Description as DescriptionIcon,
   MenuBook as MenuBookIcon,
-  Person as PersonIcon,
   School as SchoolIcon,
   Star as StarIcon,
   AccessTime as TimeIcon,
+  Restore as RestoreIcon,
 } from "@mui/icons-material";
 import {
   Avatar,
@@ -22,33 +22,77 @@ import {
   DialogTitle,
   Divider,
   IconButton,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Paper,
   Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import React from "react";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import type { TrainingProgram } from "../../types/TrainingProgram";
+import { getProgramMode, getProgramType } from "../../utils/ChangeText";
+import { API } from "../../utils/Fetch";
+import { toast } from "react-toastify";
+import ConfirmUnarchiveTrainingProgramDialog from "../general-dialog/ConfirmUnarchiveTrainingProgramDialog";
 
 interface TrainingProgramDialogProps {
   open: boolean;
   onClose: () => void;
   program: TrainingProgram | null;
+  onProgramUpdated?: () => void;
 }
 
 const TrainingProgramDialog: React.FC<TrainingProgramDialogProps> = ({
   open,
   onClose,
   program,
+  onProgramUpdated,
 }) => {
   const theme = useTheme();
-
+  const userProfile = useSelector((state: any) => state.userProfile);
+  
+  // State cho dialog khôi phục
+  const [unarchiveDialogOpen, setUnarchiveDialogOpen] = useState(false);
+  const [unarchiveLoading, setUnarchiveLoading] = useState(false);
+  
   if (!program) return null;
+
+  // Xử lý khôi phục chương trình
+  const handleUnarchiveProgram = () => {
+    setUnarchiveDialogOpen(true);
+  };
+
+  const handleConfirmUnarchive = async () => {
+    if (!program) return;
+
+    try {
+      setUnarchiveLoading(true);
+      const response = await API.program.unarchiveTrainingProgram(program.id);
+      
+      if (response.data && response.data.success) {
+        toast.success("Khôi phục chương trình đào tạo thành công!");
+        setUnarchiveDialogOpen(false);
+        onProgramUpdated?.();
+        onClose();
+      } else {
+        toast.error("Khôi phục chương trình đào tạo không thành công!");
+      }
+    } catch (error: any) {
+      console.error("Error unarchiving training program:", error);
+      toast.error(
+        error.response?.data?.message || "Có lỗi xảy ra khi khôi phục chương trình đào tạo"
+      );
+    } finally {
+      setUnarchiveLoading(false);
+    }
+  };
+
+  const handleUnarchiveDialogClose = () => {
+    if (!unarchiveLoading) {
+      setUnarchiveDialogOpen(false);
+    }
+  };
 
   // Helper functions
   const formatDate = (date: Date) => {
@@ -65,19 +109,6 @@ const TrainingProgramDialog: React.FC<TrainingProgramDialogProps> = ({
       style: "currency",
       currency: "VND",
     }).format(amount);
-  };
-
-  const getProgramModeLabel = (mode: string) => {
-    switch (mode) {
-      case "ONLINE":
-        return "Trực tuyến";
-      case "OFFLINE":
-        return "Trực tiếp";
-      case "HYBRID":
-        return "Kết hợp";
-      default:
-        return mode;
-    }
   };
 
   const getProgramStatusLabel = (status: string) => {
@@ -148,18 +179,41 @@ const TrainingProgramDialog: React.FC<TrainingProgramDialogProps> = ({
         </Typography>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-            <Box sx={{ minWidth: 200, flex: 1 }}>
+          {/* First row */}
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Typography variant="body2" color="textSecondary">
-                Mã chương trình
+                Mã chương trình:
               </Typography>
               <Typography variant="body1" fontWeight="500">
                 {program.trainingProgramId || "Chưa có"}
               </Typography>
             </Box>
-            <Box sx={{ minWidth: 200, flex: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Typography variant="body2" color="textSecondary">
-                Giá nội bộ
+                Trạng thái:
+              </Typography>
+              <Chip
+                label={getProgramStatusLabel(program.programStatus)}
+                color={getProgramStatusColor(program.programStatus) as any}
+                size="small"
+              />
+            </Box>
+          </Box>
+
+          {/* Second row */}
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography variant="body2" color="textSecondary">
+                Giá niêm yết:
+              </Typography>
+              <Typography variant="body1" fontWeight="500" color="primary">
+                {formatCurrency(program.listedPrice || program.publicPrice)}
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography variant="body2" color="textSecondary">
+                Giá nội bộ:
               </Typography>
               <Typography variant="body1" fontWeight="500" color="error">
                 {formatCurrency(program.internalPrice)}
@@ -167,46 +221,19 @@ const TrainingProgramDialog: React.FC<TrainingProgramDialogProps> = ({
             </Box>
           </Box>
 
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-            <Box sx={{ minWidth: 200, flex: 1 }}>
+          {/* Third row */}
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Typography variant="body2" color="textSecondary">
-                Trạng thái
-              </Typography>
-              <Chip
-                label={getProgramStatusLabel(program.programStatus)}
-                color={getProgramStatusColor(program.programStatus) as any}
-                size="small"
-                sx={{ mt: 0.5 }}
-              />
-            </Box>
-            <Box sx={{ minWidth: 200, flex: 1 }}>
-              <Typography variant="body2" color="textSecondary">
-                Hiển thị giá
+                Hiển thị giá:
               </Typography>
               <Chip
                 label={program.priceVisible ? "Có" : "Không"}
                 color={program.priceVisible ? "success" : "default"}
                 size="small"
-                sx={{ mt: 0.5 }}
               />
             </Box>
           </Box>
-
-          {program.user && (
-            <Box>
-              <Typography variant="body2" color="textSecondary">
-                {" "}
-              </Typography>
-              <Box
-                sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}
-              >
-                <Avatar sx={{ width: 24, height: 24 }}>
-                  <PersonIcon fontSize="small" />
-                </Avatar>
-                <Typography variant="body1">{program.user.email}</Typography>
-              </Box>
-            </Box>
-          )}
 
           {/* Tài liệu đính kèm */}
           {program.trainingProgramRequest?.fileUrl && (
@@ -230,7 +257,7 @@ const TrainingProgramDialog: React.FC<TrainingProgramDialogProps> = ({
           {program.syllabusFileUrl && (
             <Box>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
-                Giáo trình
+                Đề cương
               </Typography>
               <Button
                 variant="outlined"
@@ -276,55 +303,94 @@ const TrainingProgramDialog: React.FC<TrainingProgramDialogProps> = ({
             </Box>
           )}
 
-          {/* Title and Description */}
+          {/* Title */}
           <Box>
             <Typography variant="h5" fontWeight="600" sx={{ mb: 1 }}>
               {program.title}
             </Typography>
             {program.subTitle && (
-              <Typography variant="h6" color="textSecondary" sx={{ mb: 2 }}>
+              <Typography variant="h6" color="textSecondary">
                 {program.subTitle}
               </Typography>
             )}
-            <Typography variant="body1" paragraph>
-              {program.shortDescription}
-            </Typography>
-            {program.description && (
-              <Typography variant="body1" paragraph>
-                {program.description}
-              </Typography>
-            )}
           </Box>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+            <Box sx={{ minWidth: 200, flex: 1 }}>
+              <Typography variant="body2" color="textSecondary">
+                Giá công khai
+              </Typography>
+              <Typography variant="body1" fontWeight="600" color="primary">
+                {formatCurrency(program.publicPrice)}
+              </Typography>
+            </Box>
+            <Box sx={{ minWidth: 200, flex: 1 }}>
+              <Typography variant="body2" color="textSecondary">
+                Đánh giá
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <StarIcon color="warning" fontSize="small" />
+                <Typography variant="body1">
+                  {program.rating ? program.rating.toFixed(1) : "Chưa có"}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+          {program.tags && program.tags.length > 0 && (
+            <Box>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                Tags
+              </Typography>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                {program.tags.map((tag, index) => (
+                  <Chip
+                    key={index}
+                    label={tag}
+                    size="small"
+                    variant="outlined"
+                  />
+                ))}
+              </Box>
+            </Box>
+          )}
 
           {/* Program Details */}
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {/* Row 1: Training Mode + Location/Classroom Link */}
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
               <Box sx={{ minWidth: 200, flex: 1 }}>
                 <Typography variant="body2" color="textSecondary">
                   Hình thức đào tạo
                 </Typography>
                 <Chip
-                  label={getProgramModeLabel(program.programMode)}
+                  label={getProgramMode(program.programMode)}
                   size="small"
                   sx={{ mt: 0.5 }}
                 />
               </Box>
               <Box sx={{ minWidth: 200, flex: 1 }}>
                 <Typography variant="body2" color="textSecondary">
-                  Loại chương trình
+                  {program.programMode === "ONLINE"
+                    ? "Link phòng học"
+                    : "Địa điểm"}
                 </Typography>
-                <Typography variant="body1">{program.programType}</Typography>
+                {program.classroomLink ? (
+                  <Typography variant="body1">
+                    {program.classroomLink}
+                  </Typography>
+                ) : (
+                  <Typography variant="body1">Chưa có</Typography>
+                )}
               </Box>
             </Box>
 
+            {/* Row 2: Program Type + Schedule */}
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
               <Box sx={{ minWidth: 200, flex: 1 }}>
                 <Typography variant="body2" color="textSecondary">
-                  Thời gian
+                  Loại chương trình
                 </Typography>
                 <Typography variant="body1">
-                  {formatDate(program.startDate)} -{" "}
-                  {formatDate(program.endDate)}
+                  {getProgramType(program.programType)}
                 </Typography>
               </Box>
               <Box sx={{ minWidth: 200, flex: 1 }}>
@@ -337,6 +403,28 @@ const TrainingProgramDialog: React.FC<TrainingProgramDialogProps> = ({
               </Box>
             </Box>
 
+            {/* Row 3: Time Period */}
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+              <Box sx={{ minWidth: 200, flex: 1 }}>
+                <Typography variant="body2" color="textSecondary">
+                  Thời gian
+                </Typography>
+                <Typography variant="body1">
+                  {formatDate(program.startDate)} -{" "}
+                  {formatDate(program.endDate)}
+                </Typography>
+              </Box>
+              <Box sx={{ minWidth: 200, flex: 1 }}>
+                <Typography variant="body2" color="textSecondary">
+                  Quy mô
+                </Typography>
+                <Typography variant="body1">
+                  {program.scale || "Chưa xác định"}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Row 4: Duration + Students */}
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
               <Box sx={{ minWidth: 200, flex: 1 }}>
                 <Typography variant="body2" color="textSecondary">
@@ -351,92 +439,132 @@ const TrainingProgramDialog: React.FC<TrainingProgramDialogProps> = ({
                   Số học viên
                 </Typography>
                 <Typography variant="body1">
-                  {program.minStudents} - {program.maxStudents} học viên
+                  {program.minStudents} - {program.maxStudents}
                 </Typography>
               </Box>
             </Box>
 
+            {/* Row 5: Certificate Type + Certificate Issuer */}
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
               <Box sx={{ minWidth: 200, flex: 1 }}>
                 <Typography variant="body2" color="textSecondary">
-                  Giá công khai
+                  Loại chứng chỉ
                 </Typography>
-                <Typography variant="body1" fontWeight="600" color="primary">
-                  {formatCurrency(program.publicPrice)}
+                <Typography variant="body1">
+                  {program.completionCertificateType || "Chưa xác định"}
                 </Typography>
               </Box>
               <Box sx={{ minWidth: 200, flex: 1 }}>
                 <Typography variant="body2" color="textSecondary">
-                  Đánh giá
+                  Đơn vị cấp chứng chỉ
                 </Typography>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <StarIcon color="warning" fontSize="small" />
-                  <Typography variant="body1">
-                    {program.rating ? program.rating.toFixed(1) : "Chưa có"}
+                <Typography variant="body1">
+                  {program.certificateIssuer || "Chưa xác định"}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Row 6: Opening Condition + Equipment Requirement */}
+            {(program.openingCondition || program.equipmentRequirement) && (
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                <Box sx={{ minWidth: 200, flex: 1 }}>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                    Điều kiện khai giảng
+                  </Typography>
+                  <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
+                    {program.openingCondition || "Chưa có thông tin"}
+                  </Typography>
+                </Box>
+                <Box sx={{ minWidth: 200, flex: 1 }}>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                    Yêu cầu thiết bị
+                  </Typography>
+                  <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
+                    {program.equipmentRequirement || "Chưa có thông tin"}
                   </Typography>
                 </Box>
               </Box>
-            </Box>
+            )}
           </Box>
 
           {/* Additional Info */}
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Box>
-              <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
-                Mục tiêu học tập
-              </Typography>
-              <Typography variant="body1">
-                {program.learningObjectives || "Chưa có thông tin"}
-              </Typography>
-            </Box>
-
-            <Box>
-              <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
-                Đối tượng học viên
-              </Typography>
-              <Typography variant="body1">
-                {program.targetAudience || "Chưa có thông tin"}
-              </Typography>
-            </Box>
-
-            <Box>
-              <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
-                Yêu cầu đầu vào
-              </Typography>
-              <Typography variant="body1">
-                {program.requirements || "Chưa có thông tin"}
-              </Typography>
-            </Box>
-
-            <Box>
-              <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
-                Kết quả đào tạo
-              </Typography>
-              <Typography variant="body1">
-                {program.learningOutcomes || "Chưa có thông tin"}
-              </Typography>
-            </Box>
-
-            {program.tags && program.tags.length > 0 && (
-              <Box>
+            {/* First row: Learning Objectives + Target Audience */}
+            <Box
+              sx={{
+                display: "flex",
+                gap: 3,
+                flexDirection: { xs: "column", md: "row" },
+              }}
+            >
+              <Box sx={{ flex: 1 }}>
                 <Typography
                   variant="body2"
                   color="textSecondary"
                   sx={{ mb: 1 }}
                 >
-                  Tags
+                  Kiến thức được học
                 </Typography>
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                  {program.tags.map((tag, index) => (
-                    <Chip
-                      key={index}
-                      label={tag}
-                      size="small"
-                      variant="outlined"
-                    />
-                  ))}
-                </Box>
+                <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
+                  {program.learningObjectives || "Chưa có thông tin"}
+                </Typography>
               </Box>
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{ mb: 1 }}
+                >
+                  Đối tượng học viên
+                </Typography>
+                <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
+                  {program.targetAudience || "Chưa có thông tin"}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Second row: Requirements + Learning Outcomes */}
+            <Box
+              sx={{
+                display: "flex",
+                gap: 3,
+                flexDirection: { xs: "column", md: "row" },
+              }}
+            >
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{ mb: 1 }}
+                >
+                  Yêu cầu đầu vào
+                </Typography>
+                <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
+                  {program.requirements || "Chưa có thông tin"}
+                </Typography>
+              </Box>
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{ mb: 1 }}
+                >
+                  Kết quả đầu ra
+                </Typography>
+                <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
+                  {program.learningOutcomes || "Chưa có thông tin"}
+                </Typography>
+              </Box>
+            </Box>
+
+            <Divider />
+            <Typography variant="body1" paragraph>
+              {program.shortDescription}
+            </Typography>
+            {program.description && (
+              <Typography variant="body1" paragraph>
+                {program.description}
+              </Typography>
             )}
           </Box>
         </Box>
@@ -445,123 +573,176 @@ const TrainingProgramDialog: React.FC<TrainingProgramDialogProps> = ({
   );
 
   const renderUnits = () => (
-    <Card sx={{ height: "fit-content", maxHeight: { xs: "60vh", lg: "75vh" } }}>
+    <Card
+      sx={{ height: "fit-content", maxHeight: { xs: "100vh", lg: "150vh" } }}
+    >
       <CardContent>
         <Typography
           variant="h6"
           sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}
         >
           <MenuBookIcon color="primary" />
-          Danh sách đơn vị đào tạo ({program.units?.length || 0})
+          Danh sách bài học ({program.units?.length || 0})
         </Typography>
 
         {program.units && program.units.length > 0 ? (
           <Box
             sx={{
-              maxHeight: { xs: "calc(60vh - 120px)", lg: "calc(75vh - 120px)" },
+              maxHeight: {
+                xs: "calc(70vh - 120px)",
+                lg: "calc(150vh - 180px)",
+              },
               overflowY: "auto",
+              overflowX: "hidden",
               pr: 1,
+              pt: 2,
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              "&::-webkit-scrollbar": {
+                width: "6px",
+              },
+              "&::-webkit-scrollbar-track": {
+                background: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+                borderRadius: "10px",
+              },
+              "&::-webkit-scrollbar-thumb": {
+                background: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)",
+                borderRadius: "10px",
+                "&:hover": {
+                  background: theme.palette.mode === "dark" ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)",
+                },
+              },
             }}
           >
-            <List>
-              {[...program.units]
-                .sort((a, b) => a.orderSection - b.orderSection)
-                .map((unit, index) => (
-                  <React.Fragment key={unit.id}>
-                    <ListItem alignItems="flex-start" sx={{ px: 0 }}>
-                      <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: "primary.main" }}>
-                          {unit.orderSection}
+            {[...program.units]
+              .sort((a, b) => a.orderSection - b.orderSection)
+              .map((unit) => (
+                <Card
+                  key={unit.id}
+                  variant="outlined"
+                  sx={{
+                    border: `1px solid ${theme.palette.divider}`,
+                    minHeight: "300px",
+                    display: "flex",
+                    flexDirection: "column",
+                    "&:hover": {
+                      boxShadow: theme.shadows[2],
+                      transform: "translateY(-1px)",
+                    },
+                    transition: "all 0.2s ease-in-out",
+                  }}
+                >
+                  <CardContent sx={{ p: 2, flex: 1, display: "flex", flexDirection: "column" }}>
+                    {/* Header: Số thứ tự + Tiêu đề */}
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="h6" fontWeight="600" sx={{ mb: 0.5 }}>
+                        {unit.orderSection}. {unit.title}
+                        {/* {unit.lead && (
+                          <Chip
+                            label="Lead"
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                            sx={{ ml: 1 }}
+                          />
+                        )} */}
+                      </Typography>
+                      
+                      {/* Số giờ */}
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                        <TimeIcon fontSize="small" color="action" />
+                        <Typography variant="body2" color="primary" fontWeight="500">
+                          {unit.durationSection} giờ
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* Mô tả */}
+                    <Typography 
+                      variant="body2" 
+                      color="textSecondary" 
+                      sx={{ 
+                        mb: 2, 
+                        lineHeight: 1.5,
+                        flex: 1,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        minHeight: "3.6em", // Đảm bảo có chiều cao tối thiểu cho 3 dòng
+                      }}
+                    >
+                      {unit.description || "Chưa có mô tả"}
+                    </Typography>
+
+                    {/* Banner thông tin giảng viên */}
+                    <Paper
+                      sx={{
+                        p: 2,
+                        bgcolor: theme.palette.mode === "dark" ? "grey.900" : "grey.50",
+                        borderRadius: 1,
+                        border: `1px solid ${theme.palette.divider}`,
+                        mt: "auto", // Đẩy xuống dưới
+                      }}
+                    >
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        {/* Avatar giảng viên */}
+                        <Avatar
+                          src={unit.lecturer.avatarUrl}
+                          sx={{ 
+                            width: 48, 
+                            height: 48,
+                            bgcolor: "primary.main"
+                          }}
+                        >
+                          {unit.lecturer.fullName?.charAt(0) || "G"}
                         </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                              mb: 1,
-                            }}
-                          >
-                            <Typography variant="subtitle1" fontWeight="600">
-                              {unit.title}
-                            </Typography>
+
+                        {/* Thông tin giảng viên */}
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="subtitle1" fontWeight="600" sx={{ mb: 0.5 }}>
+                            {unit.lecturer.academicRank 
+                              ? `${unit.lecturer.academicRank}. ${unit.lecturer.fullName}`
+                              : unit.lecturer.fullName
+                            }
                             {unit.lead && (
-                              <Chip
-                                label="Lead"
-                                size="small"
+                              <Typography
+                                component="span"
+                                variant="body2"
                                 color="primary"
+                                sx={{ ml: 1, fontWeight: 500 }}
+                              >
+                                (Lead)
+                              </Typography>
+                            )}
+                          </Typography>
+                          
+                          {/* Chip năm kinh nghiệm - lĩnh vực */}
+                          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                            {unit.lecturer.experienceYears && (
+                              <Chip
+                                label={`${unit.lecturer.experienceYears} năm kinh nghiệm`}
+                                size="small"
+                                color="info"
+                                variant="outlined"
+                              />
+                            )}
+                            {unit.lecturer.specialization && (
+                              <Chip
+                                label={unit.lecturer.specialization}
+                                size="small"
+                                color="secondary"
                                 variant="outlined"
                               />
                             )}
                           </Box>
-                        }
-                        secondary={
-                          <Box>
-                            <Typography
-                              variant="body2"
-                              color="textSecondary"
-                              paragraph
-                            >
-                              {unit.description}
-                            </Typography>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 2,
-                                flexWrap: "wrap",
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 0.5,
-                                }}
-                              >
-                                <TimeIcon fontSize="small" color="action" />
-                                <Typography
-                                  variant="body2"
-                                  color="textSecondary"
-                                >
-                                  {unit.durationSection} giờ
-                                </Typography>
-                              </Box>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 0.5,
-                                }}
-                              >
-                                <PersonIcon fontSize="small" color="action" />
-                                <Typography
-                                  variant="body2"
-                                  color="textSecondary"
-                                >
-                                  {unit.lecturer.fullName}
-                                </Typography>
-                              </Box>
-                              {unit.lecturer.specialization && (
-                                <Chip
-                                  label={unit.lecturer.specialization}
-                                  size="small"
-                                  variant="outlined"
-                                />
-                              )}
-                            </Box>
-                          </Box>
-                        }
-                      />
-                    </ListItem>
-                    {index < program.units.length - 1 && (
-                      <Divider component="li" />
-                    )}
-                  </React.Fragment>
-                ))}
-            </List>
+                        </Box>
+                      </Box>
+                    </Paper>
+                  </CardContent>
+                </Card>
+              ))}
           </Box>
         ) : (
           <Box sx={{ textAlign: "center", py: 4 }}>
@@ -625,127 +806,44 @@ const TrainingProgramDialog: React.FC<TrainingProgramDialogProps> = ({
                   p: 2,
                   bgcolor:
                     theme.palette.mode === "dark" ? "grey.900" : "grey.50",
+                  borderRadius: 1,
+                  border: `1px solid ${theme.palette.divider}`,
                 }}
               >
                 <Typography variant="subtitle2" fontWeight="600" sx={{ mb: 2 }}>
                   Tổ chức đối tác
                 </Typography>
 
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    {program.trainingProgramRequest.partnerOrganization
-                      .logoUrl && (
-                      <Avatar
-                        src={
-                          program.trainingProgramRequest.partnerOrganization
-                            .logoUrl
-                        }
-                        sx={{ width: 48, height: 48 }}
-                      />
-                    )}
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight="600">
-                        {
-                          program.trainingProgramRequest.partnerOrganization
-                            .organizationName
-                        }
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        {
-                          program.trainingProgramRequest.partnerOrganization
-                            .industry
-                        }
-                      </Typography>
-                    </Box>
-                  </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  {/* Logo */}
+                  <Avatar
+                    src={program.trainingProgramRequest.partnerOrganization.logoUrl}
+                    sx={{ 
+                      width: 56, 
+                      height: 56,
+                      bgcolor: "primary.main"
+                    }}
+                  >
+                    {program.trainingProgramRequest.partnerOrganization.organizationName?.charAt(0) || "P"}
+                  </Avatar>
 
-                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-                    <Box sx={{ minWidth: 200, flex: 1 }}>
-                      <Typography variant="body2" color="textSecondary">
-                        Đại diện
-                      </Typography>
-                      <Typography variant="body1">
-                        {
-                          program.trainingProgramRequest.partnerOrganization
-                            .representativeName
-                        }{" "}
-                        -{" "}
-                        {
-                          program.trainingProgramRequest.partnerOrganization
-                            .position
-                        }
-                      </Typography>
-                    </Box>
-                    <Box sx={{ minWidth: 200, flex: 1 }}>
-                      <Typography variant="body2" color="textSecondary">
-                        Mã số kinh doanh
-                      </Typography>
-                      <Typography variant="body1">
-                        {
-                          program.trainingProgramRequest.partnerOrganization
-                            .businessRegistrationNumber
-                        }
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-                    <Box sx={{ minWidth: 200, flex: 1 }}>
-                      <Typography variant="body2" color="textSecondary">
-                        Điện thoại
-                      </Typography>
-                      <Typography variant="body1">
-                        {
-                          program.trainingProgramRequest.partnerOrganization
-                            .phoneNumber
-                        }
-                      </Typography>
-                    </Box>
-                    <Box sx={{ minWidth: 200, flex: 1 }}>
-                      <Typography variant="body2" color="textSecondary">
-                        Website
-                      </Typography>
-                      <Typography
-                        variant="body1"
-                        component="a"
-                        href={`https://${program.trainingProgramRequest.partnerOrganization.website}`}
-                        target="_blank"
-                        sx={{ color: "primary.main", textDecoration: "none" }}
-                      >
-                        {
-                          program.trainingProgramRequest.partnerOrganization
-                            .website
-                        }
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  <Box>
-                    <Typography variant="body2" color="textSecondary">
-                      Địa chỉ
+                  {/* Thông tin tổ chức */}
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="h6" fontWeight="600" sx={{ mb: 0.5 }}>
+                      {program.trainingProgramRequest.partnerOrganization.organizationName}
                     </Typography>
-                    <Typography variant="body1">
-                      {
-                        program.trainingProgramRequest.partnerOrganization
-                          .address
+                    
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                      {program.trainingProgramRequest.partnerOrganization.industry}
+                    </Typography>
+
+                    <Typography variant="body2" color="text.primary">
+                      <strong>Đại diện:</strong> {program.trainingProgramRequest.partnerOrganization.representativeName} 
+                      {program.trainingProgramRequest.partnerOrganization.position && 
+                        ` - ${program.trainingProgramRequest.partnerOrganization.position}`
                       }
                     </Typography>
                   </Box>
-
-                  {program.trainingProgramRequest.partnerOrganization
-                    .description && (
-                    <Box>
-                      <Typography variant="body2" color="textSecondary">
-                        Mô tả
-                      </Typography>
-                      <Typography variant="body1">
-                        {
-                          program.trainingProgramRequest.partnerOrganization
-                            .description
-                        }
-                      </Typography>
-                    </Box>
-                  )}
                 </Box>
               </Paper>
             )}
@@ -772,7 +870,7 @@ const TrainingProgramDialog: React.FC<TrainingProgramDialogProps> = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 2,
+          borderRadius: 1,
           maxHeight: "95vh",
         },
       }}
@@ -804,8 +902,8 @@ const TrainingProgramDialog: React.FC<TrainingProgramDialogProps> = ({
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ p: 3 }}>
-        {/* Main layout: 3 columns - Internal Info, Public Info, Units */}
+      <DialogContent sx={{ p: 3, overflowY: "auto" }}>
+        {/* Main layout: Public Info on left, Internal Info + Units on right */}
         <Box
           sx={{
             display: "flex",
@@ -813,38 +911,35 @@ const TrainingProgramDialog: React.FC<TrainingProgramDialogProps> = ({
             mb: 3,
             flexDirection: { xs: "column", lg: "row" },
             alignItems: "stretch",
+            pt: 3,
           }}
         >
-          {/* Left: Internal Info */}
-          <Box
-            sx={{
-              flex: { lg: "0 0 300px", xl: "0 0 320px" },
-              minWidth: { lg: 300, xl: 320 },
-              order: { xs: 1, lg: 1 },
-            }}
-          >
-            {renderInternalInfo()}
-          </Box>
-
-          {/* Center: Public Info */}
+          {/* Left: Public Info */}
           <Box
             sx={{
               flex: { lg: "1 1 350px", xl: "1 1 400px" },
               minWidth: { lg: 350, xl: 400 },
-              order: { xs: 2, lg: 2 },
+              order: { xs: 1, lg: 1 },
             }}
           >
             {renderPublicInfo()}
           </Box>
 
-          {/* Right: Units */}
+          {/* Right: Internal Info + Units */}
           <Box
             sx={{
-              flex: { lg: "0 0 350px", xl: "0 0 400px" },
-              minWidth: { lg: 350, xl: 400 },
-              order: { xs: 3, lg: 3 },
+              flex: { lg: "0 0 380px", xl: "0 0 420px" },
+              minWidth: { lg: 380, xl: 420 },
+              order: { xs: 2, lg: 2 },
+              display: "flex",
+              flexDirection: "column",
+              gap: 3,
             }}
           >
+            {/* Internal Info at top */}
+            {renderInternalInfo()}
+
+            {/* Units below */}
             {renderUnits()}
           </Box>
         </Box>
@@ -893,13 +988,43 @@ const TrainingProgramDialog: React.FC<TrainingProgramDialogProps> = ({
       <DialogActions
         sx={{ borderTop: `1px solid ${theme.palette.divider}`, p: 3 }}
       >
-        <Button onClick={onClose} variant="outlined">
-          Đóng
-        </Button>
-        <Button variant="contained" startIcon={<SchoolIcon />}>
-          Chỉnh sửa
-        </Button>
+        <Box sx={{ display: "flex", gap: 2, width: "100%", justifyContent: "flex-end" }}>
+          {program.programStatus === "ARCHIVED" && 
+           (userProfile?.role === "ADMIN" || userProfile?.permissions?.includes("PROGRAM_ARCHIVE")) && (
+            <Button 
+              onClick={handleUnarchiveProgram}
+              variant="contained" 
+              color="success"
+              startIcon={<RestoreIcon />}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                borderRadius: 1,
+                background: "linear-gradient(135deg, #4caf50 0%, #388e3c 100%)",
+                boxShadow: "0 4px 12px rgba(76, 175, 80, 0.3)",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #388e3c 0%, #2e7d32 100%)",
+                  boxShadow: "0 6px 16px rgba(76, 175, 80, 0.4)",
+                },
+              }}
+            >
+              Khôi phục
+            </Button>
+          )}
+          <Button onClick={onClose} variant="outlined">
+            Đóng
+          </Button>
+        </Box>
       </DialogActions>
+
+      {/* Dialog xác nhận khôi phục */}
+      <ConfirmUnarchiveTrainingProgramDialog
+        open={unarchiveDialogOpen}
+        onClose={handleUnarchiveDialogClose}
+        program={program}
+        loading={unarchiveLoading}
+        onConfirm={handleConfirmUnarchive}
+      />
     </Dialog>
   );
 };

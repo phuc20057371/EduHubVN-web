@@ -57,6 +57,7 @@ import AdminTrainingProgram from "../pages/admin/AdminTrainingProgram";
 import GuestLecturerPage from "../pages/guest/GuestLecturerPage";
 import GuestTrainingProgramPage from "../pages/guest/GuestTrainingProgramPage";
 import GuestTPDetailPage from "../pages/guest/GuestTPDetailPage";
+import GuestIntroducePage from "../pages/guest/GuestIntroducePage";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -70,6 +71,7 @@ export const router = createBrowserRouter(
 
       <Route element={<GuestLayout />}>
         <Route path="/guest" element={<GuestPage />} />
+        <Route path="/guest/introduce" element={<GuestIntroducePage />} />
         <Route path="/guest/lecturers" element={<GuestLecturerPage />} />
         <Route path="/guest/training-programs" element={<GuestTrainingProgramPage />} />
         <Route path="/guest/training-programs/:id" element={<GuestTPDetailPage />} />

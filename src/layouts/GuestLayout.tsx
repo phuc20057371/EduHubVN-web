@@ -1,79 +1,95 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Logo from "../assets/Eduhub_logo_new.png";
 import EduHubSpeedDial from "../components/EduHubSpeedDial";
 import Footer from "../components/Footer";
-import IntroductionDialog from "../components/IntroductionDialog";
 import { useColors } from "../hooks/useColors";
 // import { ThemeToggle } from "../components";
 
 const GuestLayout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const colors = useColors();
-  const [activeMenu, setActiveMenu] = useState<string>("");
-  const [introDialogOpen, setIntroDialogOpen] = useState(false);
+  
+  // Function to determine active menu based on current pathname
+  const getActiveMenuFromPath = (pathname: string): string => {
+    if (pathname.includes('/guest/introduce')) {
+      return 'gioithieu';
+    } else if (pathname.includes('/guest/lecturers')) {
+      return 'giangvien';
+    } else if (pathname.includes('/guest/training-programs')) {
+      return 'chuongtrinhdaotao';
+    } else if (pathname === '/guest' || pathname === '/') {
+      return 'trangchu';
+    } else {
+      return 'trangchu'; // default fallback
+    }
+  };
+
+  const [activeMenu, setActiveMenu] = useState<string>(() => 
+    getActiveMenuFromPath(location.pathname)
+  );
 
   // Function to get menu button styles
   const getMenuButtonStyles = (sectionId: string) => ({
-    color: activeMenu === sectionId ? "white" : colors.text.primary,
+    color: activeMenu === sectionId ? colors.primary.main : colors.text.primary,
     fontWeight: activeMenu === sectionId ? 700 : 600,
     fontSize: "0.8rem",
     textTransform: "none",
-    backgroundColor: activeMenu === sectionId ? colors.primary.main : "transparent",
+    backgroundColor: activeMenu === sectionId ? "#e3f2fd" : "transparent", // Light blue background when active
     borderRadius: "8px",
     px: 1.2,
     py: 0.6,
     transition: "all 0.3s ease",
-    boxShadow: activeMenu === sectionId ? `0 2px 8px ${colors.primary.main}40` : "none",
+    boxShadow: activeMenu === sectionId ? "0 2px 4px rgba(33, 150, 243, 0.2)" : "none",
     transform: activeMenu === sectionId ? "translateY(-1px)" : "translateY(0)",
     "&:hover": {
-      backgroundColor: activeMenu === sectionId ? colors.primary.dark : `${colors.primary.main}15`,
-      color: activeMenu === sectionId ? "white" : colors.primary.main,
+      backgroundColor: activeMenu === sectionId ? "#bbdefb" : "#f5f5f5", // Slightly darker blue on hover when active, light gray when inactive
+      color: activeMenu === sectionId ? colors.primary.dark : colors.primary.main,
       transform: "translateY(-1px)",
-      boxShadow: `0 4px 12px ${colors.primary.main}30`,
+      boxShadow: "0 4px 8px rgba(33, 150, 243, 0.15)",
     },
   });
 
-  // Function to scroll to section
-  const scrollToSection = (sectionId: string) => {
-    // Set active menu immediately for instant feedback
-    setActiveMenu(sectionId);
-    
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
-    } else {
-      // If section doesn't exist, scroll to top for "TRANG CHỦ"
-      if (sectionId === 'trangchu') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }
-  };
-
   // Function to handle intro menu click
   const handleIntroClick = () => {
-    setIntroDialogOpen(true);
     setActiveMenu("gioithieu");
+    navigate("/guest/introduce");
   };
 
-  // Listen for scroll events to update active menu
+  // Function to handle contact menu click - scroll to bottom
+  const handleContactClick = () => {
+    setActiveMenu("lienhe");
+    window.scrollTo({ 
+      top: document.documentElement.scrollHeight, 
+      behavior: 'smooth' 
+    });
+  };
+
+  // Update active menu when location changes
+  useEffect(() => {
+    const newActiveMenu = getActiveMenuFromPath(location.pathname);
+    setActiveMenu(newActiveMenu);
+  }, [location.pathname]);
+
+  // Listen for scroll events to update active menu (only on home page)
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['trangchu', 'gioithieu', 'giangvien', 'chuongtrinhdaotao', 'detainghiencuu', 'taikhoannguoidung', 'tintucsukien', 'hotro', 'lienhe'];
-      const scrollPosition = window.scrollY + 100;
+      // Only update active menu based on scroll when on home page
+      if (location.pathname === '/guest' || location.pathname === '/') {
+        const sections = ['trangchu', 'gioithieu', 'giangvien', 'chuongtrinhdaotao', 'lienhe'];
+        const scrollPosition = window.scrollY + 100;
 
-      for (const sectionId of sections) {
-        const element = document.getElementById(sectionId);
-        if (element) {
-          const { offsetTop, offsetHeight } = element;
-          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-            setActiveMenu(sectionId);
-            break;
+        for (const sectionId of sections) {
+          const element = document.getElementById(sectionId);
+          if (element) {
+            const { offsetTop, offsetHeight } = element;
+            if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+              setActiveMenu(sectionId);
+              break;
+            }
           }
         }
       }
@@ -81,7 +97,7 @@ const GuestLayout = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [location.pathname]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -151,12 +167,17 @@ const GuestLayout = () => {
               gap: 1,
               alignItems: "center",
               flex: 1,
-              justifyContent: "center",
+              justifyContent: "flex-start",
               flexWrap: "wrap",
+              ml: 4, // Add margin left for spacing from logo
             }}
           >
             <Button
-              onClick={() => scrollToSection("trangchu")}
+              onClick={() => {
+                setActiveMenu("trangchu");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                navigate("/guest");
+              }}
               sx={getMenuButtonStyles("trangchu")}
             >
               TRANG CHỦ
@@ -167,44 +188,29 @@ const GuestLayout = () => {
             >
               GIỚI THIỆU
             </Button>
+
             <Button
-              onClick={() => scrollToSection("giangvien")}
+              onClick={() => {
+                setActiveMenu("giangvien");
+                navigate("/guest/lecturers");
+              }}
               sx={getMenuButtonStyles("giangvien")}
             >
               GIẢNG VIÊN
             </Button>
+
             <Button
-              onClick={() => scrollToSection("chuongtrinhdaotao")}
+              onClick={() => {
+                setActiveMenu("chuongtrinhdaotao");
+                navigate("/guest/training-programs");
+              }}
               sx={getMenuButtonStyles("chuongtrinhdaotao")}
             >
               CHƯƠNG TRÌNH ĐÀO TẠO
             </Button>
+
             <Button
-              onClick={() => scrollToSection("detainghiencuu")}
-              sx={getMenuButtonStyles("detainghiencuu")}
-            >
-              ĐỀ TÀI NGHIÊN CỨU
-            </Button>
-            <Button
-              onClick={() => scrollToSection("taikhoannguoidung")}
-              sx={getMenuButtonStyles("taikhoannguoidung")}
-            >
-              TÀI KHOẢN NGƯỜI DÙNG
-            </Button>
-            <Button
-              onClick={() => scrollToSection("tintucsukien")}
-              sx={getMenuButtonStyles("tintucsukien")}
-            >
-              TIN TỨC & SỰ KIỆN
-            </Button>
-            <Button
-              onClick={() => scrollToSection("hotro")}
-              sx={getMenuButtonStyles("hotro")}
-            >
-              HỖ TRỢ
-            </Button>
-            <Button
-              onClick={() => scrollToSection("lienhe")}
+              onClick={handleContactClick}
               sx={getMenuButtonStyles("lienhe")}
             >
               LIÊN HỆ
@@ -318,12 +324,6 @@ const GuestLayout = () => {
 
       {/* EduHub Speed Dial for Guest */}
       <EduHubSpeedDial userRole="partner" />
-
-      {/* Introduction Dialog */}
-      <IntroductionDialog 
-        open={introDialogOpen} 
-        onClose={() => setIntroDialogOpen(false)} 
-      />
     </div>
   );
 };

@@ -13,6 +13,11 @@ const GuestTrainingProgramPage = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Function to navigate to program detail page
   const openProgramDetail = (programId: string) => {
     navigate(`/guest/training-programs/${programId}`);
@@ -20,16 +25,9 @@ const GuestTrainingProgramPage = () => {
 
   // Redux
   const dispatch = useDispatch();
-  const trainingPrograms = useSelector((state: any) => state.trainingProgramPublic);
-
-  // Debug: Kiểm tra dữ liệu trainingPrograms
-  console.log("🔍 GuestTrainingProgramPage - trainingPrograms:", {
-    length: trainingPrograms?.length || 0,
-    isArray: Array.isArray(trainingPrograms),
-    data: trainingPrograms,
-    loading,
-    error
-  });
+  const trainingPrograms = useSelector(
+    (state: any) => state.trainingProgramPublic,
+  );
 
   // Fetch training programs data
   useEffect(() => {
@@ -50,11 +48,11 @@ const GuestTrainingProgramPage = () => {
       }
     };
 
-    // Chỉ fetch nếu chưa có dữ liệu trong Redux store
-    if (!trainingPrograms || trainingPrograms.length === 0) {
+    // // Chỉ fetch nếu chưa có dữ liệu trong Redux store
+    // if (!trainingPrograms || trainingPrograms.length === 0) {
       fetchTrainingPrograms();
-    }
-  }, [dispatch, trainingPrograms]);
+    // }
+  }, []);
 
   // Lấy tất cả tags unique từ training programs
   const allTags = useMemo(() => {
@@ -134,7 +132,7 @@ const GuestTrainingProgramPage = () => {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8">
-            <a 
+            <a
               href="/"
               className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
             >
@@ -158,7 +156,7 @@ const GuestTrainingProgramPage = () => {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8">
-            <a 
+            <a
               href="/"
               className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
             >
@@ -187,7 +185,7 @@ const GuestTrainingProgramPage = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <a 
+          <a
             href="/"
             className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
           >
@@ -292,7 +290,7 @@ const GuestTrainingProgramPage = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 key={program.id}
-                className="overflow-hidden rounded-2xl bg-white shadow hover:shadow-lg transition-shadow duration-200"
+                className="overflow-hidden rounded-2xl bg-white shadow transition-shadow duration-200 hover:shadow-lg"
               >
                 <img
                   src={
@@ -333,7 +331,7 @@ const GuestTrainingProgramPage = () => {
                       : "Liên hệ"}
                   </div>
                   <div className="mt-4 flex items-center justify-between">
-                    <button className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 transition-colors">
+                    <button className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-600">
                       Đăng ký chương trình
                     </button>
                     <button
@@ -344,7 +342,7 @@ const GuestTrainingProgramPage = () => {
                           console.error("Invalid program ID:", program.id);
                         }
                       }}
-                      className="rounded-xl border px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
+                      className="rounded-xl border px-4 py-2 text-sm transition-colors hover:bg-gray-50"
                     >
                       Xem thêm
                     </button>

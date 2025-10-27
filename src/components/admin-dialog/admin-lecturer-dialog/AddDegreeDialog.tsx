@@ -157,6 +157,7 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
           createdAt: degreeData.createdAt || "",
           updatedAt: degreeData.updatedAt || "",
         };
+     
         response = await API.user.updateDegree(updateData);
         
         if (response.data.success) {

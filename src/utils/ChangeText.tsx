@@ -1,4 +1,3 @@
-
 export function formatDateToVietnamTime(dateString: string): string {
   if (!dateString) return "Không có mô tả";
 
@@ -209,5 +208,60 @@ export const getCourseLevel = (level: string) => {
       return "Nâng cao";
     default:
       return level;
+  }
+};
+
+/// Training Program
+export const getProgramStatus = (status: string) => {
+  switch (status) {
+    case "REVIEW":
+      return "Đang xem xét";
+    case "PUBLISHED":
+      return "Đã xuất bản";
+    case "UNLISTED":
+      return "Không công khai";
+    case "ARCHIVED":
+      return "Đã lưu trữ";
+    default:
+      return status;
+  }
+};
+
+export const getProgramLevel = (level: string) => {
+  switch (level) {
+    case "BEGINNER":
+      return "Cơ bản";
+    case "INTERMEDIATE":
+      return "Trung cấp";
+    case "ADVANCED":
+      return "Nâng cao";
+    default:
+      return level;
+  }
+};
+
+export const getProgramMode = (mode: string) => {
+  switch (mode) {
+    case "ONLINE":
+      return "Online";
+    case "OFFLINE":
+      return "Offline";
+    case "HYBRID":
+      return "Hybrid";
+    default:
+      return mode;
+  }
+};
+
+export const getProgramType = (type: string) => {
+  switch (type) {
+    case "SINGLE":
+      return "Đơn lẻ";
+    case "PATHWAY":
+      return "Lộ trình";
+    case "ENTERPRISE_TOPIC":
+      return "Chủ đề doanh nghiệp";
+    default:
+      return type;
   }
 };

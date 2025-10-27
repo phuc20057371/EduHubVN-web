@@ -1,19 +1,26 @@
 import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Box, Typography, TextField, InputAdornment, CircularProgress } from "@mui/material";
-import { Search as SearchIcon } from "@mui/icons-material";
+import { Box, Typography, TextField, InputAdornment, CircularProgress, IconButton } from "@mui/material";
+import { Search as SearchIcon, ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 import { API } from "../../utils/Fetch";
 import { getAcademicRank } from "../../utils/ChangeText";
 import type { LecturerBasicPublic } from "../../types/Lecturer";
 import LecturerDetailPublicDialog from "../../components/guest-dialog/LecturerDetailPublicDialog";
 
 const GuestLecturerPage = () => {
+  const navigate = useNavigate();
   const [lecturers, setLecturers] = useState<LecturerBasicPublic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLecturer, setSelectedLecturer] = useState<LecturerBasicPublic | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
     
   useEffect(() => {
     const fetchData = async () => {
@@ -310,6 +317,21 @@ const GuestLecturerPage = () => {
   return (
     <Box sx={{ py: 4 }}>
       <Box sx={{ maxWidth: "1400px", mx: "auto", px: 3 }}>
+        {/* Back Button */}
+        <Box sx={{ mb: 3 }}>
+          <IconButton
+            onClick={() => navigate(-1)}
+            sx={{
+              color: "text.primary",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
+              },
+            }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+        </Box>
+
         {/* Compact Header with Search */}
         <Box
           sx={{

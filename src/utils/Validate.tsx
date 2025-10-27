@@ -1,5 +1,6 @@
 import type { AttendedCourseRequest } from "../types/AttendedCourse";
 import type { ResearchProjectRequest } from "../types/ResearchProject";
+import type { TrainingProgramReq } from "../types/TrainingProgram";
 
 type validateResult = {
   success: boolean;
@@ -203,7 +204,7 @@ export const validateAttendedCourseForm = (formData: AttendedCourseRequest) => {
       errors.error = "URL khóa học không được vượt quá 200 ký tự.";
       return errors;
     }
-    
+
     if (!isValidURL(formData.courseUrl)) {
       errors.success = false;
       errors.error = "URL khóa học không hợp lệ.";
@@ -716,7 +717,9 @@ export const validateCertificateInfo = (formData: any) => {
   return errors;
 };
 
-export const validateResearchProjectForm = (formData: ResearchProjectRequest) => {
+export const validateResearchProjectForm = (
+  formData: ResearchProjectRequest,
+) => {
   const errors: validateResult = {
     success: true,
     error: "",
@@ -782,10 +785,13 @@ export const validateResearchProjectForm = (formData: ResearchProjectRequest) =>
   if (
     formData.foundingAmount !== undefined &&
     formData.foundingAmount !== null &&
-    (isNaN(Number(formData.foundingAmount)) || Number(formData.foundingAmount) < 0)
+    (isNaN(Number(formData.foundingAmount)) ||
+      Number(formData.foundingAmount) < 0 ||
+      Number(formData.foundingAmount) > 9999999999999
+    )
   ) {
     errors.success = false;
-    errors.error = "Số tiền tài trợ không hợp lệ.";
+    errors.error = "Số tiền tài trợ không hợp lệ. (0 - 9.999.999.999.999).";
     return errors;
   }
 
@@ -827,7 +833,7 @@ export const validateResearchProjectForm = (formData: ResearchProjectRequest) =>
       errors.error = "URL xuất bản không được vượt quá 200 ký tự.";
       return errors;
     }
-    
+
     if (!isValidURL(formData.publishedUrl)) {
       errors.success = false;
       errors.error = "URL xuất bản không hợp lệ.";
@@ -846,6 +852,217 @@ export const validateResearchProjectForm = (formData: ResearchProjectRequest) =>
   if (formData.description && formData.description.length > 500) {
     errors.success = false;
     errors.error = "Mô tả dự án không được vượt quá 500 ký tự.";
+    return errors;
+  }
+
+  return errors;
+};
+
+export const validateTrainingProgramForm = (formData: TrainingProgramReq) => {
+  const errors: validateResult = {
+    success: true,
+    error: "",
+  };
+  if (
+    !formData.title ||
+    formData.title.trim() === "" ||
+    formData.title.length < 2
+  ) {
+    errors.success = false;
+    errors.error = "Tiêu đề chương trình không hợp lệ (> 2 kí tự).";
+    return errors;
+  }
+  if (
+    !formData.subTitle ||
+    formData.subTitle.trim() === "" ||
+    formData.subTitle.length < 2
+  ) {
+    errors.success = false;
+    errors.error = "Tiêu đề phụ chương trình không hợp lệ (> 2 kí tự).";
+    return errors;
+  }
+  if (
+    !formData.shortDescription ||
+    formData.shortDescription.trim() === "" ||
+    formData.shortDescription.length < 2
+  ) {
+    errors.success = false;
+    errors.error = "Mô tả ngắn chương trình không hợp lệ (> 2 kí tự).";
+    return errors;
+  }
+  if (
+    !formData.description ||
+    formData.description.trim() === "" ||
+    formData.description.length < 2
+  ) {
+    errors.success = false;
+    errors.error = "Mô tả chương trình không hợp lệ (> 2 kí tự).";
+    return errors;
+  }
+  if (formData.bannerUrl === "" || formData.bannerUrl.trim() === "") {
+    errors.success = false;
+    errors.error = "Banner là bắt buộc.";
+    return errors;
+  }
+  if (formData.contentUrl === "" || formData.contentUrl.trim() === "") {
+    errors.success = false;
+    errors.error = "URL nội dung là bắt buộc.";
+    return errors;
+  }
+  if (
+    formData.syllabusFileUrl === "" ||
+    formData.syllabusFileUrl.trim() === ""
+  ) {
+    errors.success = false;
+    errors.error = "Đề cương là bắt buộc.";
+    return errors;
+  }
+  if (
+    formData.startDate &&
+    formData.endDate &&
+    new Date(formData.startDate) >= new Date(formData.endDate)
+  ) {
+    errors.success = false;
+    errors.error = "Ngày bắt đầu phải trước ngày kết thúc.";
+    return errors;
+  }
+  if (formData.durationHours <= 0 || formData.durationHours > 99999) {
+    errors.success = false;
+    errors.error = "Số giờ học phải lớn hơn 0 và nhỏ hơn 99999.";
+    return errors;
+  }
+  if (formData.durationSessions <= 0 || formData.durationSessions > 99999) {
+    errors.success = false;
+    errors.error = "Số buổi học phải lớn hơn 0 và nhỏ hơn 99999.";
+    return errors;
+  }
+  if (formData.scheduleDetail === "" || formData.scheduleDetail.trim() === "") {
+    errors.success = false;
+    errors.error = "Chi tiết lịch học là bắt buộc.";
+    return errors;
+  }
+  if (formData.listedPrice < 0 || formData.listedPrice > 9999999999) {
+    errors.success = false;
+    errors.error = "Giá niêm yết không hợp lệ (0 - 9.999.999.999).";
+    return errors;
+  }
+  if (formData.internalPrice < 0 || formData.internalPrice > 9999999999) {
+    errors.success = false;
+    errors.error = "Giá nội bộ không hợp lệ (0 - 9.999.999.999).";
+    return errors;
+  }
+  if (formData.publicPrice < 0 || formData.publicPrice > 9999999999) {
+    errors.success = false;
+    errors.error = "Giá công khai không hợp lệ (0 - 9.999.999.999).";
+    return errors;
+  }
+  if (
+    formData.learningObjectives === "" ||
+    formData.learningObjectives.trim() === "" ||
+    formData.learningObjectives.length < 2
+  ) {
+    errors.success = false;
+    errors.error = "Kiến thức được học không hợp lệ (> 2 kí tự).";
+    return errors;
+  }
+  if (
+    formData.requirements === "" ||
+    formData.requirements.trim() === "" ||
+    formData.requirements.length < 2
+  ) {
+    errors.success = false;
+    errors.error = "Yêu cầu đầu vào không hợp lệ (> 2 kí tự).";
+    return errors;
+  }
+  if (formData.learningOutcomes.length === 0) {
+    errors.success = false;
+    errors.error = "Vui lòng thêm ít nhất một kết quả đầu ra.";
+    return errors;
+  }
+  if (formData.targetAudience === "" || formData.targetAudience.trim() === "") {
+    errors.success = false;
+    errors.error = "Đối tượng tham gia là bắt buộc.";
+    return errors;
+  }
+
+  if (formData.minStudents <= 0 || formData.minStudents > 1000000) {
+    errors.success = false;
+    errors.error = "Số học viên tối thiểu phải lớn hơn 0 và nhỏ hơn 1.000.000.";
+    return errors;
+  }
+  if (
+    formData.maxStudents <= 0 ||
+    formData.maxStudents > 1000000 ||
+    formData.maxStudents <= formData.minStudents
+  ) {
+    errors.success = false;
+    errors.error =
+      "Số học viên tối đa phải lớn hơn 0 và nhỏ hơn 1.000.000 và lớn hơn số học viên tối thiểu.";
+    return errors;
+  }
+  if (
+    formData.openingCondition === "" ||
+    formData.openingCondition.trim() === ""
+  ) {
+    errors.success = false;
+    errors.error = "Điều kiện khai giảng là bắt buộc.";
+    return errors;
+  }
+  if (formData.equipmentRequirement.length > 1000) {
+    errors.success = false;
+    errors.error = "Yêu cầu thiết bị không được vượt quá 1000 ký tự.";
+    return errors;
+  }
+  if (formData.classroomLink && formData.classroomLink.trim() !== "") {
+    if (formData.classroomLink.length > 200) {
+      errors.success = false;
+      errors.error = "Link phòng học không được vượt quá 200 ký tự.";
+      return errors;
+    }
+  }
+  if (formData.scale.length > 100) {
+    errors.success = false;
+    errors.error = "Quy mô chương trình không được vượt quá 100 ký tự.";
+    return errors;
+  }
+
+  if (formData.tags.length === 0) {
+    errors.success = false;
+    errors.error = "Vui lòng thêm ít nhất một thẻ cho chương trình.";
+    return errors;
+  }
+  if (
+    formData.completionCertificateType === "" ||
+    formData.completionCertificateType.trim() === ""
+  ) {
+    errors.success = false;
+    errors.error = "Loại chứng nhận hoàn thành là bắt buộc.";
+    return errors;
+  }
+  if (
+    formData.certificateIssuer === "" ||
+    formData.certificateIssuer.trim() === ""
+  ) {
+    errors.success = false;
+    errors.error = "Đơn vị cấp chứng chỉ là bắt buộc.";
+    return errors;
+  }
+  if (formData.rating) {
+    if (
+      isNaN(Number(formData.rating)) ||
+      Number(formData.rating) < 0 ||
+      Number(formData.rating) > 5
+    ) {
+      errors.success = false;
+      errors.error = "Đánh giá phải là số từ 0 đến 5.";
+      return errors;
+    }
+  }
+
+  // Validate programLevel
+  if (!formData.programLevel || formData.programLevel.trim() === "") {
+    errors.success = false;
+    errors.error = "Cấp độ chương trình là bắt buộc.";
     return errors;
   }
 

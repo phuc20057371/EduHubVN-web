@@ -194,7 +194,7 @@ const AdminLayout = () => {
         icon: <School />,
         path: "/admin/training-programs",
         description: "Quản lý chương trình đào tạo",
-        permissions: ["TRAINING_PROGRAM_READ"],
+        permissions: ["PROGRAM_READ"],
       },
     ];
 

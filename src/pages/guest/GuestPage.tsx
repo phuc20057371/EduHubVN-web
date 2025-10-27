@@ -22,6 +22,7 @@ function useTopLecturers() {
         setError(null);
         const response = await API.public.getTop6Lecturers();
         let lecturersData = [];
+        console.log("API Response for Top Lecturers:", response.data.data);
 
         if (response.data) {
           if (Array.isArray(response.data)) {
@@ -475,6 +476,7 @@ function Testimonials() {
 export default function EduHubMockV2() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasFetched, setHasFetched] = useState(false);
   const navigate = useNavigate();
 
   // Redux
@@ -492,21 +494,27 @@ export default function EduHubMockV2() {
 
         const response = await API.public.getAllTrainingPrograms();
         if (response.data.success) {
-          dispatch(setTrainingProgramsPublic(response.data.data));
+          dispatch(setTrainingProgramsPublic(response.data.data || []));
+        } else {
+          // API trả về success: false
+          setError("Không thể tải dữ liệu chương trình đào tạo");
+          dispatch(setTrainingProgramsPublic([]));
         }
       } catch (err: any) {
         console.error("❌ Lỗi khi lấy dữ liệu training programs:", err);
         setError(err.message || "Không thể tải dữ liệu chương trình đào tạo");
+        dispatch(setTrainingProgramsPublic([]));
       } finally {
         setLoading(false);
+        setHasFetched(true);
       }
     };
 
-    // Chỉ fetch nếu chưa có dữ liệu trong Redux store
-    if (!trainingPrograms || trainingPrograms.length === 0) {
+    // Chỉ fetch nếu chưa từng fetch
+    if (!hasFetched) {
       fetchTrainingPrograms();
     }
-  }, [dispatch, trainingPrograms]);
+  }, [dispatch, hasFetched]);
 
   const openProgram = (id: string) => {
     // Validation ID trước khi mở

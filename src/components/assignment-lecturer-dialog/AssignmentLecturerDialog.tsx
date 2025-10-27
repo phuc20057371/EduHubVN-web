@@ -111,6 +111,7 @@ import type {
 import type { Lecturer } from "../../types/Lecturer";
 import { API } from "../../utils/Fetch";
 import { getAcademicRank } from "../../utils/ChangeText";
+import { toast } from "react-toastify";
 
 interface AssignmentLecturerDialogProps {
   open: boolean;
@@ -271,18 +272,18 @@ const AssignmentLecturerDialog: React.FC<AssignmentLecturerDialogProps> = ({
     if (onSave) {
       try {
         setLoading(true);
-        
+
         // Process units: set ID to null for newly created units (those with ID starting with "unit_")
-        const processedUnits = units.map(unit => ({
+        const processedUnits = units.map((unit) => ({
           ...unit,
-          id: unit.id.startsWith('unit_') ? null : unit.id
+          id: unit.id.startsWith("unit_") ? null : unit.id,
         })) as TrainingProgramUnit[];
-        
+
         await onSave(processedUnits);
         onClose();
       } catch (error) {
         console.error("Error saving units:", error);
-        alert("Có lỗi xảy ra khi lưu bài học");
+        toast.error("Đã có lỗi xảy ra khi lưu bài học.");
       } finally {
         setLoading(false);
       }
@@ -341,7 +342,7 @@ const AssignmentLecturerDialog: React.FC<AssignmentLecturerDialogProps> = ({
     onClose();
   };
 
-  // Filter lecturers based on search input and academic rank
+  // Filter lecturers based on search input, academic rank and APPROVED status
   const filteredLecturers = lecturers.filter((lecturer) => {
     const searchTerm = searchLecturer.toLowerCase();
     const matchesSearch =
@@ -354,7 +355,10 @@ const AssignmentLecturerDialog: React.FC<AssignmentLecturerDialogProps> = ({
     const matchesAcademicRank =
       !selectedAcademicRank || lecturer.academicRank === selectedAcademicRank;
 
-    return matchesSearch && matchesAcademicRank;
+    // Only show lecturers with APPROVED status
+    const isApproved = lecturer.status === "APPROVED";
+
+    return matchesSearch && matchesAcademicRank && isApproved;
   });
 
   return (
@@ -760,12 +764,17 @@ const AssignmentLecturerDialog: React.FC<AssignmentLecturerDialogProps> = ({
                         label="Thời lượng (giờ)"
                         type="number"
                         value={unitForm.durationSection}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = e.target.value;
+
+                          // Chặn khi vượt quá 7 chữ số
+                          if (value.length > 7) return;
+
                           setUnitForm((prev) => ({
                             ...prev,
-                            durationSection: parseInt(e.target.value) || 1,
-                          }))
-                        }
+                            durationSection: parseInt(value) || 1,
+                          }));
+                        }}
                         inputProps={{ min: 1 }}
                         sx={{ width: 150 }}
                       />
@@ -1058,8 +1067,13 @@ const AssignmentLecturerDialog: React.FC<AssignmentLecturerDialogProps> = ({
                           color: theme.palette.primary.main,
                         }}
                       >
-                        {filteredLecturers.length} / {lecturers.length} giảng
-                        viên
+                        {filteredLecturers.length} /{" "}
+                        {
+                          lecturers.filter(
+                            (lecturer) => lecturer.status === "APPROVED",
+                          ).length
+                        }{" "}
+                        giảng viên
                       </Typography>
                     </Box>
                     <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>

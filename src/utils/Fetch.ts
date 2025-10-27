@@ -1,4 +1,3 @@
-
 import axios from "axios";
 import type { InstitutionRequest } from "../types/InstitutionRequest";
 import type { LoginRequest } from "../types/LoginRequest";
@@ -37,7 +36,10 @@ import type {
 } from "../types/ResearchProject";
 import type { ResetPasswordRequest } from "../types/ResetPasswordRequest";
 import type { ResetPasswordRequestForUser } from "../types/ResetPasswordRequestForUser";
-import type { TrainingProgramReq, TrainingProgramRequestReq } from "../types/TrainingProgram";
+import type {
+  TrainingProgramReq,
+  TrainingProgramRequestReq,
+} from "../types/TrainingProgram";
 
 const domain = window.location.hostname;
 const BASE_URL = `http://${domain}:8080`;
@@ -261,7 +263,8 @@ export const API = {
     // Partner
     updatePartnerProfile: (data: PartnerRequest) =>
       fetch.post("/api/v1/partner/update-profile", data),
-    getAllProgramRequests: () => fetch.get("/api/v1/partner/get-all-training-program-requests"),
+    getAllProgramRequests: () =>
+      fetch.get("/api/v1/partner/get-all-training-program-requests"),
     createProgramRequest: (data: TrainingProgramRequestReq) =>
       fetch.post("/api/v1/partner/create-training-program-request", data),
   },
@@ -454,15 +457,23 @@ export const API = {
       fetch.get(
         `/api/v1/admin/get-training-program-requests?page=${page}&size=${size}`,
       ),
-    getAllProgramRequests: () => fetch.get("api/v1/admin/get-all-program-requests"),
+    getAllProgramRequests: () =>
+      fetch.get("api/v1/admin/get-all-program-requests"),
 
     createProgram: (data: TrainingProgramReq) =>
       fetch.post("/api/v1/admin/create-training-program", data),
-    // updateProgram: (id: string, data: any) =>
-    //   fetch.post(`/api/v1/admin/update-training-program/${id}`, data),
+    updateProgram: (data: TrainingProgramReq) =>
+      fetch.post(`/api/v1/admin/update-training-program/${data.id}`, data),
     updateProgramUnits: (id: string, data: any) =>
       fetch.post(`/api/v1/admin/update-training-program-units/${id}`, data),
-    
+    archiveTrainingProgram: (id: string) =>
+      fetch.post(`/api/v1/admin/archive-training-program/${id}`),
+    unarchiveTrainingProgram: (id: string) =>
+      fetch.post(`/api/v1/admin/unarchive-training-program/${id}`),
+    rejectProgramRequest: (data: IdRequest) =>
+      fetch.post("/api/v1/admin/reject-training-program-request", data),
+    unrejectProgramRequest: (data: IdRequest) =>
+      fetch.post("/api/v1/admin/unreject-training-program-request", data),
   },
   public: {
     getAllCourses: () => {
@@ -471,7 +482,8 @@ export const API = {
     getTop7Lecturers: () => {
       return fetch.get(`/public/top-7-lecturers`);
     },
-    getAllTrainingPrograms: () => fetch.get("/public/get-all-training-programs"),
+    getAllTrainingPrograms: () =>
+      fetch.get("/public/get-all-training-programs"),
     getTop6Lecturers: () => {
       return fetch.get("/public/get-top-6-lecturers");
     },
@@ -484,7 +496,7 @@ export const API = {
     },
     getTrainingProgrambyId: (id: string) => {
       return fetch.get(`/public/get-training-program-by-id?id=${id}`);
-    }
+    },
   },
   other: {
     getLecturerProfile: (id: string) => {

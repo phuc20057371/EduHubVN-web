@@ -62,12 +62,11 @@ const PermissionDialog: React.FC<PermissionDialogProps> = ({
       { key: 'ORGANIZATION_DELETE', label: 'Xóa' },
       { key: 'ORGANIZATION_APPROVE', label: 'Phê duyệt' },
     ],
-    'Khóa học': [
-      { key: 'COURSE_READ', label: 'Xem danh sách' },
-      { key: 'COURSE_CREATE', label: 'Tạo mới' },
-      { key: 'COURSE_UPDATE', label: 'Cập nhật' },
-      { key: 'COURSE_DELETE', label: 'Xóa' },
-      // { key: 'COURSE_APPROVE', label: 'Phê duyệt' },
+    'Chương trình đào tạo': [
+      { key: 'PROGRAM_READ', label: 'Xem danh sách' },
+      { key: 'PROGRAM_CREATE', label: 'Tạo mới' },
+      { key: 'PROGRAM_UPDATE', label: 'Cập nhật' },
+      { key: 'PROGRAM_ARCHIVE', label: 'Lưu trữ' },
     ],
   };
 
@@ -134,7 +133,7 @@ const PermissionDialog: React.FC<PermissionDialogProps> = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 2,
+          borderRadius: 1,
           boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
         }
       }}
@@ -166,7 +165,7 @@ const PermissionDialog: React.FC<PermissionDialogProps> = ({
               sx={{ 
                 p: 2, 
                 border: `1px solid ${colors.neutral[200]}`,
-                borderRadius: 2,
+                borderRadius: 1,
                 height: 'fit-content'
               }}
             >

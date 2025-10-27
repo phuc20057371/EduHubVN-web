@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   Avatar,
   Box,
@@ -36,10 +36,15 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setTrainingPrograms } from "../../../../redux/slice/TrainingProgramSlice";
 import { API } from "../../../../utils/Fetch";
-import type { TrainingProgram, TrainingProgramReq } from "../../../../types/TrainingProgram";
+import type {
+  TrainingProgram,
+  TrainingProgramReq,
+} from "../../../../types/TrainingProgram";
 import TrainingProgramDialog from "../../../../components/training-program-dialog/TrainingProgramDialog";
 import TrainingProgramCreateDialog from "../../../../components/training-program-dialog/TrainingProgramCreateDialog";
+import TrainingProgramUpdateDialog from "../../../../components/training-program-dialog/TrainingProgramUpdateDialog";
 import AssignmentLecturerDialog from "../../../../components/assignment-lecturer-dialog/AssignmentLecturerDialog";
+import ConfirmArchiveTrainingProgramDialog from "../../../../components/general-dialog/ConfirmArchiveTrainingProgramDialog";
 import { toast } from "react-toastify";
 
 type Order = "asc" | "desc";
@@ -90,10 +95,10 @@ const headCells: readonly HeadCell[] = [
     label: "Trạng thái",
   },
   {
-    id: "programMode",
+    id: "partnerOrganization",
     numeric: false,
     disablePadding: false,
-    label: "Hình thức",
+    label: "Sở hữu",
   },
   {
     id: "startDate",
@@ -111,7 +116,7 @@ const headCells: readonly HeadCell[] = [
     id: "syllabusFileUrl",
     numeric: false,
     disablePadding: false,
-    label: " Đề cương / Tài liệu đính kèm",
+    label: " Đề cương / TL đính kèm",
   },
   { id: "rating", numeric: true, disablePadding: false, label: "Đánh giá" },
   { id: "units", numeric: false, disablePadding: false, label: "Bài học" },
@@ -230,32 +235,44 @@ const TrainingProgramTab = () => {
   }, [trainingProgramState.programsByPage, trainingProgramState.currentPage]);
 
   // Local state for filters and table
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [programModeFilter, setProgramModeFilter] = React.useState("");
-  const [programStatusFilter, setProgramStatusFilter] =
-    React.useState("PUBLISHED");
-  const [order, setOrder] = React.useState<Order>("asc");
-  const [orderBy, setOrderBy] = React.useState<keyof TrainingProgram>("title");
-  const [selected, setSelected] = React.useState<string | null>(null);
-  const [loading, setLoading] = React.useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [programModeFilter, setProgramModeFilter] = useState("");
+  const [programStatusFilter, setProgramStatusFilter] = useState("PUBLISHED");
+  const [order, setOrder] = useState<Order>("asc");
+  const [orderBy, setOrderBy] = useState<keyof TrainingProgram>("title");
+  const [selected, setSelected] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Menu dropdown state
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedMenuProgram, setSelectedMenuProgram] =
-    React.useState<TrainingProgram | null>(null);
+    useState<TrainingProgram | null>(null);
   const openMenu = Boolean(anchorEl);
 
   // Dialog state
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [dialogProgram, setDialogProgram] =
-    React.useState<TrainingProgram | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogProgram, setDialogProgram] = useState<TrainingProgram | null>(
+    null,
+  );
 
   // Create dialog state
-  const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+
+  // Update dialog state
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const [selectedProgramForUpdate, setSelectedProgramForUpdate] =
+    useState<TrainingProgram | null>(null);
 
   // Assignment lecturer dialog state
-  const [assignmentDialogOpen, setAssignmentDialogOpen] = React.useState(false);
-  const [selectedProgramForAssignment, setSelectedProgramForAssignment] = React.useState<TrainingProgram | null>(null);
+  const [assignmentDialogOpen, setAssignmentDialogOpen] = useState(false);
+  const [selectedProgramForAssignment, setSelectedProgramForAssignment] =
+    useState<TrainingProgram | null>(null);
+
+  // Archive dialog state
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
+  const [selectedProgramForArchive, setSelectedProgramForArchive] =
+    useState<TrainingProgram | null>(null);
+  const [archiveLoading, setArchiveLoading] = useState(false);
 
   // Initial data fetch - Get all programs at once
   useEffect(() => {
@@ -287,7 +304,7 @@ const TrainingProgramTab = () => {
   }, [dispatch, userProfile]);
 
   // Refresh data function
-  const refreshData = React.useCallback(async () => {
+  const refreshData = useCallback(async () => {
     try {
       setLoading(true);
       const response = await API.program.getAllPrograms();
@@ -310,7 +327,7 @@ const TrainingProgramTab = () => {
   }, [dispatch]);
 
   // Filtered data logic
-  const filteredPrograms = React.useMemo(() => {
+  const filteredPrograms = useMemo(() => {
     let filtered = trainingPrograms;
 
     if (searchTerm) {
@@ -403,17 +420,33 @@ const TrainingProgramTab = () => {
 
   const handleEditProgram = () => {
     if (selectedMenuProgram) {
+      // Kiểm tra nếu chương trình đã được lưu trữ
+      if (selectedMenuProgram.programStatus === "ARCHIVED") {
+        toast.warning("Không thể chỉnh sửa chương trình đã lưu trữ!");
+        handleMenuClose();
+        return;
+      }
+      
+      setSelectedProgramForUpdate(selectedMenuProgram);
+      setUpdateDialogOpen(true);
     }
     handleMenuClose();
   };
 
   const handleDeleteProgram = () => {
     if (selectedMenuProgram) {
+      // Kiểm tra nếu chương trình đã được lưu trữ
+      if (selectedMenuProgram.programStatus === "ARCHIVED") {
+        toast.info("Chương trình này đã được lưu trữ!");
+        handleMenuClose();
+        return;
+      }
+      
+      setSelectedProgramForArchive(selectedMenuProgram);
+      setArchiveDialogOpen(true);
     }
     handleMenuClose();
-  };
-
-  const handleDialogClose = () => {
+  };  const handleDialogClose = () => {
     setDialogOpen(false);
     setDialogProgram(null);
   };
@@ -447,8 +480,37 @@ const TrainingProgramTab = () => {
     setCreateDialogOpen(false);
   };
 
+  // Update dialog handlers
+  const handleUpdateProgram = async (programData: TrainingProgramReq) => {
+    try {
+      const response = await API.program.updateProgram(programData);
+      if (response.data.success) {
+        toast.success("Cập nhật chương trình đào tạo thành công!");
+        setUpdateDialogOpen(false);
+        setSelectedProgramForUpdate(null);
+        await refreshData();
+      } else {
+        toast.error("Cập nhật chương trình đào tạo không thành công!");
+      }
+    } catch (error) {
+      console.error("Error updating training program:", error);
+      throw error;
+    }
+  };
+
+  const handleUpdateDialogClose = () => {
+    setUpdateDialogOpen(false);
+    setSelectedProgramForUpdate(null);
+  };
+
   // Assignment lecturer dialog handlers
   const handleUnitManagement = (program: TrainingProgram) => {
+    // Kiểm tra nếu chương trình đã được lưu trữ
+    if (program.programStatus === "ARCHIVED") {
+      toast.warning("Không thể quản lý bài học của chương trình đã lưu trữ!");
+      return;
+    }
+    
     setSelectedProgramForAssignment(program);
     setAssignmentDialogOpen(true);
   };
@@ -461,47 +523,57 @@ const TrainingProgramTab = () => {
   const handleSaveUnits = async (units: any[]) => {
     try {
       if (!selectedProgramForAssignment) return;
-      
-      const res = await API.program.updateProgramUnits(selectedProgramForAssignment?.id, units);
+
+      const res = await API.program.updateProgramUnits(
+        selectedProgramForAssignment?.id,
+        units,
+      );
       if (res.data.success) {
         toast.success("Cập nhật bài học thành công");
       }
-      
+
       // Refresh all data after updating units
       await refreshData();
     } catch (error) {
-      console.error('Error saving units:', error);
+      console.error("Error saving units:", error);
       throw error;
     }
   };
 
+  // Archive dialog handlers
+  const handleConfirmArchive = async () => {
+    if (!selectedProgramForArchive) return;
+
+    try {
+      setArchiveLoading(true);
+      const response = await API.program.archiveTrainingProgram(selectedProgramForArchive.id);
+      
+      if (response.data && response.data.success) {
+        toast.success("Lưu trữ chương trình đào tạo thành công!");
+        setArchiveDialogOpen(false);
+        setSelectedProgramForArchive(null);
+        await refreshData();
+      } else {
+        toast.error("Lưu trữ chương trình đào tạo không thành công!");
+      }
+    } catch (error: any) {
+      console.error("Error archiving training program:", error);
+      toast.error(
+        error.response?.data?.message || "Có lỗi xảy ra khi lưu trữ chương trình đào tạo"
+      );
+    } finally {
+      setArchiveLoading(false);
+    }
+  };
+
+  const handleArchiveDialogClose = () => {
+    if (!archiveLoading) {
+      setArchiveDialogOpen(false);
+      setSelectedProgramForArchive(null);
+    }
+  };
+
   // Helper functions for display
-  const getProgramModeLabel = (mode: string) => {
-    switch (mode) {
-      case "ONLINE":
-        return "Trực tuyến";
-      case "OFFLINE":
-        return "Trực tiếp";
-      case "HYBRID":
-        return "Kết hợp";
-      default:
-        return mode;
-    }
-  };
-
-  const getProgramModeColor = (mode: string) => {
-    switch (mode) {
-      case "ONLINE":
-        return "info";
-      case "OFFLINE":
-        return "success";
-      case "HYBRID":
-        return "warning";
-      default:
-        return "default";
-    }
-  };
-
   const getProgramStatusLabel = (status: string) => {
     switch (status) {
       case "REVIEW":
@@ -694,26 +766,28 @@ const TrainingProgramTab = () => {
           </Box>
 
           {/* Create Button */}
-          <Box sx={{ flexShrink: 0 }}>
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => setCreateDialogOpen(true)}
-              sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                borderRadius: 1,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                "&:hover": {
-                  transform: "translateY(-1px)",
-                  boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
-                },
-                transition: "all 0.2s ease-in-out",
-              }}
-            >
-              Tạo mới
-            </Button>
-          </Box>
+          {(userProfile?.role === "ADMIN" || userProfile?.permissions?.includes("PROGRAM_CREATE")) && (
+            <Box sx={{ flexShrink: 0 }}>
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => setCreateDialogOpen(true)}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                  borderRadius: 1,
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  "&:hover": {
+                    transform: "translateY(-1px)",
+                    boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
+                  },
+                  transition: "all 0.2s ease-in-out",
+                }}
+              >
+                Tạo mới
+              </Button>
+            </Box>
+          )}
         </Box>
 
         {/* Active Filters Display */}
@@ -754,7 +828,15 @@ const TrainingProgramTab = () => {
 
             {programModeFilter && (
               <Chip
-                label={`Hình thức: ${getProgramModeLabel(programModeFilter)}`}
+                label={`Hình thức: ${
+                  programModeFilter === "ONLINE"
+                    ? "Trực tuyến"
+                    : programModeFilter === "OFFLINE"
+                      ? "Trực tiếp"
+                      : programModeFilter === "HYBRID"
+                        ? "Kết hợp"
+                        : programModeFilter
+                }`}
                 size="small"
                 onDelete={() => setProgramModeFilter("")}
                 color="secondary"
@@ -917,12 +999,15 @@ const TrainingProgramTab = () => {
                       />
                     </TableCell>
 
-                    {/* Hình thức */}
+                    {/* Sở hữu */}
                     <TableCell sx={{ fontSize: "0.875rem" }}>
                       <Chip
-                        label={getProgramModeLabel(row.programMode)}
+                        label={row.partnerOrganization ? "Đối tác" : "SGL"}
                         size="small"
-                        color={getProgramModeColor(row.programMode) as any}
+                        color={
+                          row.partnerOrganization ? "secondary" : "primary"
+                        }
+                        variant="outlined"
                         sx={{ fontSize: "0.75rem" }}
                       />
                     </TableCell>
@@ -1027,23 +1112,37 @@ const TrainingProgramTab = () => {
 
                     {/* Bài học */}
                     <TableCell align="center" sx={{ fontSize: "0.875rem" }}>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleUnitManagement(row);
-                        }}
-                        sx={{
-                          minWidth: 60,
-                          borderRadius: 2,
-                          fontSize: "0.75rem",
-                          fontWeight: 600,
-                          px: 1.5,
-                        }}
-                      >
-                        {row.units?.length || 0}
-                      </Button>
+                      {(userProfile?.role === "ADMIN" || userProfile?.permissions?.includes("PROGRAM_UPDATE")) ? (
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          disabled={row.programStatus === "ARCHIVED"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUnitManagement(row);
+                          }}
+                          sx={{
+                            minWidth: 60,
+                            borderRadius: 2,
+                            fontSize: "0.75rem",
+                            fontWeight: 600,
+                            px: 1.5,
+                            ...(row.programStatus === "ARCHIVED" && {
+                              opacity: 0.5,
+                              cursor: "not-allowed",
+                              "&:hover": {
+                                backgroundColor: "transparent",
+                              },
+                            }),
+                          }}
+                        >
+                          {row.units?.length || 0}
+                        </Button>
+                      ) : (
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                          {row.units?.length || 0}
+                        </Typography>
+                      )}
                     </TableCell>
 
                     <TableCell align="center" sx={{ fontSize: "0.875rem" }}>
@@ -1069,8 +1168,6 @@ const TrainingProgramTab = () => {
                   </TableRow>
                 );
               })}
-
-
 
               {/* No data row */}
               {visibleRows.length === 0 && !loading && (
@@ -1124,30 +1221,47 @@ const TrainingProgramTab = () => {
             <VisibilityIcon sx={{ mr: 2, fontSize: "1.1rem" }} />
             Xem chi tiết
           </MenuItem>
-          <MenuItem
-            onClick={handleEditProgram}
-            sx={{ fontSize: "0.875rem", py: 1.5 }}
-          >
-            <EditIcon sx={{ mr: 2, fontSize: "1.1rem" }} />
-            Chỉnh sửa
-          </MenuItem>
-          <MenuItem
-            onClick={handleDeleteProgram}
-            sx={{
-              fontSize: "0.875rem",
-              py: 1.5,
-              color: "error.main",
-              "&:hover": {
-                bgcolor:
-                  theme.palette.mode === "dark"
-                    ? "rgba(244, 67, 54, 0.1)"
-                    : "rgba(244, 67, 54, 0.04)",
-              },
-            }}
-          >
-            <DeleteIcon sx={{ mr: 2, fontSize: "1.1rem" }} />
-            Xóa
-          </MenuItem>
+          {(userProfile?.role === "ADMIN" || userProfile?.permissions?.includes("PROGRAM_UPDATE")) && (
+            <MenuItem
+              onClick={handleEditProgram}
+              disabled={selectedMenuProgram?.programStatus === "ARCHIVED"}
+              sx={{ 
+                fontSize: "0.875rem", 
+                py: 1.5,
+                ...(selectedMenuProgram?.programStatus === "ARCHIVED" && {
+                  opacity: 0.5,
+                  cursor: "not-allowed",
+                }),
+              }}
+            >
+              <EditIcon sx={{ mr: 2, fontSize: "1.1rem" }} />
+              Chỉnh sửa
+            </MenuItem>
+          )}
+          {(userProfile?.role === "ADMIN" || userProfile?.permissions?.includes("PROGRAM_ARCHIVE")) && (
+            <MenuItem
+              onClick={handleDeleteProgram}
+              disabled={selectedMenuProgram?.programStatus === "ARCHIVED"}
+              sx={{
+                fontSize: "0.875rem",
+                py: 1.5,
+                color: selectedMenuProgram?.programStatus === "ARCHIVED" ? "text.disabled" : "error.main",
+                "&:hover": {
+                  bgcolor: selectedMenuProgram?.programStatus === "ARCHIVED" ? "transparent" :
+                    theme.palette.mode === "dark"
+                      ? "rgba(244, 67, 54, 0.1)"
+                      : "rgba(244, 67, 54, 0.04)",
+                },
+                ...(selectedMenuProgram?.programStatus === "ARCHIVED" && {
+                  opacity: 0.5,
+                  cursor: "not-allowed",
+                }),
+              }}
+            >
+              <DeleteIcon sx={{ mr: 2, fontSize: "1.1rem" }} />
+              {selectedMenuProgram?.programStatus === "ARCHIVED" ? "Đã lưu trữ" : "Lưu trữ"}
+            </MenuItem>
+          )}
         </Menu>
       </Paper>
 
@@ -1156,6 +1270,7 @@ const TrainingProgramTab = () => {
         open={dialogOpen}
         onClose={handleDialogClose}
         program={dialogProgram}
+        onProgramUpdated={refreshData}
       />
 
       <TrainingProgramCreateDialog
@@ -1166,11 +1281,26 @@ const TrainingProgramTab = () => {
         requestedProgram={null} // TODO: Load requested program from API
       />
 
+      <TrainingProgramUpdateDialog
+        open={updateDialogOpen}
+        onClose={handleUpdateDialogClose}
+        onSave={handleUpdateProgram}
+        program={selectedProgramForUpdate}
+      />
+
       <AssignmentLecturerDialog
         open={assignmentDialogOpen}
         onClose={handleAssignmentDialogClose}
         trainingProgram={selectedProgramForAssignment}
         onSave={handleSaveUnits}
+      />
+
+      <ConfirmArchiveTrainingProgramDialog
+        open={archiveDialogOpen}
+        onClose={handleArchiveDialogClose}
+        program={selectedProgramForArchive}
+        loading={archiveLoading}
+        onConfirm={handleConfirmArchive}
       />
     </>
   );

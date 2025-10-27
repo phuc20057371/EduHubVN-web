@@ -213,7 +213,7 @@ const ApproveLecturerCreateDialog: React.FC<
       type,
       note,
     });
-    setRejectNote(note);
+    setRejectNote(""); // Để trống khi mở dialog
     setConfirmOpen(true);
   };
   // Approve/Reject for all types

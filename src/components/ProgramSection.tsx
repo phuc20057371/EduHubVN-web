@@ -17,15 +17,6 @@ export function CourseSearch({
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tagScrollIndex, setTagScrollIndex] = useState(0);
 
-  // Debug: Kiểm tra dữ liệu trainingPrograms
-  console.log("🔍 CourseSearch - trainingPrograms:", {
-    length: trainingPrograms?.length || 0,
-    isArray: Array.isArray(trainingPrograms),
-    data: trainingPrograms,
-    loading,
-    error,
-  });
-
   // Lấy tất cả tags unique từ training programs
   const allTags = useMemo(() => {
     const tags = new Set<string>();
@@ -171,16 +162,40 @@ export function CourseSearch({
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="text-center text-2xl font-extrabold text-gray-900 md:text-3xl">
-            Chương trình đào tạo nổi bật
+            Chương trình đào tạo nổi bật (0)
           </h2>
-          <div className="mt-8 text-center text-red-600">
-            <p>{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 rounded-xl bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
-            >
-              Thử lại
-            </button>
+          <div className="mt-8 text-center">
+            <p className="text-red-600">{error}</p>
+            <p className="mt-2 text-gray-500">Hiển thị 0 chương trình đào tạo</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Empty state - khi không có training programs
+  if (!loading && trainingPrograms.length === 0) {
+    return (
+      <section
+        id="khoahoc"
+        className="bg-gradient-to-b from-white via-[#2596be]/10 to-[#2596be]/80 py-16 font-sans"
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 className="text-center text-2xl font-extrabold text-gray-900 md:text-3xl">
+            Chương trình đào tạo nổi bật (0)
+          </h2>
+          <div className="mt-8 text-center">
+            <div className="text-gray-400 mb-4">
+              <svg className="mx-auto h-16 w-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+              </svg>
+            </div>
+            <p className="text-gray-600 text-xl font-medium mb-2">
+              Hiện tại chưa có chương trình đào tạo nào
+            </p>
+            <p className="text-gray-400 text-sm">
+              Các chương trình đào tạo sẽ được cập nhật sớm nhất có thể
+            </p>
           </div>
         </div>
       </section>
@@ -196,7 +211,7 @@ export function CourseSearch({
         <h2 className="text-center text-2xl font-extrabold text-gray-900 md:text-3xl">
           {(q && q.trim()) || selectedTags.length > 0
             ? `Tìm thấy ${filtered.length} chương trình đào tạo`
-            : "Chương trình đào tạo nổi bật"}
+            : `Chương trình đào tạo nổi bật (${filtered.length})`}
         </h2>
 
         <div className="mt-8">
@@ -348,8 +363,22 @@ export function CourseSearch({
         </div>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {filtered.length === 0 ? (
-            <div className="col-span-3 py-8 text-center text-gray-500">
-              Không tìm thấy chương trình đào tạo nào phù hợp
+            <div className="col-span-3 py-12 text-center">
+              <div className="text-gray-400 mb-2">
+                <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                </svg>
+              </div>
+              <p className="text-gray-500 text-lg">
+                {(q && q.trim()) || selectedTags.length > 0 
+                  ? "Không tìm thấy chương trình đào tạo nào phù hợp"
+                  : "Hiện tại chưa có chương trình đào tạo nào"}
+              </p>
+              <p className="text-gray-400 text-sm mt-2">
+                {(q && q.trim()) || selectedTags.length > 0 
+                  ? "Hãy thử thay đổi từ khóa tìm kiếm hoặc bộ lọc"
+                  : "Vui lòng quay lại sau"}
+              </p>
             </div>
           ) : (
             filtered.map((program) => (

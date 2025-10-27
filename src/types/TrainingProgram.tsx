@@ -77,6 +77,7 @@ export interface TrainingProgram {
 }
 
 export interface TrainingProgramReq {
+  id?: string;
   title: string;
   subTitle: string;
   shortDescription: string;
@@ -93,6 +94,7 @@ export interface TrainingProgramReq {
   durationHours: number;
   durationSessions: number;
   scheduleDetail: string;
+  programLevel: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
   maxStudents: number;
   minStudents: number;
   openingCondition: string;
@@ -138,50 +140,7 @@ export type TrainingProgramUnitPublic = {
   orderSection: number;
   lead: boolean;
 };
-// public class TrainingProgramPublicDTO {
 
-//     private UUID id;
-
-//     private List<TrainingProgramUnitPublicDTO> units;
-
-//     private TrainingProgramMode programMode;
-//     private TrainingProgramType programType;
-
-//     private LocalDate startDate;
-//     private LocalDate endDate;
-
-//     private Integer durationHours;
-//     private Integer durationSessions;
-//     private String scheduleDetail;
-
-//     private String equipmentRequirement;
-//     private String classroomLink;
-
-//     private String targetAudience;
-//     private String requirements;
-
-//     private String scale;
-
-//     private BigDecimal publicPrice;
-//     private boolean isPriceVisible;
-
-//     private String bannerUrl;
-//     private String contentUrl;
-
-//     private Set<String> tags;
-
-//     private String learningOutcomes;
-
-//     private String completionCertificateType;
-//     private String certificateIssuer;
-
-//     private String title;
-//     private String subTitle;
-//     private String shortDescription;
-//     private String learningObjectives;
-
-//     private Double rating;
-// }
 export type TrainingProgramPublic = {
   id: string;
   units: Array<TrainingProgramUnitPublic>;
@@ -208,6 +167,7 @@ export type TrainingProgramPublic = {
   title: string;
   subTitle: string;
   shortDescription: string;
+  description: string;
   learningObjectives: string;
   rating: number | null;
 }

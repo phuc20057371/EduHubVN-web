@@ -95,6 +95,74 @@ const LecturerCarousel: React.FC<LecturerCarouselProps> = ({
     );
   }
 
+  // Empty state - when no lecturers available
+  if (!loading && lecturers.length === 0) {
+    return (
+      <Box
+        sx={{
+          py: 8,
+          textAlign: "center",
+        }}
+      >
+        <Box sx={{ maxWidth: "1200px", mx: "auto", px: 3 }}>
+          {/* Title */}
+          <Typography
+            variant="h3"
+            sx={{
+              textAlign: "center",
+              color: "text.primary",
+              fontWeight: "bold",
+              mb: 4,
+            }}
+          >
+            Giảng Viên tiêu biểu (0)
+          </Typography>
+
+          {/* Empty State Content */}
+          <Box
+            sx={{
+              py: 8,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 3,
+            }}
+          >
+            {/* Icon */}
+            <Box sx={{ color: "text.secondary", opacity: 0.5 }}>
+              <svg width="80" height="80" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+              </svg>
+            </Box>
+
+            {/* Message */}
+            <Box sx={{ textAlign: "center" }}>
+              <Typography
+                variant="h5"
+                sx={{
+                  color: "text.primary",
+                  fontWeight: "medium",
+                  mb: 1,
+                }}
+              >
+                Hiện tại chưa có giảng viên tiêu biểu nào
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "text.secondary",
+                  maxWidth: "400px",
+                }}
+              >
+                Danh sách giảng viên tiêu biểu sẽ được cập nhật sớm nhất có thể
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -113,7 +181,7 @@ const LecturerCarousel: React.FC<LecturerCarouselProps> = ({
             mb: 6,
           }}
         >
-          Giảng Viên tiêu biểu
+          Giảng Viên tiêu biểu ({lecturers.length})
         </Typography>
 
         {/* Carousel Container */}
@@ -343,102 +411,106 @@ const LecturerCarousel: React.FC<LecturerCarouselProps> = ({
             ))}
           </Box>
 
-          {/* Navigation Controls */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              mt: 4,
-              gap: 2,
-            }}
-          >
-            {/* Previous Button */}
-            <IconButton
-              onClick={prevSlide}
+          {/* Navigation Controls - Only show when there are lecturers and navigation is needed */}
+          {lecturers.length > cardsToShow && (
+            <Box
               sx={{
-                background: "rgba(0,0,0,0.1)",
-                color: "text.primary",
-                "&:hover": {
-                  background: "rgba(0,0,0,0.2)",
-                  transform: "scale(1.1)",
-                },
-                transition: "all 0.3s ease",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mt: 4,
+                gap: 2,
               }}
             >
-              <ChevronLeft />
-            </IconButton>
+              {/* Previous Button */}
+              <IconButton
+                onClick={prevSlide}
+                sx={{
+                  background: "rgba(0,0,0,0.1)",
+                  color: "text.primary",
+                  "&:hover": {
+                    background: "rgba(0,0,0,0.2)",
+                    transform: "scale(1.1)",
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
+                <ChevronLeft />
+              </IconButton>
 
-            {/* Dots Indicator */}
-            <Box sx={{ display: "flex", gap: 1 }}>
-              {Array.from({ length: maxSlides }, (_, index) => (
-                <Box
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  sx={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: "50%",
-                    background:
-                      index === currentSlide ? "black" : "rgba(0,0,0,0.3)",
-                    cursor: "pointer",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      background: "primary.main",
-                      transform: "scale(1.2)",
-                    },
-                  }}
-                />
-              ))}
+              {/* Dots Indicator */}
+              <Box sx={{ display: "flex", gap: 1 }}>
+                {Array.from({ length: maxSlides }, (_, index) => (
+                  <Box
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    sx={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: "50%",
+                      background:
+                        index === currentSlide ? "black" : "rgba(0,0,0,0.3)",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        background: "primary.main",
+                        transform: "scale(1.2)",
+                      },
+                    }}
+                  />
+                ))}
+              </Box>
+
+              {/* Next Button */}
+              <IconButton
+                onClick={nextSlide}
+                sx={{
+                  background: "rgba(0,0,0,0.1)",
+                  color: "text.primary",
+                  "&:hover": {
+                    background: "rgba(0,0,0,0.2)",
+                    transform: "scale(1.1)",
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
+                <ChevronRight />
+              </IconButton>
             </Box>
+          )}
 
-            {/* Next Button */}
-            <IconButton
-              onClick={nextSlide}
+          {/* View All Button - Only show when there are lecturers */}
+          {lecturers.length > 0 && (
+            <Box
               sx={{
-                background: "rgba(0,0,0,0.1)",
-                color: "text.primary",
-                "&:hover": {
-                  background: "rgba(0,0,0,0.2)",
-                  transform: "scale(1.1)",
-                },
-                transition: "all 0.3s ease",
+                display: "flex",
+                justifyContent: "center",
+                mt: 4,
               }}
             >
-              <ChevronRight />
-            </IconButton>
-          </Box>
-
-          {/* View All Button */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              mt: 4,
-            }}
-          >
-            <Button
-              onClick={() => navigate("/guest/lecturers")}
-              variant="outlined"
-              sx={{
-                borderRadius: "25px",
-                px: 4,
-                py: 1.5,
-                fontWeight: "bold",
-                borderColor: "#1976d2",
-                color: "#1976d2",
-                "&:hover": {
-                  backgroundColor: "#1976d2",
-                  color: "white",
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 4px 12px rgba(25, 118, 210, 0.3)",
-                },
-                transition: "all 0.3s ease",
-              }}
-            >
-              Xem tất cả giảng viên
-            </Button>
-          </Box>
+              <Button
+                onClick={() => navigate("/guest/lecturers")}
+                variant="outlined"
+                sx={{
+                  borderRadius: "25px",
+                  px: 4,
+                  py: 1.5,
+                  fontWeight: "bold",
+                  borderColor: "#1976d2",
+                  color: "#1976d2",
+                  "&:hover": {
+                    backgroundColor: "#1976d2",
+                    color: "white",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 4px 12px rgba(25, 118, 210, 0.3)",
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Xem tất cả giảng viên
+              </Button>
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>
