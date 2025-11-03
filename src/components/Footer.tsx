@@ -20,8 +20,9 @@ const Footer = () => {
   return (
     <Box
       sx={{
-        background: colors.isDark ? colors.gradients.primary : "#ffffff",
-        color: colors.isDark ? "white" : colors.text.primary,
+        // Use flat dark background requested by product: #0E1D2C
+        background: colors.isDark ? '#0E1D2C' : "#ffffff",
+        color: colors.isDark ? "#FFFFFF" : colors.text.primary,
         borderTop: colors.isDark
           ? "none"
           : `1px solid ${colors.border.light}`,
@@ -34,24 +35,31 @@ const Footer = () => {
         <Box
           sx={{
             display: "flex",
-            gap: 4,
+            gap: 6,
+            ml: { xs: 0, md: 0 },
             flexDirection: { xs: "column", md: "row" },
+            
           }}
         >
-          {/* Left section - 35% - Logo and Social Icons */}
+            {/* Left section - 35% - Logo and Social Icons */}
           <Box
             sx={{
               flex: { xs: "1 1 100%", md: "0 0 35%" },
               display: "flex",
               flexDirection: "column",
-              alignItems: { xs: "center", md: "flex-start" },
+              alignItems: { xs: "flex-start", md: "flex-start" },
             }}
           >
             {/* Logo */}
-            <Box sx={{ display: "flex", alignItems: "flex-start", mb: 3 }}>
-              <img src={Logo} alt="EduHubVN Logo" style={{ height: 80,  filter: colors.isDark
-                        ? "brightness(0) invert(1)"
-                        : "none", }} />
+            <Box sx={{ display: "flex", alignItems: "flex-start", mb: 2, mt: 2, ml: -4 }}>
+              <img
+                src={Logo}
+                alt="EduHubVN Logo"
+                style={{
+                  height: 80,
+                  filter: colors.isDark ? "brightness(0) invert(1)" : "none",
+                }}
+              />
             </Box>
 
             {/* Social Icons */}
@@ -59,7 +67,7 @@ const Footer = () => {
               sx={{
                 display: "flex",
                 gap: 2,
-                justifyContent: { xs: "center", md: "flex-start" },
+                justifyContent: { xs: "flex-start", md: "flex-start" },
               }}
             >
               {[
@@ -82,14 +90,15 @@ const Footer = () => {
                   }}
                   aria-label={social.label}
                 >
-                  <img 
-                    src={social.icon} 
-                    alt={social.label} 
-                    style={{ 
-                      width: 24, 
+                  <img
+                    src={social.icon}
+                    alt={social.label}
+                    style={{
+                      width: 24,
                       height: 24,
-                      filter: "brightness(0) invert(1)"
-                    }} 
+                      // only invert images in dark mode so they appear white
+                      filter: colors.isDark ? "brightness(0) invert(1)" : "none",
+                    }}
                   />
                 </IconButton>
               ))}
@@ -102,7 +111,7 @@ const Footer = () => {
               flex: { xs: "1 1 100%", md: "0 0 65%" },
               display: "flex",
               flexDirection: "column",
-              alignItems: { xs: "center", md: "flex-start" },
+              alignItems: { xs: "flex-start", md: "flex-start" },
             }}
           >
             <Typography
@@ -112,7 +121,7 @@ const Footer = () => {
                 mb: 3,
                 color: colors.isDark ? "white" : colors.primary.main,
                 fontFamily: "'Inter', sans-serif",
-                textAlign: { xs: "center", md: "left" },
+                textAlign: { xs: "left", md: "left" },
                 fontSize: { xs: "1.25rem", md: "1.5rem" }, // Responsive font size
               }}
             >
@@ -126,14 +135,14 @@ const Footer = () => {
                   display: "flex",
                   alignItems: "center",
                   mb: 3,
-                  color: colors.isDark ? "#f3f3f3" : colors.text.secondary,
-                  justifyContent: { xs: "center", md: "flex-start" },
+                  color: colors.isDark ? "#FFFFFF" : colors.text.secondary,
+                  justifyContent: { xs: "flex-start", md: "flex-start" },
                 }}
               >
                 <Phone
                   sx={{
                     mr: 2,
-                    color: colors.isDark ? "white" : colors.primary.main,
+                    color: colors.isDark ? "#FFFFFF" : colors.primary.main,
                     fontSize: { xs: "1.25rem", md: "1.5rem" }, // Responsive icon size
                   }}
                 />
@@ -142,6 +151,8 @@ const Footer = () => {
                   sx={{
                     fontSize: { xs: "0.95rem", md: "1.1rem" }, // Responsive font size
                     lineHeight: 1.4,
+                    color: colors.isDark ? '#FFFFFF' : undefined,
+                    textAlign: { xs: 'left', md: 'left' },
                   }}
                 >
                   028.3863.8239 - 08.5957.9939
@@ -153,14 +164,14 @@ const Footer = () => {
                   display: "flex",
                   alignItems: "center",
                   mb: 3,
-                  color: colors.isDark ? "#f3f3f3" : colors.text.secondary,
-                  justifyContent: { xs: "center", md: "flex-start" },
+                  color: colors.isDark ? "#FFFFFF" : colors.text.secondary,
+                  justifyContent: { xs: "flex-start", md: "flex-start" },
                 }}
               >
                 <Email
                   sx={{
                     mr: 2,
-                    color: colors.isDark ? "white" : colors.primary.main,
+                    color: colors.isDark ? "#FFFFFF" : colors.primary.main,
                     fontSize: { xs: "1.25rem", md: "1.5rem" }, // Responsive icon size
                   }}
                 />
@@ -169,6 +180,8 @@ const Footer = () => {
                   sx={{
                     fontSize: { xs: "0.95rem", md: "1.1rem" }, // Responsive font size
                     lineHeight: 1.4,
+                    color: colors.isDark ? '#FFFFFF' : undefined,
+                    textAlign: { xs: 'left', md: 'left' },
                   }}
                 >
                   support@saigonlab.edu.vn
@@ -180,14 +193,14 @@ const Footer = () => {
                   display: "flex",
                   alignItems: "flex-start",
                   mb: 3,
-                  color: colors.isDark ? "#f3f3f3" : colors.text.secondary,
-                  justifyContent: { xs: "center", md: "flex-start" },
+                  color: colors.isDark ? "#FFFFFF" : colors.text.secondary,
+                  justifyContent: { xs: "flex-start", md: "flex-start" },
                 }}
               >
                 <LocationOn
                   sx={{
                     mr: 2,
-                    color: colors.isDark ? "white" : colors.primary.main,
+                    color: colors.isDark ? "#FFFFFF" : colors.primary.main,
                     fontSize: { xs: "1.25rem", md: "1.5rem" }, // Responsive icon size
                     mt: 0.2,
                   }}
@@ -197,6 +210,8 @@ const Footer = () => {
                   sx={{
                     fontSize: { xs: "0.95rem", md: "1.1rem" }, // Responsive font size
                     lineHeight: 1.4, // Consistent line height
+                    color: colors.isDark ? '#FFFFFF' : undefined,
+                    textAlign: { xs: 'left', md: 'left' },
                   }}
                 >
                   28/61 Cư Xá Lữ Gia, phường Phú Thọ, Tp.Hồ Chí Minh
@@ -214,13 +229,14 @@ const Footer = () => {
               : `1px solid ${colors.border.light}`,
             mt: 4,
             pt: 3,
-            textAlign: "center",
+            textAlign: { xs: 'left', md: 'center' },
+            pl: { xs: 0, md: 0 },
           }}
         >
           <Typography
             variant="body2"
             sx={{
-              color: colors.isDark ? "#f3f3f3" : colors.text.secondary,
+              color: colors.isDark ? "#FFFFFF" : colors.text.secondary,
               fontSize: "1rem",
             }}
           >

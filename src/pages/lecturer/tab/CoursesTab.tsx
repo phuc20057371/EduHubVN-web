@@ -32,6 +32,7 @@ import {
   DialogActions,
   DialogContentText,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
@@ -59,6 +60,10 @@ const CoursesTab = ({
   onEdit,
 }: CoursesTabProps) => {
   const dispatch = useDispatch();
+  const theme = useTheme();
+  const isDark = theme?.palette?.mode === "dark";
+  const whiteBg = isDark ? "#0E1D2C" : "white";
+  const translucentWhite = isDark ? "rgba(14,29,44,0.9)" : "rgba(255,255,255,0.9)";
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
   const [deleteType, setDeleteType] = useState<'owned' | 'attended'>('owned');
@@ -109,6 +114,7 @@ const CoursesTab = ({
       sx={{
         borderRadius: 3,
         boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        transition: "transform 0.15s ease, box-shadow 0.15s ease",
         "&:before": {
           display: "none",
         },
@@ -116,6 +122,15 @@ const CoursesTab = ({
           boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
           transform: "translateY(-2px)",
         },
+        "&:hover": {
+          transform: "translateY(-6px)",
+          boxShadow: "0 12px 32px rgba(0,0,0,0.25)",
+        },
+        "&:active": {
+          transform: "translateY(-6px)",
+          boxShadow: "0 16px 40px rgba(0,0,0,0.35)",
+        },
+        cursor: "pointer",
         mb: 2,
       }}
     >
@@ -147,7 +162,7 @@ const CoursesTab = ({
                 width: 48,
                 height: 48,
                 borderRadius: "12px",
-                background: "rgba(255,255,255,0.2)",
+                background: isDark ? "rgba(14,29,44,0.2)" : "rgba(255,255,255,0.2)",
                 backdropFilter: "blur(10px)",
                 display: "flex",
                 alignItems: "center",
@@ -189,7 +204,7 @@ const CoursesTab = ({
               size="small"
               sx={{
                 fontWeight: 600,
-                background: "rgba(255,255,255,0.9)",
+                background: translucentWhite,
                 height: "28px",
                 color:
                   item.original.status === "APPROVED"
@@ -206,7 +221,7 @@ const CoursesTab = ({
       <AccordionDetails
         sx={{
           p: 0,
-          background: "white",
+          background: whiteBg,
           borderRadius: "0 0 10px 10px",
         }}
       >
@@ -398,8 +413,8 @@ const CoursesTab = ({
                 <div
                   className="flex items-center gap-3 rounded-lg p-3"
                   style={{
-                    background: colors.background.tertiary,
-                    border: "1px solid #E5E7EB",
+                      background: isDark ? whiteBg : colors.background.tertiary,
+                      border: isDark ? "1px solid rgba(255,255,255,0.06)" : "1px solid #E5E7EB",
                   }}
                 >
                   <AttachMoney className="text-purple-600" fontSize="small" />
@@ -529,8 +544,8 @@ const CoursesTab = ({
               <div
                 className="flex items-center gap-3 rounded-lg p-3"
                 style={{
-                  background: colors.background.tertiary,
-                  border: "1px solid #E5E7EB",
+                  background: isDark ? whiteBg : colors.background.tertiary,
+                  border: isDark ? "1px solid rgba(255,255,255,0.06)" : "1px solid #E5E7EB",
                 }}
               >
                 <CalendarToday className="text-blue-600" fontSize="small" />
@@ -551,13 +566,11 @@ const CoursesTab = ({
                   </Typography>
                 </div>
               </div>
-
-              {/* Địa điểm */}
               <div
                 className="flex items-center gap-3 rounded-lg p-3"
                 style={{
-                  background: colors.background.tertiary,
-                  border: "1px solid #E5E7EB",
+                  background: isDark ? whiteBg : colors.background.tertiary,
+                  border: isDark ? "1px solid rgba(255,255,255,0.06)" : "1px solid #E5E7EB",
                 }}
               >
                 <LocationOn className="text-green-600" fontSize="small" />
@@ -578,7 +591,6 @@ const CoursesTab = ({
                 </div>
               </div>
 
-              {/* Hình thức học as simple checkbox (chỉ hiển thị cho owned courses) */}
               {isOwned && typeof item.original.isOnline !== 'undefined' && (
                 <div className="flex items-center gap-2">
                   {item.original.isOnline ? (

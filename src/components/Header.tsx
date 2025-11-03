@@ -26,6 +26,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Logoweb from "../assets/Eduhub_logo_new.png";
 import { useColors } from "../hooks/useColors";
+import { useTheme } from "../theme/ThemeProvider";
+import { SwitchMode } from "../ui/switch-mode";
 
 export interface MenuItem {
   text: string;
@@ -65,6 +67,8 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const navigate = useNavigate();
   const colors = useColors();
+  const { isDarkMode, toggleTheme } = useTheme();
+  const headerIconColor = colors.isDark ? '#FFFFFF' : undefined;
 
   return (
     <AppBar
@@ -72,7 +76,7 @@ const Header: React.FC<HeaderProps> = ({
       elevation={0}
       sx={{
         background: colors.isDark
-          ? colors.gradients.primary
+          ? '#0E1D2C'
           : `linear-gradient(135deg, ${colors.primary.main} 0%, ${colors.primary.dark} 100%)`,
         borderBottom: `1px solid ${colors.border.light}`,
         backdropFilter: "blur(10px)",
@@ -80,7 +84,7 @@ const Header: React.FC<HeaderProps> = ({
       }}
     >
       <Container maxWidth="xl">
-        <Toolbar disableGutters sx={{ minHeight: 70 }}>
+  <Toolbar disableGutters sx={{ minHeight: { xs: 56, sm: 70 } }}>
           {/* Mobile menu button */}
           <IconButton
             color="inherit"
@@ -158,12 +162,13 @@ const Header: React.FC<HeaderProps> = ({
           </Box>
 
           {/* Right side actions */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 0.5, sm: 1 } }}>
             {/* Search Button */}
             <IconButton
               color="inherit"
               sx={{
                 bgcolor: alpha("#fff", 0.1),
+                p: { xs: 0.5, sm: 'auto' },
                 "&:hover": {
                   bgcolor: colors.isDark
                     ? alpha("#fff", 0.2)
@@ -174,14 +179,29 @@ const Header: React.FC<HeaderProps> = ({
               <Search />
             </IconButton>
 
-            {/* Theme Toggle */}
-            {/* <ThemeToggle /> */}
+            {/* Compact theme toggle: match Search icon styling */}
+            <IconButton
+              onClick={toggleTheme}
+              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              color="inherit"
+              sx={{
+                color: headerIconColor,
+                bgcolor: alpha("#fff", 0.1),
+                display: { xs: 'none', sm: 'inline-flex' },
+                "&:hover": {
+                  bgcolor: colors.isDark ? alpha("#fff", 0.2) : alpha("#000", 0.1),
+                },
+              }}
+            >
+              <SwitchMode dark={isDarkMode} />
+            </IconButton>
 
             {/* Notifications */}
             <IconButton
               color="inherit"
               sx={{
                 bgcolor: alpha("#fff", 0.1),
+                display: { xs: 'none', sm: 'inline-flex' },
                 "&:hover": {
                   bgcolor: colors.isDark
                     ? alpha("#fff", 0.2)
@@ -201,8 +221,8 @@ const Header: React.FC<HeaderProps> = ({
               sx={{
                 color: "white",
                 ml: 1,
-                px: 2,
-                py: 1,
+                px: { xs: 1, sm: 2 },
+                py: { xs: 0.5, sm: 1 },
                 borderRadius: 1,
                 bgcolor: alpha("#fff", 0.1),
                 "&:hover": {
@@ -223,8 +243,8 @@ const Header: React.FC<HeaderProps> = ({
                   profile?.partnerOrganization?.logoUrl
                 }
                 sx={{
-                  width: 50,
-                  height: 50,
+                  width: { xs: 36, sm: 50 },
+                  height: { xs: 36, sm: 50 },
                   mr: 1,
                   border: `2px solid ${colors.border.light}`,
                   fontSize: "0.9rem",

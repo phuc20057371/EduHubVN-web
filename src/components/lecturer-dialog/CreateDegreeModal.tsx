@@ -1,4 +1,6 @@
 import { AttachFile, CloudUpload, School, Close } from "@mui/icons-material";
+import { useTheme } from "@mui/material/styles";
+import type { Theme } from "@mui/material";
 import {
   Autocomplete,
   Box,
@@ -69,6 +71,17 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
   editMode = false,
   editData,
 }) => {
+  const theme = useTheme() as Theme;
+  const isDark = theme?.palette?.mode === "dark";
+  const whiteBg = isDark ? "#0E1D2C" : "#ffffff";
+  const translucentWhite = isDark
+    ? "rgba(255,255,255,0.06)"
+    : "rgba(255,255,255,0.15)";
+  const inputBg = isDark ? "#07202d" : "#f8fafc";
+  const scrollbarTrack = isDark ? "#071722" : "#f1f5f9";
+  const chipBg = isDark ? "#072b24" : "#f0fdfa";
+  const footerBorder = isDark ? "rgba(255,255,255,0.03)" : "#f0fdfa";
+
   // useEffect đẻ clear form khi đóng modal
   React.useEffect(() => {
     if (!open) {
@@ -155,7 +168,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
         },
       }}
     >
-      <Box sx={style}>
+      <Box sx={{ ...style, bgcolor: whiteBg }}>
         {/* Modern Header with Gradient */}
         <Box
           sx={{
@@ -239,11 +252,13 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                 md: 40,
               },
               borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.15)",
+              backgroundColor: translucentWhite,
               backdropFilter: "blur(10px)",
               color: "white",
               "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.25)",
+                backgroundColor: isDark
+                  ? "rgba(255,255,255,0.12)"
+                  : "rgba(255, 255, 255, 0.25)",
                 transform: "scale(1.05)",
               },
               transition: "all 0.2s ease-in-out",
@@ -289,7 +304,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                     xs: "10px", // Mobile: smaller radius
                     md: "12px", // Desktop: larger radius
                   },
-                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  backgroundColor: translucentWhite,
                   backdropFilter: "blur(10px)",
                   display: "flex",
                   alignItems: "center",
@@ -357,7 +372,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
               },
             },
             "&::-webkit-scrollbar-track": {
-              backgroundColor: "#f1f5f9",
+              backgroundColor: scrollbarTrack,
             },
             "&::-webkit-scrollbar-thumb": {
               backgroundColor: "#14b8a6",
@@ -470,14 +485,14 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "12px",
-                        backgroundColor: "#f8fafc",
+                        backgroundColor: inputBg,
                         transition: "all 0.2s ease-in-out",
                         "&:hover": {
-                          backgroundColor: "#f0fdfa",
+                          backgroundColor: chipBg,
                           borderColor: "#99f6e4",
                         },
                         "&.Mui-focused": {
-                          backgroundColor: "#ffffff",
+                          backgroundColor: whiteBg,
                           boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                         },
                       },
@@ -502,16 +517,16 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "12px",
-                        backgroundColor: "#f8fafc",
-                  
+                        backgroundColor: inputBg,
+
                         transition: "all 0.2s ease-in-out",
                         "&:hover": {
-                          backgroundColor: "#f0fdfa",
+                          backgroundColor: chipBg,
                           borderColor: "#99f6e4",
                         },
                         "&.Mui-focused": {
-                          backgroundColor: "#ffffff",
-               
+                          backgroundColor: whiteBg,
+
                           boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                         },
                       },
@@ -543,16 +558,16 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                           sx={{
                             "& .MuiOutlinedInput-root": {
                               borderRadius: "12px",
-                              backgroundColor: "#f8fafc",
-                 
+                              backgroundColor: inputBg,
+
                               transition: "all 0.2s ease-in-out",
                               "&:hover": {
-                                backgroundColor: "#f0fdfa",
+                                backgroundColor: chipBg,
                                 borderColor: "#99f6e4",
                               },
                               "&.Mui-focused": {
-                                backgroundColor: "#ffffff",
-                       
+                                backgroundColor: whiteBg,
+
                                 boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                               },
                             },
@@ -584,16 +599,16 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                           sx={{
                             "& .MuiOutlinedInput-root": {
                               borderRadius: "12px",
-                              backgroundColor: "#f8fafc",
-                      
+                              backgroundColor: inputBg,
+
                               transition: "all 0.2s ease-in-out",
                               "&:hover": {
-                                backgroundColor: "#f0fdfa",
+                                backgroundColor: chipBg,
                                 borderColor: "#99f6e4",
                               },
                               "&.Mui-focused": {
-                                backgroundColor: "#ffffff",
-                   
+                                backgroundColor: whiteBg,
+
                                 boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                               },
                             },
@@ -622,15 +637,15 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "12px",
-                        backgroundColor: "#f8fafc",
+                        backgroundColor: inputBg,
 
                         transition: "all 0.2s ease-in-out",
                         "&:hover": {
-                          backgroundColor: "#f0fdfa",
+                          backgroundColor: chipBg,
                           borderColor: "#99f6e4",
                         },
                         "&.Mui-focused": {
-                          backgroundColor: "#ffffff",
+                          backgroundColor: whiteBg,
 
                           boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                         },
@@ -698,16 +713,16 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "12px",
-                        backgroundColor: "#f8fafc",
-              
+                        backgroundColor: inputBg,
+
                         transition: "all 0.2s ease-in-out",
                         "&:hover": {
-                          backgroundColor: "#f0fdfa",
+                          backgroundColor: chipBg,
                           borderColor: "#99f6e4",
                         },
                         "&.Mui-focused": {
-                          backgroundColor: "#ffffff",
-          
+                          backgroundColor: whiteBg,
+
                           boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                         },
                       },
@@ -733,15 +748,15 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "12px",
-                        backgroundColor: "#f8fafc",
+                        backgroundColor: inputBg,
                         border: "2px solid transparent",
                         transition: "all 0.2s ease-in-out",
                         "&:hover": {
-                          backgroundColor: "#f0fdfa",
+                          backgroundColor: chipBg,
                           borderColor: "#99f6e4",
                         },
                         "&.Mui-focused": {
-                          backgroundColor: "#ffffff",
+                          backgroundColor: whiteBg,
       
                           boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                         },
@@ -804,7 +819,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                       mb: 3,
                       p: 2,
                       borderRadius: "12px",
-                      backgroundColor: "#f0fdfa",
+                      backgroundColor: chipBg,
                       border: "2px solid #99f6e4",
                     }}
                   >
@@ -870,7 +885,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                       mt: 3,
                       p: 2,
                       borderRadius: "12px",
-                      backgroundColor: "#ecfdf5",
+                      backgroundColor: chipBg,
                       border: "2px solid #86efac",
                     }}
                   >
@@ -939,16 +954,16 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "12px",
-                      backgroundColor: "#f8fafc",
-            
+                      backgroundColor: inputBg,
+
                       transition: "all 0.2s ease-in-out",
                       "&:hover": {
-                        backgroundColor: "#f0fdfa",
+                        backgroundColor: chipBg,
                         borderColor: "#99f6e4",
                       },
                       "&.Mui-focused": {
-                        backgroundColor: "#ffffff",
-           
+                        backgroundColor: whiteBg,
+
                         boxShadow: "0 0 0 3px rgba(20, 184, 166, 0.1)",
                       },
                     },
@@ -976,8 +991,8 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
               xs: 2, // Mobile: consistent top padding
               md: 3, // Desktop: more top padding
             },
-            backgroundColor: "#f8fafc",
-            borderTop: "2px solid #f0fdfa",
+            backgroundColor: whiteBg,
+            borderTop: `2px solid ${footerBorder}`,
             borderRadius: {
               xs: "0 0 12px 12px", // Mobile: smaller radius
               sm: "0 0 16px 16px", // Tablet and up: larger radius

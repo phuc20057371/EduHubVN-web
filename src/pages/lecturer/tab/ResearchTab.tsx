@@ -28,6 +28,7 @@ import {
   DialogActions,
   DialogContentText,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
@@ -51,6 +52,11 @@ const ResearchTab = ({
   onEdit 
 }: ResearchTabProps) => {
   const dispatch = useDispatch();
+  const theme = useTheme();
+  const isDark = theme?.palette?.mode === "dark";
+  // Replace white backgrounds in dark mode with this color
+  const whiteBg = isDark ? "#0E1D2C" : "white";
+  const translucentWhite = isDark ? "rgba(14,29,44,0.9)" : "rgba(255,255,255,0.9)";
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
 
@@ -90,6 +96,7 @@ const ResearchTab = ({
       sx={{
         borderRadius: 3,
         boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        transition: "transform 0.15s ease, box-shadow 0.15s ease",
         "&:before": {
           display: "none",
         },
@@ -97,6 +104,15 @@ const ResearchTab = ({
           boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
           transform: "translateY(-2px)",
         },
+        "&:hover": {
+          transform: "translateY(-6px)",
+          boxShadow: "0 12px 32px rgba(0,0,0,0.25)",
+        },
+        "&:active": {
+          transform: "translateY(-6px)",
+          boxShadow: "0 16px 40px rgba(0,0,0,0.35)",
+        },
+        cursor: "pointer",
         mb: 2,
       }}
     >
@@ -126,7 +142,7 @@ const ResearchTab = ({
                 width: 48,
                 height: 48,
                 borderRadius: "12px",
-                background: "rgba(255,255,255,0.2)",
+                background: isDark ? "rgba(14,29,44,0.2)" : "rgba(255,255,255,0.2)",
                 backdropFilter: "blur(10px)",
                 display: "flex",
                 alignItems: "center",
@@ -160,7 +176,7 @@ const ResearchTab = ({
               label={getStatus(item.original.status)}
               size="small"
               sx={{
-                background: "rgba(255,255,255,0.9)",
+                background: translucentWhite,
                 height: "28px",
                 color:
                   item.original.status === "APPROVED"
@@ -177,7 +193,7 @@ const ResearchTab = ({
       <AccordionDetails
         sx={{
           p: 0,
-          background: "white",
+          background: whiteBg,
           borderRadius: "0 0 10px 10px",
         }}
       >
@@ -414,8 +430,8 @@ const ResearchTab = ({
               <div
                 className="flex items-center gap-3 rounded-lg p-3"
                 style={{
-                  background: colors.background.tertiary,
-                  border: "1px solid #E5E7EB",
+                  background: isDark ? whiteBg : colors.background.tertiary,
+                  border: isDark ? "1px solid rgba(255,255,255,0.06)" : "1px solid #E5E7EB",
                 }}
               >
                 <CalendarToday sx={{ color: colors.primary[600] }} fontSize="small" />
@@ -439,8 +455,8 @@ const ResearchTab = ({
               <div
                 className="flex items-center gap-3 rounded-lg p-3"
                 style={{
-                  background: colors.background.tertiary,
-                  border: "1px solid #E5E7EB",
+                  background: isDark ? whiteBg : colors.background.tertiary,
+                  border: isDark ? "1px solid rgba(255,255,255,0.06)" : "1px solid #E5E7EB",
                 }}
               >
                 <Business sx={{ color: colors.success[600] }} fontSize="small" />
@@ -469,7 +485,7 @@ const ResearchTab = ({
                 mb: 2,
                 p: 3,
                 borderRadius: "8px",
-                background: colors.primary[50],
+                      background: isDark ? "#07202d" : colors.primary[50],
                 border: `1px solid ${colors.primary[200]}`,
               }}
             >
@@ -501,7 +517,7 @@ const ResearchTab = ({
               sx={{
                 p: 3,
                 borderRadius: "8px",
-                background: colors.warning[100],
+                  background: isDark ? "#3b2c12" : colors.warning[100],
                 border: `1px solid ${colors.warning[500]}`,
               }}
             >
@@ -632,6 +648,7 @@ const ResearchTab = ({
           sx: {
             borderRadius: 3,
             minWidth: 400,
+            background: whiteBg,
           },
         }}
       >
