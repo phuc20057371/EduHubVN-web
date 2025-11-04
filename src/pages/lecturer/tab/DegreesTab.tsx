@@ -25,6 +25,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { useColors } from "../../../hooks/useColors";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import UploadDegreeModal from "../../../components/lecturer-dialog/CreateDegreeModal";
@@ -40,6 +41,7 @@ interface DegreesTabProps {
 
 const DegreesTab = ({ degrees }: DegreesTabProps) => {
   const dispatch = useDispatch();
+  const themeColors = useColors();
   const [openModal, setOpenModal] = useState(false);
   const [editDegree, setEditDegree] = useState<any>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -133,7 +135,7 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
       <div className="flex items-center justify-between">
         <Typography
           variant="h6"
-          sx={{ color: colors.text.primary, fontWeight: 600 }}
+          sx={{ color: themeColors.isDark ? themeColors.text.primary : colors.text.primary, fontWeight: 600 }}
         >
           Danh sách bằng cấp ({degrees?.length || 0})
         </Typography>
@@ -172,14 +174,25 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
             className="transition-all duration-300"
             sx={{
               borderRadius: 1,
-              border: `1px solid ${colors.primary[100]}`,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              border: 'none',
+              boxShadow: 'none',
+              transition: "transform 200ms ease, box-shadow 200ms ease",
+              cursor: "pointer",
               "&:before": {
                 display: "none",
               },
+              // keep a subtle hover elevation but no framed border
+              "&:hover": {
+                transform: "translateY(-4px)",
+                boxShadow: "0 10px 24px rgba(0,0,0,0.08)",
+              },
               "&.Mui-expanded": {
-                boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
                 transform: "translateY(-2px)",
+              },
+              "&:active": {
+                transform: "translateY(-6px)",
+                boxShadow: "0 14px 30px rgba(0,0,0,0.12)",
               },
             }}
           >
@@ -189,11 +202,20 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                 background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`,
                 color: "white",
                 borderRadius: "12px",
+                transition: "transform 180ms ease, box-shadow 180ms ease",
+                cursor: "pointer",
                 "& .MuiAccordionSummary-expandIconWrapper": {
                   color: "white",
                 },
                 "&.Mui-expanded": {
                   borderRadius: "12px 12px 0 0",
+                },
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                },
+                "&:active": {
+                  transform: "translateY(-6px)",
+                  boxShadow: "0 18px 40px rgba(0,0,0,0.32)",
                 },
               }}
             >
@@ -206,19 +228,19 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                       backdropFilter: "blur(10px)",
                     }}
                   >
-                    <School className="text-white" />
+                    <School sx={{ color: themeColors.isDark ? themeColors.text.primary : 'white' }} />
                   </Box>
                   <div>
                     <Typography
                       variant="h6"
                       className="font-bold"
-                      sx={{ color: "white" }}
+                      sx={{ color: themeColors.isDark ? themeColors.text.primary : 'white' }}
                     >
                       {item.original.name}
                     </Typography>
                     <Typography
                       variant="body2"
-                      sx={{ color: "rgba(255,255,255,0.9)" }}
+                      sx={{ color: themeColors.isDark ? themeColors.text.secondary : 'rgba(255,255,255,0.9)' }}
                     >
                       {item.original.major}
                     </Typography>
@@ -237,7 +259,7 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                   size="small"
                   sx={{
                     fontWeight: 600,
-                    background: "rgba(255,255,255,0.9)",
+                    background: themeColors.isDark ? 'rgba(255,255,255,0.08)' : "rgba(255,255,255,0.9)",
                     color:
                       item.original.status === "APPROVED"
                         ? "#047857"
@@ -252,7 +274,7 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
             <AccordionDetails
               sx={{
                 p: 0,
-                background: "white",
+                background: themeColors.isDark ? '#0E1D2C' : "white",
                 borderRadius: "0 0 12px 12px",
               }}
             >
@@ -261,10 +283,10 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                   <div
                     className="flex items-center gap-3 rounded-lg p-3"
                     style={{
-                      background: colors.background.tertiary,
+                      background: themeColors.isDark ? '#0E1D2C' : colors.background.tertiary,
                     }}
                   >
-                    <Business className="text-blue-600" fontSize="small" />
+                    <Business fontSize="small" sx={{ color: themeColors.isDark ? themeColors.text.primary : colors.primary[600] }} />
                     <div>
                       <Typography
                         variant="caption"
@@ -283,13 +305,10 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                   <div
                     className="flex items-center gap-3 rounded-lg p-3"
                     style={{
-                      background: colors.background.tertiary,
+                      background: themeColors.isDark ? '#0E1D2C' : colors.background.tertiary,
                     }}
                   >
-                    <CalendarToday
-                      className="text-green-600"
-                      fontSize="small"
-                    />
+                    <CalendarToday fontSize="small" sx={{ color: themeColors.isDark ? themeColors.text.primary : '#16A34A' }} />
                     <div>
                       <Typography
                         variant="caption"
@@ -309,10 +328,10 @@ const DegreesTab = ({ degrees }: DegreesTabProps) => {
                   <div
                     className="flex items-center gap-3 rounded-lg p-3"
                     style={{
-                      background: colors.background.tertiary,
+                      background: themeColors.isDark ? '#0E1D2C' : colors.background.tertiary,
                     }}
                   >
-                    <Grade className="text-purple-600" fontSize="small" />
+                    <Grade fontSize="small" sx={{ color: themeColors.isDark ? themeColors.text.primary : '#7C3AED' }} />
                     <div>
                       <Typography
                         variant="caption"

@@ -5,7 +5,7 @@ import type { UserProfile } from "../types/UserProfile";
 class WebSocketService {
   private client: CompatClient | null = null;
   private domain = window.location.hostname;
-  private BASE_URL = `http://${this.domain}:8080`;
+  private BASE_URL = `http://demoportal.ccvi.com.vn:8880`;
   private currentUserProfile: UserProfile | null = null;
 
   connect(

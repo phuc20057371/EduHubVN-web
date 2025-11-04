@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useColors } from "../../../hooks/useColors";
 import {
   Add,
   Assignment,
@@ -43,6 +44,7 @@ const CertificatesTab = ({
   formatDate,
 }: CertificatesTabProps) => {
   const dispatch = useDispatch();
+  const themeColors = useColors();
   const [openModal, setOpenModal] = useState(false);
   const [editCertificate, setEditCertificate] = useState<any>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -137,7 +139,7 @@ const CertificatesTab = ({
       <div className="flex items-center justify-between">
         <Typography
           variant="h6"
-          sx={{ color: colors.text.primary, fontWeight: 600 }}
+          sx={{ color: themeColors.isDark ? themeColors.text.primary : colors.text.primary, fontWeight: 600 }}
         >
           Danh sách chứng chỉ ({certificates?.length || 0})
         </Typography>
@@ -175,14 +177,26 @@ const CertificatesTab = ({
             className="transition-all duration-300"
             sx={{
               borderRadius: 3,
-              border: `1px solid ${colors.primary[100]}`,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              // remove framed border and default shadow to keep a clean list
+              border: 'none',
+              boxShadow: 'none',
+              transition: "transform 200ms ease, box-shadow 200ms ease",
+              cursor: "pointer",
               "&:before": {
                 display: "none",
               },
+              // keep hover/active elevation for a subtle "nổi" effect
+              "&:hover": {
+                transform: "translateY(-4px)",
+                boxShadow: "0 12px 28px rgba(0,0,0,0.12)",
+              },
               "&.Mui-expanded": {
-                boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                boxShadow: "0 10px 24px rgba(0,0,0,0.12)",
                 transform: "translateY(-2px)",
+              },
+              "&:active": {
+                transform: "translateY(-6px)",
+                boxShadow: "0 16px 36px rgba(0,0,0,0.16)",
               },
             }}
           >
@@ -192,11 +206,19 @@ const CertificatesTab = ({
                 background: "linear-gradient(135deg, #10B981 0%, #047857 100%)",
                 color: "white",
                 borderRadius: "12px",
+                transition: "transform 180ms ease",
+                cursor: "pointer",
                 "& .MuiAccordionSummary-expandIconWrapper": {
                   color: "white",
                 },
                 "&.Mui-expanded": {
                   borderRadius: "12px 12px 0 0",
+                },
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                },
+                "&:active": {
+                  transform: "translateY(-4px)",
                 },
               }}
             >
@@ -209,19 +231,19 @@ const CertificatesTab = ({
                       backdropFilter: "blur(10px)",
                     }}
                   >
-                    <Assignment className="text-white" />
+                    <Assignment sx={{ color: themeColors.isDark ? themeColors.text.primary : 'white' }} />
                   </Box>
                   <div>
                     <Typography
                       variant="h6"
                       className="font-bold"
-                      sx={{ color: "white" }}
+                      sx={{ color: themeColors.isDark ? themeColors.text.primary : 'white' }}
                     >
                       {item.original.name}
                     </Typography>
                     <Typography
                       variant="body2"
-                      sx={{ color: "rgba(255,255,255,0.9)" }}
+                      sx={{ color: themeColors.isDark ? themeColors.text.secondary : 'rgba(255,255,255,0.9)' }}
                     >
                       {item.original.issuedBy}
                     </Typography>
@@ -255,7 +277,7 @@ const CertificatesTab = ({
             <AccordionDetails
               sx={{
                 p: 0,
-                background: "white",
+                background: themeColors.isDark ? '#0E1D2C' : "white",
                 borderRadius: "0 0 12px 12px",
               }}
             >
@@ -264,10 +286,10 @@ const CertificatesTab = ({
                   <div
                     className="flex items-center gap-3 rounded-lg p-3"
                     style={{
-                      background: colors.background.tertiary,
+                      background: themeColors.isDark ? '#0E1D2C' : colors.background.tertiary,
                     }}
                   >
-                    <CalendarToday className="text-blue-600" fontSize="small" />
+                    <CalendarToday fontSize="small" sx={{ color: themeColors.isDark ? themeColors.text.primary : '#2563EB' }} />
                     <div>
                       <Typography
                         variant="caption"
@@ -285,15 +307,12 @@ const CertificatesTab = ({
                   </div>
                   {item.original.expiryDate && (
                     <div
-                      className="flex items-center gap-3 rounded-lg p-3"
-                      style={{
-                        background: colors.background.tertiary,
-                      }}
-                    >
-                      <CalendarToday
-                        className="text-red-600"
-                        fontSize="small"
-                      />
+                        className="flex items-center gap-3 rounded-lg p-3"
+                        style={{
+                          background: themeColors.isDark ? '#0E1D2C' : colors.background.tertiary,
+                        }}
+                      >
+                        <CalendarToday fontSize="small" sx={{ color: themeColors.isDark ? themeColors.text.primary : '#DC2626' }} />
                       <div>
                         <Typography
                           variant="caption"
@@ -313,10 +332,10 @@ const CertificatesTab = ({
                   <div
                     className="flex items-center gap-3 rounded-lg p-3"
                     style={{
-                      background: colors.background.tertiary,
+                      background: themeColors.isDark ? '#0E1D2C' : colors.background.tertiary,
                     }}
                   >
-                    <Grade className="text-green-600" fontSize="small" />
+                    <Grade fontSize="small" sx={{ color: themeColors.isDark ? themeColors.text.primary : '#16A34A' }} />
                     <div>
                       <Typography
                         variant="caption"

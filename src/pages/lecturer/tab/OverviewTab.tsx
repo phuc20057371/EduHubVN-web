@@ -1,5 +1,6 @@
 import { Card, CardContent, Typography } from "@mui/material";
 import { colors } from "../../../theme/colors";
+import { useColors } from "../../../hooks/useColors";
 
 interface OverviewTabProps {
   lecturer: any;
@@ -8,7 +9,9 @@ interface OverviewTabProps {
   getStatusColor: (status: string) => string;
 }
 
+
 const OverviewTab = ({ lecturer }: OverviewTabProps) => {
+  const themeColors = useColors();
   return (
     <div className="space-y-6">
       {/* Bio Section - Enhanced */}
@@ -17,15 +20,18 @@ const OverviewTab = ({ lecturer }: OverviewTabProps) => {
           <Typography
             variant="h6"
             className="mb-4 font-semibold"
-            sx={{ color: colors.text.primary }}
+            sx={{ color: themeColors.isDark ? themeColors.text.primary : colors.text.primary }}
           >
             Giới thiệu
           </Typography>
           <Card
             sx={{
               borderRadius: 1,
-              boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-              border: `1px solid ${colors.primary[100]}`,
+              boxShadow: themeColors.isDark ? 'none' : "0 2px 12px rgba(0,0,0,0.06)",
+              /* removed framed border and orange frame for dark mode */
+              border: 'none',
+              background: themeColors.isDark ? '#CD853F' : '#FFFFFF',
+              mt: 3,
             }}
           >
             <CardContent className="p-6">
@@ -33,7 +39,7 @@ const OverviewTab = ({ lecturer }: OverviewTabProps) => {
                 variant="body1"
                 className="leading-relaxed"
                 sx={{
-                  color: colors.text.secondary,
+                  color: themeColors.isDark ? themeColors.text.primary : colors.text.secondary,
                   fontSize: "1rem",
                   lineHeight: 1.6,
                 }}

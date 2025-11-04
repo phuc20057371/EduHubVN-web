@@ -32,6 +32,7 @@ import CreateAttendedCourseDialog from "../../components/lecturer-dialog/CreateA
 import CreateResearchProjectDialog from "../../components/lecturer-dialog/CreateResearchProjectDialog";
 import { setLecturerProfile } from "../../redux/slice/LecturerProfileSlice";
 import { colors } from "../../theme/colors";
+import { useColors } from "../../hooks/useColors";
 import { API } from "../../utils/Fetch";
 import {
   OverviewTab,
@@ -56,6 +57,7 @@ const LecturerProfilePage = () => {
   const dispatch = useDispatch();
   const lecturerProfile = useSelector((state: any) => state.lecturerProfile);
   const userProfile = useSelector((state: any) => state.userProfile);
+  const themeColors = useColors();
   const [activeSection, setActiveSection] = useState("overview");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [createOwnedCourseDialogOpen, setCreateOwnedCourseDialogOpen] =
@@ -426,7 +428,7 @@ const LecturerProfilePage = () => {
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: colors.background.secondary }}
+      style={{ backgroundColor: themeColors.isDark ? '#0E1D2C' : colors.background.secondary, color: themeColors.isDark ? themeColors.text.primary : colors.text.primary }}
     >
       <Container maxWidth="xl" className="py-8">
         {/* Header Section */}
@@ -435,7 +437,9 @@ const LecturerProfilePage = () => {
           sx={{
             borderRadius: 1,
             boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-            background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
+            background: themeColors.isDark
+              ? `linear-gradient(135deg, #0E1D2C 0%, #1a2733 100%)`
+              : `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[700]} 100%)`,
             color: "white",
             position: "relative",
           }}
@@ -728,7 +732,9 @@ const LecturerProfilePage = () => {
                         <div
                           className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                           style={{
-                            background: `linear-gradient(135deg, ${colors.primary[25]} 0%, ${colors.secondary[50]} 100%)`,
+                            background: themeColors.isDark
+                              ? `linear-gradient(135deg, ${themeColors.primary.main} 0%, ${themeColors.secondary.main} 100%)`
+                              : `linear-gradient(135deg, ${colors.primary[25]} 0%, ${colors.secondary[50]} 100%)`,
                           }}
                         />
 
@@ -741,8 +747,11 @@ const LecturerProfilePage = () => {
                                   activeSection === item.id
                                     ? `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[500]} 100%)`
                                     : `${colors.primary[100]}`,
-                                color:
-                                  activeSection === item.id
+                                color: themeColors.isDark
+                                  ? activeSection === item.id
+                                    ? themeColors.primary.main
+                                    : themeColors.text.secondary
+                                  : activeSection === item.id
                                     ? "white"
                                     : colors.primary[600],
                               }}
@@ -755,8 +764,11 @@ const LecturerProfilePage = () => {
                                 sx={{
                                   fontFamily: "'Inter', sans-serif",
                                   fontWeight: 600,
-                                  color:
-                                    activeSection === item.id
+                                  color: themeColors.isDark
+                                    ? activeSection === item.id
+                                      ? themeColors.primary.main
+                                      : themeColors.text.secondary
+                                    : activeSection === item.id
                                       ? colors.primary[700]
                                       : colors.text.primary,
                                   fontSize: "1rem",
@@ -767,8 +779,9 @@ const LecturerProfilePage = () => {
                               <Typography
                                 variant="caption"
                                 sx={{
-                                  color:
-                                    activeSection === item.id
+                                  color: themeColors.isDark
+                                    ? themeColors.text.secondary
+                                    : activeSection === item.id
                                       ? colors.primary[600]
                                       : colors.text.tertiary,
                                   fontSize: "0.8rem",
@@ -780,24 +793,24 @@ const LecturerProfilePage = () => {
                             </div>
                           </div>
 
-                          {item.count !== undefined && (
+                            {item.count !== undefined && (
                             <Chip
                               label={item.count}
                               size="small"
                               sx={{
-                                background:
-                                  activeSection === item.id
+                                /* Single background expression that supports dark mode and active state */
+                                background: themeColors.isDark
+                                  ? 'rgba(255,255,255,0.04)'
+                                  : activeSection === item.id
                                     ? "linear-gradient(135deg, #FF9800, #F57C00)"
                                     : colors.background.tertiary,
-                                color:
-                                  activeSection === item.id
-                                    ? "#fff"
-                                    : colors.text.secondary,
+                                color: themeColors.isDark ? themeColors.primary.main : (activeSection === item.id ? '#fff' : colors.text.secondary),
                                 fontFamily: "'Inter', sans-serif",
                                 fontWeight: 700,
                                 minWidth: "32px",
                                 height: "28px",
                                 fontSize: "0.75rem",
+                                border: themeColors.isDark ? `1px solid ${themeColors.primary.main}` : undefined,
                               }}
                             />
                           )}

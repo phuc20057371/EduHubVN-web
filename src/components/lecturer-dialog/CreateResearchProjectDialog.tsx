@@ -17,6 +17,7 @@ import {
   AttachMoney,
 } from "@mui/icons-material";
 import React, { useEffect, useState } from "react";
+import { useTheme } from "@mui/material/styles";
 import { toast } from "react-toastify";
 import { validateResearchProjectForm } from "../../utils/Validate";
 import { projectTypes, scales } from "../../utils/DropdownOption";
@@ -75,6 +76,10 @@ interface CreateResearchProjectDialogProps {
 const CreateResearchProjectDialog: React.FC<
   CreateResearchProjectDialogProps
 > = ({ open, onClose, onSubmit, editMode = false, editData }) => {
+  const theme = useTheme();
+  const isDark = theme?.palette?.mode === "dark";
+  const whiteBg = isDark ? "#0E1D2C" : "#ffffff";
+  const translucentWhite = isDark ? "rgba(14,29,44,0.15)" : "rgba(255,255,255,0.15)";
   const [form, setForm] = useState<ResearchProject>({
     id: "",
     title: "",
@@ -171,7 +176,7 @@ const CreateResearchProjectDialog: React.FC<
         },
       }}
     >
-      <Box sx={style}>
+  <Box sx={{ ...style, bgcolor: whiteBg }}>
         {/* Modern Header with Gradient */}
         <Box
           sx={{
@@ -255,11 +260,11 @@ const CreateResearchProjectDialog: React.FC<
                 md: 40,
               },
               borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.15)",
+              backgroundColor: isDark ? translucentWhite : "rgba(255, 255, 255, 0.15)",
               backdropFilter: "blur(10px)",
               color: "white",
               "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.25)",
+                backgroundColor: isDark ? "rgba(14,29,44,0.25)" : "rgba(255, 255, 255, 0.25)",
                 transform: "scale(1.05)",
               },
               transition: "all 0.2s ease-in-out",
@@ -277,7 +282,7 @@ const CreateResearchProjectDialog: React.FC<
 
           <Box sx={{ position: "relative", zIndex: 1 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
-              <Box
+                <Box
                 sx={{
                   p: {
                     xs: 1,
@@ -287,7 +292,7 @@ const CreateResearchProjectDialog: React.FC<
                     xs: "8px",
                     md: "12px",
                   },
-                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  backgroundColor: isDark ? translucentWhite : "rgba(255, 255, 255, 0.15)",
                   backdropFilter: "blur(10px)",
                 }}
               >
@@ -352,7 +357,7 @@ const CreateResearchProjectDialog: React.FC<
               },
             },
             "&::-webkit-scrollbar-track": {
-              backgroundColor: "#f1f5f9",
+              backgroundColor: isDark ? "#0E1D2C" : "#f1f5f9",
             },
             "&::-webkit-scrollbar-thumb": {
               backgroundColor: "#0284c7",
@@ -677,8 +682,8 @@ const CreateResearchProjectDialog: React.FC<
               xs: 2, // Mobile: consistent top padding
               md: 3, // Desktop: more top padding
             },
-            backgroundColor: "#f8fafc",
-            borderTop: "2px solid #f3f4f6",
+            backgroundColor: isDark ? whiteBg : "#f8fafc",
+            borderTop: isDark ? "2px solid rgba(255,255,255,0.04)" : "2px solid #f3f4f6",
             borderRadius: {
               xs: "0 0 12px 12px", // Mobile: smaller radius
               sm: "0 0 16px 16px", // Tablet and up: larger radius

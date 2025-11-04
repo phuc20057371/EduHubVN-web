@@ -42,7 +42,7 @@ import type {
 } from "../types/TrainingProgram";
 
 const domain = window.location.hostname;
-const BASE_URL = `http://${domain}:8080`;
+const BASE_URL = `http://demoportal.ccvi.com.vn:8880`;
 
 const fetch = axios.create({
   baseURL: BASE_URL,

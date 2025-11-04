@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTheme } from "@mui/material/styles";
 import {
   Modal,
   Box,
@@ -79,6 +80,10 @@ const CreateAttendedCourseDialog: React.FC<CreateAttendedCourseDialogProps> = ({
   editMode = false,
   editData,
 }) => {
+  const theme = useTheme();
+  const isDark = theme?.palette?.mode === "dark";
+  const whiteBg = isDark ? "#0E1D2C" : "#ffffff";
+  const translucentWhite = isDark ? "rgba(14,29,44,0.12)" : "rgba(255,255,255,0.15)";
   const [form, setForm] = useState<AttendedCourse>({
     id: "",
     title: "",
@@ -156,7 +161,7 @@ const CreateAttendedCourseDialog: React.FC<CreateAttendedCourseDialogProps> = ({
         },
       }}
     >
-      <Box sx={style}>
+      <Box sx={{ ...style, bgcolor: whiteBg }}>
         {/* Modern Header with Gradient */}
         <Box
           sx={{
@@ -240,11 +245,11 @@ const CreateAttendedCourseDialog: React.FC<CreateAttendedCourseDialogProps> = ({
                 md: 40,
               },
               borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
+              backgroundColor: isDark ? translucentWhite : "rgba(255, 255, 255, 0.1)",
               color: "white",
               transition: "all 0.2s ease-in-out",
               "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.2)",
+                backgroundColor: isDark ? "rgba(14,29,44,0.22)" : "rgba(255, 255, 255, 0.2)",
                 transform: "scale(1.05)",
               },
             }}
@@ -332,7 +337,7 @@ const CreateAttendedCourseDialog: React.FC<CreateAttendedCourseDialogProps> = ({
               width: "6px",
             },
             "&::-webkit-scrollbar-track": {
-              background: "#f1f1f1",
+              background: isDark ? "#0E1D2C" : "#f1f1f1",
               borderRadius: "3px",
             },
             "&::-webkit-scrollbar-thumb": {
@@ -356,7 +361,7 @@ const CreateAttendedCourseDialog: React.FC<CreateAttendedCourseDialogProps> = ({
                   sx={{
                     p: 1,
                     borderRadius: "8px",
-                    backgroundColor: "#F0FDF4",
+                    backgroundColor: isDark ? translucentWhite : "#F0FDF4",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -386,7 +391,7 @@ const CreateAttendedCourseDialog: React.FC<CreateAttendedCourseDialogProps> = ({
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "12px",
-                      backgroundColor: "#f8fafc",
+                      backgroundColor: isDark ? "#07202d" : "#f8fafc",
                       border: "2px solid transparent",
                       transition: "all 0.2s ease-in-out",
                       "&:hover": {
@@ -437,7 +442,7 @@ const CreateAttendedCourseDialog: React.FC<CreateAttendedCourseDialogProps> = ({
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             borderRadius: "12px",
-                            backgroundColor: "#f8fafc",
+                            backgroundColor: isDark ? "#07202d" : "#f8fafc",
                             border: "2px solid transparent",
                             transition: "all 0.2s ease-in-out",
                             "&:hover": {
@@ -479,7 +484,7 @@ const CreateAttendedCourseDialog: React.FC<CreateAttendedCourseDialogProps> = ({
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "12px",
-                        backgroundColor: "#f8fafc",
+                        backgroundColor: isDark ? "#07202d" : "#f8fafc",
                         border: "2px solid transparent",
                         transition: "all 0.2s ease-in-out",
                         "&:hover": {
@@ -642,7 +647,7 @@ const CreateAttendedCourseDialog: React.FC<CreateAttendedCourseDialogProps> = ({
                   sx={{
                     p: 1,
                     borderRadius: "8px",
-                    backgroundColor: "#FEF3C7",
+                    backgroundColor: isDark ? translucentWhite : "#FEF3C7",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -773,7 +778,7 @@ const CreateAttendedCourseDialog: React.FC<CreateAttendedCourseDialogProps> = ({
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "12px",
-                      backgroundColor: "#f8fafc",
+                      backgroundColor: isDark ? "#07202d" : "#f8fafc",
                       border: "2px solid transparent",
                       transition: "all 0.2s ease-in-out",
                       "&:hover": {
@@ -811,7 +816,7 @@ const CreateAttendedCourseDialog: React.FC<CreateAttendedCourseDialogProps> = ({
                   sx={{
                     p: 1,
                     borderRadius: "8px",
-                    backgroundColor: "#E0E7FF",
+                    backgroundColor: isDark ? translucentWhite : "#E0E7FF",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -967,8 +972,8 @@ const CreateAttendedCourseDialog: React.FC<CreateAttendedCourseDialogProps> = ({
               md: 4, // Desktop: full padding
             },
             pt: 2,
-            borderTop: "1px solid #e2e8f0",
-            backgroundColor: "#f8fafc",
+            borderTop: isDark ? "1px solid rgba(255,255,255,0.04)" : "1px solid #e2e8f0",
+            backgroundColor: isDark ? whiteBg : "#f8fafc",
             display: "flex",
             gap: 2,
             justifyContent: "flex-end",
