@@ -10,4 +10,6 @@ export type UserProfile = {
     lecturer: Object | null;
     educationInstitution: Object | null;
     partnerOrganization: Object | null;
+
+    notifications: Array<Notification>;
 }

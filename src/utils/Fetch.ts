@@ -41,8 +41,10 @@ import type {
   TrainingProgramRequestReq,
 } from "../types/TrainingProgram";
 
-const domain = window.location.hostname;
-const BASE_URL = `http://demoportal.ccvi.com.vn:8880`;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL  ;
+
+// const domain = window.location.hostname;
+// const BASE_URL = `http://${domain}:8888`;
 
 const fetch = axios.create({
   baseURL: BASE_URL,

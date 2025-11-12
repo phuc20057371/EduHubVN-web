@@ -2,7 +2,6 @@ import {
   Help,
   KeyboardArrowDown,
   Logout,
-  Notifications,
 } from "@mui/icons-material";
 import {
   AppBar,
@@ -11,7 +10,6 @@ import {
   Chip,
   Container,
   Divider,
-  IconButton,
   Menu,
   MenuItem,
   Paper,
@@ -26,6 +24,7 @@ import { toast } from "react-toastify";
 import Logoweb from "../assets/Eduhub_logo_new.png";
 import EduHubSpeedDial from "../components/EduHubSpeedDial";
 import Footer from "../components/Footer";
+import NotificationMenu from "../components/NotificationMenu";
 import { useColors } from "../hooks/useColors";
 import { setUserProfile } from "../redux/slice/userSlice";
 import { UserMessageHandler } from "../services/UserMessageHandler";
@@ -187,18 +186,9 @@ const PendingLayout = () => {
             </Paper> */}
 
             {/* Notifications */}
-            <IconButton
-              sx={{
-                color: "white",
-                "&:hover": {
-                  backgroundColor: colors.isDark
-                    ? alpha(colors.primary.light, 0.2)
-                    : "rgba(255,255,255,0.1)",
-                },
-              }}
-            >
-              <Notifications />
-            </IconButton>
+            <NotificationMenu 
+              notifications={userProfile?.notifications}
+            />
 
             {/* Theme Toggle */}
             {/* <ThemeToggle /> */}

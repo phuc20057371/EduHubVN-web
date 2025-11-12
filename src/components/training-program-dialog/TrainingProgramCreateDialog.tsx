@@ -126,6 +126,7 @@ const TrainingProgramCreateDialog: React.FC<
     tags: [],
     completionCertificateType: "",
     certificateIssuer: "",
+    trialVideoUrl: "",
     rating: null,
 
     trainingProgramRequest: requestedProgram,
@@ -359,6 +360,7 @@ const TrainingProgramCreateDialog: React.FC<
       tags: Array.isArray(program.tags) ? [...program.tags] : [],
       completionCertificateType: program.completionCertificateType || "",
       certificateIssuer: program.certificateIssuer || "",
+      trialVideoUrl: program.trialVideoUrl || "",
 
       // Keep current values for these fields
       rating: null, // Don't copy rating
@@ -444,6 +446,7 @@ const TrainingProgramCreateDialog: React.FC<
       tags: [],
       completionCertificateType: "",
       certificateIssuer: "",
+      trialVideoUrl: "",
       rating: null,
 
       trainingProgramRequest: null,
@@ -961,6 +964,7 @@ const TrainingProgramCreateDialog: React.FC<
                     tags: [],
                     completionCertificateType: "",
                     certificateIssuer: "",
+                    trialVideoUrl: "",
                     rating: null,
                     trainingProgramRequest: null,
                     partnerOrganization: partner,
@@ -1380,6 +1384,18 @@ const TrainingProgramCreateDialog: React.FC<
                     handleFormChange("contentUrl", e.target.value)
                   }
                   placeholder="https://..."
+                />
+              </Box>
+
+              <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
+                <TextField
+                  fullWidth
+                  label="Trial Video URL"
+                  value={formData.trialVideoUrl}
+                  onChange={(e) =>
+                    handleFormChange("trialVideoUrl", e.target.value)
+                  }
+                  placeholder="https://youtube.com/... hoặc https://vimeo.com/..."
                 />
               </Box>
             </Box>

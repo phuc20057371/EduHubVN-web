@@ -3,14 +3,12 @@ import {
   KeyboardArrowDown,
   Logout,
   Menu as MenuIcon,
-  Notifications,
   Search,
   Settings,
 } from "@mui/icons-material";
 import {
   AppBar,
   Avatar,
-  Badge,
   Box,
   Button,
   Container,
@@ -28,6 +26,7 @@ import Logoweb from "../assets/Eduhub_logo_new.png";
 import { useColors } from "../hooks/useColors";
 import { useTheme } from "../theme/ThemeProvider";
 import { SwitchMode } from "../ui/switch-mode";
+import NotificationMenu from "./NotificationMenu";
 
 export interface MenuItem {
   text: string;
@@ -197,22 +196,9 @@ const Header: React.FC<HeaderProps> = ({
             </IconButton>
 
             {/* Notifications */}
-            <IconButton
-              color="inherit"
-              sx={{
-                bgcolor: alpha("#fff", 0.1),
-                display: { xs: 'none', sm: 'inline-flex' },
-                "&:hover": {
-                  bgcolor: colors.isDark
-                    ? alpha("#fff", 0.2)
-                    : alpha("#000", 0.1),
-                },
-              }}
-            >
-              <Badge badgeContent={3} color="error" variant="dot">
-                <Notifications />
-              </Badge>
-            </IconButton>
+            <NotificationMenu 
+              notifications={userProfile?.notifications}
+            />
 
             {/* User Menu */}
             <Button

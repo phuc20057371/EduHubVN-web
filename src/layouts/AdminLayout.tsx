@@ -6,7 +6,6 @@ import {
   KeyboardArrowDown,
   Logout,
   Menu as MenuIcon,
-  Notifications,
   Person,
   School,
   Settings,
@@ -16,7 +15,6 @@ import {
 import {
   AppBar,
   Avatar,
-  Badge,
   Box,
   Button,
   Card,
@@ -44,6 +42,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import LogoWeb from "../assets/Eduhub_logo_new.png";
 import Footer from "../components/Footer";
+import NotificationMenu from "../components/NotificationMenu";
 import { useColors } from "../hooks/useColors";
 import { setUserProfile } from "../redux/slice/userSlice";
 import { AdminMessageHandler } from "../services/AdminMessageHandler";
@@ -636,19 +635,9 @@ const AdminLayout = () => {
               {/* <ThemeToggle /> */}
 
               {/* Notifications */}
-              <IconButton
-                color="inherit"
-                sx={{
-                  bgcolor: alpha("#fff", 0.1),
-                  "&:hover": {
-                    bgcolor: alpha("#fff", 0.2),
-                  },
-                }}
-              >
-                <Badge badgeContent={3} color="error" variant="dot">
-                  <Notifications />
-                </Badge>
-              </IconButton>
+              <NotificationMenu 
+                notifications={userProfile?.notifications}
+              />
 
               {/* User Menu */}
               <Button

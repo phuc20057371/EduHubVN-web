@@ -5,4 +5,5 @@ export { default as Footer } from './Footer';
 export { default as Header } from './Header';
 export { default as IntroductionDialog } from './IntroductionDialog';
 export { default as LecturerCarousel } from './LecturerCarousel';
+export { default as NotificationMenu } from './NotificationMenu';
 export { default as ThemeToggle } from './ThemeToggle';

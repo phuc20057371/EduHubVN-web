@@ -4,6 +4,7 @@ import {
   Close as CloseIcon,
   Description as DescriptionIcon,
   MenuBook as MenuBookIcon,
+  PlayCircleOutline as PlayIcon,
   School as SchoolIcon,
   Star as StarIcon,
   AccessTime as TimeIcon,
@@ -350,6 +351,29 @@ const TrainingProgramDialog: React.FC<TrainingProgramDialogProps> = ({
                   />
                 ))}
               </Box>
+            </Box>
+          )}
+
+          {/* Trial Video */}
+          {program.trialVideoUrl && (
+            <Box>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                Video dùng thử
+              </Typography>
+              <Button
+                variant="outlined"
+                startIcon={<PlayIcon />}
+                href={program.trialVideoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                size="small"
+                sx={{
+                  textTransform: "none",
+                  borderRadius: 1,
+                }}
+              >
+                Xem video dùng thử
+              </Button>
             </Box>
           )}
 

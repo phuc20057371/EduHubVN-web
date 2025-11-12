@@ -10,6 +10,7 @@ export interface TrainingProgramUnit {
   durationSection: number;
   orderSection: number;
   lead: boolean;
+  trialVideoUrl?: string;
 }
 
 export interface TrainingProgramRequest {
@@ -66,6 +67,7 @@ export interface TrainingProgram {
   tags: string[];
   completionCertificateType: string;
   certificateIssuer: string;
+  trialVideoUrl?: string;
   rating: number;
   units: Array<TrainingProgramUnit>;
 
@@ -111,6 +113,7 @@ export interface TrainingProgramReq {
   tags: string[];
   completionCertificateType: string;
   certificateIssuer: string;
+  trialVideoUrl?: string;
   rating: number | null;
 
   trainingProgramRequest: TrainingProgramRequest | null;
@@ -139,6 +142,7 @@ export type TrainingProgramUnitPublic = {
   durationSection: number;
   orderSection: number;
   lead: boolean;
+  trialVideoUrl?: string;
 };
 
 export type TrainingProgramPublic = {
@@ -169,5 +173,6 @@ export type TrainingProgramPublic = {
   shortDescription: string;
   description: string;
   learningObjectives: string;
+  trialVideoUrl?: string;
   rating: number | null;
 }

@@ -128,6 +128,7 @@ interface UnitFormData {
   durationSection: number;
   orderSection: number;
   lead: boolean;
+  trialVideoUrl?: string;
 }
 
 const AssignmentLecturerDialog: React.FC<AssignmentLecturerDialogProps> = ({
@@ -152,6 +153,7 @@ const AssignmentLecturerDialog: React.FC<AssignmentLecturerDialogProps> = ({
     durationSection: 1,
     orderSection: 1,
     lead: false,
+    trialVideoUrl: "",
   });
 
   // Load lecturers when dialog opens
@@ -185,6 +187,7 @@ const AssignmentLecturerDialog: React.FC<AssignmentLecturerDialogProps> = ({
       durationSection: 1,
       orderSection: units.length + 1,
       lead: false,
+      trialVideoUrl: "",
     });
     setIsAddingUnit(false);
     setEditingUnitId(null);
@@ -198,6 +201,7 @@ const AssignmentLecturerDialog: React.FC<AssignmentLecturerDialogProps> = ({
       durationSection: 1,
       orderSection: units.length + 1,
       lead: false,
+      trialVideoUrl: "",
     });
     setIsAddingUnit(true);
     setEditingUnitId(null);
@@ -212,6 +216,7 @@ const AssignmentLecturerDialog: React.FC<AssignmentLecturerDialogProps> = ({
       durationSection: unit.durationSection,
       orderSection: unit.orderSection,
       lead: unit.lead || false,
+      trialVideoUrl: unit.trialVideoUrl || "",
     });
     setEditingUnitId(unit.id);
     setIsAddingUnit(true);
@@ -239,6 +244,7 @@ const AssignmentLecturerDialog: React.FC<AssignmentLecturerDialogProps> = ({
       durationSection: unitForm.durationSection,
       orderSection: unitForm.orderSection,
       lead: unitForm.lead,
+      trialVideoUrl: unitForm.trialVideoUrl || undefined,
     };
 
     if (editingUnitId) {
@@ -792,6 +798,19 @@ const AssignmentLecturerDialog: React.FC<AssignmentLecturerDialogProps> = ({
                           description: e.target.value,
                         }))
                       }
+                    />
+
+                    <TextField
+                      fullWidth
+                      label="URL Video dùng thử"
+                      value={unitForm.trialVideoUrl || ""}
+                      onChange={(e) =>
+                        setUnitForm((prev) => ({
+                          ...prev,
+                          trialVideoUrl: e.target.value,
+                        }))
+                      }
+                      placeholder="https://youtube.com/... hoặc https://vimeo.com/..."
                     />
 
                     {/* Selected Lecturer Display */}

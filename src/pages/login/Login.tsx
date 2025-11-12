@@ -108,7 +108,7 @@ const Login = () => {
       >
         <Tooltip title="Quay lại trang chủ" placement="right">
           <IconButton
-            onClick={() => navigate("/guest")}
+            onClick={() => window.location.href = import.meta.env.VITE_WELCOME_URL }
             sx={{
               backgroundColor: colors.isDark
                 ? "rgba(255,255,255,0.1)"
