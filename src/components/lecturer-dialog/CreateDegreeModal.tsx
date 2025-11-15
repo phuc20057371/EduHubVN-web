@@ -14,13 +14,13 @@ import {
 import { Stack } from "@mui/system";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import type { DegreeRequest } from "../../types/DegreeRequest";
 import { API } from "../../utils/Fetch";
 import { validateDegreeInfo } from "../../utils/Validate";
 import {
   degreeLevelsAutoComplete,
   majorsAutoComplete,
 } from "../../utils/AutoComplete";
+import type { DegreeCreateReq } from "../../types/Degree";
 
 const style = {
   position: "absolute" as const,
@@ -59,9 +59,9 @@ const style = {
 interface UploadDegreeModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (degree: DegreeRequest) => void;
+  onSubmit: (degree: DegreeCreateReq) => void;
   editMode?: boolean;
-  editData?: DegreeRequest;
+  editData?: DegreeCreateReq;
 }
 
 const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
@@ -103,7 +103,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
       setForm(editData);
     }
   }, [open, editMode, editData]);
-  const [form, setForm] = useState<DegreeRequest>({
+  const [form, setForm] = useState<DegreeCreateReq>({
     referenceId: "",
     name: "",
     major: "",
@@ -116,7 +116,7 @@ const CreateDegreeModal: React.FC<UploadDegreeModalProps> = ({
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
-  const handleChange = (field: keyof DegreeRequest, value: string | number) => {
+  const handleChange = (field: keyof DegreeCreateReq, value: string | number) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 

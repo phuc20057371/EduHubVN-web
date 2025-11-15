@@ -1,51 +1,50 @@
-export type InstitutionType = "UNIVERSITY" | "TRAINING_CENTER";
+export type PartnerType = "UNIVERSITY" | "TRAINING_CENTER";
 
-export type Institution = {
+export type Partner = {
   id: string;
-  email?: string;
   businessRegistrationNumber: string;
-  institutionName: string;
-  institutionType: string;
+  organizationName: string;
+  industry: string;
   phoneNumber: string;
   website: string;
   address: string;
   representativeName: string;
   position: string;
   description: string;
-  logoUrl: string;
-  establishedYear: number;
-  adminNote: string;
+  logoUrl?: string; // Optional field
+  establishedYear: number | null;
+
+  adminNote?: string; // Optional field
   status: string;
   createdAt: string;
   updatedAt: string;
 };
 
-export type InstitutionCreateReq = {
+export type PartnerCreateReq = {
   businessRegistrationNumber: string;
-  institutionName: string;
-  institutionType: string
+  organizationName: string;
+  industry: string;
   phoneNumber: string;
   website: string;
   address: string;
   representativeName: string;
   position: string;
   description: string;
+  logoUrl?: string;
   establishedYear: number | null;
-  logoUrl?: string; // Optional field
 };
 
 
-export type InstitutionUpdateReq = {
-  id: string;
+export type PartnerUpdateReq = {
   businessRegistrationNumber: string;
-  institutionName: string;
-  institutionType: string
+  organizationName: string;
+  industry: string;
   phoneNumber: string;
   website: string;
   address: string;
   representativeName: string;
   position: string;
   description: string;
+  logoUrl?: string;
   establishedYear: number | null;
-  logoUrl?: string; // Optional field
 };

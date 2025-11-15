@@ -43,10 +43,7 @@ import {
 } from "./tab";
 import { toast } from "react-toastify";
 import type { OwnedCourse } from "../../types/OwnedCourse";
-import type {
-  AttendedCourse,
-  AttendedCourseRequest,
-} from "../../types/AttendedCourse";
+import type { AttendedCourse } from "../../types/AttendedCourse";
 import {
   formatDate,
   getAcademicRank,
@@ -116,10 +113,10 @@ const LecturerProfilePage = () => {
 
     try {
       setIsUploadingAvatar(true);
-      
+
       // Upload avatar using API from Fetch.ts
       const response = await API.user.uploadAvatar(file);
-      
+
       if (response.data.success) {
         // Refresh lecturer profile to get updated avatar URL
         const profileResponse = await API.lecturer.getLecturerProfile();
@@ -150,9 +147,7 @@ const LecturerProfilePage = () => {
     setCreateOwnedCourseDialogOpen(true);
   };
 
-  const handleSubmitAttendedCourse = async (
-    courseData: AttendedCourseRequest,
-  ) => {
+  const handleSubmitAttendedCourse = async (courseData: AttendedCourse) => {
     try {
       if (isEditMode && editingItem) {
         if (editingItem.status === "APPROVED") {
@@ -428,7 +423,14 @@ const LecturerProfilePage = () => {
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: themeColors.isDark ? '#0E1D2C' : colors.background.secondary, color: themeColors.isDark ? themeColors.text.primary : colors.text.primary }}
+      style={{
+        backgroundColor: themeColors.isDark
+          ? "#0E1D2C"
+          : colors.background.secondary,
+        color: themeColors.isDark
+          ? themeColors.text.primary
+          : colors.text.primary,
+      }}
     >
       <Container maxWidth="xl" className="py-8">
         {/* Header Section */}
@@ -489,7 +491,7 @@ const LecturerProfilePage = () => {
                   {lecturer.fullName?.charAt(0)}
                 </Avatar>
               </Tooltip>
-              
+
               {/* Camera overlay on hover */}
               <Box
                 sx={{
@@ -793,24 +795,30 @@ const LecturerProfilePage = () => {
                             </div>
                           </div>
 
-                            {item.count !== undefined && (
+                          {item.count !== undefined && (
                             <Chip
                               label={item.count}
                               size="small"
                               sx={{
                                 /* Single background expression that supports dark mode and active state */
                                 background: themeColors.isDark
-                                  ? 'rgba(255,255,255,0.04)'
+                                  ? "rgba(255,255,255,0.04)"
                                   : activeSection === item.id
                                     ? "linear-gradient(135deg, #FF9800, #F57C00)"
                                     : colors.background.tertiary,
-                                color: themeColors.isDark ? themeColors.primary.main : (activeSection === item.id ? '#fff' : colors.text.secondary),
+                                color: themeColors.isDark
+                                  ? themeColors.primary.main
+                                  : activeSection === item.id
+                                    ? "#fff"
+                                    : colors.text.secondary,
                                 fontFamily: "'Inter', sans-serif",
                                 fontWeight: 700,
                                 minWidth: "32px",
                                 height: "28px",
                                 fontSize: "0.75rem",
-                                border: themeColors.isDark ? `1px solid ${themeColors.primary.main}` : undefined,
+                                border: themeColors.isDark
+                                  ? `1px solid ${themeColors.primary.main}`
+                                  : undefined,
                               }}
                             />
                           )}

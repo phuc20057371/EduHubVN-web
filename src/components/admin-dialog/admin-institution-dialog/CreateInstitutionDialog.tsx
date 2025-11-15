@@ -24,7 +24,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { API } from "../../../utils/Fetch";
 import { validateInstitutionInfo } from "../../../utils/Validate";
-import type { RequestInstitutionFromAdmin } from "../../../types/RequestInstitutionFromAdmin";
+import type { CreateInstitutionReq } from "../../../types/Admin";
 
 interface CreateInstitutionDialogProps {
   open: boolean;
@@ -146,7 +146,7 @@ const CreateInstitutionDialog = ({
     }
 
     try {
-      const newInstitution: RequestInstitutionFromAdmin = {
+      const newInstitution: CreateInstitutionReq = {
         email: email.trim(),
         password: password.trim(),
         institutionName: institutionName.trim(),

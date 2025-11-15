@@ -27,7 +27,7 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { setLecturerPendingCreate } from "../../../redux/slice/LecturerPendingCreateSlice";
 import { setLecturers } from "../../../redux/slice/LecturerSlice";
-import type { Certificate } from "../../../types/Certificate";
+import type { Certification } from "../../../types/Certification";
 import type { Degree } from "../../../types/Degree";
 import type { Lecturer } from "../../../types/Lecturer";
 import {
@@ -46,7 +46,7 @@ export interface ApproveLecturerCreateDialogProps {
   onClose: () => void;
   lecturer: Lecturer;
   degrees: Degree[];
-  certificates: Certificate[];
+  certificates: Certification[];
 }
 
 const ApproveLecturerCreateDialog: React.FC<

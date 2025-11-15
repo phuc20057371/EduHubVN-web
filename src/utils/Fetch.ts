@@ -1,47 +1,26 @@
 import axios from "axios";
-import type { InstitutionRequest } from "../types/InstitutionRequest";
-import type { LoginRequest } from "../types/LoginRequest";
-import type { PartnerRequest } from "../types/PartnerRequest";
-import type { ForgotPasswordRequest } from "./../types/ForgotPasswordRequest";
 
 import { toast } from "react-toastify";
-import type {
-  AddSubEmailRequest,
-  SendSubEmailOtpRequest,
-} from "../types/AddSubEmailRequest";
-import type { AssignPermissionsRequest } from "../types/AssignPermissionsRequest";
-import type {
-  AttendedCourse,
-  AttendedCourseRequest,
-} from "../types/AttendedCourse";
-import type { Certificate } from "../types/Certificate";
-import type { CertificationUpdateRequest } from "../types/CertificationUpdateRequest";
-import type { ChangePasswordRequest } from "../types/ChangePasswordRequest";
-import type { Degree } from "../types/Degree";
-import type { DegreeRequest } from "../types/DegreeRequest";
-import type { EmailSent } from "../types/EmailSent";
-import type { IdRequest } from "../types/IdRequest";
-import type { Institution } from "../types/Institution";
-import type { Lecturer } from "../types/Lecturer";
-import type { LecturerRequest } from "../types/LecturerRequest";
-import type { OwnedCourse, OwnedCourseRequest } from "../types/OwnedCourse";
-import type { Partner } from "../types/Parner";
-import type { RejectRequest } from "../types/RejectRequest";
-import type { RequestInstitutionFromAdmin } from "../types/RequestInstitutionFromAdmin";
-import type { RequestLecturerFromAdmin } from "../types/RequestLecturerFromAdmin";
-import type { RequestPartnerFromAdmin } from "../types/RequestPartnerFromAdmin";
-import type {
-  ResearchProject,
-  ResearchProjectRequest,
-} from "../types/ResearchProject";
-import type { ResetPasswordRequest } from "../types/ResetPasswordRequest";
-import type { ResetPasswordRequestForUser } from "../types/ResetPasswordRequestForUser";
+import type { CreateInstitutionReq, CreateLecturerReq, CreatePartnerReq } from "../types/Admin";
+import type { AttendedCourseCreateReq, AttendedCourseUpdateReq } from "../types/AttendedCourse";
+import type { ChangePasswordReq, LoginReq, ResetPasswordReq, ResetPasswordUserReq } from "../types/Authen";
+import type { Certification, CertificationUpdateReq } from "../types/Certification";
+import type { Degree, DegreeUpdateReq } from "../types/Degree";
+import type { EmailReq, EmailSent } from "../types/Email";
+import type { IdReq } from "../types/IdReq";
+import type { Institution, InstitutionCreateReq, InstitutionUpdateReq } from "../types/Institution";
+import type { Lecturer, LecturerCreateReq } from "../types/Lecturer";
+import type { AssignPermissionsReq } from "../types/Mod";
+import type { OwnedCourseCreateReq, OwnedCourseUpdateReq } from "../types/OwnedCourse";
+import type { Partner, PartnerCreateReq, PartnerUpdateReq } from "../types/Parner";
+import type { RejectReq } from "../types/RejectReq";
+import type { ResearchProjectCreateReq, ResearchProjectUpdateReq } from "../types/ResearchProject";
 import type {
   TrainingProgramReq,
   TrainingProgramRequestReq,
 } from "../types/TrainingProgram";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL  ;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // const domain = window.location.hostname;
 // const BASE_URL = `http://${domain}:8888`;
@@ -122,15 +101,15 @@ const handleTokenExpiration = () => {
 
 export const API = {
   auth: {
-    login: (data: LoginRequest) => fetch.post("/api/v1/auth/login", data),
+    login: (data: LoginReq) => fetch.post("/api/v1/auth/login", data),
     register: (data: any) => fetch.post("/api/v1/auth/register", data),
     sendOtp: (email: string) => fetch.post("/api/v1/auth/send-otp", { email }),
     refresh: (refreshToken: string) =>
       fetch.post("/api/v1/auth/refresh", { refreshToken }),
     logout: () => fetch.post("/api/v1/auth/logout"),
-    forgotPassword: (data: ForgotPasswordRequest) =>
+    forgotPassword: (data: EmailReq) =>
       fetch.post("/api/v1/auth/forgot-password", data),
-    resetPassword: (data: ResetPasswordRequestForUser) =>
+    resetPassword: (data: ResetPasswordUserReq) =>
       fetch.post("/api/v1/auth/reset-password", data),
   },
   user: {
@@ -145,20 +124,20 @@ export const API = {
       return fetch.post("/api/v1/user/uploads", formData);
     },
     getUserProfile: () => fetch.get("/api/v1/user/user-profile"),
-    sendOTPChangePassword: (data: ForgotPasswordRequest) =>
+    sendOTPChangePassword: (data: EmailReq) =>
       fetch.post("/api/v1/user/send-otp-change-password", data),
-    changePassword: (data: ChangePasswordRequest) =>
+    changePassword: (data: ChangePasswordReq) =>
       fetch.post("/api/v1/user/change-password", data),
-    sendSubEmailOtp: (data: SendSubEmailOtpRequest) =>
+    sendSubEmailOtp: (data: EmailReq) =>
       fetch.post("/api/v1/user/send-otp-add-subemail", data),
-    addSubEmail: (data: AddSubEmailRequest) =>
+    addSubEmail: (data: EmailReq) =>
       fetch.post("/api/v1/user/add-subemail", data),
     removeSubEmail: (data: { email: string }) =>
       fetch.post("/api/v1/user/remove-subemail", data),
     //Leccturer
-    registerLecturer: (data: LecturerRequest) =>
+    registerLecturer: (data: LecturerCreateReq) =>
       fetch.post("/api/v1/user/register-lecturer", data),
-    updateLecturer: (data: LecturerRequest) =>
+    updateLecturer: (data: LecturerCreateReq) =>
       fetch.post("/api/v1/user/update-lecturer", data),
     getPendingLecturer: () =>
       fetch.get("/api/v1/user/pending-lecturer-profile"),
@@ -170,9 +149,9 @@ export const API = {
       return fetch.post("/api/v1/lecturer/update-avatar", formData);
     },
     // Institution
-    registerInstitution: (data: InstitutionRequest) =>
+    registerInstitution: (data: InstitutionCreateReq) =>
       fetch.post("/api/v1/user/register-institution", data),
-    updateInstitution: (data: InstitutionRequest) =>
+    updateInstitution: (data: InstitutionUpdateReq) =>
       fetch.post("/api/v1/user/update-institution", data),
     getPendingInstitution: () =>
       fetch.get("/api/v1/user/pending-institution-profile"),
@@ -182,9 +161,9 @@ export const API = {
       return fetch.post("/api/v1/institution/update-logo", formData);
     },
     // Partner
-    registerPartner: (data: PartnerRequest) =>
+    registerPartner: (data: PartnerCreateReq) =>
       fetch.post("/api/v1/user/register-partner", data),
-    updatePartner: (data: PartnerRequest) =>
+    updatePartner: (data: PartnerUpdateReq) =>
       fetch.post("/api/v1/user/update-partner", data),
     getPendingPartner: () => fetch.get("/api/v1/user/pending-partner-profile"),
     updateLogoPartner: (file: File) => {
@@ -196,16 +175,16 @@ export const API = {
     createDegree: (data: any) => fetch.post("/api/v1/user/create-degree", data),
     updateDegree: (data: Degree) =>
       fetch.post("/api/v1/user/update-degree", data),
-    editDegree: (data: DegreeRequest) =>
+    editDegree: (data: DegreeUpdateReq) =>
       fetch.post("/api/v1/user/edit-degree", data),
     deleteDegree: (data: string) =>
       fetch.post("/api/v1/user/delete-degree", { id: data }),
     // Certification
     createCertification: (data: any) =>
       fetch.post("/api/v1/user/create-certification", data),
-    updateCertification: (data: Certificate) =>
+    updateCertification: (data: Certification) =>
       fetch.post("/api/v1/user/update-certification", data),
-    editCertification: (data: CertificationUpdateRequest) =>
+    editCertification: (data: CertificationUpdateReq) =>
       fetch.post("/api/v1/user/edit-certification", data),
     deleteCertification: (data: string) =>
       fetch.post("/api/v1/user/delete-certification", { id: data }),
@@ -215,37 +194,37 @@ export const API = {
     getLecturerProfile: () => fetch.get("/api/v1/lecturer/lecturer-profile"),
     getAllCourses: () => fetch.get("/api/v1/lecturer/get-all-courses"),
     // Lecturer
-    updateProfile: (data: LecturerRequest) =>
+    updateProfile: (data: LecturerCreateReq) =>
       fetch.post("/api/v1/lecturer/update-profile", data),
     // Degree
     // Certification
 
     // Attended Courses
-    createAttendedCourse: (data: AttendedCourseRequest) =>
+    createAttendedCourse: (data: AttendedCourseCreateReq) =>
       fetch.post("/api/v1/lecturer/create-attended-course", data),
-    updateAttendedCourse: (data: AttendedCourse) =>
+    updateAttendedCourse: (data: AttendedCourseUpdateReq) =>
       fetch.post("/api/v1/lecturer/update-attended-course", data),
-    editAttendedCourse: (data: AttendedCourse) =>
+    editAttendedCourse: (data: AttendedCourseUpdateReq) =>
       fetch.post("/api/v1/lecturer/edit-attended-course", data),
-    deleteAttendedCourse: (data: IdRequest) =>
+    deleteAttendedCourse: (data: IdReq) =>
       fetch.post("/api/v1/lecturer/delete-attended-course", { id: data }),
     // Owned Courses
-    createOwnedCourse: (data: OwnedCourseRequest) =>
+    createOwnedCourse: (data: OwnedCourseCreateReq) =>
       fetch.post("/api/v1/lecturer/create-owned-course", data),
-    updateOwnedCourse: (data: OwnedCourse) =>
+    updateOwnedCourse: (data: OwnedCourseUpdateReq) =>
       fetch.post("/api/v1/lecturer/update-owned-course", data),
-    editOwnedCourse: (data: OwnedCourse) =>
+    editOwnedCourse: (data: OwnedCourseUpdateReq) =>
       fetch.post("/api/v1/lecturer/edit-owned-course", data),
-    deleteOwnedCourse: (data: IdRequest) =>
+    deleteOwnedCourse: (data: IdReq) =>
       fetch.post("/api/v1/lecturer/delete-owned-course", { id: data }),
     // Research Projects
-    createResearchProject: (data: ResearchProjectRequest) =>
+    createResearchProject: (data: ResearchProjectCreateReq) =>
       fetch.post("/api/v1/lecturer/create-research-project", data),
-    updateResearchProject: (data: ResearchProject) =>
+    updateResearchProject: (data: ResearchProjectUpdateReq) =>
       fetch.post("/api/v1/lecturer/update-research-project", data),
-    editResearchProject: (data: ResearchProject) =>
+    editResearchProject: (data: ResearchProjectUpdateReq) =>
       fetch.post("/api/v1/lecturer/edit-research-project", data),
-    deleteResearchProject: (data: IdRequest) =>
+    deleteResearchProject: (data: IdReq) =>
       fetch.post("/api/v1/lecturer/delete-research-project", { id: data }),
     hiddenProfile: (data: any) =>
       fetch.post("/api/v1/lecturer/hidden-profile", data),
@@ -254,7 +233,7 @@ export const API = {
     // Get
     getLecturers: () => fetch.get("/api/v1/institution/get-lecturers"),
     // Institution
-    updateInstitutionProfile: (data: InstitutionRequest) =>
+    updateInstitutionProfile: (data: InstitutionUpdateReq) =>
       fetch.post("/api/v1/institution/update-profile", data),
     getInstitutionProfile: () =>
       fetch.get("/api/v1/institution/get-institution-profile"),
@@ -263,7 +242,7 @@ export const API = {
     // Get
     getPartnerProfile: () => fetch.get("/api/v1/partner/get-partner-profile"),
     // Partner
-    updatePartnerProfile: (data: PartnerRequest) =>
+    updatePartnerProfile: (data: PartnerCreateReq) =>
       fetch.post("/api/v1/partner/update-profile", data),
     getAllProgramRequests: () =>
       fetch.get("/api/v1/partner/get-all-training-program-requests"),
@@ -285,16 +264,12 @@ export const API = {
     getPartnerPendingCreate: () =>
       fetch.get("/api/v1/admin/partner-pending-create"),
 
-    getAllPendingUpdates: () => fetch.get("/api/v1/admin/pending-updates"),
-    getAllPendingApplications: () =>
-      fetch.get("/api/v1/admin/pending-application"),
-
     getAllLecturers: () => fetch.get("/api/v1/admin/get-all-lecturers"),
     getAllInstitutions: () => fetch.get("/api/v1/admin/get-all-institutions"),
     getAllPartners: () => fetch.get("/api/v1/admin/get-all-partners"),
 
-    // getLecturerRequests: () => fetch.get("/api/v1/admin/get-lecturer-requests"),
-    getLecturerAllProfile: (data: IdRequest) =>
+    // getLecturerCreateReqs: () => fetch.get("/api/v1/admin/get-lecturer-requests"),
+    getLecturerAllProfile: (data: IdReq) =>
       fetch.get("/api/v1/admin/get-lecturer-all-profile/" + data.id),
 
     getDegreeRequests: () => fetch.get("/api/v1/admin/get-degree-requests"),
@@ -307,122 +282,122 @@ export const API = {
     getResearchProjectRequests: () =>
       fetch.get("/api/v1/admin/get-research-project-requests"),
     //Lecturer
-    approveLecturer: (data: IdRequest) =>
+    approveLecturer: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-lecturer", data),
-    rejectLecturer: (data: RejectRequest) =>
+    rejectLecturer: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-lecturer", data),
-    approveLecturerUpdate: (data: IdRequest) =>
+    approveLecturerUpdate: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-lecturer-update", data),
-    rejectLecturerUpdate: (data: RejectRequest) =>
+    rejectLecturerUpdate: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-lecturer-update", data),
     updateLecturer: (data: Lecturer) =>
       fetch.post("/api/v1/admin/update-lecturer", data),
-    deleteLecturer: (data: IdRequest) =>
+    deleteLecturer: (data: IdReq) =>
       fetch.post("/api/v1/admin/delete-lecturer", data),
-    createLecturer: (data: RequestLecturerFromAdmin) =>
+    createLecturer: (data: CreateLecturerReq) =>
       fetch.post("/api/v1/admin/create-lecturer", data),
 
     // Institution
-    approveInstitution: (data: IdRequest) =>
+    approveInstitution: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-institution", data),
-    rejectInstitution: (data: RejectRequest) =>
+    rejectInstitution: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-institution", data),
-    approveInstitutionUpdate: (data: IdRequest) =>
+    approveInstitutionUpdate: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-institution-update", data),
-    rejectInstitutionUpdate: (data: RejectRequest) =>
+    rejectInstitutionUpdate: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-institution-update", data),
     updateInstitution: (data: Institution) =>
       fetch.post("/api/v1/admin/update-institution", data),
-    deleteInstitution: (data: IdRequest) =>
+    deleteInstitution: (data: IdReq) =>
       fetch.post("/api/v1/admin/delete-institution", data),
-    createInstitution: (data: RequestInstitutionFromAdmin) =>
+    createInstitution: (data: CreateInstitutionReq) =>
       fetch.post("/api/v1/admin/create-institution", data),
     // Partner
 
-    approvePartner: (data: IdRequest) =>
+    approvePartner: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-partner", data),
-    rejectPartner: (data: RejectRequest) =>
+    rejectPartner: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-partner", data),
-    approvePartnerUpdate: (data: IdRequest) =>
+    approvePartnerUpdate: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-partner-update", data),
-    rejectPartnerUpdate: (data: RejectRequest) =>
+    rejectPartnerUpdate: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-partner-update", data),
 
     updatePartner: (data: Partner) =>
       fetch.post("/api/v1/admin/update-partner", data),
-    deletePartner: (data: IdRequest) =>
+    deletePartner: (data: IdReq) =>
       fetch.post("/api/v1/admin/delete-partner", data),
-    createPartner: (data: RequestPartnerFromAdmin) =>
+    createPartner: (data: CreatePartnerReq) =>
       fetch.post("/api/v1/admin/create-partner", data),
     // Degree
 
-    approveDegree: (data: IdRequest) =>
+    approveDegree: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-degree", data),
-    rejectDegree: (data: RejectRequest) =>
+    rejectDegree: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-degree", data),
-    approveDegreeUpdate: (data: IdRequest) =>
+    approveDegreeUpdate: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-degree-update", data),
-    rejectDegreeUpdate: (data: RejectRequest) =>
+    rejectDegreeUpdate: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-degree-update", data),
     createDegree: (data: any, lecturerId: string) =>
       fetch.post(`/api/v1/admin/create-degree/${lecturerId}`, data),
-    deleteDegree: (data: IdRequest) =>
+    deleteDegree: (data: IdReq) =>
       fetch.post("/api/v1/admin/delete-degree", data),
 
     // Certification
-    approveCertification: (data: IdRequest) =>
+    approveCertification: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-certification", data),
-    rejectCertification: (data: RejectRequest) =>
+    rejectCertification: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-certification", data),
-    approveCertificationUpdate: (data: IdRequest) =>
+    approveCertificationUpdate: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-certification-update", data),
-    rejectCertificationUpdate: (data: RejectRequest) =>
+    rejectCertificationUpdate: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-certification-update", data),
     createCertification: (data: any, lecturerId: string) =>
       fetch.post(`/api/v1/admin/create-certification/${lecturerId}`, data),
-    deleteCertification: (data: IdRequest) =>
+    deleteCertification: (data: IdReq) =>
       fetch.post("/api/v1/admin/delete-certification", data),
 
     // Attended Courses
-    approveAttendedCourse: (data: IdRequest) =>
+    approveAttendedCourse: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-attended-course", data),
-    rejectAttendedCourse: (data: RejectRequest) =>
+    rejectAttendedCourse: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-attended-course", data),
-    approveAttendedCourseUpdate: (data: IdRequest) =>
+    approveAttendedCourseUpdate: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-attended-course-update", data),
-    rejectAttendedCourseUpdate: (data: RejectRequest) =>
+    rejectAttendedCourseUpdate: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-attended-course-update", data),
     createAttendedCourse: (data: any, lecturerId: string) =>
       fetch.post(`/api/v1/admin/create-attended-course/${lecturerId}`, data),
-    deleteAttendedCourse: (data: IdRequest) =>
+    deleteAttendedCourse: (data: IdReq) =>
       fetch.post("/api/v1/admin/delete-attended-course", data),
 
     // Owned Courses
-    approveOwnedCourse: (data: IdRequest) =>
+    approveOwnedCourse: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-owned-course", data),
-    rejectOwnedCourse: (data: RejectRequest) =>
+    rejectOwnedCourse: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-owned-course", data),
-    approveOwnedCourseUpdate: (data: IdRequest) =>
+    approveOwnedCourseUpdate: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-owned-course-update", data),
-    rejectOwnedCourseUpdate: (data: RejectRequest) =>
+    rejectOwnedCourseUpdate: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-owned-course-update", data),
     createOwnedCourse: (data: any, lecturerId: string) =>
       fetch.post(`/api/v1/admin/create-owned-course/${lecturerId}`, data),
-    deleteOwnedCourse: (data: IdRequest) =>
+    deleteOwnedCourse: (data: IdReq) =>
       fetch.post("/api/v1/admin/delete-owned-course", data),
 
     // Research Projects
-    approveResearchProject: (data: IdRequest) =>
+    approveResearchProject: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-research-project", data),
-    rejectResearchProject: (data: RejectRequest) =>
+    rejectResearchProject: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-research-project", data),
-    approveResearchProjectUpdate: (data: IdRequest) =>
+    approveResearchProjectUpdate: (data: IdReq) =>
       fetch.post("/api/v1/admin/approve-research-project-update", data),
-    rejectResearchProjectUpdate: (data: RejectRequest) =>
+    rejectResearchProjectUpdate: (data: RejectReq) =>
       fetch.post("/api/v1/admin/reject-research-project-update", data),
     createResearchProject: (data: any, lecturerId: string) =>
       fetch.post(`/api/v1/admin/create-research-project/${lecturerId}`, data),
-    deleteResearchProject: (data: IdRequest) =>
+    deleteResearchProject: (data: IdReq) =>
       fetch.post("/api/v1/admin/delete-research-project", data),
 
     // Course
@@ -435,18 +410,18 @@ export const API = {
     //   fetch.post("/api/v1/admin/create-course", data),
     // updateCourse: (data: any) =>
     //   fetch.post("/api/v1/admin/update-course", data),
-    // deleteCourse: (data: IdRequest) =>
+    // deleteCourse: (data: IdReq) =>
     //   fetch.post("/api/v1/admin/delete-course", data),
   },
   subadmin: {
     getAllSubAdmins: () => fetch.get("/api/v1/admin/sub-admin/all"),
-    assignPermissions: (data: AssignPermissionsRequest) =>
+    assignPermissions: (data: AssignPermissionsReq) =>
       fetch.post("/api/v1/admin/sub-admin/assign-permissions", data),
-    createSubAdmin: (data: LoginRequest) =>
+    createSubAdmin: (data: LoginReq) =>
       fetch.post("/api/v1/admin/sub-admin/create", data),
-    deleteSubAdmin: (data: IdRequest) =>
+    deleteSubAdmin: (data: IdReq) =>
       fetch.delete("/api/v1/admin/sub-admin/" + data.id),
-    resetPassword: (data: ResetPasswordRequest) =>
+    resetPassword: (data: ResetPasswordReq) =>
       fetch.post("/api/v1/admin/sub-admin/reset-password", data),
   },
   program: {
@@ -472,9 +447,9 @@ export const API = {
       fetch.post(`/api/v1/admin/archive-training-program/${id}`),
     unarchiveTrainingProgram: (id: string) =>
       fetch.post(`/api/v1/admin/unarchive-training-program/${id}`),
-    rejectProgramRequest: (data: IdRequest) =>
+    rejectProgramRequest: (data: IdReq) =>
       fetch.post("/api/v1/admin/reject-training-program-request", data),
-    unrejectProgramRequest: (data: IdRequest) =>
+    unrejectProgramRequest: (data: IdReq) =>
       fetch.post("/api/v1/admin/unreject-training-program-request", data),
   },
   public: {

@@ -35,7 +35,7 @@ import {
   jobFieldAutoComplete,
   specializationAutoComplete,
 } from "../../../utils/AutoComplete";
-import type { RequestLecturerFromAdmin } from "../../../types/RequestLecturerFromAdmin";
+import type { CreateLecturerReq } from "../../../types/Admin";
 
 interface CreateLecturerDialogProps {
   open: boolean;
@@ -183,7 +183,7 @@ const CreateLecturerDialog = ({
         dateOfBirthObj = dateOfBirth.toDate();
       }
 
-      const newLecturer: RequestLecturerFromAdmin = {
+      const newLecturer: CreateLecturerReq = {
         email: email.trim(),
         password: password.trim(),
         fullName: fullName.trim(),

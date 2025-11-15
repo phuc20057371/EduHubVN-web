@@ -28,16 +28,16 @@ import { toast } from "react-toastify";
 import { validateResearchProjectForm } from "../../../utils/Validate";
 import { projectTypes, scales } from "../../../utils/DropdownOption";
 import { getProjectType, getScale } from "../../../utils/ChangeText";
-import type {
-  ResearchProject,
-  ResearchProjectRequest,
-} from "../../../types/ResearchProject";
 import type { Lecturer } from "../../../types/Lecturer";
 import {
   industriesAutoComplete,
   researchProjectStatusAutoComplete,
 } from "../../../utils/AutoComplete";
 import { API } from "../../../utils/Fetch";
+import type {
+  ResearchProject,
+  ResearchProjectCreateReq,
+} from "../../../types/ResearchProject";
 
 const style = {
   position: "absolute" as const,
@@ -158,7 +158,7 @@ const AddResearchProjectDialog: React.FC<AddResearchProjectDialogProps> = ({
   }, [open, editMode, projectData]);
 
   const handleChange = (
-    field: keyof ResearchProjectRequest,
+    field: keyof ResearchProjectCreateReq,
     value: string | number,
   ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -184,17 +184,20 @@ const AddResearchProjectDialog: React.FC<AddResearchProjectDialogProps> = ({
     setIsSubmitting(true);
     try {
       let response;
-      
+
       if (editMode) {
         // Update existing research project
         response = await API.lecturer.updateResearchProject(form);
-        
+
         if (response.data.success) {
           toast.success("Cập nhật dự án nghiên cứu thành công!");
           onSuccess();
           onClose();
         } else {
-          toast.error(response.data.message || "Có lỗi xảy ra khi cập nhật dự án nghiên cứu");
+          toast.error(
+            response.data.message ||
+              "Có lỗi xảy ra khi cập nhật dự án nghiên cứu",
+          );
         }
       } else {
         // Create new research project
@@ -211,10 +214,13 @@ const AddResearchProjectDialog: React.FC<AddResearchProjectDialogProps> = ({
         }
       }
     } catch (error: any) {
-      console.error(`❌ Error ${editMode ? 'updating' : 'creating'} research project:`, error);
+      console.error(
+        `❌ Error ${editMode ? "updating" : "creating"} research project:`,
+        error,
+      );
       toast.error(
         error.response?.data?.message ||
-          `Có lỗi xảy ra khi ${editMode ? 'cập nhật' : 'thêm'} dự án nghiên cứu!`,
+          `Có lỗi xảy ra khi ${editMode ? "cập nhật" : "thêm"} dự án nghiên cứu!`,
       );
     } finally {
       setIsSubmitting(false);
@@ -375,7 +381,9 @@ const AddResearchProjectDialog: React.FC<AddResearchProjectDialogProps> = ({
                   mb: 0.5,
                 }}
               >
-                {editMode ? "Chỉnh sửa dự án nghiên cứu" : `Thêm dự án nghiên cứu cho ${lecturer?.fullName}`}
+                {editMode
+                  ? "Chỉnh sửa dự án nghiên cứu"
+                  : `Thêm dự án nghiên cứu cho ${lecturer?.fullName}`}
               </Typography>
               <Typography
                 variant="body2"
@@ -383,7 +391,9 @@ const AddResearchProjectDialog: React.FC<AddResearchProjectDialogProps> = ({
                   opacity: 0.9,
                 }}
               >
-                {editMode ? `Chỉnh sửa dự án nghiên cứu cho ${lecturer?.fullName || "giảng viên"}` : "Thông tin về dự án nghiên cứu khoa học"}
+                {editMode
+                  ? `Chỉnh sửa dự án nghiên cứu cho ${lecturer?.fullName || "giảng viên"}`
+                  : "Thông tin về dự án nghiên cứu khoa học"}
               </Typography>
             </Box>
           </Box>
@@ -1149,10 +1159,13 @@ const AddResearchProjectDialog: React.FC<AddResearchProjectDialogProps> = ({
               },
             }}
           >
-            {isSubmitting 
-              ? (editMode ? "Đang cập nhật..." : "Đang tạo...") 
-              : (editMode ? "Cập nhật dự án" : "Thêm dự án")
-            }
+            {isSubmitting
+              ? editMode
+                ? "Đang cập nhật..."
+                : "Đang tạo..."
+              : editMode
+                ? "Cập nhật dự án"
+                : "Thêm dự án"}
           </Button>
         </Box>
       </Box>

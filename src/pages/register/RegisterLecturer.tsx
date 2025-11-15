@@ -26,9 +26,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import UploadDegreeModal from "../../components/lecturer-dialog/CreateDegreeModal";
-import type { DegreeRequest } from "../../types/DegreeRequest";
 import UploadCertificationModal from "../../components/lecturer-dialog/CreateCertificationDialog";
-import type { CertificationRequest } from "../../types/CertificationRequest";
 import { API } from "../../utils/Fetch";
 import { useNavigate } from "react-router-dom";
 import {
@@ -57,6 +55,8 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { vi } from "date-fns/locale";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import type { DegreeCreateReq } from "../../types/Degree";
+import type { CertificationCreateReq } from "../../types/Certification";
 
 const RegisterLecturer = () => {
   const steps = [
@@ -107,8 +107,8 @@ const RegisterLecturer = () => {
   const [jobField, setJobField] = useState(savedData.jobField || "");
 
   const [openModal, setOpenModal] = useState(false);
-  const [degrees, setDegrees] = useState<DegreeRequest[]>([]);
-  const [certifications, setCertifications] = useState<CertificationRequest[]>(
+  const [degrees, setDegrees] = useState<DegreeCreateReq[]>([]);
+  const [certifications, setCertifications] = useState<CertificationCreateReq[]>(
     [],
   );
   const [openCertificationModal, setOpenCertificationModal] = useState(false);
@@ -185,7 +185,7 @@ const RegisterLecturer = () => {
     setOpenCertificationModal(true);
   };
 
-  const handleSubmitDegree = (degree: DegreeRequest) => {
+  const handleSubmitDegree = (degree: DegreeCreateReq) => {
     if (editingDegreeIndex !== null) {
       // Update existing degree
       setDegrees((prev) =>
@@ -200,7 +200,7 @@ const RegisterLecturer = () => {
     }
   };
 
-  const handleSubmitCertification = (cert: CertificationRequest) => {
+  const handleSubmitCertification = (cert: CertificationCreateReq) => {
     if (editingCertificationIndex !== null) {
       // Update existing certification
       setCertifications((prev) =>

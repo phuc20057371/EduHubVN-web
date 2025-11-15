@@ -1,4 +1,4 @@
-export type RejectRequest = {
+export type RejectReq = {
     id: string;
     adminNote: string;
 };

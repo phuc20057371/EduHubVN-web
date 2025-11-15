@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import IconButton from '@mui/material/IconButton';
-import { colors } from '../../theme/colors';
+import { colors } from '../../../theme/colors';
 
 interface SubAdmin {
   id: string;

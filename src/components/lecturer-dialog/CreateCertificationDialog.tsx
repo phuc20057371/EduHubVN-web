@@ -19,7 +19,7 @@ import {
   Business,
   Close,
 } from "@mui/icons-material";
-import type { CertificationRequest } from "../../types/CertificationRequest";
+import type { CertificationCreateReq } from "../../types/Certification";
 import { API } from "../../utils/Fetch";
 import { Stack } from "@mui/system";
 import { toast } from "react-toastify";
@@ -69,9 +69,9 @@ const style = {
 interface UploadCertificationModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (cert: CertificationRequest) => void;
+  onSubmit: (cert: CertificationCreateReq) => void;
   editMode?: boolean;
-  editData?: CertificationRequest;
+  editData?: CertificationCreateReq;
 }
 
 const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
@@ -92,7 +92,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
   const chipBg = isDark ? "#072b24" : "#ecfeff";
   const footerBorder = isDark ? "rgba(255,255,255,0.03)" : "#ecfeff";
 
-  const [form, setForm] = useState<CertificationRequest>({
+  const [form, setForm] = useState<CertificationCreateReq>({
     referenceId: "",
     name: "",
     issuedBy: "",
@@ -131,7 +131,7 @@ const CreateCertificationDialog: React.FC<UploadCertificationModalProps> = ({
     }
   }, [open, editMode, editData]);
 
-  const handleChange = (field: keyof CertificationRequest, value: any) => {
+  const handleChange = (field: keyof CertificationCreateReq, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 

@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-import type { RequestFromLecturer } from "../../types/RequestFromLecturer";
+import type { RequestFromLecturer } from "../../types/Lecturer";
+
 
 const initialState: RequestFromLecturer[] = [];
 

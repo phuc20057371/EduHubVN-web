@@ -26,10 +26,9 @@ import ApproveDegreeUpdateDialog from "../../../../components/admin-dialog/admin
 import ApproveCertificationUpdateDialog from "../../../../components/admin-dialog/admin-lecturer-dialog/ApproveCertificationUpdateDialog";
 import ApproveCertificationCreateDialog from "../../../../components/admin-dialog/admin-lecturer-dialog/ApproveCertificationCreateDialog";
 import { getAcademicRank } from "../../../../utils/ChangeText";
-import type { LecturerRequest } from "../../../../types/LecturerRequest";
 
 interface AdminLecturerDegreeTabProps {
-  lecturerRequestsDGCC: LecturerRequest[];
+  lecturerRequestsDGCC: any[];
 }
 
 const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> =
@@ -240,7 +239,6 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> =
                   label="Loại"
                   onChange={(e) => setDegreeTypeFilter(e.target.value)}
                   sx={{
-                  
                     borderRadius: 1,
                   }}
                 >
@@ -261,7 +259,6 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> =
                   label="Hành động"
                   onChange={(e) => setDegreeActionFilter(e.target.value)}
                   sx={{
-              
                     borderRadius: 1,
                   }}
                 >
@@ -282,7 +279,6 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> =
                   label="Sắp xếp theo ngày"
                   onChange={(e) => setDegreeDateSort(e.target.value)}
                   sx={{
-                   
                     borderRadius: 1,
                   }}
                 >
@@ -301,7 +297,6 @@ const AdminLecturerDegreeTab: React.FC<AdminLecturerDegreeTabProps> =
                 value={degreeSearchTerm}
                 onChange={(e) => setDegreeSearchTerm(e.target.value)}
                 sx={{
-                
                   borderRadius: 1,
                 }}
                 InputProps={{

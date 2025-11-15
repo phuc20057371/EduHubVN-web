@@ -1,4 +1,4 @@
-import type { Certificate } from "./Certificate";
+import type { Certification } from "./Certification";
 import type { Degree } from "./Degree";
 
 export type Lecturer = {
@@ -24,6 +24,21 @@ export type Lecturer = {
   hidden?: boolean;
 }
 
+export type LecturerCreateReq = {
+  citizenId: string;
+  phoneNumber: string;
+  fullName: string;
+  dateOfBirth: string; // ISO date
+  gender: boolean;
+  bio: string;
+  address: string;
+  avatarUrl: string;
+  academicRank: string;
+  specialization: string;
+  experienceYears: number;
+  jobField: string;
+}
+
 export type LecturerBasicPublic = {
   id: String;
   fullName: String;
@@ -40,6 +55,14 @@ export type LecturerBasicPublic = {
   updatedAt: String;
 
   degrees?: Array<Degree>;
-  certifications?: Array<Certificate>;
+  certifications?: Array<Certification>;
 
 }
+
+export type RequestFromLecturer = {
+  content: any;
+  lecturerInfo: Lecturer;
+  type: string;
+  label: string;
+  date: Date;
+};

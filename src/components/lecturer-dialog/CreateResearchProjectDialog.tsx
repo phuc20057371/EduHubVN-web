@@ -24,7 +24,7 @@ import { projectTypes, scales } from "../../utils/DropdownOption";
 import { getProjectType, getScale } from "../../utils/ChangeText";
 import type {
   ResearchProject,
-  ResearchProjectRequest,
+  ResearchProjectCreateReq,
 } from "../../types/ResearchProject";
 import {
   industriesAutoComplete,
@@ -148,7 +148,7 @@ const CreateResearchProjectDialog: React.FC<
   }, [open, editMode, editData]);
 
   const handleChange = (
-    field: keyof ResearchProjectRequest,
+    field: keyof ResearchProjectCreateReq,
     value: string | number,
   ) => {
     setForm((prev) => ({ ...prev, [field]: value }));

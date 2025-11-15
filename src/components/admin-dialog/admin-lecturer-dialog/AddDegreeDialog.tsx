@@ -1,4 +1,8 @@
-import { AttachFile, CloudUpload, Close as CloseIcon } from "@mui/icons-material";
+import {
+  AttachFile,
+  CloudUpload,
+  Close as CloseIcon,
+} from "@mui/icons-material";
 import {
   Autocomplete,
   Box,
@@ -12,13 +16,13 @@ import {
 import { Stack } from "@mui/system";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import type { DegreeRequest } from "../../../types/DegreeRequest";
 import { API } from "../../../utils/Fetch";
 import { validateDegreeInfo } from "../../../utils/Validate";
 import {
   degreeLevelsAutoComplete,
   majorsAutoComplete,
 } from "../../../utils/AutoComplete";
+import type { DegreeCreateReq } from "../../../types/Degree";
 
 // Modal style matching AddCertificationDialog
 const style = {
@@ -65,7 +69,7 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
   editMode = false,
   degreeData,
 }) => {
-  const [form, setForm] = useState<DegreeRequest>({
+  const [form, setForm] = useState<DegreeCreateReq>({
     referenceId: "",
     name: "",
     major: "",
@@ -113,7 +117,10 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
     }
   }, [open, editMode, degreeData]);
 
-  const handleChange = (field: keyof DegreeRequest, value: string | number) => {
+  const handleChange = (
+    field: keyof DegreeCreateReq,
+    value: string | number,
+  ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -138,7 +145,7 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
     setIsSubmitting(true);
     try {
       let response;
-      
+
       if (editMode) {
         // Update existing degree
         const updateData = {
@@ -157,15 +164,17 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
           createdAt: degreeData.createdAt || "",
           updatedAt: degreeData.updatedAt || "",
         };
-     
+
         response = await API.user.updateDegree(updateData);
-        
+
         if (response.data.success) {
           toast.success("Cập nhật bằng cấp thành công!");
           onSuccess?.();
           onClose();
         } else {
-          toast.error(response.data.message || "Có lỗi xảy ra khi cập nhật bằng cấp");
+          toast.error(
+            response.data.message || "Có lỗi xảy ra khi cập nhật bằng cấp",
+          );
         }
       } else {
         // Create new degree
@@ -176,11 +185,16 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
           onSuccess?.();
           onClose();
         } else {
-          toast.error(response.data.message || "Có lỗi xảy ra khi thêm bằng cấp");
+          toast.error(
+            response.data.message || "Có lỗi xảy ra khi thêm bằng cấp",
+          );
         }
       }
     } catch (error: any) {
-      console.error(`Error ${editMode ? 'updating' : 'creating'} degree:`, error);
+      console.error(
+        `Error ${editMode ? "updating" : "creating"} degree:`,
+        error,
+      );
       toast.error(
         error.response?.data?.message || "Có lỗi xảy ra khi thêm bằng cấp",
       );
@@ -239,7 +253,8 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
         {/* Header with gradient background */}
         <Box
           sx={{
-            background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%)",
+            background:
+              "linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%)",
             color: "white",
             p: 3,
             position: "relative",
@@ -308,277 +323,285 @@ const AddDegreeDialog: React.FC<AddDegreeDialogProps> = ({
             p: 0,
           }}
         >
-        <Box sx={{ p: 4 }}>
-          <Stack spacing={3}>
-            {/* Reference ID và Tên bằng cấp */}
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                flexDirection: { xs: "column", md: "row" },
-              }}
-            >
-              <TextField
-                fullWidth
-                label="Mã tham chiếu"
-                placeholder="Nhập mã tham chiếu (tùy chọn)"
-                value={form.referenceId}
-                onChange={(e) => handleChange("referenceId", e.target.value)}
-                sx={{ flex: 1 }}
-              />
-              <TextField
-                fullWidth
-                label="Tên bằng cấp"
-                placeholder="VD: Bằng Cử nhân Công nghệ Thông tin"
-                value={form.name}
-                onChange={(e) => handleChange("name", e.target.value)}
-                sx={{ flex: 2 }}
-                required
-              />
-            </Box>
-
-            {/* Chuyên ngành và Trình độ */}
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                flexDirection: { xs: "column", md: "row" },
-              }}
-            >
-              <Autocomplete
-                fullWidth
-                options={majorsAutoComplete}
-                value={form.major}
-                onChange={(_, newValue) =>
-                  handleChange("major", newValue || "")
-                }
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Chuyên ngành"
-                    placeholder="Chọn hoặc nhập chuyên ngành"
-                    required
-                  />
-                )}
-                freeSolo
-                sx={{ flex: 1 }}
-              />
-              <Autocomplete
-                fullWidth
-                options={degreeLevelsAutoComplete}
-                value={form.level}
-                onChange={(_, newValue) =>
-                  handleChange("level", newValue || "")
-                }
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Trình độ"
-                    placeholder="Chọn trình độ bằng cấp"
-                    required
-                  />
-                )}
-                sx={{ flex: 1 }}
-              />
-            </Box>
-
-            {/* Trường/Tổ chức */}
-            <TextField
-              fullWidth
-              label="Trường/Tổ chức cấp bằng"
-              placeholder="VD: Đại học Bách khoa Hà Nội"
-              value={form.institution}
-              onChange={(e) => handleChange("institution", e.target.value)}
-              required
-            />
-
-            {/* Năm bắt đầu và Năm tốt nghiệp */}
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                flexDirection: { xs: "column", md: "row" },
-              }}
-            >
-              <TextField
-                fullWidth
-                label="Năm bắt đầu"
-                type="number"
-                placeholder="VD: 2018"
-                value={form.startYear || ""}
-                onChange={(e) =>
-                  handleChange("startYear", parseInt(e.target.value) || 0)
-                }
-                InputProps={{
-                  inputProps: { min: 1950, max: new Date().getFullYear() },
-                }}
-                required
-              />
-              <TextField
-                fullWidth
-                label="Năm tốt nghiệp"
-                type="number"
-                placeholder="VD: 2022"
-                value={form.graduationYear || ""}
-                onChange={(e) =>
-                  handleChange("graduationYear", parseInt(e.target.value) || 0)
-                }
-                InputProps={{
-                  inputProps: { min: 1950, max: new Date().getFullYear() + 10 },
-                }}
-                required
-              />
-            </Box>
-
-            {/* Mô tả */}
-            <TextField
-              fullWidth
-              label="Mô tả chi tiết"
-              placeholder="Nhập mô tả về bằng cấp (tùy chọn)"
-              value={form.description}
-              onChange={(e) => handleChange("description", e.target.value)}
-              multiline
-              rows={3}
-            />
-
-            {/* Upload tài liệu */}
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                Tài liệu đính kèm
-              </Typography>
+          <Box sx={{ p: 4 }}>
+            <Stack spacing={3}>
+              {/* Reference ID và Tên bằng cấp */}
               <Box
                 sx={{
-                  border: "2px dashed #e0e0e0",
-                  borderRadius: 2,
-                  p: 3,
-                  textAlign: "center",
-                  backgroundColor: "#fafafa",
-                  position: "relative",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    borderColor: "#14b8a6",
-                    backgroundColor: "#f0fdfa",
-                  },
+                  display: "flex",
+                  gap: 2,
+                  flexDirection: { xs: "column", md: "row" },
                 }}
               >
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={handleFileChange}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    opacity: 0,
-                    cursor: "pointer",
-                  }}
-                  disabled={isUploading}
+                <TextField
+                  fullWidth
+                  label="Mã tham chiếu"
+                  placeholder="Nhập mã tham chiếu (tùy chọn)"
+                  value={form.referenceId}
+                  onChange={(e) => handleChange("referenceId", e.target.value)}
+                  sx={{ flex: 1 }}
                 />
-
-                {isUploading ? (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 2,
-                    }}
-                  >
-                    <CircularProgress size={40} sx={{ color: "#14b8a6" }} />
-                    <Typography variant="body2" color="text.secondary">
-                      Đang tải lên...
-                    </Typography>
-                  </Box>
-                ) : selectedFile ? (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 2,
-                    }}
-                  >
-                    <AttachFile sx={{ fontSize: 40, color: "#14b8a6" }} />
-                    <Chip
-                      label={selectedFile.name}
-                      onDelete={() => {
-                        setSelectedFile(null);
-                        setForm((prev) => ({ ...prev, url: "" }));
-                      }}
-                      color="primary"
-                      variant="outlined"
-                    />
-                    <Typography variant="body2" color="success.main">
-                      Tải lên thành công!
-                    </Typography>
-                  </Box>
-                ) : (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 2,
-                    }}
-                  >
-                    <CloudUpload sx={{ fontSize: 40, color: "#bdbdbd" }} />
-                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                      Kéo thả file vào đây hoặc nhấn để chọn
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Hỗ trợ: PDF, JPG, PNG (tối đa 10MB)
-                    </Typography>
-                  </Box>
-                )}
+                <TextField
+                  fullWidth
+                  label="Tên bằng cấp"
+                  placeholder="VD: Bằng Cử nhân Công nghệ Thông tin"
+                  value={form.name}
+                  onChange={(e) => handleChange("name", e.target.value)}
+                  sx={{ flex: 2 }}
+                  required
+                />
               </Box>
-            </Box>
 
-            {/* Action Buttons */}
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                justifyContent: "flex-end",
-                pt: 2,
-              }}
-            >
-              <Button
-                variant="outlined"
-                onClick={onClose}
-                disabled={isSubmitting || isUploading}
-              >
-                Hủy
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleSubmit}
-                disabled={isSubmitting || isUploading}
+              {/* Chuyên ngành và Trình độ */}
+              <Box
                 sx={{
-                  background:
-                    "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)",
-                  "&:hover": {
-                    background:
-                      "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)",
-                  },
+                  display: "flex",
+                  gap: 2,
+                  flexDirection: { xs: "column", md: "row" },
                 }}
               >
-                {isSubmitting ? (
-                  <>
-                    <CircularProgress
-                      size={20}
-                      sx={{ mr: 1, color: "white" }}
+                <Autocomplete
+                  fullWidth
+                  options={majorsAutoComplete}
+                  value={form.major}
+                  onChange={(_, newValue) =>
+                    handleChange("major", newValue || "")
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Chuyên ngành"
+                      placeholder="Chọn hoặc nhập chuyên ngành"
+                      required
                     />
-                    Đang {editMode ? "cập nhật" : "thêm"}...
-                  </>
-                ) : (
-                  editMode ? "Cập nhật bằng cấp" : "Thêm bằng cấp"
-                )}
-              </Button>
-            </Box>
-          </Stack>
-        </Box>
+                  )}
+                  freeSolo
+                  sx={{ flex: 1 }}
+                />
+                <Autocomplete
+                  fullWidth
+                  options={degreeLevelsAutoComplete}
+                  value={form.level}
+                  onChange={(_, newValue) =>
+                    handleChange("level", newValue || "")
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Trình độ"
+                      placeholder="Chọn trình độ bằng cấp"
+                      required
+                    />
+                  )}
+                  sx={{ flex: 1 }}
+                />
+              </Box>
+
+              {/* Trường/Tổ chức */}
+              <TextField
+                fullWidth
+                label="Trường/Tổ chức cấp bằng"
+                placeholder="VD: Đại học Bách khoa Hà Nội"
+                value={form.institution}
+                onChange={(e) => handleChange("institution", e.target.value)}
+                required
+              />
+
+              {/* Năm bắt đầu và Năm tốt nghiệp */}
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  flexDirection: { xs: "column", md: "row" },
+                }}
+              >
+                <TextField
+                  fullWidth
+                  label="Năm bắt đầu"
+                  type="number"
+                  placeholder="VD: 2018"
+                  value={form.startYear || ""}
+                  onChange={(e) =>
+                    handleChange("startYear", parseInt(e.target.value) || 0)
+                  }
+                  InputProps={{
+                    inputProps: { min: 1950, max: new Date().getFullYear() },
+                  }}
+                  required
+                />
+                <TextField
+                  fullWidth
+                  label="Năm tốt nghiệp"
+                  type="number"
+                  placeholder="VD: 2022"
+                  value={form.graduationYear || ""}
+                  onChange={(e) =>
+                    handleChange(
+                      "graduationYear",
+                      parseInt(e.target.value) || 0,
+                    )
+                  }
+                  InputProps={{
+                    inputProps: {
+                      min: 1950,
+                      max: new Date().getFullYear() + 10,
+                    },
+                  }}
+                  required
+                />
+              </Box>
+
+              {/* Mô tả */}
+              <TextField
+                fullWidth
+                label="Mô tả chi tiết"
+                placeholder="Nhập mô tả về bằng cấp (tùy chọn)"
+                value={form.description}
+                onChange={(e) => handleChange("description", e.target.value)}
+                multiline
+                rows={3}
+              />
+
+              {/* Upload tài liệu */}
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                  Tài liệu đính kèm
+                </Typography>
+                <Box
+                  sx={{
+                    border: "2px dashed #e0e0e0",
+                    borderRadius: 2,
+                    p: 3,
+                    textAlign: "center",
+                    backgroundColor: "#fafafa",
+                    position: "relative",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      borderColor: "#14b8a6",
+                      backgroundColor: "#f0fdfa",
+                    },
+                  }}
+                >
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={handleFileChange}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      opacity: 0,
+                      cursor: "pointer",
+                    }}
+                    disabled={isUploading}
+                  />
+
+                  {isUploading ? (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 2,
+                      }}
+                    >
+                      <CircularProgress size={40} sx={{ color: "#14b8a6" }} />
+                      <Typography variant="body2" color="text.secondary">
+                        Đang tải lên...
+                      </Typography>
+                    </Box>
+                  ) : selectedFile ? (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 2,
+                      }}
+                    >
+                      <AttachFile sx={{ fontSize: 40, color: "#14b8a6" }} />
+                      <Chip
+                        label={selectedFile.name}
+                        onDelete={() => {
+                          setSelectedFile(null);
+                          setForm((prev) => ({ ...prev, url: "" }));
+                        }}
+                        color="primary"
+                        variant="outlined"
+                      />
+                      <Typography variant="body2" color="success.main">
+                        Tải lên thành công!
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 2,
+                      }}
+                    >
+                      <CloudUpload sx={{ fontSize: 40, color: "#bdbdbd" }} />
+                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                        Kéo thả file vào đây hoặc nhấn để chọn
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Hỗ trợ: PDF, JPG, PNG (tối đa 10MB)
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+
+              {/* Action Buttons */}
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  justifyContent: "flex-end",
+                  pt: 2,
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  onClick={onClose}
+                  disabled={isSubmitting || isUploading}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting || isUploading}
+                  sx={{
+                    background:
+                      "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)",
+                    "&:hover": {
+                      background:
+                        "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)",
+                    },
+                  }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <CircularProgress
+                        size={20}
+                        sx={{ mr: 1, color: "white" }}
+                      />
+                      Đang {editMode ? "cập nhật" : "thêm"}...
+                    </>
+                  ) : editMode ? (
+                    "Cập nhật bằng cấp"
+                  ) : (
+                    "Thêm bằng cấp"
+                  )}
+                </Button>
+              </Box>
+            </Stack>
+          </Box>
         </Box>
       </Box>
     </Modal>

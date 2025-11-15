@@ -1,32 +1,32 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { API } from "../../utils/Fetch";
-import { setUserProfile } from "../../redux/slice/userSlice";
-import { navigateToRole } from "../../utils/navigationRole";
-import { useNavigate } from "react-router-dom";
-import { setPendingInstitution } from "../../redux/slice/PendingInstitutionSlice";
-import type { EducationInstitutionType } from "../../types/InstitutionRequest";
+import { Business, ContactMail, Person } from "@mui/icons-material";
 import {
+  Alert,
   Box,
+  Button,
   Card,
   CardContent,
-  Typography,
-  TextField,
-  Alert,
-  Paper,
-  Stack,
-  Button,
-  Select,
-  MenuItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControl,
   InputLabel,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { Business, Person, ContactMail } from "@mui/icons-material";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { setPendingInstitution } from "../../redux/slice/PendingInstitutionSlice";
+import { setUserProfile } from "../../redux/slice/userSlice";
+import type { InstitutionType } from "../../types/Institution";
+import { API } from "../../utils/Fetch";
+import { navigateToRole } from "../../utils/navigationRole";
 import { validateInstitutionInfo } from "../../utils/Validate";
 
 const InstitutionPendingPage = () => {
@@ -40,7 +40,7 @@ const InstitutionPendingPage = () => {
     useState<string>("");
   const [institutionName, setInstitutionName] = useState<string>("");
   const [institutionType, setInstitutionType] =
-    useState<EducationInstitutionType>("UNIVERSITY");
+    useState<InstitutionType>("UNIVERSITY");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [website, setWebsite] = useState<string>("");
   const [address, setAddress] = useState<string>("");
@@ -110,6 +110,7 @@ const InstitutionPendingPage = () => {
   }
   const handleSaveInstitution = async () => {
     const institutionData = {
+      id: pendingInstitution ? pendingInstitution.id : "",
       businessRegistrationNumber,
       institutionName,
       institutionType,

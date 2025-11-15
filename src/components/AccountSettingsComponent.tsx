@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -28,7 +28,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Save as SaveIcon,
   Cancel as CancelIcon,
@@ -37,21 +37,20 @@ import {
   Visibility,
   VisibilityOff,
   Security,
-  Email,
   VpnKey,
   AlternateEmail,
   ExpandMore as ExpandMoreIcon,
-} from '@mui/icons-material';
-import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { API } from '../utils/Fetch';
-import { useColors } from '../hooks/useColors';
-import { setUserProfile } from '../redux/slice/userSlice';
-import WebSocketService from '../services/WebSocketService';
-import type { SendChangePasswordOtpRequest } from '../types/SendChangePasswordOtpRequest';
-import type { ChangePasswordRequest } from '../types/ChangePasswordRequest';
-import type { SendSubEmailOtpRequest, AddSubEmailRequest } from '../types/AddSubEmailRequest';
+  Email,
+} from "@mui/icons-material";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { API } from "../utils/Fetch";
+import { useColors } from "../hooks/useColors";
+import { setUserProfile } from "../redux/slice/userSlice";
+import WebSocketService from "../services/WebSocketService";
+import type { EmailReq, EmailOtp } from "../types/Email";
+import type { ChangePasswordReq } from "../types/Authen";
 
 interface SubEmail {
   id: string;
@@ -73,77 +72,81 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
   subtitle = "Quản lý thông tin tài khoản và bảo mật của bạn",
   showTitle = true,
   containerProps = {},
-  onPasswordChangeSuccess
+  onPasswordChangeSuccess,
 }) => {
   const colors = useColors();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userProfile = useSelector((state: any) => state.userProfile);
-  
+
   // SubEmail management state
   const [subEmails, setSubEmails] = useState<SubEmail[]>([]);
-  const [newSubEmail, setNewSubEmail] = useState('');
+  const [newSubEmail, setNewSubEmail] = useState("");
   const [isAddingEmail, setIsAddingEmail] = useState(false);
   const [editingEmailId, setEditingEmailId] = useState<string | null>(null);
-  const [editEmailValue, setEditEmailValue] = useState('');
+  const [editEmailValue, setEditEmailValue] = useState("");
   const [isLoadingEmailAction, setIsLoadingEmailAction] = useState(false);
-  
+
   // SubEmail OTP verification state
   const [subEmailOtpStep, setSubEmailOtpStep] = useState(0); // 0: input email, 1: verify OTP
-  const [subEmailOtp, setSubEmailOtp] = useState('');
+  const [subEmailOtp, setSubEmailOtp] = useState("");
   const [isLoadingSubEmailOtp, setIsLoadingSubEmailOtp] = useState(false);
-  const [pendingSubEmail, setPendingSubEmail] = useState('');
-  
+  const [pendingSubEmail, setPendingSubEmail] = useState("");
+
   // Password change state
   const [activeStep, setActiveStep] = useState(0);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [otp, setOtp] = useState('');
-  const [selectedEmailForOtp, setSelectedEmailForOtp] = useState('');
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [selectedEmailForOtp, setSelectedEmailForOtp] = useState("");
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   // Dialog states
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [emailToDelete, setEmailToDelete] = useState<string | null>(null);
-  
+
   // Loading states
   const [isLoadingOtp, setIsLoadingOtp] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  
+
   // Error states
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   // Accordion states
-  const [expandedAccordion, setExpandedAccordion] = useState<string | false>('email-management');
+  const [expandedAccordion, setExpandedAccordion] = useState<string | false>(
+    "email-management",
+  );
 
   useEffect(() => {
     if (userProfile?.email) {
       // Initialize with primary email
       const primaryEmail: SubEmail = {
-        id: 'primary',
+        id: "primary",
         email: userProfile.email,
         isVerified: true,
         isPrimary: true,
       };
-      
+
       // Add sub emails from userProfile.subEmails if they exist
       const subEmailsList: SubEmail[] = [primaryEmail];
-      
+
       if (userProfile.subEmails && Array.isArray(userProfile.subEmails)) {
-        const formattedSubEmails: SubEmail[] = userProfile.subEmails.map((emailString: string, index: number) => ({
-          id: `sub-${index}`,
-          email: emailString,
-          isVerified: false, // Default to false since we don't have verification info
-          isPrimary: false,
-        }));
-        
+        const formattedSubEmails: SubEmail[] = userProfile.subEmails.map(
+          (emailString: string, index: number) => ({
+            id: `sub-${index}`,
+            email: emailString,
+            isVerified: false, // Default to false since we don't have verification info
+            isPrimary: false,
+          }),
+        );
+
         subEmailsList.push(...formattedSubEmails);
       }
-      
+
       setSubEmails(subEmailsList);
       // Default to primary email, but user can select any email including subEmails
       if (!selectedEmailForOtp) {
@@ -166,35 +169,37 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
   // SubEmail management functions - Step 1: Send OTP
   const handleSendSubEmailOtp = async () => {
     if (!validateEmail(newSubEmail)) {
-      setEmailError('Vui lòng nhập email hợp lệ');
+      setEmailError("Vui lòng nhập email hợp lệ");
       return;
     }
 
-    if (subEmails.some(email => email.email === newSubEmail)) {
-      setEmailError('Email này đã tồn tại trong danh sách');
+    if (subEmails.some((email) => email.email === newSubEmail)) {
+      setEmailError("Email này đã tồn tại trong danh sách");
       return;
     }
 
     if (newSubEmail === userProfile.email) {
-      setEmailError('Email phụ không thể trùng với email chính');
+      setEmailError("Email phụ không thể trùng với email chính");
       return;
     }
 
     setIsLoadingSubEmailOtp(true);
-    setEmailError('');
-    
+    setEmailError("");
+
     try {
-      const otpRequest: SendSubEmailOtpRequest = {
-        email: newSubEmail
+      const otpRequest: EmailReq = {
+        email: newSubEmail,
       };
-      
+
       await API.user.sendSubEmailOtp(otpRequest);
       setPendingSubEmail(newSubEmail);
       setSubEmailOtpStep(1);
       toast.success(`Mã OTP đã được gửi đến ${newSubEmail}!`);
     } catch (error: any) {
-      setEmailError(error.response?.data?.message || 'Có lỗi xảy ra khi gửi OTP');
-      toast.error('Không thể gửi mã OTP');
+      setEmailError(
+        error.response?.data?.message || "Có lỗi xảy ra khi gửi OTP",
+      );
+      toast.error("Không thể gửi mã OTP");
     } finally {
       setIsLoadingSubEmailOtp(false);
     }
@@ -203,61 +208,71 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
   // SubEmail management functions - Step 2: Add SubEmail with OTP
   const handleAddSubEmailWithOtp = async () => {
     if (!subEmailOtp) {
-      setEmailError('Vui lòng nhập mã OTP');
+      setEmailError("Vui lòng nhập mã OTP");
       return;
     }
 
     setIsLoadingEmailAction(true);
-    setEmailError('');
-    
+    setEmailError("");
+
     try {
-      const addRequest: AddSubEmailRequest = {
+      const addRequest: EmailOtp = {
         email: pendingSubEmail,
-        otp: subEmailOtp
+        otp: subEmailOtp,
       };
-      
+
       await API.user.addSubEmail(addRequest);
-      
+
       // Update userProfile in Redux store - add email string to array
-      const updatedSubEmails = [...(userProfile.subEmails || []), pendingSubEmail];
-      dispatch(setUserProfile({
-        ...userProfile,
-        subEmails: updatedSubEmails
-      }));
-      
+      const updatedSubEmails = [
+        ...(userProfile.subEmails || []),
+        pendingSubEmail,
+      ];
+      dispatch(
+        setUserProfile({
+          ...userProfile,
+          subEmails: updatedSubEmails,
+        }),
+      );
+
       // Reset form
-      setNewSubEmail('');
-      setPendingSubEmail('');
-      setSubEmailOtp('');
+      setNewSubEmail("");
+      setPendingSubEmail("");
+      setSubEmailOtp("");
       setSubEmailOtpStep(0);
       setIsAddingEmail(false);
-      toast.success('Thêm email phụ thành công!');
+      toast.success("Thêm email phụ thành công!");
     } catch (error: any) {
-      setEmailError(error.response?.data?.message || 'Có lỗi xảy ra khi thêm email');
-      toast.error('Mã OTP không đúng hoặc đã hết hạn');
+      setEmailError(
+        error.response?.data?.message || "Có lỗi xảy ra khi thêm email",
+      );
+      toast.error("Mã OTP không đúng hoặc đã hết hạn");
     } finally {
       setIsLoadingEmailAction(false);
     }
   };
 
   const handleCancelAddSubEmail = () => {
-    setNewSubEmail('');
-    setPendingSubEmail('');
-    setSubEmailOtp('');
+    setNewSubEmail("");
+    setPendingSubEmail("");
+    setSubEmailOtp("");
     setSubEmailOtpStep(0);
     setIsAddingEmail(false);
-    setEmailError('');
+    setEmailError("");
   };
-
 
   const handleSaveEditEmail = async (emailId: string) => {
     if (!validateEmail(editEmailValue)) {
-      setEmailError('Vui lòng nhập email hợp lệ');
+      setEmailError("Vui lòng nhập email hợp lệ");
       return;
     }
 
-    if (subEmails.some(email => email.email === editEmailValue && email.id !== emailId)) {
-      setEmailError('Email này đã tồn tại trong danh sách');
+    if (
+      subEmails.some(
+        (email) => email.email === editEmailValue && email.id !== emailId,
+      )
+    ) {
+      setEmailError("Email này đã tồn tại trong danh sách");
       return;
     }
 
@@ -265,28 +280,32 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
     try {
       // TODO: API call to update sub email
       // await API.user.updateSubEmail({ id: emailId, email: editEmailValue });
-      
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Update userProfile in Redux store - find and replace email string
-      const emailIndex = parseInt(emailId.replace('sub-', ''));
+      const emailIndex = parseInt(emailId.replace("sub-", ""));
       const updatedSubEmails = [...(userProfile.subEmails || [])];
       if (emailIndex >= 0 && emailIndex < updatedSubEmails.length) {
         updatedSubEmails[emailIndex] = editEmailValue;
       }
-      dispatch(setUserProfile({
-        ...userProfile,
-        subEmails: updatedSubEmails
-      }));
-      
+      dispatch(
+        setUserProfile({
+          ...userProfile,
+          subEmails: updatedSubEmails,
+        }),
+      );
+
       setEditingEmailId(null);
-      setEditEmailValue('');
-      setEmailError('');
-      toast.success('Cập nhật email thành công!');
+      setEditEmailValue("");
+      setEmailError("");
+      toast.success("Cập nhật email thành công!");
     } catch (error: any) {
-      setEmailError(error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật email');
-      toast.error('Không thể cập nhật email');
+      setEmailError(
+        error.response?.data?.message || "Có lỗi xảy ra khi cập nhật email",
+      );
+      toast.error("Không thể cập nhật email");
     } finally {
       setIsLoadingEmailAction(false);
     }
@@ -294,8 +313,8 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
 
   const handleCancelEditEmail = () => {
     setEditingEmailId(null);
-    setEditEmailValue('');
-    setEmailError('');
+    setEditEmailValue("");
+    setEmailError("");
   };
 
   const handleDeleteSubEmail = (emailId: string) => {
@@ -309,31 +328,35 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
     setIsLoadingEmailAction(true);
     try {
       // Get the email to delete
-      const emailToDeleteObj = subEmails.find(email => email.id === emailToDelete);
+      const emailToDeleteObj = subEmails.find(
+        (email) => email.id === emailToDelete,
+      );
       if (!emailToDeleteObj) {
-        throw new Error('Email not found');
+        throw new Error("Email not found");
       }
 
       // Call API to remove sub email
       await API.user.removeSubEmail({ email: emailToDeleteObj.email });
-      
+
       // Update userProfile in Redux store - remove email string by index
-      const emailIndex = parseInt(emailToDelete.replace('sub-', ''));
+      const emailIndex = parseInt(emailToDelete.replace("sub-", ""));
       const updatedSubEmails = [...(userProfile.subEmails || [])];
       if (emailIndex >= 0 && emailIndex < updatedSubEmails.length) {
         updatedSubEmails.splice(emailIndex, 1);
       }
-      dispatch(setUserProfile({
-        ...userProfile,
-        subEmails: updatedSubEmails
-      }));
-      
+      dispatch(
+        setUserProfile({
+          ...userProfile,
+          subEmails: updatedSubEmails,
+        }),
+      );
+
       setDeleteDialogOpen(false);
       setEmailToDelete(null);
-      toast.success('Xóa email phụ thành công!');
+      toast.success("Xóa email phụ thành công!");
     } catch (error: any) {
-      console.error('Error deleting sub email:', error);
-      toast.error(error.response?.data?.message || 'Không thể xóa email phụ');
+      console.error("Error deleting sub email:", error);
+      toast.error(error.response?.data?.message || "Không thể xóa email phụ");
     } finally {
       setIsLoadingEmailAction(false);
     }
@@ -342,39 +365,40 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
   // Handle password change - Step 1: Send OTP
   const handleSendOtp = async () => {
     if (!currentPassword) {
-      setPasswordError('Vui lòng nhập mật khẩu hiện tại');
+      setPasswordError("Vui lòng nhập mật khẩu hiện tại");
       return;
     }
-    
+
     if (!validatePassword(newPassword)) {
-      setPasswordError('Mật khẩu mới phải có ít nhất 8 ký tự');
+      setPasswordError("Mật khẩu mới phải có ít nhất 8 ký tự");
       return;
     }
-    
+
     if (newPassword !== confirmPassword) {
-      setPasswordError('Mật khẩu xác nhận không khớp');
+      setPasswordError("Mật khẩu xác nhận không khớp");
       return;
     }
 
     if (!selectedEmailForOtp) {
-      setPasswordError('Vui lòng chọn email để nhận OTP');
+      setPasswordError("Vui lòng chọn email để nhận OTP");
       return;
     }
 
     setIsLoadingOtp(true);
-    setPasswordError('');
-    
+    setPasswordError("");
+
     try {
-      const otpRequest: SendChangePasswordOtpRequest = {
-        email: selectedEmailForOtp
+      const otpRequest: EmailReq = {
+        email: selectedEmailForOtp,
       };
-      
+
       await API.user.sendOTPChangePassword(otpRequest);
       setActiveStep(1);
       toast.success(`Mã OTP đã được gửi đến ${selectedEmailForOtp}!`);
     } catch (error: any) {
-      console.error('Send change password OTP error:', error); // Debug log     
-      const errorMessage = error.response?.data?.message || 'Có lỗi xảy ra khi gửi OTP';
+      console.error("Send change password OTP error:", error); // Debug log
+      const errorMessage =
+        error.response?.data?.message || "Có lỗi xảy ra khi gửi OTP";
       setPasswordError(errorMessage);
       toast.error(`Lỗi: ${errorMessage}`);
     } finally {
@@ -385,32 +409,32 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
   // Handle password change - Step 2: Change password with OTP
   const handleChangePassword = async () => {
     if (!otp) {
-      setPasswordError('Vui lòng nhập mã OTP');
+      setPasswordError("Vui lòng nhập mã OTP");
       return;
     }
 
     setIsChangingPassword(true);
-    setPasswordError('');
-    
+    setPasswordError("");
+
     try {
-      const changePasswordRequest: ChangePasswordRequest = {
+      const changePasswordRequest: ChangePasswordReq = {
         email: selectedEmailForOtp,
         otp,
         oldPassword: currentPassword,
         newPassword,
-        confirmPassword
+        confirmPassword,
       };
       await API.user.changePassword(changePasswordRequest);
-      
+
       // Reset form
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setOtp('');
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setOtp("");
       setActiveStep(0);
-      
-      toast.success('Đổi mật khẩu thành công! Đang đăng xuất...');
-      
+
+      toast.success("Đổi mật khẩu thành công! Đang đăng xuất...");
+
       // Call custom callback if provided
       if (onPasswordChangeSuccess) {
         onPasswordChangeSuccess();
@@ -419,96 +443,111 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
         setTimeout(() => {
           // Disconnect WebSocket
           WebSocketService.disconnect();
-          
+
           // Clear tokens
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
-          
+
           // Navigate to login
           navigate("/login");
         }); // Delay để user có thể thấy thông báo thành công
       }
-      
     } catch (error: any) {
-      setPasswordError(error.response?.data?.message || 'Có lỗi xảy ra khi đổi mật khẩu');
-      toast.error('Không thể đổi mật khẩu');
+      setPasswordError(
+        error.response?.data?.message || "Có lỗi xảy ra khi đổi mật khẩu",
+      );
+      toast.error("Không thể đổi mật khẩu");
     } finally {
       setIsChangingPassword(false);
     }
   };
 
   const handleResetPasswordForm = () => {
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    setOtp('');
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setOtp("");
     setActiveStep(0);
-    setPasswordError('');
+    setPasswordError("");
   };
 
   const steps = [
     {
-      label: 'Nhập thông tin mật khẩu',
-      description: 'Nhập mật khẩu hiện tại và mật khẩu mới'
+      label: "Nhập thông tin mật khẩu",
+      description: "Nhập mật khẩu hiện tại và mật khẩu mới",
     },
     {
-      label: 'Xác thực OTP',
-      description: 'Nhập mã OTP được gửi đến email của bạn'
-    }
+      label: "Xác thực OTP",
+      description: "Nhập mã OTP được gửi đến email của bạn",
+    },
   ];
 
   // Get available emails for OTP selection - primary email + all subEmails
   const availableEmailsForOtp = subEmails; // All emails (primary + subEmails) are available for OTP
 
   // Handle accordion change
-  const handleAccordionChange = (panel: string) => (_event: React.SyntheticEvent, isExpanded: boolean) => {
-    setExpandedAccordion(isExpanded ? panel : false);
-  };
+  const handleAccordionChange =
+    (panel: string) => (_event: React.SyntheticEvent, isExpanded: boolean) => {
+      setExpandedAccordion(isExpanded ? panel : false);
+    };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 900, mx: 'auto', ...containerProps }}>
+    <Box sx={{ p: 3, maxWidth: 900, mx: "auto", ...containerProps }}>
       {showTitle && (
         <>
-          <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: colors.text.primary }}>
+          <Typography
+            variant="h4"
+            gutterBottom
+            sx={{ fontWeight: 600, color: colors.text.primary }}
+          >
             {title}
           </Typography>
-          <Typography variant="body1" sx={{ mb: 4, color: colors.text.secondary }}>
+          <Typography
+            variant="body1"
+            sx={{ mb: 4, color: colors.text.secondary }}
+          >
             {subtitle}
           </Typography>
         </>
       )}
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         {/* Email Management Section */}
-        <Accordion 
-          expanded={expandedAccordion === 'email-management'} 
-          onChange={handleAccordionChange('email-management')}
-          sx={{ borderRadius: 2, boxShadow: 2, '&:before': { display: 'none' } }}
+        <Accordion
+          expanded={expandedAccordion === "email-management"}
+          onChange={handleAccordionChange("email-management")}
+          sx={{
+            borderRadius: 2,
+            boxShadow: 2,
+            "&:before": { display: "none" },
+          }}
         >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
-            sx={{ 
+            sx={{
               backgroundColor: colors.background.secondary,
-              borderRadius: '8px 8px 0 0',
-              '&.Mui-expanded': {
-                borderRadius: '8px 8px 0 0',
-              }
+              borderRadius: "8px 8px 0 0",
+              "&.Mui-expanded": {
+                borderRadius: "8px 8px 0 0",
+              },
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
               <AlternateEmail sx={{ mr: 2, color: colors.primary.main }} />
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
                   Quản lý danh sách Email
                 </Typography>
-                <Typography variant="body2" sx={{ color: colors.text.secondary }}>
+                <Typography
+                  variant="body2"
+                  sx={{ color: colors.text.secondary }}
+                >
                   Quản lý email chính và các email phụ
                 </Typography>
               </Box>
             </Box>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 3 }}>
-
             {emailError && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 {emailError}
@@ -521,7 +560,9 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
                 <ListItem key={email.id} sx={{ px: 0, py: 1 }}>
                   <ListItemText
                     primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
                         {editingEmailId === email.id ? (
                           <TextField
                             size="small"
@@ -532,27 +573,27 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
                         ) : (
                           <Typography variant="body1">{email.email}</Typography>
                         )}
-                        
+
                         {email.isPrimary && (
-                          <Chip 
-                            label="Email chính" 
-                            size="small" 
-                            color="primary" 
+                          <Chip
+                            label="Email chính"
+                            size="small"
+                            color="primary"
                             variant="outlined"
                           />
                         )}
-                        
+
                         {email.isPrimary ? (
-                          <Chip 
-                            label="Đã xác thực" 
-                            size="small" 
+                          <Chip
+                            label="Đã xác thực"
+                            size="small"
                             color="success"
                             variant="outlined"
                           />
                         ) : (
-                          <Chip 
-                            label="Email phụ" 
-                            size="small" 
+                          <Chip
+                            label="Email phụ"
+                            size="small"
                             color="default"
                             variant="outlined"
                           />
@@ -561,7 +602,7 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
                     }
                   />
                   <ListItemSecondaryAction>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Box sx={{ display: "flex", gap: 1 }}>
                       {editingEmailId === email.id ? (
                         <>
                           <IconButton
@@ -570,7 +611,11 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
                             disabled={isLoadingEmailAction}
                             sx={{ color: colors.success[500] }}
                           >
-                            {isLoadingEmailAction ? <CircularProgress size={16} /> : <SaveIcon />}
+                            {isLoadingEmailAction ? (
+                              <CircularProgress size={16} />
+                            ) : (
+                              <SaveIcon />
+                            )}
                           </IconButton>
                           <IconButton
                             size="small"
@@ -580,23 +625,22 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
                             <CancelIcon />
                           </IconButton>
                         </>
-                        ) 
-                        : (
-                          <>
-                            {!email.isPrimary && (
-                              <>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleDeleteSubEmail(email.id)}
-                                  sx={{ color: colors.error[500] }}
-                                  title="Xóa email phụ"
-                                >
-                                  <DeleteIcon />
-                                </IconButton>
-                              </>
-                            )}
-                          </>
-                        )}
+                      ) : (
+                        <>
+                          {!email.isPrimary && (
+                            <>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeleteSubEmail(email.id)}
+                                sx={{ color: colors.error[500] }}
+                                title="Xóa email phụ"
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </>
+                          )}
+                        </>
+                      )}
                     </Box>
                   </ListItemSecondaryAction>
                 </ListItem>
@@ -605,14 +649,23 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
 
             {/* Add New Email - 2 Step Process */}
             {isAddingEmail ? (
-              <Box sx={{ border: `1px solid ${colors.border.light}`, borderRadius: 1, p: 2, mt: 2 }}>
+              <Box
+                sx={{
+                  border: `1px solid ${colors.border.light}`,
+                  borderRadius: 1,
+                  p: 2,
+                  mt: 2,
+                }}
+              >
                 <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
                   Thêm email phụ
                 </Typography>
-                
+
                 {subEmailOtpStep === 0 ? (
                   // Step 1: Enter email and send OTP
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                  >
                     <TextField
                       fullWidth
                       size="small"
@@ -623,15 +676,21 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
                       helperText="Mã OTP sẽ được gửi đến email này để xác thực"
                       error={!!emailError}
                     />
-                    
-                    <Box sx={{ display: 'flex', gap: 2 }}>
+
+                    <Box sx={{ display: "flex", gap: 2 }}>
                       <Button
                         variant="contained"
                         onClick={handleSendSubEmailOtp}
                         disabled={isLoadingSubEmailOtp}
-                        startIcon={isLoadingSubEmailOtp ? <CircularProgress size={20} /> : <VpnKey />}
+                        startIcon={
+                          isLoadingSubEmailOtp ? (
+                            <CircularProgress size={20} />
+                          ) : (
+                            <VpnKey />
+                          )
+                        }
                       >
-                        {isLoadingSubEmailOtp ? 'Đang gửi...' : 'Gửi mã OTP'}
+                        {isLoadingSubEmailOtp ? "Đang gửi..." : "Gửi mã OTP"}
                       </Button>
                       <Button
                         variant="outlined"
@@ -643,20 +702,38 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
                   </Box>
                 ) : (
                   // Step 2: Enter OTP and confirm
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                  >
                     <Alert severity="info">
-                      Mã OTP đã được gửi đến email: <strong>{pendingSubEmail}</strong>
+                      Mã OTP đã được gửi đến email:{" "}
+                      <strong>{pendingSubEmail}</strong>
                     </Alert>
-                    
-                    <Box sx={{ p: 2, bgcolor: colors.background.secondary, borderRadius: 1, mb: 1 }}>
-                      <Typography variant="body2" sx={{ color: colors.text.secondary }}>
-                        Email phụ: <strong>{pendingSubEmail || 'Không có email'}</strong>
+
+                    <Box
+                      sx={{
+                        p: 2,
+                        bgcolor: colors.background.secondary,
+                        borderRadius: 1,
+                        mb: 1,
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{ color: colors.text.secondary }}
+                      >
+                        Email phụ:{" "}
+                        <strong>{pendingSubEmail || "Không có email"}</strong>
                       </Typography>
-                      <Typography variant="caption" sx={{ color: colors.text.secondary, display: 'block' }}>
-                        Debug - Step: {subEmailOtpStep}, Pending: {pendingSubEmail}
+                      <Typography
+                        variant="caption"
+                        sx={{ color: colors.text.secondary, display: "block" }}
+                      >
+                        Debug - Step: {subEmailOtpStep}, Pending:{" "}
+                        {pendingSubEmail}
                       </Typography>
                     </Box>
-                    
+
                     <TextField
                       fullWidth
                       size="small"
@@ -668,15 +745,23 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
                       error={!!emailError}
                       helperText={emailError}
                     />
-                    
-                    <Box sx={{ display: 'flex', gap: 2 }}>
+
+                    <Box sx={{ display: "flex", gap: 2 }}>
                       <Button
                         variant="contained"
                         onClick={handleAddSubEmailWithOtp}
                         disabled={isLoadingEmailAction}
-                        startIcon={isLoadingEmailAction ? <CircularProgress size={20} /> : <SaveIcon />}
+                        startIcon={
+                          isLoadingEmailAction ? (
+                            <CircularProgress size={20} />
+                          ) : (
+                            <SaveIcon />
+                          )
+                        }
                       >
-                        {isLoadingEmailAction ? 'Đang thêm...' : 'Xác nhận thêm email'}
+                        {isLoadingEmailAction
+                          ? "Đang thêm..."
+                          : "Xác nhận thêm email"}
                       </Button>
                       <Button
                         variant="outlined"
@@ -709,35 +794,41 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
         </Accordion>
 
         {/* Password Change Section */}
-        <Accordion 
-          expanded={expandedAccordion === 'password-change'} 
-          onChange={handleAccordionChange('password-change')}
-          sx={{ borderRadius: 2, boxShadow: 2, '&:before': { display: 'none' } }}
+        <Accordion
+          expanded={expandedAccordion === "password-change"}
+          onChange={handleAccordionChange("password-change")}
+          sx={{
+            borderRadius: 2,
+            boxShadow: 2,
+            "&:before": { display: "none" },
+          }}
         >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
-            sx={{ 
+            sx={{
               backgroundColor: colors.background.secondary,
-              borderRadius: '8px 8px 0 0',
-              '&.Mui-expanded': {
-                borderRadius: '8px 8px 0 0',
-              }
+              borderRadius: "8px 8px 0 0",
+              "&.Mui-expanded": {
+                borderRadius: "8px 8px 0 0",
+              },
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
               <Security sx={{ mr: 2, color: colors.primary.main }} />
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
                   Đổi mật khẩu
                 </Typography>
-                <Typography variant="body2" sx={{ color: colors.text.secondary }}>
+                <Typography
+                  variant="body2"
+                  sx={{ color: colors.text.secondary }}
+                >
                   Xác thực qua email trước khi đổi mật khẩu
                 </Typography>
               </Box>
             </Box>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 3 }}>
-
             {passwordError && (
               <Alert severity="error" sx={{ mb: 3 }}>
                 {passwordError}
@@ -753,36 +844,51 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
                     </Typography>
                   </StepLabel>
                   <StepContent>
-                    <Typography variant="body2" sx={{ mb: 2, color: colors.text.secondary }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ mb: 2, color: colors.text.secondary }}
+                    >
                       {step.description}
                     </Typography>
-                    
+
                     {index === 0 && (
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 2,
+                        }}
+                      >
                         <TextField
                           fullWidth
                           label="Mật khẩu hiện tại"
-                          type={showCurrentPassword ? 'text' : 'password'}
+                          type={showCurrentPassword ? "text" : "password"}
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
                           InputProps={{
                             endAdornment: (
                               <InputAdornment position="end">
                                 <IconButton
-                                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                  onClick={() =>
+                                    setShowCurrentPassword(!showCurrentPassword)
+                                  }
                                   edge="end"
                                 >
-                                  {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                                  {showCurrentPassword ? (
+                                    <VisibilityOff />
+                                  ) : (
+                                    <Visibility />
+                                  )}
                                 </IconButton>
                               </InputAdornment>
                             ),
                           }}
                         />
-                        
+
                         <TextField
                           fullWidth
                           label="Mật khẩu mới"
-                          type={showNewPassword ? 'text' : 'password'}
+                          type={showNewPassword ? "text" : "password"}
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           helperText="Mật khẩu phải có ít nhất 8 ký tự"
@@ -790,30 +896,42 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
                             endAdornment: (
                               <InputAdornment position="end">
                                 <IconButton
-                                  onClick={() => setShowNewPassword(!showNewPassword)}
+                                  onClick={() =>
+                                    setShowNewPassword(!showNewPassword)
+                                  }
                                   edge="end"
                                 >
-                                  {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                                  {showNewPassword ? (
+                                    <VisibilityOff />
+                                  ) : (
+                                    <Visibility />
+                                  )}
                                 </IconButton>
                               </InputAdornment>
                             ),
                           }}
                         />
-                        
+
                         <TextField
                           fullWidth
                           label="Xác nhận mật khẩu mới"
-                          type={showConfirmPassword ? 'text' : 'password'}
+                          type={showConfirmPassword ? "text" : "password"}
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           InputProps={{
                             endAdornment: (
                               <InputAdornment position="end">
                                 <IconButton
-                                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                  onClick={() =>
+                                    setShowConfirmPassword(!showConfirmPassword)
+                                  }
                                   edge="end"
                                 >
-                                  {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                  {showConfirmPassword ? (
+                                    <VisibilityOff />
+                                  ) : (
+                                    <Visibility />
+                                  )}
                                 </IconButton>
                               </InputAdornment>
                             ),
@@ -825,33 +943,59 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
                           <InputLabel>Chọn email để nhận OTP</InputLabel>
                           <Select
                             value={selectedEmailForOtp}
-                            onChange={(e) => setSelectedEmailForOtp(e.target.value)}
+                            onChange={(e) =>
+                              setSelectedEmailForOtp(e.target.value)
+                            }
                             label="Chọn email để nhận OTP"
                           >
                             {availableEmailsForOtp.map((email) => (
                               <MenuItem key={email.id} value={email.email}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                  }}
+                                >
                                   <Email fontSize="small" />
                                   {email.email}
                                   {email.isPrimary ? (
-                                    <Chip label="Email chính" size="small" color="primary" variant="outlined" />
+                                    <Chip
+                                      label="Email chính"
+                                      size="small"
+                                      color="primary"
+                                      variant="outlined"
+                                    />
                                   ) : (
-                                    <Chip label="Email phụ" size="small" color="default" variant="outlined" />
+                                    <Chip
+                                      label="Email phụ"
+                                      size="small"
+                                      color="default"
+                                      variant="outlined"
+                                    />
                                   )}
                                 </Box>
                               </MenuItem>
                             ))}
                           </Select>
                         </FormControl>
-                        
-                        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+
+                        <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
                           <Button
                             variant="contained"
                             onClick={handleSendOtp}
-                            disabled={isLoadingOtp || availableEmailsForOtp.length === 0}
-                            startIcon={isLoadingOtp ? <CircularProgress size={20} /> : <VpnKey />}
+                            disabled={
+                              isLoadingOtp || availableEmailsForOtp.length === 0
+                            }
+                            startIcon={
+                              isLoadingOtp ? (
+                                <CircularProgress size={20} />
+                              ) : (
+                                <VpnKey />
+                              )
+                            }
                           >
-                            {isLoadingOtp ? 'Đang gửi...' : 'Gửi mã OTP'}
+                            {isLoadingOtp ? "Đang gửi..." : "Gửi mã OTP"}
                           </Button>
                           <Button
                             variant="outlined"
@@ -868,13 +1012,19 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
                         )}
                       </Box>
                     )}
-                    
+
                     {index === 1 && (
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 2,
+                        }}
+                      >
                         <Alert severity="info">
                           Mã OTP đã được gửi đến email: {selectedEmailForOtp}
                         </Alert>
-                        
+
                         <TextField
                           fullWidth
                           label="Mã OTP"
@@ -883,15 +1033,23 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
                           placeholder="Nhập mã OTP 6 số"
                           inputProps={{ maxLength: 6 }}
                         />
-                        
-                        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+
+                        <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
                           <Button
                             variant="contained"
                             onClick={handleChangePassword}
                             disabled={isChangingPassword}
-                            startIcon={isChangingPassword ? <CircularProgress size={20} /> : <Security />}
+                            startIcon={
+                              isChangingPassword ? (
+                                <CircularProgress size={20} />
+                              ) : (
+                                <Security />
+                              )
+                            }
                           >
-                            {isChangingPassword ? 'Đang đổi...' : 'Đổi mật khẩu'}
+                            {isChangingPassword
+                              ? "Đang đổi..."
+                              : "Đổi mật khẩu"}
                           </Button>
                           <Button
                             variant="outlined"
@@ -918,8 +1076,13 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
       </Box>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <DeleteIcon color="error" />
           Xác nhận xóa email phụ
         </DialogTitle>
@@ -928,35 +1091,53 @@ const AccountSettingsComponent: React.FC<AccountSettingsComponentProps> = ({
             Bạn có chắc chắn muốn xóa email phụ này khỏi danh sách không?
           </Typography>
           {emailToDelete && (
-            <Box sx={{ p: 2, bgcolor: colors.background.secondary, borderRadius: 1 }}>
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: colors.background.secondary,
+                borderRadius: 1,
+              }}
+            >
               <Typography variant="body2" sx={{ color: colors.text.secondary }}>
                 Email sẽ bị xóa:
               </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 600, color: colors.error[500] }}>
-                {subEmails.find(email => email.id === emailToDelete)?.email}
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: 600, color: colors.error[500] }}
+              >
+                {subEmails.find((email) => email.id === emailToDelete)?.email}
               </Typography>
             </Box>
           )}
-          <Typography variant="body2" sx={{ mt: 2, color: colors.text.secondary }}>
+          <Typography
+            variant="body2"
+            sx={{ mt: 2, color: colors.text.secondary }}
+          >
             Hành động này không thể hoàn tác.
           </Typography>
         </DialogContent>
         <DialogActions sx={{ p: 3, gap: 1 }}>
-          <Button 
+          <Button
             onClick={() => setDeleteDialogOpen(false)}
             variant="outlined"
             disabled={isLoadingEmailAction}
           >
             Hủy
           </Button>
-          <Button 
-            onClick={confirmDeleteSubEmail} 
-            color="error" 
+          <Button
+            onClick={confirmDeleteSubEmail}
+            color="error"
             variant="contained"
             disabled={isLoadingEmailAction}
-            startIcon={isLoadingEmailAction ? <CircularProgress size={16} /> : <DeleteIcon />}
+            startIcon={
+              isLoadingEmailAction ? (
+                <CircularProgress size={16} />
+              ) : (
+                <DeleteIcon />
+              )
+            }
           >
-            {isLoadingEmailAction ? 'Đang xóa...' : 'Xóa email'}
+            {isLoadingEmailAction ? "Đang xóa..." : "Xóa email"}
           </Button>
         </DialogActions>
       </Dialog>

@@ -23,8 +23,8 @@ import {
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import { API } from '../../utils/Fetch';
-import type { ForgotPasswordRequest } from '../../types/ForgotPasswordRequest';
-import type { ResetPasswordRequestForUser } from '../../types/ResetPasswordRequestForUser';
+import type { EmailReq } from '../../types/Email';
+import type { ResetPasswordUserReq } from '../../types/Authen';
 
 const steps = ['Nhập email', 'Đặt lại mật khẩu'];
 
@@ -75,7 +75,7 @@ const ForgotPassword = () => {
     setError('');
 
     try {
-      const requestData: ForgotPasswordRequest = {
+      const requestData: EmailReq = {
         email: formData.email
       };
 
@@ -121,7 +121,7 @@ const ForgotPassword = () => {
     setError('');
 
     try {
-      const requestData: ResetPasswordRequestForUser = {
+      const requestData: ResetPasswordUserReq = {
         email: formData.email,
         otp: formData.otp,
         newPassword: formData.newPassword

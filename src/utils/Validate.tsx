@@ -1,5 +1,6 @@
-import type { AttendedCourseRequest } from "../types/AttendedCourse";
-import type { ResearchProjectRequest } from "../types/ResearchProject";
+
+import type { AttendedCourseCreateReq } from "../types/AttendedCourse";
+import type { ResearchProjectCreateReq } from "../types/ResearchProject";
 import type { TrainingProgramReq } from "../types/TrainingProgram";
 
 type validateResult = {
@@ -85,7 +86,7 @@ export const validateCourseForm = (formData: any) => {
   return errors;
 };
 
-export const validateAttendedCourseForm = (formData: AttendedCourseRequest) => {
+export const validateAttendedCourseForm = (formData: AttendedCourseCreateReq) => {
   const errors: validateResult = {
     success: true,
     error: "",
@@ -718,7 +719,7 @@ export const validateCertificateInfo = (formData: any) => {
 };
 
 export const validateResearchProjectForm = (
-  formData: ResearchProjectRequest,
+  formData: ResearchProjectCreateReq,
 ) => {
   const errors: validateResult = {
     success: true,

@@ -20,7 +20,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { API } from "../../../utils/Fetch";
 import { validatePartnerInfo } from "../../../utils/Validate";
-import type { RequestPartnerFromAdmin } from "../../../types/RequestPartnerFromAdmin";
+import type { CreatePartnerReq } from "../../../types/Admin";
 
 interface CreatePartnerDialogProps {
   open: boolean;
@@ -139,7 +139,7 @@ const CreatePartnerDialog = ({
     }
 
     try {
-      const newPartner: RequestPartnerFromAdmin = {
+      const newPartner: CreatePartnerReq = {
         email: email.trim(),
         password: password.trim(),
         organizationName: organizationName.trim(),

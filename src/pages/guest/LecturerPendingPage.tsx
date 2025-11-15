@@ -60,8 +60,6 @@ import CreateDegreeModal from "../../components/lecturer-dialog/CreateDegreeModa
 import { setPendingLecturer } from "../../redux/slice/PendingLectuererSlice";
 import { clearUserProfile, setUserProfile } from "../../redux/slice/userSlice";
 import { colors } from "../../theme/colors";
-import type { CertificationRequest } from "../../types/CertificationRequest";
-import type { DegreeRequest } from "../../types/DegreeRequest";
 import {
   jobFieldAutoComplete,
   majorsAutoComplete,
@@ -70,6 +68,8 @@ import { formatDate, getStatus, getStatusColor } from "../../utils/ChangeText";
 import { API } from "../../utils/Fetch";
 import { navigateToRole } from "../../utils/navigationRole";
 import { validateLecturerInfo } from "../../utils/Validate";
+import type { DegreeCreateReq } from "../../types/Degree";
+import type { CertificationCreateReq } from "../../types/Certification";
 
 // Cấu hình dayjs locale
 dayjs.locale("vi");
@@ -293,7 +293,7 @@ const LecturerPendingPage = () => {
     }
   };
 
-  const handleAddDegree = async (degree: DegreeRequest) => {
+  const handleAddDegree = async (degree: DegreeCreateReq) => {
     try {
       const response = await API.user.createDegree([degree]);
       if (response.data.success) {
@@ -308,7 +308,7 @@ const LecturerPendingPage = () => {
   };
 
   const handleAddCertification = async (
-    certification: CertificationRequest,
+    certification: CertificationCreateReq,
   ) => {
     try {
       const response = await API.user.createCertification([certification]);

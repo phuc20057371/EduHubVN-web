@@ -1,28 +1,28 @@
 import {
-  Autocomplete,
-  Button,
-  TextField,
-  Typography,
-  IconButton,
-  Paper,
-  Divider,
-} from "@mui/material";
-import {
   ArrowBack,
   Business,
-  Person,
   Description,
   Handshake,
+  Person,
 } from "@mui/icons-material";
-import { useState, useEffect } from "react";
+import {
+  Autocomplete,
+  Button,
+  Divider,
+  IconButton,
+  Paper,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { setUserProfile } from "../../redux/slice/userSlice";
-import { API } from "../../utils/Fetch";
-import type { PartnerRequest } from "../../types/PartnerRequest";
-import { validatePartnerInfo } from "../../utils/Validate";
 import { toast } from "react-toastify";
+import { setUserProfile } from "../../redux/slice/userSlice";
+import type { PartnerCreateReq } from "../../types/Parner";
 import { industriesAutoComplete } from "../../utils/AutoComplete";
+import { API } from "../../utils/Fetch";
+import { validatePartnerInfo } from "../../utils/Validate";
 
 const RegisterPartner = () => {
   const [businessRegistrationNumber, setBusinessRegistrationNumber] =
@@ -95,11 +95,10 @@ const RegisterPartner = () => {
     navigate(-1);
   };
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const partnerData: PartnerRequest = {
+    const partnerData: PartnerCreateReq = {
       businessRegistrationNumber,
       organizationName,
       industry,
@@ -122,7 +121,7 @@ const RegisterPartner = () => {
     }
 
     try {
-     await API.user.registerPartner(partnerData);
+      await API.user.registerPartner(partnerData);
 
       // Clear localStorage on successful registration
       localStorage.removeItem("partnerRegisterForm");

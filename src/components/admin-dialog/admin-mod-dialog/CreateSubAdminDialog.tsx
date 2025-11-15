@@ -19,7 +19,7 @@ import {
   Person as PersonIcon,
   Lock as LockIcon,
 } from '@mui/icons-material';
-import { useColors } from '../../hooks/useColors';
+import { useColors } from '../../../hooks/useColors';
 
 interface CreateSubAdminDialogProps {
   open: boolean;

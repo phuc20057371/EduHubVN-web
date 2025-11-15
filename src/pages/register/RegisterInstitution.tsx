@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import type { EducationInstitutionType } from "../../types/InstitutionRequest";
 import {
   Button,
   TextField,
@@ -9,7 +8,6 @@ import {
   Divider,
 } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
-import type { InstitutionRequest } from "../../types/InstitutionRequest";
 import { API } from "../../utils/Fetch";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,6 +21,10 @@ import {
 } from "@mui/icons-material";
 import { validateInstitutionInfo } from "../../utils/Validate";
 import { toast } from "react-toastify";
+import type {
+  InstitutionCreateReq,
+  InstitutionType,
+} from "../../types/Institution";
 
 const RegisterInstitution = () => {
   const navigate = useNavigate();
@@ -34,7 +36,7 @@ const RegisterInstitution = () => {
     useState<string>("");
   const [institutionName, setInstitutionName] = useState<string>("");
   const [institutionType, setInstitutionType] =
-    useState<EducationInstitutionType | null>(null);
+    useState<InstitutionType | null>(null);
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [website, setWebsite] = useState<string>("");
   const [address, setAddress] = useState<string>("");
@@ -102,7 +104,7 @@ const RegisterInstitution = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const institutionData: InstitutionRequest = {
+    const institutionData: InstitutionCreateReq = {
       businessRegistrationNumber,
       institutionName,
       institutionType: institutionType ?? "UNIVERSITY", // fallback nếu null
@@ -329,7 +331,7 @@ const RegisterInstitution = () => {
                     value={institutionType ?? ""}
                     onChange={(e) =>
                       setInstitutionType(
-                        e.target.value as EducationInstitutionType,
+                        e.target.value as InstitutionType,
                       )
                     }
                     SelectProps={{ native: true }}

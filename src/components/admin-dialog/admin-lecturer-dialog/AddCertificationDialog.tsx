@@ -17,7 +17,6 @@ import {
   Business,
   Close,
 } from "@mui/icons-material";
-import type { CertificationRequest } from "../../../types/CertificationRequest";
 import { API } from "../../../utils/Fetch";
 import { Stack } from "@mui/system";
 import { toast } from "react-toastify";
@@ -28,6 +27,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { vi } from "date-fns/locale/vi";
 import { validateCertificateInfo } from "../../../utils/Validate";
 import { certificationLevelsAutoComplete } from "../../../utils/AutoComplete";
+import type { CertificationCreateReq } from "../../../types/Certification";
 
 const style = {
   position: "absolute" as const,
@@ -80,7 +80,7 @@ const AddCertificationDialog: React.FC<AddCertificationDialogProps> = ({
   editMode = false,
   certificationData,
 }) => {
-  const [form, setForm] = useState<CertificationRequest>({
+  const [form, setForm] = useState<CertificationCreateReq>({
     referenceId: "",
     name: "",
     issuedBy: "",
@@ -116,8 +116,12 @@ const AddCertificationDialog: React.FC<AddCertificationDialogProps> = ({
         referenceId: certificationData.referenceId || "",
         name: certificationData.name || "",
         issuedBy: certificationData.issuedBy || "",
-        issueDate: certificationData.issueDate ? new Date(certificationData.issueDate) : new Date(),
-        expiryDate: certificationData.expiryDate ? new Date(certificationData.expiryDate) : null,
+        issueDate: certificationData.issueDate
+          ? new Date(certificationData.issueDate)
+          : new Date(),
+        expiryDate: certificationData.expiryDate
+          ? new Date(certificationData.expiryDate)
+          : null,
         certificateUrl: certificationData.certificateUrl || "",
         level: certificationData.level || "",
         description: certificationData.description || "",
@@ -125,7 +129,7 @@ const AddCertificationDialog: React.FC<AddCertificationDialogProps> = ({
     }
   }, [open, editMode, certificationData]);
 
-  const handleChange = (field: keyof CertificationRequest, value: any) => {
+  const handleChange = (field: keyof CertificationCreateReq, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -177,7 +181,7 @@ const AddCertificationDialog: React.FC<AddCertificationDialogProps> = ({
     setIsSubmitting(true);
     try {
       let response;
-      
+
       if (editMode) {
         // Update existing certification
         const updateData = {
@@ -196,13 +200,15 @@ const AddCertificationDialog: React.FC<AddCertificationDialogProps> = ({
           updatedAt: certificationData.updatedAt || "",
         };
         response = await API.user.updateCertification(updateData);
-        
+
         if (response.data.success) {
           toast.success("Cập nhật chứng chỉ thành công!");
           onSuccess();
           onClose();
         } else {
-          toast.error(response.data.message || "Có lỗi xảy ra khi cập nhật chứng chỉ");
+          toast.error(
+            response.data.message || "Có lỗi xảy ra khi cập nhật chứng chỉ",
+          );
         }
       } else {
         // Create new certification
@@ -217,8 +223,14 @@ const AddCertificationDialog: React.FC<AddCertificationDialogProps> = ({
         }
       }
     } catch (error: any) {
-      console.error(`❌ Error ${editMode ? 'updating' : 'creating'} certification:`, error);
-      toast.error(error.message || `Có lỗi xảy ra khi ${editMode ? 'cập nhật' : 'thêm'} chứng chỉ!`);
+      console.error(
+        `❌ Error ${editMode ? "updating" : "creating"} certification:`,
+        error,
+      );
+      toast.error(
+        error.message ||
+          `Có lỗi xảy ra khi ${editMode ? "cập nhật" : "thêm"} chứng chỉ!`,
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -400,7 +412,9 @@ const AddCertificationDialog: React.FC<AddCertificationDialogProps> = ({
                   mb: 0.5,
                 }}
               >
-                {editMode ? "Chỉnh sửa chứng chỉ" : "Thêm chứng chỉ cho giảng viên"}
+                {editMode
+                  ? "Chỉnh sửa chứng chỉ"
+                  : "Thêm chứng chỉ cho giảng viên"}
               </Typography>
               <Typography
                 variant="body1"
@@ -413,7 +427,9 @@ const AddCertificationDialog: React.FC<AddCertificationDialogProps> = ({
                   fontWeight: 400,
                 }}
               >
-                {editMode ? `Chỉnh sửa chứng chỉ cho ${lecturer?.fullName || "giảng viên"}` : `Thêm chứng chỉ mới cho giảng viên ${lecturer?.fullName}`}
+                {editMode
+                  ? `Chỉnh sửa chứng chỉ cho ${lecturer?.fullName || "giảng viên"}`
+                  : `Thêm chứng chỉ mới cho giảng viên ${lecturer?.fullName}`}
               </Typography>
             </Box>
           </Box>
@@ -1147,8 +1163,10 @@ const AddCertificationDialog: React.FC<AddCertificationDialogProps> = ({
                   <CircularProgress size={20} sx={{ color: "white" }} />
                   <span>Đang xử lý...</span>
                 </Box>
+              ) : editMode ? (
+                "Cập nhật chứng chỉ"
               ) : (
-                editMode ? "Cập nhật chứng chỉ" : "Thêm chứng chỉ"
+                "Thêm chứng chỉ"
               )}
             </Button>
           </Box>

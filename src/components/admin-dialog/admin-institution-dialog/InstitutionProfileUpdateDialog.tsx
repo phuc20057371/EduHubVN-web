@@ -24,15 +24,19 @@ import SchoolIcon from "@mui/icons-material/School";
 import PersonIcon from "@mui/icons-material/Person";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import type { Institution } from "../../../types/Institution";
+import type {
+  Institution,
+  InstitutionType,
+  InstitutionUpdateReq,
+} from "../../../types/Institution";
 import { API } from "../../../utils/Fetch";
 import { setInstitutions } from "../../../redux/slice/InstitutionSlice";
 import { validateInstitutionInfo } from "../../../utils/Validate";
-import type {
-  EducationInstitutionType,
-  InstitutionRequest,
-} from "../../../types/InstitutionRequest";
-import { getInstitutionTypeText, getStatus, getStatusColor } from "../../../utils/ChangeText";
+import {
+  getInstitutionTypeText,
+  getStatus,
+  getStatusColor,
+} from "../../../utils/ChangeText";
 
 interface InstitutionEditDialogProps {
   open: boolean;
@@ -93,10 +97,11 @@ const InstitutionProfileUpdateDialog = ({
         logoUrl: institution.logoUrl || "",
       };
 
-      const updatedInstitutionRequest: InstitutionRequest = {
+      const updatedInstitutionRequest: InstitutionUpdateReq = {
+        id: institution.id,
         businessRegistrationNumber,
         institutionName,
-        institutionType: institutionType as EducationInstitutionType, // ✅ ép kiểu ở đây
+        institutionType: institutionType as InstitutionType, // ✅ ép kiểu ở đây
         phoneNumber,
         website,
         address,
@@ -204,7 +209,8 @@ const InstitutionProfileUpdateDialog = ({
                         textShadow: "0 1px 2px rgba(0,0,0,0.2)",
                       }}
                     >
-                       {getInstitutionTypeText(institutionType) || "Chưa cập nhật"}
+                      {getInstitutionTypeText(institutionType) ||
+                        "Chưa cập nhật"}
                     </Typography>
                   </Box>
                   <Box
@@ -274,10 +280,12 @@ const InstitutionProfileUpdateDialog = ({
                           label="Loại cơ sở"
                         >
                           <MenuItem value="UNIVERSITY">Đại học</MenuItem>
-                          <MenuItem value="TRAINING_CENTER">Trung tâm đào tạo</MenuItem>
+                          <MenuItem value="TRAINING_CENTER">
+                            Trung tâm đào tạo
+                          </MenuItem>
                         </Select>
                       </FormControl>
-                      
+
                       {/* Năm thành lập và Số đăng ký kinh doanh trên cùng một hàng */}
                       <Box display="flex" gap={2}>
                         <TextField
@@ -304,7 +312,7 @@ const InstitutionProfileUpdateDialog = ({
                           }}
                         />
                       </Box>
-                      
+
                       <TextField
                         label="Số điện thoại"
                         value={phoneNumber}
@@ -365,7 +373,7 @@ const InstitutionProfileUpdateDialog = ({
                     </Box>
                   </CardContent>
                 </Card>
-                
+
                 {/* Mô tả cơ sở - Card riêng */}
                 <Card elevation={1}>
                   <CardHeader
@@ -389,7 +397,7 @@ const InstitutionProfileUpdateDialog = ({
                     />
                   </CardContent>
                 </Card>
-                
+
                 <Box>
                   <Typography
                     variant="body2"

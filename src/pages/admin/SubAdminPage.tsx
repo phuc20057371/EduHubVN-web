@@ -36,8 +36,8 @@ import {
 import { API } from "../../utils/Fetch";
 import { useDispatch, useSelector } from "react-redux";
 import { setSubAdmins } from "../../redux/slice/SubAdminSlice";
-import PermissionDialog from "../../components/admin-dialog/PermissionDialog";
-import CreateSubAdminDialog from "../../components/admin-dialog/CreateSubAdminDialog";
+import PermissionDialog from "../../components/admin-dialog/admin-mod-dialog/PermissionDialog";
+import CreateSubAdminDialog from "../../components/admin-dialog/admin-mod-dialog/CreateSubAdminDialog";
 import { useColors } from "../../hooks/useColors"; // Thay thế import colors
 
 interface SubAdmin {
