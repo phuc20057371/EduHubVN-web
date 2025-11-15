@@ -1,40 +1,37 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { API } from "../utils/Fetch";
-import { setUserProfile } from "../redux/slice/userSlice";
-import { navigateToRole } from "../utils/navigationRole";
 import {
-  Typography,
+  Dashboard,
+  Person,
+  School
+} from "@mui/icons-material";
+import {
   Box,
+  Card,
+  CardContent,
+  Chip,
   Container,
+  Divider,
   Drawer,
   List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
-  ListItemButton,
-  Chip,
-  Card,
-  CardContent,
-  Divider,
+  Typography,
 } from "@mui/material";
-import {
-  School,
-  Dashboard,
-  MenuBook,
-  People,
-  Assignment,
-  Person,
-} from "@mui/icons-material";
 import { alpha } from "@mui/material/styles";
-import { useColors } from "../hooks/useColors";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Logoweb from "../assets/Eduhub_logo_new.png";
-import WebSocketService from "../services/WebSocketService";
-import { InstitutionMessageHandler } from "../services/InstitutionMessageHandler";
-import Footer from "../components/Footer";
-import EduHubSpeedDial from "../components/EduHubSpeedDial";
 import { Header } from "../components";
+import EduHubSpeedDial from "../components/EduHubSpeedDial";
+import Footer from "../components/Footer";
+import { useColors } from "../hooks/useColors";
+import { setUserProfile } from "../redux/slice/userSlice";
+import { InstitutionMessageHandler } from "../services/InstitutionMessageHandler";
+import WebSocketService from "../services/WebSocketService";
+import { API } from "../utils/Fetch";
+import { navigateToRole } from "../utils/navigationRole";
 
 const InstitutionLayout = () => {
   const colors = useColors();
@@ -130,30 +127,19 @@ const InstitutionLayout = () => {
       path: "/institution",
       description: "Tổng quan và thống kê",
     },
-    {
-      text: "Đề tài",
-      icon: <MenuBook />,
-      path: "/institution/projects",
-      description: "Quản lý đề tài nghiên cứu",
-    },
-    {
-      text: "Khóa học",
-      icon: <MenuBook />,
-      path: "/institution/courses",
-      description: "Quản lý khóa học",
-    },
-    {
-      text: "Hợp đồng",
-      icon: <Assignment />,
-      path: "/institution/contracts",
-      description: "Quản lý hợp đồng",
-    },
-    {
-      text: "Giảng viên",
-      icon: <People />,
-      path: "/institution/lecturers",
-      description: "Quản lý giảng viên",
-    },
+
+    // {
+    //   text: "Khóa học",
+    //   icon: <MenuBook />,
+    //   path: "/institution/courses",
+    //   description: "Quản lý khóa học",
+    // },
+    // {
+    //   text: "Hợp đồng",
+    //   icon: <Assignment />,
+    //   path: "/institution/contracts",
+    //   description: "Quản lý hợp đồng",
+    // },
     {
       text: "Hồ sơ",
       icon: <Person />,

@@ -1,42 +1,39 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { API } from "../utils/Fetch";
-import { setUserProfile } from "../redux/slice/userSlice";
-import { navigateToRole } from "../utils/navigationRole";
 import {
-  Typography,
+  Dashboard,
+  Person,
+  School
+} from "@mui/icons-material";
+import {
   Box,
+  Card,
+  CardContent,
+  Chip,
   Container,
+  Divider,
   Drawer,
   List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
-  ListItemButton,
-  Chip,
-  Card,
-  CardContent,
+  Typography,
   alpha,
 } from "@mui/material";
-import {
-  Dashboard,
-  MenuBook,
-  Assignment,
-  Person,
-  TrendingUp,
-  School,
-} from "@mui/icons-material";
-import { setLecturerProfile } from "../redux/slice/LecturerProfileSlice";
-import { useColors } from "../hooks/useColors";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Logoweb from "../assets/Eduhub_logo_new.png";
-import WebSocketService from "../services/WebSocketService";
-import { useGlobalWebSocket } from "../hooks/useGlobalWebSocket";
-import { LecturerMessageHandler } from "../services/LecturerMessageHandler";
+import { Header } from "../components";
 import EduHubSpeedDial from "../components/EduHubSpeedDial";
 import Footer from "../components/Footer";
-import { Header } from "../components";
-import { Divider } from "@mui/material";
+import { useColors } from "../hooks/useColors";
+import { useGlobalWebSocket } from "../hooks/useGlobalWebSocket";
+import { setLecturerProfile } from "../redux/slice/LecturerProfileSlice";
+import { setUserProfile } from "../redux/slice/userSlice";
+import { LecturerMessageHandler } from "../services/LecturerMessageHandler";
+import WebSocketService from "../services/WebSocketService";
+import { API } from "../utils/Fetch";
+import { navigateToRole } from "../utils/navigationRole";
 
 const LecturerLayout = () => {
   const dispatch = useDispatch();
@@ -152,30 +149,18 @@ const LecturerLayout = () => {
       path: "/lecturer",
       description: "Tổng quan và thống kê",
     },
-    {
-      text: "Đề tài",
-      icon: <Dashboard />,
-      path: "/lecturer/projects",
-      description: "Tổng quan và thống kê",
-    },
-    {
-      text: "Khóa học",
-      icon: <MenuBook />,
-      path: "/lecturer/courses",
-      description: "Quản lý khóa học giảng dạy",
-    },
-    {
-      text: "Hợp đồng",
-      icon: <Assignment />,
-      path: "/lecturer/contracts",
-      description: "Quản lý hợp đồng giảng dạy",
-    },
-    {
-      text: "Thống kê",
-      icon: <TrendingUp />,
-      path: "/lecturer/statistics",
-      description: "Phân tích hiệu quả giảng dạy",
-    },
+    // {
+    //   text: "Khóa học",
+    //   icon: <MenuBook />,
+    //   path: "/lecturer/courses",
+    //   description: "Quản lý khóa học giảng dạy",
+    // },
+    // {
+    //   text: "Hợp đồng",
+    //   icon: <Assignment />,
+    //   path: "/lecturer/contracts",
+    //   description: "Quản lý hợp đồng giảng dạy",
+    // },
     {
       text: "Hồ sơ",
       icon: <Person />,

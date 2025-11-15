@@ -24,26 +24,19 @@ import LecturerPendingPage from "../pages/guest/LecturerPendingPage";
 import PartnerPendingPage from "../pages/guest/PartnerPendingPage";
 import HomePage from "../pages/home/HomePage";
 import InstitutionContractPage from "../pages/institution/InstitutionContractPage";
-import InstitutionCourse from "../pages/institution/InstitutionCourse";
-import InstitutionLecturerPage from "../pages/institution/InstitutionLecturerPage";
 import InstitutionPage from "../pages/institution/InstitutionPage";
 import InstitutionProfilePage from "../pages/institution/InstitutionProfilePage";
-import InstitutionProjectPage from "../pages/institution/InstitutionProjectPage";
 import LecturerContractPage from "../pages/lecturer/LecturerContractPage";
 import LecturerCoursePage from "../pages/lecturer/LecturerCoursePage";
 import LecturerPage from "../pages/lecturer/LecturerPage";
 import LecturerProfilePage from "../pages/lecturer/LecturerProfilePage";
-import LecturerProjectPage from "../pages/lecturer/LecturerProjectPage";
-import LecturerStatisticPage from "../pages/lecturer/LecturerStatisticPage";
 import ForgotPassword from "../pages/login/ForgotPassword";
 import Login from "../pages/login/Login";
 import LecturerInfoPage from "../pages/other/LecturerInfoPage";
 import PartnerContractPage from "../pages/partner/PartnerContractPage";
 import PartnerCoursePage from "../pages/partner/PartnerCoursePage";
-import PartnerLecturerPage from "../pages/partner/PartnerLecturerPage";
 import PartnerPage from "../pages/partner/PartnerPage";
 import PartnerProfilePage from "../pages/partner/PartnerProfilePage";
-import PartnerProjectPage from "../pages/partner/PartnerProjectPage";
 import Register from "../pages/register/Register";
 import RegisterInstitution from "../pages/register/RegisterInstitution";
 import RegisterLecturer from "../pages/register/RegisterLecturer";
@@ -58,6 +51,7 @@ import GuestLecturerPage from "../pages/guest/GuestLecturerPage";
 import GuestTrainingProgramPage from "../pages/guest/GuestTrainingProgramPage";
 import GuestTPDetailPage from "../pages/guest/GuestTPDetailPage";
 import GuestIntroducePage from "../pages/guest/GuestIntroducePage";
+import InstitutionCourse from "../pages/institution/InstitutionCourse";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -73,8 +67,14 @@ export const router = createBrowserRouter(
         <Route path="/guest" element={<GuestPage />} />
         <Route path="/guest/introduce" element={<GuestIntroducePage />} />
         <Route path="/guest/lecturers" element={<GuestLecturerPage />} />
-        <Route path="/guest/training-programs" element={<GuestTrainingProgramPage />} />
-        <Route path="/guest/training-programs/:id" element={<GuestTPDetailPage />} />
+        <Route
+          path="/guest/training-programs"
+          element={<GuestTrainingProgramPage />}
+        />
+        <Route
+          path="/guest/training-programs/:id"
+          element={<GuestTPDetailPage />}
+        />
       </Route>
 
       <Route element={<ProtectedRoute />}>
@@ -98,8 +98,11 @@ export const router = createBrowserRouter(
           />
           <Route path="/admin/partners" element={<AdminPartner />} />
           <Route path="/admin/courses" element={<AdminCourse />} />
-          <Route path="/admin/training-programs" element={<AdminTrainingProgram />} />
-          
+          <Route
+            path="/admin/training-programs"
+            element={<AdminTrainingProgram />}
+          />
+
           {/* Protected route for ADMIN role only */}
           <Route element={<AdminOnlyRoute />}>
             <Route path="/admin/sub-admin" element={<SubAdminPage />} />
@@ -117,11 +120,9 @@ export const router = createBrowserRouter(
           />
           <Route path="/lecturer/courses" element={<LecturerCoursePage />} />
           <Route
-            path="/lecturer/statistics"
-            element={<LecturerStatisticPage />}
+            path="/account-config-lecturer"
+            element={<AccountConfigLecturer />}
           />
-          <Route path="/lecturer/projects" element={<LecturerProjectPage />} />
-          <Route path="/account-config-lecturer" element={<AccountConfigLecturer />} />
         </Route>
       </Route>
 
@@ -137,15 +138,11 @@ export const router = createBrowserRouter(
             element={<InstitutionContractPage />}
           />
           <Route path="/institution/courses" element={<InstitutionCourse />} />
+
           <Route
-            path="/institution/lecturers"
-            element={<InstitutionLecturerPage />}
+            path="/account-config-institution"
+            element={<AccountConfigInstitution />}
           />
-          <Route
-            path="/institution/projects"
-            element={<InstitutionProjectPage />}
-          />
-          <Route path="/account-config-institution" element={<AccountConfigInstitution />} />
         </Route>
       </Route>
 
@@ -155,17 +152,16 @@ export const router = createBrowserRouter(
           <Route path="/partner/profile" element={<PartnerProfilePage />} />
           <Route path="/partner/contracts" element={<PartnerContractPage />} />
           <Route path="/partner/courses" element={<PartnerCoursePage />} />
-          <Route path="/partner/lecturers" element={<PartnerLecturerPage />} />
-          <Route path="/partner/projects" element={<PartnerProjectPage />} />
-          <Route path="/account-config-partner" element={<AccountConfigPartner />} />
+          <Route
+            path="/account-config-partner"
+            element={<AccountConfigPartner />}
+          />
         </Route>
       </Route>
 
       {/* Protected Account Config Route */}
       <Route element={<ProtectedRoute />}>
-        <Route element={<BlankLayout />}>
-          
-        </Route>
+        <Route element={<BlankLayout />}></Route>
       </Route>
 
       {/* Auth + Register */}

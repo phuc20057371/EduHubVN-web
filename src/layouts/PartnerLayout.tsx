@@ -1,40 +1,38 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { API } from "../utils/Fetch";
-import { setUserProfile } from "../redux/slice/userSlice";
-import { navigateToRole } from "../utils/navigationRole";
-import {
-  Typography,
-  Box,
-  Container,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  ListItemButton,
-  Chip,
-  Card,
-  CardContent,
-  Divider,
-} from "@mui/material";
 import {
   Business,
   Dashboard,
   MenuBook,
-  People,
-  Assignment,
-  Person,
+  Person
 } from "@mui/icons-material";
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Divider,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+} from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { useColors } from "../hooks/useColors";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Logoweb from "../assets/eduhub-01.png";
-import WebSocketService from "../services/WebSocketService";
-import { PartnerMessageHandler } from "../services/PartnerMessageHandler";
-import Footer from "../components/Footer";
-import EduHubSpeedDial from "../components/EduHubSpeedDial";
 import { Header } from "../components";
+import EduHubSpeedDial from "../components/EduHubSpeedDial";
+import Footer from "../components/Footer";
+import { useColors } from "../hooks/useColors";
+import { setUserProfile } from "../redux/slice/userSlice";
+import { PartnerMessageHandler } from "../services/PartnerMessageHandler";
+import WebSocketService from "../services/WebSocketService";
+import { API } from "../utils/Fetch";
+import { navigateToRole } from "../utils/navigationRole";
 
 const PartnerLayout = () => {
   const colors = useColors();
@@ -128,29 +126,17 @@ const PartnerLayout = () => {
       description: "Tổng quan và thống kê",
     },
     {
-      text: "Dự án",
-      icon: <MenuBook />,
-      path: "/partner/projects",
-      description: "Quản lý dự án hợp tác",
-    },
-    {
       text: "Yêu cầu đào tạo",
       icon: <MenuBook />,
       path: "/partner/courses",
       description: "Quản lý khóa học hợp tác",
     },
-    {
-      text: "Hợp đồng",
-      icon: <Assignment />,
-      path: "/partner/contracts",
-      description: "Quản lý hợp đồng hợp tác",
-    },
-    {
-      text: "Giảng viên",
-      icon: <People />,
-      path: "/partner/lecturers",
-      description: "Quản lý giảng viên",
-    },
+    // {
+    //   text: "Hợp đồng",
+    //   icon: <Assignment />,
+    //   path: "/partner/contracts",
+    //   description: "Quản lý hợp đồng hợp tác",
+    // },
     {
       text: "Hồ sơ",
       icon: <Person />,

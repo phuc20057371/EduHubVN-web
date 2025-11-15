@@ -3,8 +3,7 @@ import {
   KeyboardArrowDown,
   Logout,
   Menu as MenuIcon,
-  Search,
-  Settings,
+  Settings
 } from "@mui/icons-material";
 import {
   AppBar,
@@ -67,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({
   const navigate = useNavigate();
   const colors = useColors();
   const { isDarkMode, toggleTheme } = useTheme();
-  const headerIconColor = colors.isDark ? '#FFFFFF' : undefined;
+  const headerIconColor = colors.isDark ? "#FFFFFF" : undefined;
 
   return (
     <AppBar
@@ -75,7 +74,7 @@ const Header: React.FC<HeaderProps> = ({
       elevation={0}
       sx={{
         background: colors.isDark
-          ? '#0E1D2C'
+          ? "#0E1D2C"
           : `linear-gradient(135deg, ${colors.primary.main} 0%, ${colors.primary.dark} 100%)`,
         borderBottom: `1px solid ${colors.border.light}`,
         backdropFilter: "blur(10px)",
@@ -83,7 +82,7 @@ const Header: React.FC<HeaderProps> = ({
       }}
     >
       <Container maxWidth="xl">
-  <Toolbar disableGutters sx={{ minHeight: { xs: 56, sm: 70 } }}>
+        <Toolbar disableGutters sx={{ minHeight: { xs: 56, sm: 70 } }}>
           {/* Mobile menu button */}
           <IconButton
             color="inherit"
@@ -161,13 +160,24 @@ const Header: React.FC<HeaderProps> = ({
           </Box>
 
           {/* Right side actions */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 0.5, sm: 1 } }}>
-            {/* Search Button */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: { xs: 0.5, sm: 1 },
+            }}
+          >
+            {/* Compact theme toggle: match Search icon styling */}
             <IconButton
+              onClick={toggleTheme}
+              aria-label={
+                isDarkMode ? "Switch to light mode" : "Switch to dark mode"
+              }
               color="inherit"
               sx={{
+                color: headerIconColor,
                 bgcolor: alpha("#fff", 0.1),
-                p: { xs: 0.5, sm: 'auto' },
+                display: { xs: "none", sm: "inline-flex" },
                 "&:hover": {
                   bgcolor: colors.isDark
                     ? alpha("#fff", 0.2)
@@ -175,30 +185,11 @@ const Header: React.FC<HeaderProps> = ({
                 },
               }}
             >
-              <Search />
-            </IconButton>
-
-            {/* Compact theme toggle: match Search icon styling */}
-            <IconButton
-              onClick={toggleTheme}
-              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              color="inherit"
-              sx={{
-                color: headerIconColor,
-                bgcolor: alpha("#fff", 0.1),
-                display: { xs: 'none', sm: 'inline-flex' },
-                "&:hover": {
-                  bgcolor: colors.isDark ? alpha("#fff", 0.2) : alpha("#000", 0.1),
-                },
-              }}
-            >
               <SwitchMode dark={isDarkMode} />
             </IconButton>
 
             {/* Notifications */}
-            <NotificationMenu 
-              notifications={userProfile?.notifications}
-            />
+            <NotificationMenu notifications={userProfile?.notifications} />
 
             {/* User Menu */}
             <Button
