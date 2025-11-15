@@ -478,7 +478,7 @@ const Login = () => {
                 : colors.background.secondary,
             }}
           >
-            <Typography
+            {/* <Typography
               variant="body2"
               sx={{
                 color: colors.text.secondary,
@@ -487,8 +487,8 @@ const Login = () => {
               }}
             >
               Bạn chưa có tài khoản?
-            </Typography>
-            <Button
+            </Typography> */}
+            {/* <Button
               variant="outlined"
               onClick={() => navigate("/register")}
               sx={{
@@ -512,12 +512,12 @@ const Login = () => {
               }}
             >
               Đăng ký tài khoản mới
-            </Button>
+            </Button> */}
           </Box>
         </Card>
 
         {/* Enhanced Additional Info */}
-        <Box sx={{ mt: 6, textAlign: "center" }}>
+        {/* <Box sx={{ mt: 6, textAlign: "center" }}>
           <Typography
             variant="caption"
             sx={{
@@ -556,7 +556,7 @@ const Login = () => {
             </Box>{" "}
             của chúng tôi
           </Typography>
-        </Box>
+        </Box> */}
       </Container>
     </Box>
   );

@@ -246,7 +246,7 @@ const GuestLayout = () => {
             {/* Theme Toggle */}
             {/* <ThemeToggle /> */}
 
-            <Button
+            {/* <Button
               variant="contained"
               onClick={() => navigate("/register")}
               sx={{
@@ -274,7 +274,7 @@ const GuestLayout = () => {
               }}
             >
               Đăng ký
-            </Button>
+            </Button> */}
             <Button
               variant="outlined"
               onClick={() => navigate("/login")}
